@@ -1,0 +1,9 @@
+**/.envs/
+*.env
+__pycache__/
+*.pyc
+.venv/
+bunna-bridge-frontend/node_modules/
+bunna-bridge-frontend/dist/
+*.sqlite3
+.DS_Store
