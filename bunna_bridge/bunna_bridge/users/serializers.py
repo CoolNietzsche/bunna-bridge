@@ -1,9 +1,40 @@
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth import authenticate, get_user_model
 
 User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = User
+        fields = [
+            "id", "username", "email", "first_name", "last_name",
+            "role", "company_name", "phone", "country", "bio",
+            "is_verified", "date_joined",
+        ]
+        read_only_fields = ["id", "date_joined", "is_verified"]
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password  = serializers.CharField(write_only=True, min_length=8)
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model  = User
+        fields = [
+            "email", "username", "password", "password2",
+            "first_name", "last_name", "role",
+            "company_name", "phone", "country",
+        ]
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs.pop("password2"):
+            raise serializers.ValidationError("Passwords do not match.")
+        return attrs
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
 
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -15,7 +46,7 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         self.fields.pop("username", None)
 
     def validate(self, attrs):
-        email = attrs.get("email")
+        email    = attrs.get("email")
         password = attrs.get("password")
 
         try:
@@ -31,12 +62,19 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if not user:
             raise serializers.ValidationError("Invalid credentials.")
-
         if not user.is_active:
             raise serializers.ValidationError("Account is disabled.")
 
         refresh = self.get_token(user)
         return {
             "refresh": str(refresh),
-            "access": str(refresh.access_token),
+            "access":  str(refresh.access_token),
+            "user": {
+                "id":           str(user.id),
+                "email":        user.email,
+                "username":     user.username,
+                "role":         user.role,
+                "company_name": user.company_name,
+                "is_verified":  user.is_verified,
+            },
         }

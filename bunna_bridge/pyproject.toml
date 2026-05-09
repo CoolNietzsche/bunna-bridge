@@ -37,6 +37,9 @@ dependencies = [
   "djangorestframework-simplejwt==5.3.1",
   "django-cors-headers==4.4.0",
   "django-filter==24.2",
+  "django-unfold>=0.92.0",
+  "django-jazzmin>=3.0.4",
+  "drf-nested-routers>=0.95.0",
 ]
 
 [dependency-groups]

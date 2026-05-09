@@ -1,0 +1,236 @@
+from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
+from bunna_bridge.lots.models import CoffeeLot
+from django.contrib.gis.geos import Point
+import random
+
+User = get_user_model()
+
+LOTS = [
+    {
+        "lot_id": "YRG-2025-0847",
+        "name": "Kochere Washed Natural",
+        "region": "yirgacheffe",
+        "kebele": "Kochere",
+        "washing_station": "Kochere Washing Station",
+        "altitude_m": 1950,
+        "processing": "washed",
+        "grade": "G1",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-12-01",
+        "volume_kg": "3200.00",
+        "price_per_kg": "6.42",
+        "sca_score": "87.5",
+        "flavor_notes": "Jasmine, Bergamot, Lemon Zest, Stone Fruit",
+        "q_grader_name": "Tigist Bekele",
+        "q_grader_cert_id": "SCA-3847",
+        "cupping_date": "2026-01-15",
+        "farm_location": Point(38.2149, 6.3241, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": True,
+        "ecta_license_active": True,
+        "nbe_fx_declared": True,
+        "cta_floor_met": True,
+        "eudr_dds_ready": True,
+        "status": "listed",
+    },
+    {
+        "lot_id": "SDM-2025-0213",
+        "name": "Bensa Natural Grade 1",
+        "region": "sidama",
+        "kebele": "Bensa",
+        "washing_station": "Bensa Dry Mill",
+        "altitude_m": 1820,
+        "processing": "natural",
+        "grade": "G1",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-11-20",
+        "volume_kg": "1800.00",
+        "price_per_kg": "6.20",
+        "sca_score": "86.0",
+        "flavor_notes": "Blueberry, Dark Chocolate, Red Wine, Hibiscus",
+        "q_grader_name": "Dawit Tadesse",
+        "q_grader_cert_id": "SCA-2291",
+        "cupping_date": "2026-01-20",
+        "farm_location": Point(38.4500, 6.8700, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": False,
+        "ecta_license_active": True,
+        "nbe_fx_declared": True,
+        "cta_floor_met": False,
+        "eudr_dds_ready": False,
+        "status": "draft",
+    },
+    {
+        "lot_id": "GJI-2025-0391",
+        "name": "Hambela Washed G1",
+        "region": "guji",
+        "kebele": "Hambela",
+        "washing_station": "Hambela Coffee Estate",
+        "altitude_m": 2150,
+        "processing": "washed",
+        "grade": "G1",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-12-10",
+        "volume_kg": "2400.00",
+        "price_per_kg": "6.85",
+        "sca_score": "89.0",
+        "flavor_notes": "Earl Grey, Peach, Nectarine, Floral",
+        "q_grader_name": "Tigist Bekele",
+        "q_grader_cert_id": "SCA-3847",
+        "cupping_date": "2026-02-01",
+        "farm_location": Point(38.5100, 5.9800, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": True,
+        "ecta_license_active": True,
+        "nbe_fx_declared": True,
+        "cta_floor_met": True,
+        "eudr_dds_ready": True,
+        "status": "contracted",
+    },
+    {
+        "lot_id": "JMA-2025-0102",
+        "name": "Limu Washed Grade 2",
+        "region": "jimma",
+        "kebele": "Gomma",
+        "washing_station": "Gomma Cooperative",
+        "altitude_m": 1680,
+        "processing": "washed",
+        "grade": "G2",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-11-05",
+        "volume_kg": "5000.00",
+        "price_per_kg": "5.90",
+        "sca_score": "83.5",
+        "flavor_notes": "Brown Sugar, Citrus, Mild Floral",
+        "q_grader_name": "Abebe Girma",
+        "q_grader_cert_id": "SCA-1155",
+        "cupping_date": "2025-12-10",
+        "farm_location": Point(36.8300, 7.6700, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": True,
+        "ecta_license_active": True,
+        "nbe_fx_declared": False,
+        "cta_floor_met": True,
+        "eudr_dds_ready": False,
+        "status": "draft",
+    },
+    {
+        "lot_id": "HRR-2025-0055",
+        "name": "Harrar Longberry Natural",
+        "region": "harrar",
+        "kebele": "Kersa",
+        "washing_station": "Kersa Dry Processing",
+        "altitude_m": 1900,
+        "processing": "natural",
+        "grade": "G1",
+        "varietal": "Longberry Harrar",
+        "harvest_date": "2025-10-15",
+        "volume_kg": "1200.00",
+        "price_per_kg": "7.10",
+        "sca_score": "85.5",
+        "flavor_notes": "Wild Blueberry, Cardamom, Dark Fruit, Wine",
+        "q_grader_name": "Sara Mohammed",
+        "q_grader_cert_id": "SCA-4402",
+        "cupping_date": "2025-11-20",
+        "farm_location": Point(42.1200, 9.3100, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": True,
+        "ecta_license_active": True,
+        "nbe_fx_declared": True,
+        "cta_floor_met": True,
+        "eudr_dds_ready": True,
+        "status": "exported",
+    },
+    {
+        "lot_id": "YRG-2025-0901",
+        "name": "Gedeb Honey Process",
+        "region": "yirgacheffe",
+        "kebele": "Gedeb",
+        "washing_station": "Gedeb Washing Station",
+        "altitude_m": 2020,
+        "processing": "honey",
+        "grade": "G1",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-12-20",
+        "volume_kg": "900.00",
+        "price_per_kg": "7.50",
+        "sca_score": "90.0",
+        "flavor_notes": "Jasmine, Tropical Fruit, Honey, Apricot",
+        "q_grader_name": "Tigist Bekele",
+        "q_grader_cert_id": "SCA-3847",
+        "cupping_date": "2026-02-10",
+        "farm_location": Point(38.3200, 6.1500, srid=4326),
+        "deforestation_free": True,
+        "gps_verified": True,
+        "phyto_cert_uploaded": True,
+        "ecta_license_active": True,
+        "nbe_fx_declared": True,
+        "cta_floor_met": True,
+        "eudr_dds_ready": True,
+        "status": "listed",
+    },
+    {
+        "lot_id": "SDM-2025-0298",
+        "name": "Aleta Wondo Washed",
+        "region": "sidama",
+        "kebele": "Aleta Wondo",
+        "washing_station": "Aleta Wondo Cooperative",
+        "altitude_m": 1750,
+        "processing": "washed",
+        "grade": "G2",
+        "varietal": "Ethiopian Heirloom",
+        "harvest_date": "2025-11-28",
+        "volume_kg": "3800.00",
+        "price_per_kg": "5.80",
+        "sca_score": "82.0",
+        "flavor_notes": "Citrus, Stone Fruit, Light Floral",
+        "q_grader_name": "Dawit Tadesse",
+        "q_grader_cert_id": "SCA-2291",
+        "cupping_date": "2026-01-05",
+        "farm_location": Point(38.4100, 6.6200, srid=4326),
+        "deforestation_free": False,
+        "gps_verified": False,
+        "phyto_cert_uploaded": False,
+        "ecta_license_active": False,
+        "nbe_fx_declared": False,
+        "cta_floor_met": False,
+        "eudr_dds_ready": False,
+        "status": "draft",
+    },
+]
+
+
+class Command(BaseCommand):
+    help = "Seed demo coffee lots for Bunna Bridge"
+
+    def handle(self, *args, **kwargs):
+        # Get or create admin user as exporter
+        user, _ = User.objects.get_or_create(
+            username="admin",
+            defaults={"email": "admin@bunnabridge.com", "is_superuser": True, "is_staff": True}
+        )
+
+        created = 0
+        skipped = 0
+
+        for lot_data in LOTS:
+            lot_id = lot_data["lot_id"]
+            if CoffeeLot.objects.filter(lot_id=lot_id).exists():
+                self.stdout.write(f"  skipped {lot_id} (already exists)")
+                skipped += 1
+                continue
+
+            CoffeeLot.objects.create(exporter=user, **lot_data)
+            self.stdout.write(self.style.SUCCESS(f"  ✓ created {lot_id} — {lot_data['name']}"))
+            created += 1
+
+        self.stdout.write("")
+        self.stdout.write(self.style.SUCCESS(
+            f"Done. {created} lots created, {skipped} skipped."
+        ))

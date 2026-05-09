@@ -1,26 +1,41 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import CharField
-from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 
 
 class User(AbstractUser):
-    """
-    Default custom user model for Bunna Bridge.
-    If adding fields that need to be filled at user signup,
-    check forms.SignupForm and forms.SocialSignupForms accordingly.
-    """
+    class Role(models.TextChoices):
+        ADMIN    = "admin",    "Admin"
+        EXPORTER = "exporter", "Exporter"
+        BUYER    = "buyer",    "Buyer"
+        FARMER   = "farmer",   "Farmer"
+        QGRADER  = "qgrader",  "Q-Grader"
 
-    # First and last name do not cover name patterns around the globe
-    name = CharField(_("Name of User"), blank=True, max_length=255)
-    first_name = None  # type: ignore[assignment]
-    last_name = None  # type: ignore[assignment]
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.EXPORTER,
+    )
+    company_name  = models.CharField(max_length=200, blank=True)
+    phone         = models.CharField(max_length=30,  blank=True)
+    country       = models.CharField(max_length=100, blank=True)
+    bio           = models.TextField(blank=True)
+    is_verified   = models.BooleanField(default=False)
 
-    def get_absolute_url(self) -> str:
-        """Get URL for user's detail view.
+    def __str__(self):
+        return f"{self.email} ({self.role})"
 
-        Returns:
-            str: URL for user detail.
+    @property
+    def is_exporter(self):
+        return self.role == self.Role.EXPORTER
 
-        """
-        return reverse("users:detail", kwargs={"username": self.username})
+    @property
+    def is_buyer(self):
+        return self.role == self.Role.BUYER
+
+    @property
+    def is_farmer(self):
+        return self.role == self.Role.FARMER
+
+    @property
+    def is_qgrader(self):
+        return self.role == self.Role.QGRADER

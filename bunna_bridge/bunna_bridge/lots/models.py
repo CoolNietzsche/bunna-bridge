@@ -55,7 +55,7 @@ class CoffeeLot(models.Model):
     farm_location = models.PointField(srid=4326, null=True, blank=True)
     farm_polygon  = models.PolygonField(srid=4326, null=True, blank=True)
 
-    # Quality
+    # Quality — set from latest confirmed CuppingScore
     sca_score        = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
     flavor_notes     = models.CharField(max_length=500, blank=True)
     cupping_date     = models.DateField(null=True, blank=True)
@@ -103,3 +103,77 @@ class CoffeeLot(models.Model):
             self.nbe_fx_declared,
             self.cta_floor_met,
         ])
+
+
+class CuppingScore(models.Model):
+    """
+    Write-once cupping score record.
+    Once submitted and confirmed, score cannot be edited — only appended.
+    """
+    STATUS_CHOICES = [
+        ("pending",   "Pending Review"),
+        ("confirmed", "Confirmed"),
+        ("disputed",  "Disputed"),
+    ]
+
+    id      = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lot     = models.ForeignKey(CoffeeLot, on_delete=models.PROTECT, related_name="cupping_scores")
+    grader  = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="cupping_scores",
+    )
+    status  = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+
+    # SCA protocol scores
+    fragrance_aroma = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    flavor          = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    aftertaste      = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    acidity         = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    body            = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    balance         = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    uniformity      = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    clean_cup       = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    sweetness       = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    overall         = models.DecimalField(max_digits=4, decimal_places=2, help_text="6–10")
+    defects         = models.DecimalField(max_digits=4, decimal_places=2, default=0, help_text="Penalty points")
+
+    flavor_notes    = models.CharField(max_length=500, blank=True)
+    notes           = models.TextField(blank=True, help_text="Private Q-Grader notes")
+    cupping_date    = models.DateField()
+    cupping_location= models.CharField(max_length=200, blank=True)
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-cupping_date", "-created_at"]
+        verbose_name = "Cupping Score"
+        verbose_name_plural = "Cupping Scores"
+
+    def __str__(self):
+        return f"{self.lot.lot_id} — {self.total_score} pts ({self.grader.get_full_name()})"
+
+    @property
+    def total_score(self):
+        components = [
+            self.fragrance_aroma, self.flavor, self.aftertaste,
+            self.acidity, self.body, self.balance,
+            self.uniformity, self.clean_cup, self.sweetness, self.overall,
+        ]
+        return round(float(sum(components)) - float(self.defects), 2)
+
+    def save(self, *args, **kwargs):
+        # Write-once — prevent editing confirmed scores
+        if self.pk:
+            original = CuppingScore.objects.filter(pk=self.pk).first()
+            if original and original.status == "confirmed":
+                raise ValueError("Confirmed cupping scores cannot be edited.")
+        super().save(*args, **kwargs)
+        # If confirmed, update the lot's quality fields
+        if self.status == "confirmed":
+            self.lot.sca_score        = self.total_score
+            self.lot.flavor_notes     = self.flavor_notes
+            self.lot.cupping_date     = self.cupping_date
+            self.lot.q_grader_name    = self.grader.get_full_name()
+            self.lot.q_grader_cert_id = getattr(self.grader, "q_grader_cert_id", "")
+            self.lot.save()

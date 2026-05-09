@@ -1,40 +1,23 @@
-from allauth.account.decorators import secure_admin_login
-from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth import admin as auth_admin
-from django.utils.translation import gettext_lazy as _
-
-from .forms import UserAdminChangeForm
-from .forms import UserAdminCreationForm
+from django.contrib.auth.admin import UserAdmin
 from .models import User
-
-if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
-    # Force the `admin` sign in process to go through the `django-allauth` workflow:
-    # https://docs.allauth.org/en/latest/common/admin.html#admin
-    admin.autodiscover()
-    admin.site.login = secure_admin_login(admin.site.login)  # type: ignore[method-assign]
 
 
 @admin.register(User)
-class UserAdmin(auth_admin.UserAdmin):
-    form = UserAdminChangeForm
-    add_form = UserAdminCreationForm
-    fieldsets = (
-        (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("name", "email")}),
-        (
-            _("Permissions"),
-            {
-                "fields": (
-                    "is_active",
-                    "is_staff",
-                    "is_superuser",
-                    "groups",
-                    "user_permissions",
-                ),
-            },
-        ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+class CustomUserAdmin(UserAdmin):
+    list_display  = ["email", "username", "role", "company_name",
+                     "is_verified", "is_active", "date_joined"]
+    list_filter   = ["role", "is_verified", "is_active", "is_staff"]
+    search_fields = ["email", "username", "company_name"]
+    ordering      = ["role", "email"]
+
+    fieldsets = UserAdmin.fieldsets + (
+        ("Bunna Bridge Profile", {"fields": [
+            "role", "company_name", "phone", "country", "bio", "is_verified",
+        ]}),
     )
-    list_display = ["username", "name", "is_superuser"]
-    search_fields = ["name"]
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ("Bunna Bridge Profile", {"fields": [
+            "role", "company_name", "phone", "country",
+        ]}),
+    )
