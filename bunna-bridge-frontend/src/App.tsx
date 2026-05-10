@@ -9,6 +9,7 @@ import Lots from "./pages/Lots";
 import LotDetail from "./pages/LotDetail";
 import CreateLot from "./pages/CreateLot";
 import Marketplace from "./pages/Marketplace";
+import MyFarm from "./pages/MyFarm";
 import CuppingForm from "./pages/CuppingForm";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/lots/:id"    element={<ProtectedRoute><LotDetail /></ProtectedRoute>} />
             <Route path="/lots"        element={<ProtectedRoute><Lots /></ProtectedRoute>} />
             <Route path="/lots/:id/cup"    element={<ProtectedRoute><CuppingForm /></ProtectedRoute>} />
+            <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="*"            element={<Navigate to="/login" replace />} />
           </Routes>

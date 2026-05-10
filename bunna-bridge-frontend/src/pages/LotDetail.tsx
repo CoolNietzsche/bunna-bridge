@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
 import ComplianceBadge from "../components/ComplianceBadge";
 import StatusPill from "../components/StatusPill";
-import CuppingHistory from "../components/CuppingHistory";
+import CuppingHistory from '../components/CuppingHistory';
+import SettlementWidget from '../components/SettlementWidget';
 
 export default function LotDetail() {
   const { id }     = useParams<{ id: string }>();
@@ -185,6 +186,9 @@ export default function LotDetail() {
             {/* Cupping history */}
             <div style={s.card}>
               <CuppingHistory lotId={lot.id} />
+              <div style={{ marginTop: '24px' }}>
+                <SettlementWidget lotId={lot.id} lotRef={lot.lot_id} defaultUsd={lot.price_per_kg && lot.volume_kg ? parseFloat(String(lot.price_per_kg)) * parseFloat(String(lot.volume_kg)) : undefined} />
+              </div>
             </div>
           </div>
 

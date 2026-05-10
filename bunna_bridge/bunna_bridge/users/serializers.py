@@ -12,6 +12,9 @@ class UserSerializer(serializers.ModelSerializer):
             "id", "username", "email", "first_name", "last_name",
             "role", "company_name", "phone", "country", "bio",
             "is_verified", "date_joined",
+            "farm_name", "farm_region", "farm_kebele",
+            "farm_altitude_m", "farm_size_ha", "cooperative",
+            "gps_lat", "gps_lng",
         ]
         read_only_fields = ["id", "date_joined", "is_verified"]
 

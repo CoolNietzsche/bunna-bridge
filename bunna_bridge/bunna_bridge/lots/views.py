@@ -147,20 +147,50 @@ class SettlementView(viewsets.ViewSet):
         except CoffeeLot.DoesNotExist:
             return Response({"detail": "Lot not found."}, status=404)
 
-        if not lot.price_per_kg or not lot.volume_kg:
-            return Response(
-                {"detail": "Lot must have price_per_kg and volume_kg set."},
-                status=400
-            )
-
         try:
             nbe_rate = Decimal(str(request.data.get("nbe_rate", "59.85")))
         except InvalidOperation:
             return Response({"detail": "Invalid nbe_rate."}, status=400)
 
-        result = calculate_settlement(
-            volume_kg    = Decimal(str(lot.volume_kg)),
-            price_per_kg = Decimal(str(lot.price_per_kg)),
-            nbe_rate     = nbe_rate,
-        )
-        return Response(result)
+        # Use total_usd from request if provided,
+        # otherwise calculate from lot price * volume
+        total_usd_input = request.data.get("total_usd")
+
+        if total_usd_input:
+            try:
+                total_usd = Decimal(str(total_usd_input))
+                volume_kg    = total_usd / nbe_rate if not lot.price_per_kg else Decimal(str(lot.volume_kg or 1))
+                price_per_kg = total_usd / volume_kg
+            except (InvalidOperation, ZeroDivisionError):
+                return Response({"detail": "Invalid total_usd."}, status=400)
+        else:
+            if not lot.price_per_kg or not lot.volume_kg:
+                return Response(
+                    {"detail": "Lot must have price_per_kg and volume_kg, or provide total_usd."},
+                    status=400
+                )
+            total_usd    = Decimal(str(lot.volume_kg)) * Decimal(str(lot.price_per_kg))
+            volume_kg    = Decimal(str(lot.volume_kg))
+            price_per_kg = Decimal(str(lot.price_per_kg))
+
+        # Calculate split
+        platform_fee_pct = Decimal("0.025")
+        platform_fee     = (total_usd * platform_fee_pct).quantize(Decimal("0.01"))
+        net_usd          = total_usd - platform_fee
+        usd_retained     = (net_usd * Decimal("0.50")).quantize(Decimal("0.01"))
+        etb_portion_usd  = net_usd - usd_retained
+        etb_converted    = (etb_portion_usd * nbe_rate).quantize(Decimal("0.00"))
+
+        from datetime import datetime, timezone
+        return Response({
+            "lot_id":        str(lot.id),
+            "lot_ref":       lot.lot_id,
+            "total_usd":     float(total_usd),
+            "platform_fee":  float(platform_fee),
+            "net_usd":       float(net_usd),
+            "usd_retained":  float(usd_retained),
+            "etb_converted": float(etb_converted),
+            "nbe_rate":      float(nbe_rate),
+            "split_percent": 50.0,
+            "calculated_at": datetime.now(timezone.utc).isoformat(),
+        })

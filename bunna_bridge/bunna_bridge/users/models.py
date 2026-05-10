@@ -21,6 +21,16 @@ class User(AbstractUser):
     bio           = models.TextField(blank=True)
     is_verified   = models.BooleanField(default=False)
 
+    # Farmer-specific fields
+    farm_name       = models.CharField(max_length=200, blank=True)
+    farm_region     = models.CharField(max_length=100, blank=True)
+    farm_kebele     = models.CharField(max_length=200, blank=True)
+    farm_altitude_m = models.IntegerField(null=True, blank=True)
+    farm_size_ha    = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    cooperative     = models.CharField(max_length=200, blank=True)
+    gps_lat         = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    gps_lng         = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
     def __str__(self):
         return f"{self.email} ({self.role})"
 
