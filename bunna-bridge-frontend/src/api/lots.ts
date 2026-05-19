@@ -30,6 +30,8 @@ export interface CoffeeLot {
   q_grader_name: string;
   q_grader_cert_id: string;
   cupping_date: string | null;
+  gps_lat: number | null;
+  gps_lng: number | null;
 }
 
 export interface ComplianceCheck {
@@ -60,7 +62,13 @@ export const getLot = async (id: string): Promise<CoffeeLot> => {
   const { data } = await api.get(`/v1/lots/${id}/`);
   // GeoFeatureModelSerializer wraps in { id, type, geometry, properties }
   if (data.properties) {
-    return { id: data.id, ...data.properties } as CoffeeLot;
+    const coords = data.geometry?.coordinates;
+    return {
+      id: data.id,
+      ...data.properties,
+      gps_lat: coords ? coords[1] : null,
+      gps_lng: coords ? coords[0] : null,
+    } as CoffeeLot;
   }
   return data as CoffeeLot;
 };
@@ -68,6 +76,12 @@ export const getLot = async (id: string): Promise<CoffeeLot> => {
 export const getComplianceCheck = async (id: string) => {
   const { data } = await api.get<ComplianceCheck>(`/v1/lots/${id}/compliance-check/`);
   return data;
+};
+
+export const updateLot = async (id: string, data: Record<string, unknown>): Promise<CoffeeLot> => {
+  const { data: res } = await api.patch(`/v1/lots/${id}/`, data);
+  if (res.type === "Feature") return { id: res.id, ...res.properties } as CoffeeLot;
+  return res;
 };
 
 export const createLot = async (lot: Partial<CoffeeLot>) => {

@@ -14,6 +14,7 @@ export default function LotDetail() {
   const { id }     = useParams<{ id: string }>();
   const navigate   = useNavigate();
   const { user }   = useAuth();
+  const isExporter = user?.role === 'exporter' || user?.role === 'admin';
   const [ddsLoading, setDdsLoading] = useState(false);
   const [ddsError,   setDdsError]   = useState('');
 
@@ -215,6 +216,13 @@ export default function LotDetail() {
                 )}
               </div>
 
+              { isExporter && (
+                <button
+                  onClick={() => navigate(`/lots/${lot.id}/edit`)}
+                  style={{ background: "rgba(245,237,216,0.06)", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.7rem 1.4rem", color: "rgba(245,237,216,0.6)", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, cursor: "pointer", marginRight: "0.75rem" }}>
+                  ✎ Edit Lot
+                </button>
+              )}
               <button
                 onClick={async () => { setDdsLoading(true); setDdsError(""); try { await downloadEudrDds(lot.id); } catch(e:unknown){ setDdsError((e as Error).message); } finally { setDdsLoading(false); } }}
                 disabled={!lot.eudr_dds_ready || ddsLoading}
