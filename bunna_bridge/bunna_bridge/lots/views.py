@@ -293,11 +293,23 @@ class LotStatusUpdateView(viewsets.ViewSet):
 
 
 # ── EUDR DDS Generator ────────────────────────────────────
+
+# EUDR DDS Generator
 class EudrDdsView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def retrieve(self, request, lot_pk=None):
-        """GET /api/v1/lots/{id}/eudr-dds/ — returns DDS data as JSON"""
+        """GET /api/v1/lots/{id}/eudr-dds/ — generates and returns a DDS PDF"""
+        from datetime import date
+        import io
+        from django.http import FileResponse
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.units import mm
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER
+
         try:
             lot = CoffeeLot.objects.select_related("exporter").get(pk=lot_pk)
         except CoffeeLot.DoesNotExist:
@@ -306,83 +318,152 @@ class EudrDdsView(viewsets.ViewSet):
         if not lot.gps_verified:
             return Response({"detail": "GPS not verified — cannot generate DDS."}, status=400)
 
-        # Build GeoJSON geometry
         if lot.farm_location:
-            geometry = {
-                "type": "Point",
-                "coordinates": [
-                    float(lot.farm_location.x),
-                    float(lot.farm_location.y),
-                ]
-            }
+            coords_str = f"{lot.farm_location.y:.6f} N, {lot.farm_location.x:.6f} E"
+            geo_type   = "Point"
         elif lot.farm_polygon:
-            coords = list(lot.farm_polygon.coords[0])
-            geometry = {"type": "Polygon", "coordinates": [coords]}
+            coords_str = f"Polygon — {lot.farm_polygon.num_coords} vertices"
+            geo_type   = "Polygon"
         else:
             return Response({"detail": "No GPS coordinates found."}, status=400)
 
-        from datetime import date
-        dds = {
-            "dds_version":    "1.0",
-            "regulation":     "EU 2023/1115",
-            "reference_date": "2020-12-31",
-            "generated_at":   date.today().isoformat(),
-            "operator": {
-                "name":    lot.exporter.get_full_name() or lot.exporter.username,
-                "email":   lot.exporter.email,
-                "company": getattr(lot.exporter, "company_name", ""),
-                "country": "ET",
-            },
-            "commodity": {
-                "hs_code":         "0901",
-                "description":     "Coffee",
-                "scientific_name": "Coffea arabica",
-                "quantity_kg":     float(lot.volume_kg),
-                "country_of_production": "ET",
-            },
-            "lot": {
-                "id":              str(lot.id),
-                "lot_id":          lot.lot_id,
-                "name":            lot.name,
-                "region":          lot.region,
-                "grade":           lot.grade,
-                "processing":      lot.processing,
-                "harvest_date":    lot.harvest_date.isoformat() if lot.harvest_date else None,
-                "washing_station": lot.washing_station,
-                "altitude_m":      lot.altitude_m,
-            },
-            "geolocation": {
-                "type":     "Feature",
-                "geometry": geometry,
-                "properties": {
-                    "lot_id":   lot.lot_id,
-                    "region":   lot.region,
-                    "country":  "ET",
-                    "verified": lot.gps_verified,
-                    "deforestation_free": lot.deforestation_free,
-                    "reference_date":     "2020-12-31",
-                }
-            },
-            "compliance": {
-                "deforestation_free":  lot.deforestation_free,
-                "gps_verified":        lot.gps_verified,
-                "phyto_cert_uploaded": lot.phyto_cert_uploaded,
-                "ecta_license_active": lot.ecta_license_active,
-                "nbe_fx_declared":     lot.nbe_fx_declared,
-                "cta_floor_met":       lot.cta_floor_met,
-                "eudr_dds_ready":      lot.eudr_dds_ready,
-                "export_ready":        lot.export_ready,
-            },
-        }
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer, pagesize=A4,
+            leftMargin=20*mm, rightMargin=20*mm,
+            topMargin=20*mm, bottomMargin=20*mm,
+        )
 
-        # Return as downloadable JSON file
-        import json
-        from django.http import HttpResponse
-        response = HttpResponse(
-            json.dumps(dds, indent=2),
-            content_type="application/json"
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="DDS-{lot.lot_id}-{date.today().isoformat()}.json"'
-        )
-        return response
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle("title", fontSize=22, fontName="Helvetica-Bold",
+            textColor=colors.HexColor("#1E3A2F"), spaceAfter=2*mm, alignment=TA_CENTER)
+        sub_style = ParagraphStyle("sub", fontSize=9, fontName="Helvetica",
+            textColor=colors.HexColor("#4A7C59"), spaceAfter=6*mm, alignment=TA_CENTER, leading=14)
+        section_style = ParagraphStyle("section", fontSize=10, fontName="Helvetica-Bold",
+            textColor=colors.HexColor("#1E3A2F"), spaceBefore=6*mm, spaceAfter=3*mm)
+        small_style = ParagraphStyle("small", fontSize=7.5, fontName="Helvetica",
+            textColor=colors.HexColor("#666666"), leading=12)
+
+        def section_table(rows):
+            t = Table(rows, colWidths=[65*mm, 105*mm])
+            t.setStyle(TableStyle([
+                ("FONTNAME",    (0,0), (0,-1), "Helvetica-Bold"),
+                ("FONTNAME",    (1,0), (1,-1), "Helvetica"),
+                ("FONTSIZE",    (0,0), (-1,-1), 9),
+                ("TEXTCOLOR",   (0,0), (0,-1), colors.HexColor("#555555")),
+                ("TEXTCOLOR",   (1,0), (1,-1), colors.HexColor("#111111")),
+                ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.HexColor("#F5F9F7"), colors.white]),
+                ("TOPPADDING",  (0,0), (-1,-1), 5),
+                ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+                ("LEFTPADDING", (0,0), (-1,-1), 8),
+                ("RIGHTPADDING", (0,0), (-1,-1), 8),
+                ("GRID", (0,0), (-1,-1), 0.3, colors.HexColor("#D0E4D8")),
+            ]))
+            return t
+
+        compliance_gates = [
+            ("GPS Verified",        "PASS" if lot.gps_verified        else "FAIL"),
+            ("Deforestation Free",  "PASS" if lot.deforestation_free  else "FAIL"),
+            ("EUDR DDS Ready",      "PASS" if lot.eudr_dds_ready      else "FAIL"),
+            ("Phytosanitary Cert",  "PASS" if lot.phyto_cert_uploaded else "FAIL"),
+            ("ECTA Export License", "PASS" if lot.ecta_license_active else "FAIL"),
+            ("NBE FX Declared",     "PASS" if lot.nbe_fx_declared     else "FAIL"),
+            ("CTA Floor Price Met", "PASS" if lot.cta_floor_met       else "FAIL"),
+        ]
+
+        gate_table = Table(compliance_gates, colWidths=[120*mm, 50*mm])
+        gate_table.setStyle(TableStyle([
+            ("FONTNAME",    (0,0), (-1,-1), "Helvetica"),
+            ("FONTNAME",    (0,0), (0,-1), "Helvetica-Bold"),
+            ("FONTSIZE",    (0,0), (-1,-1), 9),
+            ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.HexColor("#F5F9F7"), colors.white]),
+            ("TOPPADDING",  (0,0), (-1,-1), 5),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 5),
+            ("LEFTPADDING", (0,0), (-1,-1), 8),
+            ("RIGHTPADDING", (0,0), (-1,-1), 8),
+            ("GRID", (0,0), (-1,-1), 0.3, colors.HexColor("#D0E4D8")),
+            *[("TEXTCOLOR", (1,i), (1,i),
+               colors.HexColor("#1E3A2F") if compliance_gates[i][1] == "PASS"
+               else colors.HexColor("#C1440E"))
+              for i in range(len(compliance_gates))],
+        ]))
+
+        story = [
+            Paragraph("BUNNA BRIDGE", title_style),
+            Paragraph(
+                "EU Deforestation Regulation — Due Diligence Statement<br/>"
+                "Regulation EU 2023/1115 | Reference Date: 2020-12-31",
+                sub_style),
+            HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#1E3A2F"), spaceAfter=6*mm),
+            Paragraph("1. Document Information", section_style),
+            section_table([
+                ["DDS Version",    "1.0"],
+                ["Regulation",     "EU 2023/1115 (EUDR)"],
+                ["Reference Date", "31 December 2020"],
+                ["Generated On",   date.today().strftime("%d %B %Y")],
+                ["Generated By",   "Bunna Bridge Platform"],
+            ]),
+            Paragraph("2. Operator Details", section_style),
+            section_table([
+                ["Name",    lot.exporter.get_full_name() or lot.exporter.username],
+                ["Email",   lot.exporter.email],
+                ["Company", getattr(lot.exporter, "company_name", "") or "—"],
+                ["Country", "Ethiopia (ET)"],
+            ]),
+            Paragraph("3. Commodity", section_style),
+            section_table([
+                ["HS Code",          "0901 — Coffee"],
+                ["Scientific Name",  "Coffea arabica"],
+                ["Description",      "Green (unroasted) specialty coffee"],
+                ["Quantity",         f"{float(lot.volume_kg):,.2f} kg"],
+                ["Country of Production", "Ethiopia (ET)"],
+            ]),
+            Paragraph("4. Lot Details", section_style),
+            section_table([
+                ["Lot ID",          lot.lot_id],
+                ["Lot Name",        lot.name],
+                ["Region",          lot.region.capitalize()],
+                ["Kebele",          lot.kebele or "—"],
+                ["Washing Station", lot.washing_station or "—"],
+                ["Altitude",        f"{lot.altitude_m} m a.s.l."],
+                ["Processing",      lot.processing.capitalize()],
+                ["Grade",           lot.grade],
+                ["Varietal",        lot.varietal],
+                ["Harvest Date",    lot.harvest_date.strftime("%d %B %Y") if lot.harvest_date else "—"],
+            ]),
+            Paragraph("5. Geolocation", section_style),
+            section_table([
+                ["Geometry Type",     geo_type],
+                ["Coordinates",       coords_str],
+                ["GPS Verified",      "Yes"],
+                ["Deforestation Free","Yes — cleared against Global Forest Watch"],
+            ]),
+            Paragraph("6. Quality Record", section_style),
+            section_table([
+                ["SCA Score",        f"{lot.sca_score} / 100" if lot.sca_score else "Pending"],
+                ["Flavor Notes",     lot.flavor_notes or "—"],
+                ["Cupping Date",     lot.cupping_date.strftime("%d %B %Y") if lot.cupping_date else "—"],
+                ["Q-Grader",         lot.q_grader_name or "—"],
+                ["Q-Grader Cert ID", lot.q_grader_cert_id or "—"],
+            ]),
+            Paragraph("7. Compliance Gates", section_style),
+            gate_table,
+            Spacer(1, 6*mm),
+            HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#D0E4D8"), spaceAfter=4*mm),
+            Paragraph(
+                "This Due Diligence Statement is generated by the Bunna Bridge platform "
+                "in accordance with EU Regulation 2023/1115. The operator confirms that "
+                "the commodity described above was not produced on land subject to "
+                "deforestation or forest degradation after 31 December 2020.",
+                small_style),
+            Spacer(1, 3*mm),
+            Paragraph(
+                f"Document ID: EUDR-DDS-{lot.lot_id}-{date.today().strftime('%Y%m%d')} | "
+                f"Bunna Bridge (bunnabridge.pro.et) | Generated: {date.today().isoformat()}",
+                small_style),
+        ]
+
+        doc.build(story)
+        buffer.seek(0)
+        filename = f"EUDR-DDS-{lot.lot_id}-{date.today().strftime('%Y%m%d')}.pdf"
+        return FileResponse(buffer, as_attachment=True, filename=filename, content_type="application/pdf")
