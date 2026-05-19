@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { getLots } from "../api/lots";
+import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
 import ComplianceBadge from "../components/ComplianceBadge";
+import SampleRequestWidget from "../components/SampleRequestWidget";
 
 const REGIONS    = ["yirgacheffe","sidama","guji","jimma","harrar","limu","nekemte"];
 const GRADES     = ["G1","G2","G3"];
@@ -11,11 +13,12 @@ const PROCESSING = ["washed","natural","honey"];
 
 export default function Marketplace() {
   const navigate = useNavigate();
+  const { user }  = useAuth();
   const [filters, setFilters] = useState<Record<string, string>>({ status: "listed" });
   const [search,  setSearch]  = useState("");
+  const [expandedSample, setExpandedSample] = useState<string | null>(null);
 
   const params = { ...filters, ...(search ? { search } : {}) };
-
   const { data, isLoading } = useQuery({
     queryKey: ["marketplace", params],
     queryFn:  () => getLots(params),
@@ -27,6 +30,8 @@ export default function Marketplace() {
         : Object.fromEntries(Object.entries(f).filter(([key]) => key !== k))
     );
 
+  const isBuyer = user?.role === "buyer" || user?.role === "admin";
+
   const s = {
     page:    { padding: "2rem 2.5rem" },
     hdr:     { marginBottom: "2rem" },
@@ -36,7 +41,7 @@ export default function Marketplace() {
     input:   { background: "rgba(245,237,216,0.06)", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
     select:  { background: "#2C1810", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
     grid:    { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: "1.2rem" },
-    card:    { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem", cursor: "pointer", transition: "border-color 0.2s, transform 0.15s" },
+    card:    { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem", transition: "border-color 0.2s, transform 0.15s" },
     lotId:   { fontFamily: "monospace", fontSize: "0.58rem", letterSpacing: "0.15em", color: "#C9952A", textTransform: "uppercase" as const, marginBottom: "0.4rem" },
     name:    { fontSize: "1.1rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 0.25rem" },
     region:  { fontFamily: "monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.4)", marginBottom: "1rem" },
@@ -48,6 +53,15 @@ export default function Marketplace() {
     badges:  { display: "flex", gap: "0.4rem", flexWrap: "wrap" as const },
     empty:   { textAlign: "center" as const, padding: "4rem", fontFamily: "monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.3)" },
     count:   { fontFamily: "monospace", fontSize: "0.65rem", color: "rgba(245,237,216,0.3)", marginBottom: "1rem" },
+    viewBtn: { flex: 1, background: "transparent", border: "1px solid rgba(245,237,216,0.1)", borderRadius: "2px", padding: "0.55rem 0", color: "rgba(245,237,216,0.5)", fontFamily: "monospace", fontSize: "0.62rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
+    sampleBtn: (active: boolean) => ({
+      flex: 1, background: active ? "rgba(193,68,14,0.15)" : "#C1440E",
+      border: active ? "1px solid rgba(193,68,14,0.4)" : "none",
+      borderRadius: "2px", padding: "0.55rem 0",
+      color: active ? "#C1440E" : "white",
+      fontFamily: "monospace", fontSize: "0.62rem",
+      letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer",
+    }),
   };
 
   return (
@@ -91,7 +105,6 @@ export default function Marketplace() {
           <div style={s.grid}>
             {data.results.map(lot => (
               <div key={lot.id} style={s.card}
-                onClick={() => navigate(`/lots/${lot.id}`)}
                 onMouseEnter={e => {
                   e.currentTarget.style.borderColor = "rgba(201,149,42,0.25)";
                   e.currentTarget.style.transform = "translateY(-2px)";
@@ -100,12 +113,14 @@ export default function Marketplace() {
                   e.currentTarget.style.borderColor = "rgba(245,237,216,0.06)";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}>
+
                 <p style={{ ...s.lotId, margin: "0 0 0.4rem" }}>{lot.lot_id}</p>
                 <p style={{ ...s.name, margin: "0 0 0.25rem" }}>{lot.name}</p>
                 <p style={{ ...s.region, margin: "0 0 1rem" }}>
                   {lot.region.charAt(0).toUpperCase() + lot.region.slice(1)} ·{" "}
                   {lot.altitude_m} masl · {lot.processing}
                 </p>
+
                 <div style={s.row}>
                   <span style={s.rlabel}>SCA Score</span>
                   <span style={s.sca}>{lot.sca_score ?? "—"}</span>
@@ -120,12 +135,15 @@ export default function Marketplace() {
                     {lot.price_per_kg ? `$${lot.price_per_kg}` : "POA"}
                   </span>
                 </div>
+
                 {lot.flavor_notes && (
                   <p style={{ fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(245,237,216,0.35)", margin: "0.75rem 0 0", lineHeight: 1.5 }}>
                     {lot.flavor_notes}
                   </p>
                 )}
+
                 <div style={s.divider} />
+
                 <div style={s.badges}>
                   <ComplianceBadge label="EUDR" pass={lot.eudr_dds_ready} />
                   {lot.green_passport_ready && (
@@ -134,6 +152,34 @@ export default function Marketplace() {
                     </span>
                   )}
                 </div>
+
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+                  <button style={s.viewBtn}
+                    onClick={() => navigate(`/lots/${lot.id}`)}>
+                    View Details
+                  </button>
+                  {isBuyer && (
+                    <button
+                      style={s.sampleBtn(expandedSample === lot.id)}
+                      onClick={() => setExpandedSample(
+                        expandedSample === lot.id ? null : lot.id
+                      )}>
+                      {expandedSample === lot.id ? "✕ Cancel" : "Request Sample"}
+                    </button>
+                  )}
+                </div>
+
+                {/* Inline sample request form */}
+                {isBuyer && expandedSample === lot.id && (
+                  <div onClick={e => e.stopPropagation()}>
+                    <SampleRequestWidget
+                      lotId={lot.id}
+                      lotRef={lot.lot_id}
+                      onSuccess={() => setExpandedSample(null)}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

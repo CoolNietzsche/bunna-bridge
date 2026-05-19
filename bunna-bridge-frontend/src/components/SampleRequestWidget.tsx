@@ -4,9 +4,9 @@ import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
 import { Package } from "lucide-react";
 
-interface Props { lotId: string; lotRef: string; }
+interface Props { lotId: string; lotRef: string; onSuccess?: () => void; }
 
-export default function SampleRequestWidget({ lotId, lotRef }: Props) {
+export default function SampleRequestWidget({ lotId, lotRef, onSuccess }: Props) {
   const { user }    = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen]     = useState(false);
@@ -20,6 +20,7 @@ export default function SampleRequestWidget({ lotId, lotRef }: Props) {
       queryClient.invalidateQueries({ queryKey: ["sample-requests"] });
       setSuccess(true);
       setOpen(false);
+      if (onSuccess) onSuccess();
       setForm({ quantity_g: 200, message: "", shipping_address: "" });
     },
     onError: (err: unknown) => {
