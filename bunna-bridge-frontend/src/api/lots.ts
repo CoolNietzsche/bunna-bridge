@@ -74,3 +74,19 @@ export const createLot = async (lot: Partial<CoffeeLot>) => {
   const { data } = await api.post<CoffeeLot>("/v1/lots/", lot);
   return data;
 };
+
+export const downloadEudrDds = async (lotId: string): Promise<void> => {
+  const response = await api.get(`/v1/lots/${lotId}/eudr-dds/`, {
+    responseType: "blob",
+  });
+  const blob = new Blob([response.data], { type: "application/pdf" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  const disposition = response.headers["content-disposition"] || "";
+  a.download = disposition.split("filename=")[1]?.replace(/['"]/g, "") || `EUDR-DDS-${lotId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};

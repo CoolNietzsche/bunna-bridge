@@ -11,6 +11,8 @@ export interface FarmerProfile extends UserProfile {
   cooperative:     string;
   gps_lat:         string | null;
   gps_lng:         string | null;
+  phone?:          string;
+  country?:        string;
 }
 
 export const getFarmerProfile = async (): Promise<FarmerProfile> => {

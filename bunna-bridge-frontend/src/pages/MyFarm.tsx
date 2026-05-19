@@ -49,8 +49,8 @@ export default function MyFarm() {
       cooperative:     profile?.cooperative      || "",
       gps_lat:         profile?.gps_lat          || "",
       gps_lng:         profile?.gps_lng          || "",
-      phone:           profile?.phone            || "",
-      country:         profile?.country          || "",
+      phone:           profile?.phone    || "",
+      country:         profile?.country  || "",
     });
     setEditing(true);
   };

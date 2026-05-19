@@ -1,6 +1,6 @@
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
-from .models import CoffeeLot, CuppingScore
+from .models import CoffeeLot, CuppingScore, SampleRequest
 
 
 class CuppingScoreSerializer(serializers.ModelSerializer):
@@ -57,3 +57,28 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
         model     = CoffeeLot
         geo_field = "farm_location"
         fields    = "__all__"
+
+
+class SampleRequestSerializer(serializers.ModelSerializer):
+    buyer_name    = serializers.CharField(source="buyer.get_full_name", read_only=True)
+    buyer_email   = serializers.CharField(source="buyer.email",         read_only=True)
+    buyer_company = serializers.CharField(source="buyer.company_name",  read_only=True)
+    lot_name      = serializers.CharField(source="lot.name",            read_only=True)
+    lot_ref       = serializers.CharField(source="lot.lot_id",          read_only=True)
+    lot_region    = serializers.CharField(source="lot.region",          read_only=True)
+
+    class Meta:
+        model  = SampleRequest
+        fields = [
+            "id", "lot", "lot_name", "lot_ref", "lot_region",
+            "buyer", "buyer_name", "buyer_email", "buyer_company",
+            "status", "quantity_g", "message", "response",
+            "shipping_address", "tracking_number",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "buyer", "created_at", "updated_at"]
+
+
+class LotStatusUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=["draft", "listed", "contracted", "exported"])
+    note   = serializers.CharField(required=False, allow_blank=True)

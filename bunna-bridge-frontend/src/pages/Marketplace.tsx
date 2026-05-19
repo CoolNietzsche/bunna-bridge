@@ -35,7 +35,7 @@ export default function Marketplace() {
     filters: { display: "flex", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" as const },
     input:   { background: "rgba(245,237,216,0.06)", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
     select:  { background: "#2C1810", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
-    grid:    { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1.2rem" },
+    grid:    { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: "1.2rem" },
     card:    { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem", cursor: "pointer", transition: "border-color 0.2s, transform 0.15s" },
     lotId:   { fontFamily: "monospace", fontSize: "0.58rem", letterSpacing: "0.15em", color: "#C9952A", textTransform: "uppercase" as const, marginBottom: "0.4rem" },
     name:    { fontSize: "1.1rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 0.25rem" },

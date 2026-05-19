@@ -13,7 +13,7 @@ SECRET_KEY = env(
     default="FLJBxBZfIjSVr1pQzYtMULLIaAqx5zhaH6ijRSjwyxXSlNPb2lDItRgohMFRQyHd",
 )
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "91.107.204.59"]  # noqa: S104
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "91.107.204.59", "bunnabridge.pro.et"]  # noqa: S104
 
 # CACHES
 # ------------------------------------------------------------------------------

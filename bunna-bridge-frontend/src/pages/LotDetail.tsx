@@ -1,17 +1,21 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getLot, getComplianceCheck } from "../api/lots";
+import { getLot, getComplianceCheck, downloadEudrDds } from "../api/lots";
 import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
 import ComplianceBadge from "../components/ComplianceBadge";
 import StatusPill from "../components/StatusPill";
 import CuppingHistory from '../components/CuppingHistory';
+import SampleRequestWidget from '../components/SampleRequestWidget';
 import SettlementWidget from '../components/SettlementWidget';
+import { useState } from "react";
 
 export default function LotDetail() {
   const { id }     = useParams<{ id: string }>();
   const navigate   = useNavigate();
   const { user }   = useAuth();
+  const [ddsLoading, setDdsLoading] = useState(false);
+  const [ddsError,   setDdsError]   = useState('');
 
   const { data: lot, isLoading } = useQuery({
     queryKey: ["lot", id],
@@ -28,7 +32,7 @@ export default function LotDetail() {
   const s = {
     page:      { padding: "2rem 2.5rem", maxWidth: "1100px" },
     back:      { background: "none", border: "none", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", cursor: "pointer", marginBottom: "1.5rem", padding: 0 },
-    grid:      { display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "1.5rem", alignItems: "start" },
+    grid:      { display: "grid", gridTemplateColumns: "clamp(1px, 100%, 1.4fr) clamp(1px, 100%, 1fr)", gap: "1.5rem", alignItems: "start" },
     card:      { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem" },
     cardTitle: { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#D4824A", marginBottom: "1.2rem", marginTop: 0 },
     field:     { marginBottom: "1rem" },
@@ -211,6 +215,13 @@ export default function LotDetail() {
                 )}
               </div>
 
+              <button
+                onClick={async () => { setDdsLoading(true); setDdsError(""); try { await downloadEudrDds(lot.id); } catch(e:unknown){ setDdsError((e as Error).message); } finally { setDdsLoading(false); } }}
+                disabled={!lot.eudr_dds_ready || ddsLoading}
+                style={{ background: lot.eudr_dds_ready ? "#1E3A2F" : "#2C1810", border: "1px solid rgba(74,124,89,0.4)", borderRadius: "2px", padding: "0.7rem 1.4rem", color: lot.eudr_dds_ready ? "#A8C5A0" : "rgba(245,237,216,0.2)", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, cursor: lot.eudr_dds_ready ? "pointer" : "not-allowed", marginBottom: "0.75rem" }}>
+                {ddsLoading ? "⏳ Generating..." : "⬇ EUDR DDS PDF"}
+              </button>
+              {ddsError && <p style={{ fontFamily: "monospace", fontSize: "0.65rem", color: "#C1440E", margin: "0 0 0.75rem" }}>{ddsError}</p>}
               <button style={s.exportBtn(lot.export_ready)} disabled={!lot.export_ready}>
                 {lot.export_ready ? "⬆ Proceed to Export" : "⛔ Export Locked"}
               </button>
@@ -244,7 +255,10 @@ export default function LotDetail() {
               </div>
             </div>
 
-            {/* Q-Grader actions */}
+            {/* Sample Request — buyers only */}
+              <SampleRequestWidget lotId={lot.id} lotRef={lot.lot_id} />
+
+              {/* Q-Grader actions */}
             {(user?.role === "qgrader" || user?.role === "admin") && (
               <div style={{ ...s.card, border: "1px solid rgba(212,130,74,0.2)" }}>
                 <p style={{ ...s.cardTitle, color: "#D4824A" }}>Q-Grader Actions</p>

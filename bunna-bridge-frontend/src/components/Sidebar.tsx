@@ -2,8 +2,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Sprout,
-  ChevronLeft, ChevronRight, Coffee, FileCheck,
-  ClipboardList, Settings, HelpCircle
+  ChevronLeft, ChevronRight, Coffee, FileCheck, GitBranch, FlaskConical,
+  ClipboardList, Settings, HelpCircle, X
 } from "lucide-react";
 import RoleBadge from "./RoleBadge";
 
@@ -13,17 +13,23 @@ const NAV_ITEMS = [
   { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={16} />,     roles: ["buyer","admin"] },
   { label: "My Farm",     path: "/farm",        icon: <Sprout size={16} />,          roles: ["farmer"] },
   { label: "Compliance",  path: "/compliance",  icon: <FileCheck size={16} />,       roles: ["admin","exporter"] },
+  { label: "Pipeline",    path: "/pipeline",    icon: <GitBranch size={16} />,       roles: ["admin","exporter"] },
+  { label: "Samples",     path: "/samples",     icon: <FlaskConical size={16} />,    roles: ["admin","exporter","buyer"] },
   { label: "Reports",     path: "/reports",     icon: <ClipboardList size={16} />,   roles: ["admin"] },
 ];
-
 const BOTTOM_ITEMS = [
   { label: "Settings", path: "/settings", icon: <Settings size={16} /> },
   { label: "Help",     path: "/help",     icon: <HelpCircle size={16} /> },
 ];
 
-interface SidebarProps { collapsed: boolean; onCollapse: (v: boolean) => void; }
+interface SidebarProps {
+  collapsed: boolean;
+  onCollapse: (v: boolean) => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
 
-export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
+export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClose }: SidebarProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,12 +43,12 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
       background: "#2C1810",
       borderRight: "1px solid rgba(245,237,216,0.08)",
       display: "flex", flexDirection: "column" as const,
-      transition: "width 0.3s ease", zIndex: 50, overflow: "hidden",
+      transition: "width 0.3s ease, transform 0.3s ease",
+      zIndex: 50, overflow: "hidden",
     },
     logo: {
       display: "flex", alignItems: "center", height: "56px", flexShrink: 0,
-      padding: collapsed ? "0 18px" : "0 16px",
-      gap: "12px",
+      padding: collapsed ? "0 18px" : "0 16px", gap: "12px",
       borderBottom: "1px solid rgba(245,237,216,0.08)",
       justifyContent: collapsed ? "center" : "flex-start" as const,
     },
@@ -55,8 +61,7 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
     sectionLabel: {
       fontFamily: "DM Mono, monospace", fontSize: "0.625rem",
       letterSpacing: "0.2em", textTransform: "uppercase" as const,
-      color: "rgba(245,237,216,0.2)", padding: "0 8px", marginBottom: "8px",
-      display: "block",
+      color: "rgba(245,237,216,0.2)", padding: "0 8px", marginBottom: "8px", display: "block",
     },
     navList: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column" as const, gap: "2px" },
     navBtn: (active: boolean) => ({
@@ -66,8 +71,8 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
       border: active ? "1px solid rgba(193,68,14,0.25)" : "1px solid transparent",
       background: active ? "rgba(193,68,14,0.12)" : "transparent",
       color: active ? "#C1440E" : "rgba(245,237,216,0.45)",
-      cursor: "pointer", transition: "all 0.15s", fontFamily: "DM Mono, monospace",
-      fontSize: "0.75rem", letterSpacing: "0.04em",
+      cursor: "pointer", transition: "all 0.15s",
+      fontFamily: "DM Mono, monospace", fontSize: "0.75rem", letterSpacing: "0.04em",
     }),
     navLabel: { overflow: "hidden", whiteSpace: "nowrap" as const },
     userStrip: {
@@ -90,81 +95,85 @@ export default function Sidebar({ collapsed, onCollapse }: SidebarProps) {
   };
 
   return (
-    <aside style={S.aside}>
-      {/* Logo */}
-      <div style={S.logo}>
-        <div style={S.logoIcon}>
-          <Coffee size={14} color="#C1440E" />
+    <>
+      <style>{`
+        @media (max-width: 768px) {
+          .bb-sidebar { transform: translateX(-100%) !important; width: 260px !important; }
+          .bb-sidebar.open { transform: translateX(0) !important; }
+          .bb-collapse-btn { display: none !important; }
+        }
+        @media (min-width: 769px) {
+          .bb-close-btn { display: none !important; }
+        }
+      `}</style>
+
+      <aside style={S.aside} className={`bb-sidebar${mobileOpen ? " open" : ""}`}>
+        <div style={S.logo}>
+          <div style={S.logoIcon}><Coffee size={14} color="#C1440E" /></div>
+          {!collapsed && (
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1rem", fontWeight: 500, color: "#F5EDD8", margin: 0, lineHeight: 1 }}>Bunna Bridge</p>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.625rem", color: "#D4824A", letterSpacing: "0.2em", margin: "4px 0 0" }}>ቡና ብሪጅ</p>
+            </div>
+          )}
+          <button className="bb-close-btn" onClick={onMobileClose} style={{
+            background: "none", border: "none", color: "rgba(245,237,216,0.5)",
+            cursor: "pointer", padding: "4px", display: "flex", alignItems: "center",
+          }}>
+            <X size={16} />
+          </button>
         </div>
-        {!collapsed && (
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1rem", fontWeight: 500, color: "#F5EDD8", margin: 0, lineHeight: 1 }}>
-              Bunna Bridge
-            </p>
-            <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.625rem", color: "#D4824A", letterSpacing: "0.2em", margin: "4px 0 0" }}>
-              ቡና ብሪጅ
-            </p>
+
+        <nav style={S.nav}>
+          {!collapsed && <span style={S.sectionLabel}>Navigation</span>}
+          <ul style={S.navList}>
+            {visibleItems.map(item => {
+              const active = location.pathname === item.path ||
+                (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
+              return (
+                <li key={item.path}>
+                  <button style={S.navBtn(active)} title={collapsed ? item.label : undefined}
+                    onClick={() => { navigate(item.path); onMobileClose(); }}>
+                    <span style={{ flexShrink: 0, color: active ? "#C1440E" : "rgba(245,237,216,0.4)" }}>{item.icon}</span>
+                    {!collapsed && <span style={S.navLabel}>{item.label}</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <div style={{ marginTop: "24px" }}>
+            {!collapsed && <span style={S.sectionLabel}>Support</span>}
+            <ul style={S.navList}>
+              {BOTTOM_ITEMS.map(item => (
+                <li key={item.path}>
+                  <button style={{ ...S.navBtn(false), color: "rgba(245,237,216,0.25)" }}
+                    title={collapsed ? item.label : undefined}
+                    onClick={() => { navigate(item.path); onMobileClose(); }}>
+                    <span style={{ flexShrink: 0 }}>{item.icon}</span>
+                    {!collapsed && <span style={S.navLabel}>{item.label}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        {!collapsed && user && (
+          <div style={S.userStrip}>
+            <div style={S.avatar}>{(user.first_name?.[0] || user.email[0]).toUpperCase()}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "#F5EDD8", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
+              </p>
+              <RoleBadge role={user.role} />
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Nav */}
-      <nav style={S.nav}>
-        {!collapsed && <span style={S.sectionLabel}>Navigation</span>}
-        <ul style={S.navList}>
-          {visibleItems.map(item => {
-            const active = location.pathname === item.path ||
-              (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
-            return (
-              <li key={item.path}>
-                <button style={S.navBtn(active)} title={collapsed ? item.label : undefined}
-                  onClick={() => navigate(item.path)}>
-                  <span style={{ flexShrink: 0, color: active ? "#C1440E" : "rgba(245,237,216,0.4)" }}>
-                    {item.icon}
-                  </span>
-                  {!collapsed && <span style={S.navLabel}>{item.label}</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div style={{ marginTop: "24px" }}>
-          {!collapsed && <span style={S.sectionLabel}>Support</span>}
-          <ul style={S.navList}>
-            {BOTTOM_ITEMS.map(item => (
-              <li key={item.path}>
-                <button style={{ ...S.navBtn(false), color: "rgba(245,237,216,0.25)" }}
-                  title={collapsed ? item.label : undefined}
-                  onClick={() => navigate(item.path)}>
-                  <span style={{ flexShrink: 0 }}>{item.icon}</span>
-                  {!collapsed && <span style={S.navLabel}>{item.label}</span>}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
-
-      {/* User strip */}
-      {!collapsed && user && (
-        <div style={S.userStrip}>
-          <div style={S.avatar}>
-            {(user.first_name?.[0] || user.email[0]).toUpperCase()}
-          </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "#F5EDD8", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
-            </p>
-            <RoleBadge role={user.role} />
-          </div>
-        </div>
-      )}
-
-      {/* Collapse toggle */}
-      <button style={S.collapseBtn} onClick={() => onCollapse(!collapsed)}>
-        {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-      </button>
-    </aside>
+        <button style={S.collapseBtn} className="bb-collapse-btn" onClick={() => onCollapse(!collapsed)}>
+          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
+      </aside>
+    </>
   );
 }

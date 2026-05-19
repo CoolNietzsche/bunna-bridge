@@ -177,3 +177,34 @@ class CuppingScore(models.Model):
             self.lot.q_grader_name    = self.grader.get_full_name()
             self.lot.q_grader_cert_id = getattr(self.grader, "q_grader_cert_id", "")
             self.lot.save()
+
+
+class SampleRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending",  "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("shipped",  "Shipped"),
+        ("received", "Received"),
+    ]
+
+    id         = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lot        = models.ForeignKey(CoffeeLot, on_delete=models.PROTECT, related_name="sample_requests")
+    buyer      = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT,
+        related_name="sample_requests"
+    )
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    quantity_g = models.IntegerField(default=200, help_text="Sample size in grams")
+    message    = models.TextField(blank=True, help_text="Message from buyer")
+    response   = models.TextField(blank=True, help_text="Response from exporter")
+    shipping_address = models.TextField(blank=True)
+    tracking_number  = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Sample: {self.lot.lot_id} → {self.buyer.email} ({self.status})"

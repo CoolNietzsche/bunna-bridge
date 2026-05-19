@@ -25,19 +25,19 @@ export default function Lots() {
     setFilters(f => val ? { ...f, [key]: val } : Object.fromEntries(Object.entries(f).filter(([k]) => k !== key)));
 
   const s = {
-    page:    { padding: "2rem 2.5rem" },
-    hdr:     { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" },
-    title:   { fontSize: "1.8rem", fontWeight: 300, color: "#F5EDD8", margin: 0 },
+    page:    { padding: "clamp(16px, 4vw, 2rem) clamp(16px, 4vw, 2.5rem)" },
+    hdr:     { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", gap: "1rem", flexWrap: "wrap" as const },
+    title:   { fontSize: "clamp(1.4rem, 4vw, 1.8rem)", fontWeight: 300, color: "#F5EDD8", margin: 0 },
     sub:     { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#D4824A", textTransform: "uppercase" as const, marginTop: "0.25rem" },
-    newbtn:  { background: "#C1440E", border: "none", borderRadius: "2px", padding: "0.7rem 1.4rem", color: "white", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, cursor: "pointer" },
+    newbtn:  { background: "#C1440E", border: "none", borderRadius: "2px", padding: "0.7rem 1.4rem", color: "white", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, cursor: "pointer", whiteSpace: "nowrap" as const },
     filters: { display: "flex", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" as const },
-    input:   { background: "rgba(245,237,216,0.06)", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
-    select:  { background: "#2C1810", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none" },
+    input:   { background: "rgba(245,237,216,0.06)", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none", minWidth: 0, flex: "1 1 160px" },
+    select:  { background: "#2C1810", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.5rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.7rem", outline: "none", flex: "1 1 120px" },
     table:   { width: "100%", borderCollapse: "collapse" as const },
-    th:      { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", padding: "0.75rem 1rem", borderBottom: "1px solid rgba(245,237,216,0.08)", textAlign: "left" as const },
+    th:      { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", padding: "0.75rem 1rem", borderBottom: "1px solid rgba(245,237,216,0.08)", textAlign: "left" as const, whiteSpace: "nowrap" as const },
     tr:      { borderBottom: "1px solid rgba(245,237,216,0.05)", cursor: "pointer", transition: "background 0.15s" },
-    td:      { padding: "1rem", fontSize: "0.85rem", color: "#F5EDD8" },
-    tdMono:  { padding: "1rem", fontFamily: "monospace", fontSize: "0.72rem", color: "rgba(245,237,216,0.6)" },
+    td:      { padding: "1rem", fontSize: "0.85rem", color: "#F5EDD8", whiteSpace: "nowrap" as const },
+    tdMono:  { padding: "1rem", fontFamily: "monospace", fontSize: "0.72rem", color: "rgba(245,237,216,0.6)", whiteSpace: "nowrap" as const },
     empty:   { textAlign: "center" as const, padding: "4rem", fontFamily: "monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.1em" },
     count:   { fontFamily: "monospace", fontSize: "0.65rem", color: "rgba(245,237,216,0.3)", marginBottom: "1rem" },
   };
@@ -50,14 +50,11 @@ export default function Lots() {
             <h1 style={s.title}>Coffee Lots</h1>
             <p style={s.sub}>Digital Birth Certificate Registry</p>
           </div>
-          <button style={s.newbtn} onClick={() => navigate("/lots/new")}>
-            + New Lot
-          </button>
+          <button style={s.newbtn} onClick={() => navigate("/lots/new")}>+ New Lot</button>
         </div>
 
-        {/* Filters */}
         <div style={s.filters}>
-          <input style={{ ...s.input, width: "220px" }} placeholder="Search lot ID, name, region..."
+          <input style={s.input} placeholder="Search lot ID, name, region..."
             value={search} onChange={e => setSearch(e.target.value)} />
           <select style={s.select} onChange={e => setFilter("region", e.target.value)}>
             <option value="">All Regions</option>
@@ -78,52 +75,47 @@ export default function Lots() {
           </select>
         </div>
 
-        {/* Count */}
         {data && <p style={s.count}>{data.count} lot{data.count !== 1 ? "s" : ""} found</p>}
-
-        {/* Table */}
         {isLoading && <p style={s.empty}>Loading lots...</p>}
         {isError   && <p style={{ ...s.empty, color: "#C1440E" }}>Failed to load lots. Check API connection.</p>}
         {data && data.results.length === 0 && <p style={s.empty}>No lots found. Create your first lot.</p>}
 
         {data && data.results.length > 0 && (
           <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  {["Lot ID", "Name", "Region", "Grade", "SCA Score", "Volume", "Status", "EUDR", "Export Ready"].map(h => (
-                    <th key={h} style={s.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {data.results.map(lot => (
-                  <tr key={lot.id} style={s.tr}
-                    onClick={() => navigate(`/lots/${lot.id}`)}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,237,216,0.03)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <td style={s.tdMono}>{lot.lot_id}</td>
-                    <td style={s.td}>{lot.name}</td>
-                    <td style={s.tdMono}>{lot.region}</td>
-                    <td style={s.tdMono}>{lot.grade}</td>
-                    <td style={{ ...s.tdMono, color: lot.sca_score && lot.sca_score >= 85 ? "#C9952A" : "#F5EDD8" }}>
-                      {lot.sca_score ? `${lot.sca_score} pts` : "—"}
-                    </td>
-                    <td style={s.tdMono}>{lot.volume_kg} kg</td>
-                    <td style={s.td}><StatusPill status={lot.status} /></td>
-                    <td style={s.td}>
-                      <ComplianceBadge label="EUDR" pass={lot.eudr_dds_ready} />
-                    </td>
-                    <td style={s.td}>
-                      <ComplianceBadge label="Export" pass={lot.export_ready} />
-                    </td>
+            {/* Scrollable wrapper for table on mobile */}
+            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as never }}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    {["Lot ID", "Name", "Region", "Grade", "SCA Score", "Volume", "Status", "EUDR", "Export Ready"].map(h => (
+                      <th key={h} style={s.th}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.results.map(lot => (
+                    <tr key={lot.id} style={s.tr}
+                      onClick={() => navigate(`/lots/${lot.id}`)}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,237,216,0.03)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td style={s.tdMono}>{lot.lot_id}</td>
+                      <td style={s.td}>{lot.name}</td>
+                      <td style={s.tdMono}>{lot.region}</td>
+                      <td style={s.tdMono}>{lot.grade}</td>
+                      <td style={{ ...s.tdMono, color: lot.sca_score && lot.sca_score >= 85 ? "#C9952A" : "#F5EDD8" }}>
+                        {lot.sca_score ? `${lot.sca_score} pts` : "—"}
+                      </td>
+                      <td style={s.tdMono}>{lot.volume_kg} kg</td>
+                      <td style={s.td}><StatusPill status={lot.status} /></td>
+                      <td style={s.td}><ComplianceBadge label="EUDR" pass={lot.eudr_dds_ready} /></td>
+                      <td style={s.td}><ComplianceBadge label="Export" pass={lot.export_ready} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-            {/* Pagination */}
             {(data.next || data.previous) && (
               <div style={{ padding: "1rem", borderTop: "1px solid rgba(245,237,216,0.06)", display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
                 {data.previous && (

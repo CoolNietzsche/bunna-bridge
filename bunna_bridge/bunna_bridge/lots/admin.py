@@ -1,5 +1,5 @@
 from django.contrib.gis import admin
-from .models import CoffeeLot, CuppingScore
+from .models import CoffeeLot, CuppingScore, SampleRequest
 
 
 class CuppingScoreInline(admin.TabularInline):
@@ -41,3 +41,11 @@ class CuppingScoreAdmin(admin.ModelAdmin):
     list_filter   = ["status", "cupping_date"]
     search_fields = ["lot__lot_id", "grader__email"]
     readonly_fields = ["id", "total_score", "created_at"]
+
+
+@admin.register(SampleRequest)
+class SampleRequestAdmin(admin.ModelAdmin):
+    list_display  = ["lot", "buyer", "status", "quantity_g", "created_at"]
+    list_filter   = ["status"]
+    search_fields = ["lot__lot_id", "buyer__email"]
+    readonly_fields = ["id", "created_at", "updated_at"]

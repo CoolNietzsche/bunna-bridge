@@ -40,6 +40,7 @@ dependencies = [
   "django-unfold>=0.92.0",
   "django-jazzmin>=3.0.4",
   "drf-nested-routers>=0.95.0",
+  "reportlab>=4.5.1",
 ]
 
 [dependency-groups]

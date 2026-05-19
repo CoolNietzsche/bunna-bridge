@@ -96,7 +96,7 @@ export default function CuppingForm() {
     sub:       { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#D4824A", textTransform: "uppercase" as const, marginBottom: "2rem" },
     card:      { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem", marginBottom: "1.5rem" },
     cardTitle: { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#D4824A", margin: "0 0 1.2rem" },
-    grid:      { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" },
+    grid:      { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "1rem" },
     attr:      { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid rgba(245,237,216,0.05)" },
     attrLeft:  { flex: 1 },
     attrLabel: { fontSize: "0.9rem", color: "#F5EDD8", marginBottom: "0.15rem" },

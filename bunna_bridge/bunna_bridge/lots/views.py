@@ -2,9 +2,10 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import CoffeeLot, CuppingScore
+from .models import CoffeeLot, CuppingScore, SampleRequest
 from .serializers import (
-    CoffeeLotListSerializer, CoffeeLotDetailSerializer, CuppingScoreSerializer
+    CoffeeLotListSerializer, CoffeeLotDetailSerializer,
+    CuppingScoreSerializer, SampleRequestSerializer, LotStatusUpdateSerializer
 )
 
 
@@ -194,3 +195,194 @@ class SettlementView(viewsets.ViewSet):
             "split_percent": 50.0,
             "calculated_at": datetime.now(timezone.utc).isoformat(),
         })
+
+
+# ── Sample Request ViewSet ────────────────────────────────
+class SampleRequestViewSet(viewsets.ModelViewSet):
+    serializer_class   = SampleRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        role = getattr(user, "role", "buyer")
+        if user.is_staff or role == "admin":
+            return SampleRequest.objects.select_related("lot","buyer").all()
+        if role == "buyer":
+            return SampleRequest.objects.filter(buyer=user).select_related("lot","buyer")
+        if role == "exporter":
+            return SampleRequest.objects.filter(
+                lot__exporter=user
+            ).select_related("lot","buyer")
+        return SampleRequest.objects.none()
+
+    def perform_create(self, serializer):
+        serializer.save(buyer=self.request.user)
+
+    @action(detail=True, methods=["post"], url_path="respond")
+    def respond(self, request, pk=None):
+        sample = self.get_object()
+        role   = getattr(request.user, "role", "")
+        if role not in ("exporter","admin") and not request.user.is_staff:
+            return Response({"detail": "Only exporters can respond."}, status=403)
+
+        new_status = request.data.get("status")
+        response_msg = request.data.get("response", "")
+        tracking    = request.data.get("tracking_number", "")
+
+        if new_status not in ("approved","rejected","shipped"):
+            return Response({"detail": "Invalid status."}, status=400)
+
+        sample.status   = new_status
+        sample.response = response_msg
+        if tracking:
+            sample.tracking_number = tracking
+        sample.save()
+        return Response(SampleRequestSerializer(sample).data)
+
+
+# ── Lot Status Pipeline ────────────────────────────────────
+class LotStatusUpdateView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def partial_update(self, request, lot_pk=None):
+        try:
+            lot = CoffeeLot.objects.get(pk=lot_pk)
+        except CoffeeLot.DoesNotExist:
+            return Response({"detail": "Lot not found."}, status=404)
+
+        role = getattr(request.user, "role", "")
+        if role not in ("exporter","admin") and not request.user.is_staff:
+            return Response({"detail": "Only exporters can update lot status."}, status=403)
+
+        if role == "exporter" and lot.exporter != request.user:
+            return Response({"detail": "Not your lot."}, status=403)
+
+        serializer = LotStatusUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        new_status = serializer.validated_data["status"]
+
+        # Validate pipeline progression
+        pipeline = ["draft", "listed", "contracted", "exported"]
+        current_idx = pipeline.index(lot.status)
+        new_idx     = pipeline.index(new_status)
+
+        # Allow moving forward or back to draft
+        if new_idx > current_idx + 1:
+            return Response(
+                {"detail": f"Cannot skip from {lot.status} to {new_status}."},
+                status=400
+            )
+
+        # Block export if compliance not ready
+        if new_status == "exported" and not lot.export_ready:
+            return Response(
+                {"detail": "Cannot mark as exported — compliance gates not all passed."},
+                status=400
+            )
+
+        lot.status = new_status
+        lot.save()
+
+        return Response({
+            "lot_id":     lot.lot_id,
+            "status":     lot.status,
+            "export_ready": lot.export_ready,
+        })
+
+
+# ── EUDR DDS Generator ────────────────────────────────────
+class EudrDdsView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def retrieve(self, request, lot_pk=None):
+        """GET /api/v1/lots/{id}/eudr-dds/ — returns DDS data as JSON"""
+        try:
+            lot = CoffeeLot.objects.select_related("exporter").get(pk=lot_pk)
+        except CoffeeLot.DoesNotExist:
+            return Response({"detail": "Lot not found."}, status=404)
+
+        if not lot.gps_verified:
+            return Response({"detail": "GPS not verified — cannot generate DDS."}, status=400)
+
+        # Build GeoJSON geometry
+        if lot.farm_location:
+            geometry = {
+                "type": "Point",
+                "coordinates": [
+                    float(lot.farm_location.x),
+                    float(lot.farm_location.y),
+                ]
+            }
+        elif lot.farm_polygon:
+            coords = list(lot.farm_polygon.coords[0])
+            geometry = {"type": "Polygon", "coordinates": [coords]}
+        else:
+            return Response({"detail": "No GPS coordinates found."}, status=400)
+
+        from datetime import date
+        dds = {
+            "dds_version":    "1.0",
+            "regulation":     "EU 2023/1115",
+            "reference_date": "2020-12-31",
+            "generated_at":   date.today().isoformat(),
+            "operator": {
+                "name":    lot.exporter.get_full_name() or lot.exporter.username,
+                "email":   lot.exporter.email,
+                "company": getattr(lot.exporter, "company_name", ""),
+                "country": "ET",
+            },
+            "commodity": {
+                "hs_code":         "0901",
+                "description":     "Coffee",
+                "scientific_name": "Coffea arabica",
+                "quantity_kg":     float(lot.volume_kg),
+                "country_of_production": "ET",
+            },
+            "lot": {
+                "id":              str(lot.id),
+                "lot_id":          lot.lot_id,
+                "name":            lot.name,
+                "region":          lot.region,
+                "grade":           lot.grade,
+                "processing":      lot.processing,
+                "harvest_date":    lot.harvest_date.isoformat() if lot.harvest_date else None,
+                "washing_station": lot.washing_station,
+                "altitude_m":      lot.altitude_m,
+            },
+            "geolocation": {
+                "type":     "Feature",
+                "geometry": geometry,
+                "properties": {
+                    "lot_id":   lot.lot_id,
+                    "region":   lot.region,
+                    "country":  "ET",
+                    "verified": lot.gps_verified,
+                    "deforestation_free": lot.deforestation_free,
+                    "reference_date":     "2020-12-31",
+                }
+            },
+            "compliance": {
+                "deforestation_free":  lot.deforestation_free,
+                "gps_verified":        lot.gps_verified,
+                "phyto_cert_uploaded": lot.phyto_cert_uploaded,
+                "ecta_license_active": lot.ecta_license_active,
+                "nbe_fx_declared":     lot.nbe_fx_declared,
+                "cta_floor_met":       lot.cta_floor_met,
+                "eudr_dds_ready":      lot.eudr_dds_ready,
+                "export_ready":        lot.export_ready,
+            },
+        }
+
+        # Return as downloadable JSON file
+        import json
+        from django.http import HttpResponse
+        response = HttpResponse(
+            json.dumps(dds, indent=2),
+            content_type="application/json"
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="DDS-{lot.lot_id}-{date.today().isoformat()}.json"'
+        )
+        return response
