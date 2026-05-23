@@ -1,4 +1,7 @@
 from rest_framework import viewsets, permissions, filters, status
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -467,3 +470,61 @@ class EudrDdsView(viewsets.ViewSet):
         buffer.seek(0)
         filename = f"EUDR-DDS-{lot.lot_id}-{date.today().strftime('%Y%m%d')}.pdf"
         return FileResponse(buffer, as_attachment=True, filename=filename, content_type="application/pdf")
+
+
+# ── Polygon boundary views ───────────────────────────────────────
+from django.contrib.gis.geos import GEOSGeometry
+from .eudr_spatial import check_deforestation_overlap, run_deforestation_check_for_lot
+import json
+
+class LotBoundaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        """Set or update the boundary polygon for a lot."""
+        lot = get_object_or_404(CoffeeLot, pk=pk)
+
+        # Only exporter (owner) or admin can set boundary
+        if request.user.role not in ("admin",) and lot.exporter != request.user:
+            return Response({"detail": "Not allowed."}, status=403)
+
+        boundary_data = request.data.get("boundary")
+        if not boundary_data:
+            return Response({"detail": "boundary field is required."}, status=400)
+
+        try:
+            if isinstance(boundary_data, dict):
+                boundary_data = json.dumps(boundary_data)
+            geom = GEOSGeometry(boundary_data, srid=4326)
+            if geom.geom_type != "Polygon":
+                return Response({"detail": "Must be a Polygon geometry."}, status=400)
+            lot.boundary = geom
+            lot.save(update_fields=["boundary"])
+            return Response({"detail": "Boundary saved.", "area_ha": round(geom.area * 10000, 4)})
+        except Exception as e:
+            return Response({"detail": f"Invalid geometry: {e}"}, status=400)
+
+
+class LotBoundaryInheritView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        """Copy the farm boundary from the linked farmer profile to this lot."""
+        lot = get_object_or_404(CoffeeLot, pk=pk)
+
+        if request.user.role not in ("admin",) and lot.exporter != request.user:
+            return Response({"detail": "Not allowed."}, status=403)
+
+        # Find linked farmer profile
+        from users.models import FarmerProfile
+        try:
+            profile = FarmerProfile.objects.get(user=lot.farmer) if lot.farmer else None
+        except Exception:
+            profile = None
+
+        if not profile or not profile.boundary:
+            return Response({"detail": "No farm boundary found to inherit."}, status=404)
+
+        lot.boundary = profile.boundary
+        lot.save(update_fields=["boundary"])
+        return Response({"detail": "Boundary inherited from farm profile."})

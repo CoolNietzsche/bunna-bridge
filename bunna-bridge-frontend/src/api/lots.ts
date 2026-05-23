@@ -1,3 +1,4 @@
+import type { GeoPolygon } from './boundary';
 import api from "./client";
 
 export interface CoffeeLot {
@@ -32,6 +33,7 @@ export interface CoffeeLot {
   cupping_date: string | null;
   gps_lat: number | null;
   gps_lng: number | null;
+  boundary?: GeoPolygon | null;
 }
 
 export interface ComplianceCheck {
@@ -40,6 +42,12 @@ export interface ComplianceCheck {
   green_passport_ready: boolean;
   failed_gates: string[];
   gates: Record<string, boolean>;
+  deforestation_check?: {
+    status: 'clear' | 'overlap' | 'pending' | 'no_data';
+    deforestation_free: boolean | null;
+    overlap_count: number;
+    message: string;
+  };
 }
 
 export interface PaginatedLots {

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useBoundarySync } from './hooks/useBoundarySync';
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
@@ -18,6 +19,7 @@ import CuppingForm from "./pages/CuppingForm";
 const queryClient = new QueryClient();
 
 export default function App() {
+  useBoundarySync();
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

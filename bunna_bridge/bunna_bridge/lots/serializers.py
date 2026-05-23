@@ -44,7 +44,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "flavor_notes", "volume_kg", "price_per_kg",
             "deforestation_free", "eudr_dds_ready",
             "green_passport_ready", "export_ready",
-            "harvest_date", "created_at",
+            "harvest_date", "created_at", "boundary",
         ]
 
 

@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.contrib.gis.db import models
 
 
 class User(AbstractUser):
@@ -30,6 +30,11 @@ class User(AbstractUser):
     cooperative     = models.CharField(max_length=200, blank=True)
     gps_lat         = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     gps_lng         = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    boundary        = models.PolygonField(
+        geography=True, srid=4326,
+        null=True, blank=True,
+        help_text='Farm boundary polygon (GPS, WGS84)'
+    )
 
     def __str__(self):
         return f"{self.email} ({self.role})"

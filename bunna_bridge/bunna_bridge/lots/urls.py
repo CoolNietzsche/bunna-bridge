@@ -3,6 +3,7 @@ from .views import (
     CoffeeLotViewSet, CuppingScoreViewSet,
     SettlementView, SampleRequestViewSet,
     LotStatusUpdateView, EudrDdsView,
+    LotBoundaryView, LotBoundaryInheritView,
 )
 from django.urls import path
 
@@ -26,5 +27,15 @@ urlpatterns = router.urls + [
         "lots/<uuid:lot_pk>/eudr-dds/",
         EudrDdsView.as_view({"get": "retrieve"}),
         name="lot-eudr-dds",
+    ),
+    path(
+        "lots/<uuid:lot_pk>/boundary/",
+        LotBoundaryView.as_view(),
+        name="lot-boundary",
+    ),
+    path(
+        "lots/<uuid:lot_pk>/boundary/inherit/",
+        LotBoundaryInheritView.as_view(),
+        name="lot-boundary-inherit",
     ),
 ]

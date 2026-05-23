@@ -1,3 +1,4 @@
+import type { GeoPolygon } from './boundary';
 import api from "./client";
 import type { UserProfile } from "./auth";
 import type { CoffeeLot } from "./lots";
@@ -11,6 +12,7 @@ export interface FarmerProfile extends UserProfile {
   cooperative:     string;
   gps_lat:         string | null;
   gps_lng:         string | null;
+  boundary?:       GeoPolygon | null;
   phone?:          string;
   country?:        string;
 }

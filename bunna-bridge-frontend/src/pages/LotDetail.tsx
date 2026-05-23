@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
 import ComplianceBadge from "../components/ComplianceBadge";
 import StatusPill from "../components/StatusPill";
+import PolygonCaptureWidget from '../components/PolygonCaptureWidget';
+import FarmMapDisplay from '../components/FarmMapDisplay';
 import CuppingHistory from '../components/CuppingHistory';
 import SampleRequestWidget from '../components/SampleRequestWidget';
 import SettlementWidget from '../components/SettlementWidget';
@@ -18,7 +20,7 @@ export default function LotDetail() {
   const [ddsLoading, setDdsLoading] = useState(false);
   const [ddsError,   setDdsError]   = useState('');
 
-  const { data: lot, isLoading } = useQuery({
+  const { data: lot, isLoading, refetch } = useQuery({
     queryKey: ["lot", id],
     queryFn:  () => getLot(id!),
     enabled:  !!id,
@@ -195,21 +197,72 @@ export default function LotDetail() {
                 <SettlementWidget lotId={lot.id} lotRef={lot.lot_id} defaultUsd={lot.price_per_kg && lot.volume_kg ? parseFloat(String(lot.price_per_kg)) * parseFloat(String(lot.volume_kg)) : undefined} />
               </div>
             </div>
+            {/* Boundary */}
+            <div style={s.card}>
+              <PolygonCaptureWidget
+                mode="lot"
+                lotId={lot.id}
+                existingPolygon={lot.boundary ?? null}
+                canInherit={true}
+                onSaved={() => refetch()}
+              />
+            </div>
           </div>
 
           {/* ── Right column ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
+            {/* Farm boundary map — read only */}
+            {lot.boundary && (
+              <div style={s.card}>
+                <FarmMapDisplay
+                  polygon={lot.boundary}
+                  label="Lot Boundary"
+                  height={200}
+                />
+              </div>
+            )}
             {/* Compliance */}
             <div style={s.card}>
               <p style={s.cardTitle}>Compliance Gate Check</p>
               <div style={s.gates}>
-                {compliance ? Object.entries(compliance.gates).map(([key, pass]) => (
+                {compliance ? Object.entries(compliance.gates).map(([key, pass]) => {
+                  // Special handling for deforestation gate
+                  if (key === "deforestation_free") {
+                    const dc = compliance.deforestation_check;
+                    const isPending = dc?.status === "pending" || dc?.status === "no_data";
+                    const isOverlap = dc?.status === "overlap";
+                    const bgColor = isPending
+                      ? "rgba(201,149,42,0.08)"
+                      : isOverlap ? "rgba(193,68,14,0.1)" : "rgba(30,58,47,0.15)";
+                    const borderColor = isPending
+                      ? "rgba(201,149,42,0.25)"
+                      : isOverlap ? "rgba(193,68,14,0.3)" : "rgba(74,124,89,0.25)";
+                    const iconColor = isPending ? "#C9952A" : isOverlap ? "#C1440E" : "#A8C5A0";
+                    const iconText = isPending ? "⏳ PENDING" : isOverlap ? "✗ OVERLAP" : "✓ PASS";
+                    return (
+                      <div key={key} style={{ ...s.gate(pass), background: bgColor, borderColor }}>
+                        <span style={s.gateLabel}>{gateLabels[key]}</span>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
+                          <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: iconColor, fontWeight: 600 }}>
+                            {iconText}
+                          </span>
+                          {dc?.message && (
+                            <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.55rem", color: "rgba(245,237,216,0.45)", maxWidth: 140, textAlign: "right" }}>
+                              {dc.message}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
                   <div key={key} style={s.gate(pass)}>
                     <span style={s.gateLabel}>{gateLabels[key] || key}</span>
                     <span style={s.gateIcon(pass)}>{pass ? "✓ PASS" : "✗ FAIL"}</span>
                   </div>
-                )) : (
+                  );
+                }) : (
                   <p style={{ fontFamily: "monospace", fontSize: "0.7rem", color: "rgba(245,237,216,0.25)" }}>
                     Loading...
                   </p>

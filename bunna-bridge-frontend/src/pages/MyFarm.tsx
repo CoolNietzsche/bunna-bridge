@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { getFarmerProfile, getFarmerLots, updateFarmerProfile } from "../api/farmer";
 import type { FarmerProfile } from "../api/farmer";
 import PageWrapper from "../components/PageWrapper";
+import PolygonCaptureWidget from '../components/PolygonCaptureWidget';
+import FarmMapDisplay from '../components/FarmMapDisplay';
 import StatusPill from "../components/StatusPill";
 import {
   Sprout, MapPin, Mountain, Ruler, Users,
@@ -351,6 +353,24 @@ export default function MyFarm() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Farm Boundary */}
+      <div style={{ marginTop: "24px" }}>
+        {p?.boundary && (
+          <div style={{ marginBottom: "16px" }}>
+            <FarmMapDisplay
+              polygon={p.boundary}
+              label="Farm Boundary"
+              height={240}
+            />
+          </div>
+        )}
+        <PolygonCaptureWidget
+          mode="farm"
+          existingPolygon={p?.boundary ?? null}
+          onSaved={() => queryClient.invalidateQueries({ queryKey: ['farmer-profile'] })}
+        />
       </div>
     </PageWrapper>
   );

@@ -53,7 +53,11 @@ class CoffeeLot(models.Model):
 
     # Geospatial
     farm_location = models.PointField(srid=4326, null=True, blank=True)
-    farm_polygon  = models.PolygonField(srid=4326, null=True, blank=True)
+    boundary = models.PolygonField(
+        geography=True, srid=4326,
+        null=True, blank=True,
+        help_text="Lot boundary polygon — overrides farm polygon if set"
+    )
 
     # Quality — set from latest confirmed CuppingScore
     sca_score        = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
@@ -160,7 +164,7 @@ class CuppingScore(models.Model):
             self.acidity, self.body, self.balance,
             self.uniformity, self.clean_cup, self.sweetness, self.overall,
         ]
-        return round(float(sum(components)) - float(self.defects), 2)
+        return round(float(sum(c for c in components if c is not None)) - float(self.defects or 0), 2)
 
     def save(self, *args, **kwargs):
         # Write-once — prevent editing confirmed scores
@@ -208,3 +212,4 @@ class SampleRequest(models.Model):
 
     def __str__(self):
         return f"Sample: {self.lot.lot_id} → {self.buyer.email} ({self.status})"
+

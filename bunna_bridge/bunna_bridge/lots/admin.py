@@ -1,3 +1,5 @@
+from django.urls import path
+from bunna_bridge.lots.admin_views import FarmBoundaryMapView
 from django.contrib.gis import admin
 from .models import CoffeeLot, CuppingScore, SampleRequest
 
@@ -18,12 +20,19 @@ class CoffeeLotAdmin(admin.GISModelAdmin):
     search_fields   = ["lot_id", "name", "washing_station"]
     readonly_fields = ["id", "created_at", "updated_at"]
     inlines         = [CuppingScoreInline]
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path("map/", self.admin_site.admin_view(FarmBoundaryMapView.as_view()), name="lots-map"),
+        ]
+        return custom + urls
+
     fieldsets = (
         ("Identity",          {"fields": ["id", "lot_id", "name", "status", "exporter"]}),
         ("Origin",            {"fields": ["region", "kebele", "washing_station",
                                           "altitude_m", "processing", "grade",
                                           "varietal", "harvest_date"]}),
-        ("Geospatial / EUDR", {"fields": ["farm_location", "farm_polygon", "gps_verified"]}),
+        ("Geospatial / EUDR", {"fields": ["farm_location", "boundary", "gps_verified"]}),
         ("Quality",           {"fields": ["sca_score", "flavor_notes", "cupping_date",
                                           "q_grader_name", "q_grader_cert_id"]}),
         ("Compliance Gates",  {"fields": ["deforestation_free", "phyto_cert_uploaded",
@@ -49,3 +58,10 @@ class SampleRequestAdmin(admin.ModelAdmin):
     list_filter   = ["status"]
     search_fields = ["lot__lot_id", "buyer__email"]
     readonly_fields = ["id", "created_at", "updated_at"]
+
+from bunna_bridge.lots.deforestation import DeforestationZone
+
+@admin.register(DeforestationZone)
+class DeforestationZoneAdmin(admin.GISModelAdmin):
+    list_display = ["id", "year", "region", "area_ha", "source"]
+    list_filter  = ["year", "region"]
