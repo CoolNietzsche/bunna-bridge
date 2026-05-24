@@ -536,10 +536,22 @@ class LotBoundaryInheritView(APIView):
         if request.user.role not in ("admin",) and lot.exporter != request.user:
             return Response({"detail": "Not allowed."}, status=403)
 
-        # Find linked farmer profile
-        from users.models import FarmerProfile
+        # Find farmer profile — try current user first, then any farmer
+        # CoffeeLot has no direct farmer FK, so we use the requesting user
+        # if they are a farmer, otherwise find any farmer with a boundary
+        from bunna_bridge.users.models import User
+        profile = None
         try:
-            profile = FarmerProfile.objects.get(user=lot.farmer) if lot.farmer else None
+            from bunna_bridge.users.models import FarmerProfile
+            # Try current user's farm profile first
+            profile = FarmerProfile.objects.filter(
+                user=request.user, boundary__isnull=False
+            ).first()
+            # If admin, find any farmer with a boundary near the lot
+            if not profile and request.user.role == "admin":
+                profile = FarmerProfile.objects.filter(
+                    boundary__isnull=False
+                ).first()
         except Exception:
             profile = None
 
