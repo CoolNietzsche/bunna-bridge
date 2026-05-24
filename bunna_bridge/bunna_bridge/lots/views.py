@@ -56,7 +56,13 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="compliance-check")
     def compliance_check(self, request, pk=None):
-        lot   = self.get_object()
+        from .eudr_spatial import check_deforestation_overlap, run_deforestation_check_for_lot
+        lot = self.get_object()
+        # Run live spatial deforestation check and auto-update lot if changed
+        defor_result = check_deforestation_overlap(lot.boundary if lot.boundary else (lot.farm_location.buffer(0.005) if lot.farm_location else None))
+        if defor_result["deforestation_free"] is not None and defor_result["deforestation_free"] != lot.deforestation_free:
+            lot.deforestation_free = defor_result["deforestation_free"]
+            lot.save(update_fields=["deforestation_free"])
         gates = {
             "gps_verified":        lot.gps_verified,
             "deforestation_free":  lot.deforestation_free,
@@ -72,6 +78,12 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
             "export_ready":         lot.export_ready,
             "green_passport_ready": lot.green_passport_ready,
             "failed_gates":         [k for k, v in gates.items() if not v],
+            "deforestation_spatial": {
+                "status":           defor_result["status"],
+                "message":          defor_result["message"],
+                "overlap_count":    defor_result["overlap_count"],
+                "has_boundary":     bool(lot.boundary),
+            },
         })
 
     @action(detail=True, methods=["get", "post"], url_path="cupping-scores")
@@ -500,7 +512,16 @@ class LotBoundaryView(APIView):
                 return Response({"detail": "Must be a Polygon geometry."}, status=400)
             lot.boundary = geom
             lot.save(update_fields=["boundary"])
-            return Response({"detail": "Boundary saved.", "area_ha": round(geom.area * 10000, 4)})
+            # Auto-run deforestation check after boundary is set
+            defor_result = run_deforestation_check_for_lot(lot)
+            return Response({
+                "detail": "Boundary saved.",
+                "area_ha": round(geom.area * 10000, 4),
+                "deforestation_check": {
+                    "deforestation_free": defor_result,
+                    "message": "clear" if defor_result else "overlap detected" if defor_result is False else "pending",
+                }
+            })
         except Exception as e:
             return Response({"detail": f"Invalid geometry: {e}"}, status=400)
 
@@ -527,4 +548,11 @@ class LotBoundaryInheritView(APIView):
 
         lot.boundary = profile.boundary
         lot.save(update_fields=["boundary"])
-        return Response({"detail": "Boundary inherited from farm profile."})
+        # Auto-run deforestation check after inheriting boundary
+        defor_result = run_deforestation_check_for_lot(lot)
+        return Response({
+            "detail": "Boundary inherited from farm profile.",
+            "deforestation_check": {
+                "deforestation_free": defor_result,
+            }
+        })

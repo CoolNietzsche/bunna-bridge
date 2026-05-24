@@ -226,7 +226,34 @@ export default function LotDetail() {
             <div style={s.card}>
               <p style={s.cardTitle}>Compliance Gate Check</p>
               <div style={s.gates}>
-                {compliance ? Object.entries(compliance.gates).map(([key, pass]) => {
+                {/* Deforestation spatial status banner */}
+              {compliance?.deforestation_check && (
+                <div style={{
+                  padding: "10px 14px", borderRadius: "2px", marginBottom: "12px",
+                  background: compliance.deforestation_check.status === "clear" ? "rgba(30,58,47,0.3)" :
+                              compliance.deforestation_check.status === "overlap" ? "rgba(193,68,14,0.15)" :
+                              "rgba(201,149,42,0.1)",
+                  border: `1px solid ${
+                    compliance.deforestation_check.status === "clear" ? "rgba(74,124,89,0.4)" :
+                    compliance.deforestation_check.status === "overlap" ? "rgba(193,68,14,0.4)" :
+                    "rgba(201,149,42,0.3)"}`,
+                  fontFamily: "DM Mono, monospace", fontSize: "0.68rem",
+                  color: compliance.deforestation_check.status === "clear" ? "#A8C5A0" :
+                         compliance.deforestation_check.status === "overlap" ? "#C1440E" : "#C9952A",
+                }}>
+                  {compliance.deforestation_check.status === "clear" && "✅ "}
+                  {compliance.deforestation_check.status === "overlap" && "⚠️ "}
+                  {compliance.deforestation_check.status === "pending" && "⏳ "}
+                  {compliance.deforestation_check.status === "no_data" && "📊 "}
+                  {compliance.deforestation_check.message}
+                  {compliance.deforestation_check.status === 'pending' && (
+                    <span style={{ display: "block", marginTop: "4px", opacity: 0.7 }}>
+                      Draw or upload a farm boundary below to enable spatial verification.
+                    </span>
+                  )}
+                </div>
+              )}
+              {compliance ? Object.entries(compliance.gates).map(([key, pass]) => {
                   // Special handling for deforestation gate
                   if (key === "deforestation_free") {
                     const dc = compliance.deforestation_check;

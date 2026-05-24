@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Sprout,
   ChevronLeft, ChevronRight, Coffee, FileCheck,
   GitBranch, FlaskConical, ClipboardList, Settings, HelpCircle, X
-} from "lucide-react";
+, Map as MapIcon } from "lucide-react";
 import RoleBadge from "./RoleBadge";
 
 const NAV_ITEMS = [
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={15} />,     roles: ["buyer","admin"] },
   { label: "My Farm",     path: "/farm",        icon: <Sprout size={15} />,          roles: ["farmer"] },
   { label: "Compliance",  path: "/compliance",  icon: <FileCheck size={15} />,       roles: ["admin","exporter"] },
+  { label: "Lot Map",     path: "/map",         icon: <MapIcon size={16} />,            roles: ["admin","exporter","farmer"] },
   { label: "Pipeline",    path: "/pipeline",    icon: <GitBranch size={15} />,       roles: ["admin","exporter"] },
   { label: "Samples",     path: "/samples",     icon: <FlaskConical size={15} />,    roles: ["admin","exporter","buyer"] },
   { label: "Reports",     path: "/reports",     icon: <ClipboardList size={15} />,   roles: ["admin"] },
