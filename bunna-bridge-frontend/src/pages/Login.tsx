@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Coffee, CheckCircle } from "lucide-react";
 
 export default function Login() {
   const { login }  = useAuth();
@@ -22,31 +23,6 @@ export default function Login() {
     } finally { setLoading(false); }
   };
 
-  const autofill = (e: string, p: string) => {
-    setEmail(e);
-    setPassword(p);
-  };
-
-  const s = {
-    page:     { minHeight: "100vh", background: "#1A0F07", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", fontFamily: "sans-serif" },
-    wrap:     { width: "100%", maxWidth: "420px" },
-    title:    { fontSize: "3rem", fontWeight: 300, color: "#F5EDD8", textAlign: "center" as const, marginBottom: "0.25rem" },
-    sub:      { fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.2em", color: "#D4824A", textAlign: "center" as const, textTransform: "uppercase" as const, marginBottom: "2.5rem" },
-    card:     { background: "#2C1810", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "4px", padding: "2rem" },
-    label:    { display: "block", fontFamily: "monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", marginBottom: "0.4rem" },
-    input:    { width: "100%", background: "#1A0F07", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.75rem 1rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.875rem", outline: "none", boxSizing: "border-box" as const, marginBottom: "1.25rem" },
-    btn:      { width: "100%", background: "#C1440E", border: "none", borderRadius: "2px", padding: "0.875rem", color: "white", fontFamily: "monospace", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, cursor: "pointer" },
-    err:      { background: "rgba(193,68,14,0.15)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "2px", padding: "0.75rem", fontFamily: "monospace", fontSize: "0.7rem", color: "#C1440E", marginBottom: "1rem" },
-    success:  { background: "rgba(74,124,89,0.15)", border: "1px solid rgba(74,124,89,0.3)", borderRadius: "2px", padding: "0.75rem", fontFamily: "monospace", fontSize: "0.7rem", color: "#A8C5A0", marginBottom: "1rem" },
-    divider:  { textAlign: "center" as const, fontFamily: "monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.2)", margin: "1.5rem 0 0" },
-    demos:    { background: "rgba(245,237,216,0.03)", border: "1px solid rgba(245,237,216,0.08)", borderRadius: "3px", padding: "1rem", marginTop: "1rem", fontFamily: "monospace", fontSize: "0.6rem" },
-    demotitle:{ color: "rgba(245,237,216,0.3)", letterSpacing: "0.15em", textTransform: "uppercase" as const, display: "block", marginBottom: "0.7rem" },
-    demorow:  { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" },
-    demorole: { color: "rgba(245,237,216,0.25)" },
-    demoemail:{ color: "rgba(245,237,216,0.5)", cursor: "pointer", textDecoration: "underline" as const, textDecorationStyle: "dotted" as const },
-    hint:     { color: "rgba(245,237,216,0.2)", marginTop: "0.5rem", fontSize: "0.55rem", display: "block" },
-  };
-
   const demoAccounts = [
     { role: "Admin",    email: "admin@bunnabridge.com", pw: "BunnaAdmin2026!" },
     { role: "Exporter", email: "dawit@addiscoffee.et",  pw: "Bunna2026!" },
@@ -55,73 +31,111 @@ export default function Login() {
     { role: "Q-Grader", email: "tigist@scaethiopia.et", pw: "Bunna2026!" },
   ];
 
-  return (
-    <div style={s.page}>
-      <div style={s.wrap}>
-        <h1 style={s.title}>Bunna Bridge</h1>
-        <p style={s.sub}>ቡና ብሪጅ</p>
+  const inp = {
+    width: "100%", background: "rgba(245,237,216,0.04)",
+    border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px",
+    padding: "10px 14px", color: "#F5EDD8",
+    fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
+    outline: "none", boxSizing: "border-box" as const,
+    transition: "border-color 0.15s",
+  };
 
-        <form onSubmit={handleSubmit} style={s.card}>
-          <h2 style={{ fontSize: "1.5rem", fontWeight: 300, color: "#F5EDD8", margin: "0 0 1.5rem" }}>
-            Sign in
+  return (
+    <div style={{ minHeight: "100vh", background: "#1A0F07", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div style={{ width: "44px", height: "44px", borderRadius: "4px", background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+            <Coffee size={20} color="#C1440E" />
+          </div>
+          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
+            Bunna Bridge
+          </h1>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+            Export-Ready by Design
+          </p>
+        </div>
+
+        {/* Card */}
+        <div style={{ background: "#2C1810", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "6px", padding: "28px" }}>
+          <h2 style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "1.1rem", fontWeight: 500, color: "#F5EDD8", margin: "0 0 20px" }}>
+            Sign in to your account
           </h2>
 
           {params.get("registered") && (
-            <div style={s.success}>✓ Account created. Sign in below.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(74,124,89,0.15)", border: "1px solid rgba(74,124,89,0.3)", borderRadius: "3px", padding: "10px 14px", marginBottom: "16px" }}>
+              <CheckCircle size={14} color="#A8C5A0" />
+              <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8C5A0" }}>Account created. Sign in below.</span>
+            </div>
           )}
-          {error && <div style={s.err}>{error}</div>}
 
-          <label style={s.label}>Email</label>
-          <input
-            style={s.input}
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            required
-          />
+          {error && (
+            <div style={{ background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "3px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+              {error}
+            </div>
+          )}
 
-          <label style={s.label}>Password</label>
-          <input
-            style={s.input}
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "14px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+                Email
+              </label>
+              <input style={inp} type="email" value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com" required
+                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
+                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+              />
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+                Password
+              </label>
+              <input style={inp} type="password" value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required
+                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
+                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+              />
+            </div>
+            <button type="submit" disabled={loading} style={{
+              width: "100%", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E",
+              border: "none", borderRadius: "3px", padding: "11px",
+              color: "white", fontFamily: "Instrument Sans, sans-serif",
+              fontSize: "0.9rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.15s",
+            }}>
+              {loading ? "Signing in..." : "Sign In →"}
+            </button>
+          </form>
 
-          <button
-            style={{ ...s.btn, opacity: loading ? 0.6 : 1 }}
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Signing in..." : "Sign In →"}
-          </button>
-        </form>
+          <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.35)", margin: "16px 0 0" }}>
+            No account?{" "}
+            <Link to="/register" style={{ color: "#D4824A", textDecoration: "none" }}>Create one →</Link>
+          </p>
+        </div>
 
-        <p style={s.divider}>
-          No account?{" "}
-          <Link to="/register" style={{ color: "#D4824A", textDecoration: "none" }}>
-            Create one →
-          </Link>
-        </p>
-
-        <div style={s.demos}>
-          <span style={s.demotitle}>Demo Accounts</span>
+        {/* Demo accounts */}
+        <div style={{ background: "rgba(245,237,216,0.02)", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "16px", marginTop: "12px" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,237,216,0.25)", margin: "0 0 10px" }}>
+            Demo Accounts
+          </p>
           {demoAccounts.map(({ role, email: e, pw }) => (
-            <div key={role} style={s.demorow}>
-              <span style={s.demorole}>{role}</span>
+            <div key={role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.25)" }}>{role}</span>
               <span
-                style={s.demoemail}
-                onClick={() => autofill(e, pw)}
+                onClick={() => { setEmail(e); setPassword(pw); }}
+                style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.45)", cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
                 title="Click to autofill"
               >
                 {e}
               </span>
             </div>
           ))}
-          <span style={s.hint}>Click any email to autofill credentials</span>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(245,237,216,0.18)", margin: "8px 0 0" }}>
+            Click any email to autofill credentials
+          </p>
         </div>
       </div>
     </div>
