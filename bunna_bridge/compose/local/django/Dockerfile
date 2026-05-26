@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # GeoDjango dependencies (GDAL, GEOS, PROJ)
   gdal-bin \
   libgdal-dev \
+  python3-gdal \
   libgeos-dev \
   libproj-dev \
   binutils
@@ -39,6 +40,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock:rw \
     uv sync
 
+# Install GDAL into a separate venv outside /app so volume mount does not overwrite it
+RUN python3 -m venv /gdal-venv && /gdal-venv/bin/pip install GDAL==3.6.2
+
 # devcontainer dependencies and utils
 RUN apt-get update && apt-get install --no-install-recommends -y \
   sudo git bash-completion nano ssh
@@ -50,7 +54,7 @@ RUN groupadd --gid 1000 dev-user \
   && chmod 0440 /etc/sudoers.d/dev-user
 
 ENV PATH="/${APP_HOME}/.venv/bin:$PATH"
-ENV PYTHONPATH="${APP_HOME}/.venv/lib/python3.14/site-packages:$PYTHONPATH"
+ENV PYTHONPATH="/gdal-venv/lib/python3.14/site-packages:${APP_HOME}/.venv/lib/python3.14/site-packages:$PYTHONPATH"
 
 COPY ./compose/production/django/entrypoint /entrypoint
 RUN sed -i 's/\r$//g' /entrypoint

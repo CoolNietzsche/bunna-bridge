@@ -1,39 +1,21 @@
 """
 Management command to load Hansen Global Forest Change deforestation
-data for Ethiopia's coffee regions into the DeforestationZone table.
+data for Ethiopia into the DeforestationZone table.
 
 Usage:
-  python manage.py load_deforestation_data
-
-Data source:
-  Global Forest Watch — Ethiopia forest loss 2021-2023
-  Filtered to coffee-growing regions (Sidama, Oromia, SNNP)
-  Only includes loss year > 2020 (EUDR cutoff is Dec 31, 2020)
+  python manage.py load_deforestation_data --source=gfw --clear
+  python manage.py load_deforestation_data --source=sample
 """
-import os
 import json
-import tempfile
-import subprocess
 from django.core.management.base import BaseCommand
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, Polygon
 from bunna_bridge.lots.deforestation import DeforestationZone
 
+ETHIOPIA_BBOX = (33.0, 3.4, 47.9, 14.9)
+EUDR_CUTOFF_YEAR = 2020
+GFW_FILE = "/tmp/hansen/ethiopia_deforestation.geojson"
 
-# Ethiopia coffee region bounding box for clipping
-# Covers Sidama, Yirgacheffe, Guji, Kaffa, Limu, Jimma
-ETHIOPIA_COFFEE_BBOX = "34.0,3.5,43.5,12.5"
-
-# GFW tree cover loss tiles covering Ethiopia coffee regions
-# These are 10x10 degree Hansen GFC tiles in GeoJSON format
-# We use the GFW API to get pre-processed loss polygons
-GFW_API_URL = (
-    "https://opendata.arcgis.com/datasets/"
-    "091d4fb80b5f4b4d93613b1a4c5a9d58_0.geojson"
-)
-
-# Fallback: use a curated small dataset we generate ourselves
 SAMPLE_ZONES = [
-    # Sidama region known deforestation zones (post-2020, approximate)
     {"year": 2021, "region": "Sidama",
      "coords": [[[38.5,6.8],[38.7,6.8],[38.7,6.6],[38.5,6.6],[38.5,6.8]]]},
     {"year": 2021, "region": "Kaffa",
@@ -46,109 +28,144 @@ SAMPLE_ZONES = [
      "coords": [[[39.8,6.5],[40.0,6.5],[40.0,6.3],[39.8,6.3],[39.8,6.5]]]},
 ]
 
+def decode_loss_year(raw):
+    """Hansen encodes year as 1=2001 ... 24=2024. 0 = no loss."""
+    try:
+        v = int(raw)
+        return (2000 + v) if v > 0 else None
+    except (TypeError, ValueError):
+        return None
 
 class Command(BaseCommand):
-    help = "Load Ethiopia deforestation zone data into PostGIS"
+    help = "Load Ethiopia Hansen GFC deforestation zone data into PostGIS"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--source",
-            choices=["sample", "gfw"],
-            default="sample",
-            help="Data source: 'sample' (built-in test data) or 'gfw' (Global Forest Watch API)"
+            "--source", choices=["sample", "gfw"], default="sample",
         )
         parser.add_argument(
-            "--clear",
-            action="store_true",
-            help="Clear existing zones before loading"
+            "--file", type=str, default=GFW_FILE,
+            help="Path to GeoJSON produced by gdal_polygonize",
+        )
+        parser.add_argument(
+            "--clear", action="store_true",
+            help="Clear existing zones before loading",
+        )
+        parser.add_argument(
+            "--batch-size", type=int, default=500,
         )
 
     def handle(self, *args, **options):
         if options["clear"]:
             count = DeforestationZone.objects.all().delete()[0]
-            self.stdout.write(f"🗑  Cleared {count} existing zones")
+            self.stdout.write(f"Cleared {count} existing zones")
 
         if options["source"] == "sample":
             self._load_sample()
         else:
-            self._load_gfw()
+            self._load_gfw(options["file"], options["batch_size"])
 
     def _load_sample(self):
-        self.stdout.write("Loading built-in sample deforestation zones…")
+        self.stdout.write("Loading built-in sample deforestation zones...")
         created = 0
         for z in SAMPLE_ZONES:
             poly = Polygon(z["coords"][0], srid=4326)
             mpoly = MultiPolygon(poly, srid=4326)
-            # Calculate approximate area in hectares
             area_ha = round(poly.area * 1230800000 / 10000, 2)
             DeforestationZone.objects.get_or_create(
-                year=z["year"],
-                region=z["region"],
-                defaults={
-                    "geometry": mpoly,
-                    "source": "Bunna Bridge Sample Data",
-                    "area_ha": area_ha,
-                }
+                year=z["year"], region=z["region"],
+                defaults={"geometry": mpoly, "source": "Bunna Bridge Sample Data", "area_ha": area_ha},
             )
             created += 1
+        self.stdout.write(self.style.SUCCESS(f"Loaded {created} sample zones"))
+
+    def _load_gfw(self, file_path, batch_size):
+        self.stdout.write(f"Loading Hansen GFC data from {file_path}...")
+
+        self.stdout.write("  Reading file (this may take a minute)...")
+        with open(file_path, 'r') as f:
+            raw = f.read()
+
+        self.stdout.write("  Parsing features...")
+        lines = raw.splitlines()
+        del raw
+
+        feature_lines = [l.strip().rstrip(',') for l in lines
+                         if l.strip().startswith('{ "type": "Feature"')]
+        del lines
+        self.stdout.write(f"  {len(feature_lines):,} features found")
+
+        min_lon, min_lat, max_lon, max_lat = ETHIOPIA_BBOX
+        batch = []
+        created = 0
+        skipped_year = skipped_bbox = skipped_geom = 0
+
+        for i, line in enumerate(feature_lines):
+            if i % 20000 == 0 and i > 0:
+                self.stdout.write(
+                    f"  ... {i:,} / {len(feature_lines):,} processed, {created:,} loaded so far"
+                )
+
+            try:
+                feat = json.loads(line)
+            except json.JSONDecodeError:
+                skipped_geom += 1
+                continue
+
+            props = feat.get("properties", {})
+            raw_val = props.get("loss_year") or props.get("DN") or props.get("lossyear") or 0
+            year = decode_loss_year(raw_val)
+
+            if year is None or year <= EUDR_CUTOFF_YEAR:
+                skipped_year += 1
+                continue
+
+            geom_data = feat.get("geometry")
+            if not geom_data:
+                skipped_geom += 1
+                continue
+
+            try:
+                geom = GEOSGeometry(json.dumps(geom_data), srid=4326)
+
+                cx = geom.centroid.x
+                cy = geom.centroid.y
+                if not (min_lon <= cx <= max_lon and min_lat <= cy <= max_lat):
+                    skipped_bbox += 1
+                    continue
+
+                if geom.geom_type == "Polygon":
+                    geom = MultiPolygon(geom, srid=4326)
+                elif geom.geom_type != "MultiPolygon":
+                    skipped_geom += 1
+                    continue
+
+                batch.append(DeforestationZone(
+                    geometry=geom,
+                    year=year,
+                    region="Ethiopia",
+                    source="Hansen GFC v1.12 (2024)",
+                    area_ha=round(geom.area * 1230800000 / 10000, 4),
+                ))
+
+                if len(batch) >= batch_size:
+                    DeforestationZone.objects.bulk_create(batch, ignore_conflicts=True)
+                    created += len(batch)
+                    batch = []
+
+            except Exception:
+                skipped_geom += 1
+                continue
+
+        if batch:
+            DeforestationZone.objects.bulk_create(batch, ignore_conflicts=True)
+            created += len(batch)
+
         self.stdout.write(self.style.SUCCESS(
-            f"✅ Loaded {created} sample deforestation zones"
+            f"Loaded {created:,} deforestation zones into PostGIS"
         ))
         self.stdout.write(
-            "ℹ️  Run with --source=gfw to load real Global Forest Watch data"
+            f"   Skipped: {skipped_year:,} pre-2021 | "
+            f"{skipped_bbox:,} outside Ethiopia bbox | "
+            f"{skipped_geom:,} bad geometry"
         )
-
-    def _load_gfw(self):
-        """
-        Download and load real GFW deforestation data.
-        Requires ogr2ogr (GDAL) — available in the Django container.
-        """
-        self.stdout.write("Downloading Global Forest Watch data for Ethiopia…")
-        try:
-            import urllib.request
-            with tempfile.TemporaryDirectory() as tmpdir:
-                geojson_path = os.path.join(tmpdir, "ethiopia_loss.geojson")
-                self.stdout.write(f"  Fetching {GFW_API_URL}…")
-                urllib.request.urlretrieve(GFW_API_URL, geojson_path)
-
-                with open(geojson_path) as f:
-                    data = json.load(f)
-
-                features = data.get("features", [])
-                self.stdout.write(f"  {len(features)} features found")
-                created = 0
-                skipped = 0
-                for feat in features:
-                    props = feat.get("properties", {})
-                    year = props.get("year") or props.get("loss_year") or 2021
-                    if int(year) <= 2020:
-                        skipped += 1
-                        continue
-                    geom_data = feat.get("geometry")
-                    if not geom_data:
-                        continue
-                    try:
-                        geom = GEOSGeometry(json.dumps(geom_data), srid=4326)
-                        if geom.geom_type == "Polygon":
-                            geom = MultiPolygon(geom, srid=4326)
-                        elif geom.geom_type != "MultiPolygon":
-                            continue
-                        DeforestationZone.objects.create(
-                            geometry=geom,
-                            year=int(year),
-                            region=props.get("region", "Ethiopia"),
-                            source="Hansen GFC via GFW",
-                            area_ha=props.get("area_ha"),
-                        )
-                        created += 1
-                    except Exception as e:
-                        self.stdout.write(f"  ⚠️  Skipped feature: {e}")
-                        continue
-
-                self.stdout.write(self.style.SUCCESS(
-                    f"✅ Loaded {created} zones ({skipped} pre-2020 skipped)"
-                ))
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"❌ GFW download failed: {e}"))
-            self.stdout.write("Falling back to sample data…")
-            self._load_sample()
