@@ -15,8 +15,8 @@ import {
   ArrowLeft, MapPin, Mountain, Layers, Award, Download,
   ShieldCheck, ShieldAlert, ShieldOff, Clock, CheckCircle,
   XCircle, AlertTriangle, Leaf, FileCheck, Upload, Lock,
-  Pencil, FlaskConical, TrendingUp, Package, Users, Droplets,
-  Thermometer, Globe, BadgeCheck
+  Pencil, FlaskConical, TrendingUp, Package, Users,
+  Globe, BadgeCheck
 } from "lucide-react";
 
 function RadarChart({ scores }: { scores: Record<string, number> }) {
