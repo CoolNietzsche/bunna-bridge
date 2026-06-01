@@ -1,11 +1,13 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
     CoffeeLotViewSet, CuppingScoreViewSet,
     SettlementView, SampleRequestViewSet,
     LotStatusUpdateView, EudrDdsView,
     LotBoundaryView, LotBoundaryInheritView,
+    NotificationListView, notification_unread_count,
+    notification_mark_read, notification_mark_all_read,
 )
-from django.urls import path
 
 router = DefaultRouter()
 router.register(r"lots",            CoffeeLotViewSet,      basename="lot")
@@ -38,4 +40,8 @@ urlpatterns = router.urls + [
         LotBoundaryInheritView.as_view(),
         name="lot-boundary-inherit",
     ),
+    path('notifications/', NotificationListView.as_view(), name='notification-list'),
+    path('notifications/unread-count/', notification_unread_count, name='notification-unread-count'),
+    path('notifications/read-all/', notification_mark_all_read, name='notification-read-all'),
+    path('notifications/<int:pk>/read/', notification_mark_read, name='notification-read'),
 ]

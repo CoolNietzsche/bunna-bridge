@@ -1,8 +1,8 @@
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import CoffeeLot, CuppingScore, SampleRequest
@@ -568,3 +568,57 @@ class LotBoundaryInheritView(APIView):
                 "deforestation_free": defor_result,
             }
         })
+
+
+# ── Notification Views ──────────────────────────────────────────────────────
+
+class NotificationListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from .models import Notification
+        from django.core import serializers as dj_serializers
+        import json
+        qs = Notification.objects.filter(recipient=request.user)[:50]
+        data = [
+            {
+                'id': n.id,
+                'notification_type': n.notification_type,
+                'title': n.title,
+                'message': n.message,
+                'link': n.link,
+                'is_read': n.is_read,
+                'created_at': n.created_at.isoformat(),
+            }
+            for n in qs
+        ]
+        return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def notification_unread_count(request):
+    from .models import Notification
+    count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    return Response({'count': count})
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def notification_mark_read(request, pk):
+    from .models import Notification
+    try:
+        n = Notification.objects.get(pk=pk, recipient=request.user)
+        n.is_read = True
+        n.save()
+        return Response({'status': 'ok'})
+    except Notification.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def notification_mark_all_read(request):
+    from .models import Notification
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    return Response({'status': 'ok'})
