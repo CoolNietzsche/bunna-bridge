@@ -43,6 +43,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "altitude_m", "processing", "grade", "sca_score",
             "flavor_notes", "volume_kg", "price_per_kg",
             "deforestation_free", "eudr_dds_ready",
+            "phyto_cert_file", "phyto_cert_uploaded",
             "green_passport_ready", "export_ready",
             "harvest_date", "created_at", "boundary",
         ]

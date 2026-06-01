@@ -67,7 +67,7 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
             "gps_verified":        lot.gps_verified,
             "deforestation_free":  lot.deforestation_free,
             "eudr_dds_ready":      lot.eudr_dds_ready,
-            "phyto_cert_uploaded": lot.phyto_cert_uploaded,
+            "phyto_cert_uploaded": bool(lot.phyto_cert_file),
             "ecta_license_active": lot.ecta_license_active,
             "nbe_fx_declared":     lot.nbe_fx_declared,
             "cta_floor_met":       lot.cta_floor_met,

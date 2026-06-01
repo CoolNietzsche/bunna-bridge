@@ -91,6 +91,11 @@ class CoffeeLot(models.Model):
         verbose_name = "Coffee Lot"
         verbose_name_plural = "Coffee Lots"
 
+    def save(self, *args, **kwargs):
+        # Auto-update phyto_cert_uploaded based on file presence
+        self.phyto_cert_uploaded = bool(self.phyto_cert_file)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.lot_id} — {self.name}"
 
