@@ -1,260 +1,299 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { Search, Bell, ChevronDown, User, LogOut, Settings, Menu } from "lucide-react";
-import RoleBadge from "./RoleBadge";
+import React, { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import {
+  Bell, Menu, Mail, Coffee, AlertTriangle,
+  CheckSquare, ChevronDown, LogOut, Settings, User
+} from 'lucide-react';
+import RoleBadge from './RoleBadge';
+import {
+  getNotifications, getUnreadCount, markRead, markAllRead,
+} from '../api/notifications';
+import type { NotificationItem } from '../api/notifications';
 
-interface TopBarProps { sidebarWidth: number; onHamburger: () => void; }
+interface TopBarProps {
+  onMenuToggle: () => void;
+}
 
-export default function TopBar({ sidebarWidth, onHamburger }: TopBarProps) {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [search, setSearch]       = useState("");
-  const [profileOpen, setProfile] = useState(false);
-  const [notifOpen, setNotif]     = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
+export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
+  const [notifOpen, setNotifOpen]   = useState(false);
+  const [profileOpen, setProfile]   = useState(false);
   const notifRef   = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const navigate    = useNavigate();
+  const { user, logout } = useAuth();
 
+  // Track IDs we have already notified about to avoid push on first load
+  const notifiedIds = useRef<Set<number>>(new Set());
+  const initialLoadDone = useRef(false);
+
+  const { data: notifications = [] } = useQuery({
+    queryKey: ['notifications'],
+    queryFn:  getNotifications,
+    refetchInterval: 30000,
+  });
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn:  getUnreadCount,
+    refetchInterval: 30000,
+  });
+
+  const unreadCount = unreadData?.count ?? 0;
+
+  // Fix 2 — invalidate BOTH queries on any read action
+  const invalidateBoth = () => {
+    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+  };
+
+  const markReadMutation    = useMutation({ mutationFn: markRead,    onSuccess: invalidateBoth });
+  const markAllReadMutation = useMutation({ mutationFn: markAllRead, onSuccess: invalidateBoth });
+
+  // Fix 3 — on first load, seed known IDs without pushing. Only push truly new ones after.
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfile(false);
-      if (notifRef.current   && !notifRef.current.contains(e.target as Node))   setNotif(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    if (notifications.length === 0) return;
+    if (!initialLoadDone.current) {
+      notifications.forEach(n => notifiedIds.current.add(n.id));
+      initialLoadDone.current = true;
+      return;
+    }
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    notifications.filter(n => !n.is_read && !notifiedIds.current.has(n.id)).forEach(item => {
+      notifiedIds.current.add(item.id);
+      const push = new Notification(item.title, { body: item.message, icon: '/favicon.ico' });
+      push.onclick = () => { window.focus(); handleNotificationClick(item); };
+    });
+  }, [notifications]);
+
+  // Request push permission once
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
-  const notifications = [
-    { id: 1, text: "Lot YRG-2025-0847 is export ready", time: "2m ago",  color: "#A8C5A0" },
-    { id: 2, text: "New cupping score submitted",        time: "1h ago",  color: "#C9952A" },
-    { id: 3, text: "SDM-2025-0213 missing phyto cert",   time: "3h ago",  color: "#C1440E" },
-  ];
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current   && !notifRef.current.contains(e.target as Node))   setNotifOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfile(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const initials = user ? (user.first_name?.[0] || user.email[0]).toUpperCase() : "?";
-  const displayName = user?.first_name
-    ? `${user.first_name} ${user.last_name || ""}`.trim()
-    : user?.email?.split("@")[0] ?? "";
+  const handleNotificationClick = (item: NotificationItem) => {
+    if (!item.is_read) markReadMutation.mutate(item.id);
+    setNotifOpen(false);
+    if (item.link) navigate(item.link);
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'sample_request': return <Mail      className="w-4 h-4" style={{ color: '#C9952A' }} />;
+      case 'lot_status':     return <Coffee    className="w-4 h-4" style={{ color: '#D4824A' }} />;
+      case 'eudr_alert':     return <AlertTriangle className="w-4 h-4" style={{ color: '#C1440E' }} />;
+      default:               return <Bell      className="w-4 h-4" style={{ color: '#EDE0C4' }} />;
+    }
+  };
+
+  const userName = user?.first_name
+    ? `${user.first_name} ${user.last_name || ''}`.trim()
+    : user?.email?.split('@')[0] ?? '—';
+
+  const initials = (user?.first_name?.[0] || user?.email?.[0] || '?').toUpperCase();
 
   return (
-    <>
-      <style>{`
-        .bb-topbar {
-          position: fixed; top: 0; right: 0;
-          left: ${sidebarWidth}px;
-          height: 56px;
-          background: rgba(30,18,8,0.96);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(245,237,216,0.07);
-          display: flex; align-items: center;
-          padding: 0 20px; gap: 12px; z-index: 40;
-          transition: left 0.25s ease;
-        }
-        @media (max-width: 768px) {
-          .bb-topbar { left: 0 !important; }
-          .bb-search-wrap { display: none !important; }
-          .bb-hamburger { display: flex !important; }
-          .bb-username { display: none !important; }
-          .bb-notif-dropdown { width: calc(100vw - 32px) !important; right: -60px !important; }
-        }
-        .tb-icon-btn {
-          width: 32px; height: 32px; border-radius: 3px;
-          border: none; background: transparent;
-          display: flex; align-items: center; justify-content: center;
-          color: rgba(245,237,216,0.35); cursor: pointer;
-          transition: all 0.12s; position: relative;
-        }
-        .tb-icon-btn:hover {
-          background: rgba(245,237,216,0.05);
-          color: rgba(245,237,216,0.6);
-        }
-        .tb-dropdown {
-          position: absolute; right: 0; top: 44px;
-          background: #1E1208;
-          border: 1px solid rgba(245,237,216,0.09);
-          border-radius: 6px;
-          box-shadow: 0 24px 64px rgba(0,0,0,0.7);
-          z-index: 100; overflow: hidden;
-        }
-        .tb-menu-item {
-          width: 100%; display: flex; align-items: center; gap: 10px;
-          padding: 9px 16px; border: none; background: transparent;
-          color: rgba(245,237,216,0.45); cursor: pointer;
-          font-family: "Instrument Sans", sans-serif; font-size: 0.825rem;
-          transition: all 0.12s; text-align: left;
-        }
-        .tb-menu-item:hover {
-          background: rgba(245,237,216,0.04);
-          color: rgba(245,237,216,0.8);
-        }
-        .tb-avatar {
-          border-radius: 3px; flex-shrink: 0;
-          background: rgba(193,68,14,0.12);
-          border: 1px solid rgba(193,68,14,0.25);
-          display: flex; align-items: center; justify-content: center;
-          font-family: "DM Mono", monospace;
-          color: #C1440E; font-weight: 500;
-        }
-      `}</style>
-
-      <header className="bb-topbar">
-        {/* Hamburger mobile */}
-        <button className="tb-icon-btn bb-hamburger" onClick={onHamburger}
-          style={{ display: "none" }}>
-          <Menu size={17} />
+    <header
+      style={{ backgroundColor: '#1E1208', borderBottom: '1px solid #4A2515' }}
+      className="h-14 flex items-center justify-between px-4 sticky top-0 z-40"
+    >
+      {/* Left — hamburger + brand */}
+      <div className="flex items-center gap-3">
+        <button onClick={onMenuToggle} className="md:hidden text-[#F5EDD8]">
+          <Menu className="w-5 h-5" />
         </button>
+        <span
+          style={{ fontFamily: 'Cormorant Garamond, serif' }}
+          className="text-lg font-medium text-[#F5EDD8] tracking-wide hidden md:block"
+        >
+          Bunna Bridge
+        </span>
+      </div>
 
-        {/* Search */}
-        <div className="bb-search-wrap" style={{
-          display: "flex", alignItems: "center", gap: "8px",
-          flex: 1, maxWidth: "340px",
-          background: "rgba(245,237,216,0.04)",
-          border: "1px solid rgba(245,237,216,0.07)",
-          borderRadius: "3px", padding: "6px 12px",
-        }}>
-          <Search size={12} color="rgba(245,237,216,0.2)" />
-          <input
-            style={{
-              background: "transparent", outline: "none", border: "none",
-              color: "#F5EDD8", fontFamily: "Instrument Sans, sans-serif",
-              fontSize: "0.8125rem", width: "100%",
-            }}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search lots, regions, lot ID..."
-            onKeyDown={e => {
-              if (e.key === "Enter" && search.trim()) {
-                navigate(`/lots?search=${encodeURIComponent(search.trim())}`);
-                setSearch("");
-              }
-            }}
-          />
-        </div>
+      {/* Right — notifications + profile */}
+      <div className="flex items-center gap-2">
 
-        <div style={{ display: "flex", alignItems: "center", gap: "4px", marginLeft: "auto" }}>
-
-          {/* Notifications */}
-          <div style={{ position: "relative" }} ref={notifRef}>
-            <button className="tb-icon-btn" onClick={() => { setNotif(o => !o); setProfile(false); }}>
-              <Bell size={15} />
-              <span style={{
-                position: "absolute", top: "7px", right: "7px",
-                width: "5px", height: "5px", borderRadius: "50%",
-                background: "#C1440E",
-              }} />
-            </button>
-            {notifOpen && (
-              <div className="tb-dropdown bb-notif-dropdown" style={{ width: "300px" }}>
-                <div style={{
-                  display: "flex", justifyContent: "space-between",
-                  alignItems: "center", padding: "11px 16px",
-                  borderBottom: "1px solid rgba(245,237,216,0.07)",
-                }}>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.575rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)" }}>
-                    Notifications
-                  </span>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.575rem", color: "#C1440E", cursor: "pointer" }}>
-                    Mark all read
-                  </span>
-                </div>
-                {notifications.map(n => (
-                  <div key={n.id} style={{
-                    display: "flex", alignItems: "flex-start", gap: "12px",
-                    padding: "11px 16px",
-                    borderBottom: "1px solid rgba(245,237,216,0.04)",
-                    cursor: "pointer", transition: "background 0.12s",
-                  }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,237,216,0.03)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: n.color, marginTop: "6px", flexShrink: 0 }} />
-                    <div>
-                      <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "rgba(245,237,216,0.65)", margin: "0 0 2px", lineHeight: 1.4 }}>{n.text}</p>
-                      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.575rem", color: "rgba(245,237,216,0.22)", margin: 0 }}>{n.time}</p>
-                    </div>
-                  </div>
-                ))}
-                <div style={{ padding: "10px 16px", textAlign: "center" }}>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.575rem", color: "rgba(245,237,216,0.25)", cursor: "pointer" }}>
-                    View all notifications
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div style={{ width: "1px", height: "18px", background: "rgba(245,237,216,0.07)", margin: "0 4px" }} />
-
-          {/* Profile */}
-          <div style={{ position: "relative" }} ref={profileRef}>
-            <button
-              onClick={() => { setProfile(o => !o); setNotif(false); }}
-              style={{
-                display: "flex", alignItems: "center", gap: "8px",
-                padding: "5px 8px", borderRadius: "3px", border: "none",
-                background: "transparent", cursor: "pointer",
-                transition: "background 0.12s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,237,216,0.04)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-            >
-              <div className="tb-avatar" style={{ width: "26px", height: "26px", fontSize: "0.6rem" }}>
-                {initials}
-              </div>
-              <span className="bb-username" style={{
-                fontFamily: "Instrument Sans, sans-serif",
-                fontSize: "0.8125rem", color: "rgba(245,237,216,0.75)",
-              }}>
-                {displayName}
+        {/* Notification bell */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => { setNotifOpen(o => !o); setProfile(false); }}
+            className="p-2 text-[#EDE0C4] hover:text-[#F5EDD8] transition-colors relative rounded"
+            style={{ background: notifOpen ? 'rgba(74,37,21,0.4)' : 'transparent' }}
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span
+                style={{ backgroundColor: '#C1440E' }}
+                className="absolute top-1 right-1 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full animate-pulse"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
               </span>
-              <ChevronDown size={11} color="rgba(245,237,216,0.25)"
-                style={{ transform: profileOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }} />
-            </button>
-
-            {profileOpen && (
-              <div className="tb-dropdown" style={{ width: "240px" }}>
-                {/* User info */}
-                <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(245,237,216,0.07)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                    <div className="tb-avatar" style={{ width: "34px", height: "34px", fontSize: "0.75rem" }}>
-                      {initials}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#F5EDD8", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {displayName}
-                      </p>
-                      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.575rem", color: "rgba(245,237,216,0.25)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {user?.email}
-                      </p>
-                    </div>
-                  </div>
-                  {user && <RoleBadge role={user.role} />}
-                </div>
-
-                {/* Menu items */}
-                <div style={{ padding: "4px 0" }}>
-                  <button className="tb-menu-item" onClick={() => { navigate("/profile"); setProfile(false); }}>
-                    <User size={13} style={{ color: "rgba(245,237,216,0.25)", flexShrink: 0 }} />
-                    Profile
-                  </button>
-                  <button className="tb-menu-item" onClick={() => { navigate("/settings"); setProfile(false); }}>
-                    <Settings size={13} style={{ color: "rgba(245,237,216,0.25)", flexShrink: 0 }} />
-                    Settings
-                  </button>
-                </div>
-
-                <div style={{ borderTop: "1px solid rgba(245,237,216,0.07)", padding: "4px 0" }}>
-                  <button className="tb-menu-item" onClick={logout}
-                    style={{ color: "rgba(193,68,14,0.7)" }}>
-                    <LogOut size={13} style={{ flexShrink: 0 }} />
-                    Sign out
-                  </button>
-                </div>
-              </div>
             )}
-          </div>
+          </button>
+
+          {notifOpen && (
+            <div
+              style={{ backgroundColor: '#2C1810', border: '1px solid #4A2515' }}
+              className="absolute right-0 mt-2 w-80 rounded shadow-xl overflow-hidden flex flex-col z-50"
+            >
+              {/* Header */}
+              <div
+                style={{ backgroundColor: '#1E1208', borderBottom: '1px solid #4A2515' }}
+                className="px-3 py-2 flex justify-between items-center"
+              >
+                <span style={{ fontFamily: 'DM Mono, monospace' }} className="text-xs text-[#F5EDD8] tracking-widest uppercase">
+                  Notifications
+                </span>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={() => markAllReadMutation.mutate()}
+                    disabled={markAllReadMutation.isPending}
+                    className="flex items-center gap-1 text-[10px] text-[#D4824A] hover:text-[#F5EDD8] transition-colors"
+                    style={{ fontFamily: 'DM Mono, monospace' }}
+                  >
+                    <CheckSquare className="w-3 h-3" />
+                    Mark all read
+                  </button>
+                )}
+              </div>
+
+              {/* List */}
+              <div className="overflow-y-auto max-h-80">
+                {notifications.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-[#EDE0C4]" style={{ fontFamily: 'DM Mono, monospace' }}>
+                    No notifications yet
+                  </div>
+                ) : (
+                  notifications.map(item => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleNotificationClick(item)}
+                      style={{
+                        borderBottom: '1px solid rgba(74,37,21,0.4)',
+                        background: !item.is_read ? 'rgba(74,37,21,0.25)' : 'transparent',
+                        cursor: 'pointer',
+                      }}
+                      className="px-3 py-2.5 flex gap-2.5 items-start hover:bg-[#1A0F07] transition-colors"
+                    >
+                      <div style={{ background: '#1A0F07', borderRadius: '4px' }} className="p-1 mt-0.5 shrink-0">
+                        {getIcon(item.notification_type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs truncate text-[#F5EDD8] ${!item.is_read ? 'font-semibold' : ''}`}>
+                          {item.title}
+                        </p>
+                        <p className="text-[11px] text-[#EDE0C4] line-clamp-2 mt-0.5 leading-relaxed">
+                          {item.message}
+                        </p>
+                        <p style={{ fontFamily: 'DM Mono, monospace' }} className="text-[9px] text-[#EDE0C4]/50 mt-1 uppercase">
+                          {new Date(item.created_at).toLocaleString([], {
+                            month: 'short', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                      {!item.is_read && (
+                        <div style={{ backgroundColor: '#C1440E' }} className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" />
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </header>
-    </>
+
+        {/* Divider */}
+        <div style={{ width: '1px', height: '20px', background: '#4A2515' }} />
+
+        {/* Profile dropdown */}
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => { setProfile(o => !o); setNotifOpen(false); }}
+            className="flex items-center gap-2 px-2 py-1 rounded transition-colors hover:bg-[#2C1810]"
+          >
+            <div
+              style={{
+                width: '28px', height: '28px', borderRadius: '4px',
+                background: 'rgba(193,68,14,0.15)', border: '1px solid rgba(193,68,14,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C1440E', fontWeight: 600,
+              }}
+            >
+              {initials}
+            </div>
+            <span className="text-xs text-[#F5EDD8] hidden md:block" style={{ fontFamily: 'DM Mono, monospace' }}>
+              {userName}
+            </span>
+            <ChevronDown
+              className="w-3 h-3 text-[#EDE0C4]/50 hidden md:block"
+              style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+            />
+          </button>
+
+          {profileOpen && (
+            <div
+              style={{ backgroundColor: '#2C1810', border: '1px solid #4A2515' }}
+              className="absolute right-0 mt-2 w-56 rounded shadow-xl z-50 overflow-hidden"
+            >
+              {/* User info */}
+              <div style={{ borderBottom: '1px solid #4A2515', background: '#1E1208' }} className="px-3 py-2.5">
+                <p className="text-xs text-[#F5EDD8] font-medium truncate">{userName}</p>
+                <p className="text-[10px] text-[#EDE0C4]/50 truncate mt-0.5" style={{ fontFamily: 'DM Mono, monospace' }}>
+                  {user?.email}
+                </p>
+                {user && <div className="mt-1.5"><RoleBadge role={user.role} /></div>}
+              </div>
+
+              {/* Menu items */}
+              <div className="py-1">
+                {[
+                  { icon: <User className="w-3.5 h-3.5" />,     label: 'Profile',  action: () => { navigate('/profile');  setProfile(false); } },
+                  { icon: <Settings className="w-3.5 h-3.5" />, label: 'Settings', action: () => { navigate('/settings'); setProfile(false); } },
+                ].map(item => (
+                  <button
+                    key={item.label}
+                    onClick={item.action}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[#EDE0C4]/60 hover:text-[#F5EDD8] hover:bg-[#1A0F07] transition-colors"
+                    style={{ fontFamily: 'DM Mono, monospace' }}
+                  >
+                    <span className="text-[#EDE0C4]/40">{item.icon}</span>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Logout */}
+              <div style={{ borderTop: '1px solid #4A2515' }} className="py-1">
+                <button
+                  onClick={() => { logout(); setProfile(false); }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs hover:bg-[#1A0F07] transition-colors"
+                  style={{ fontFamily: 'DM Mono, monospace', color: 'rgba(193,68,14,0.7)' }}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
-}
+};
+
+export default TopBar;

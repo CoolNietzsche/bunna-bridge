@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import Sidebar from "./Sidebar";
-import TopBar from "./TopBar";
+import { TopBar } from "./TopBar";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -44,7 +44,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <div className="app-shell" style={{
         display: "flex", flexDirection: "column", minHeight: "100vh",
       }}>
-        <TopBar sidebarWidth={sidebarWidth} onHamburger={() => setMobileOpen(true)} />
+        <TopBar onMenuToggle={() => setMobileOpen(true)} />
         <main style={{ flex: 1, paddingTop: "56px" }}>
           <div style={{ padding: "clamp(16px, 4vw, 24px)" }}>
             {children}

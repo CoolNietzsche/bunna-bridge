@@ -63,6 +63,13 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
         if defor_result["deforestation_free"] is not None and defor_result["deforestation_free"] != lot.deforestation_free:
             lot.deforestation_free = defor_result["deforestation_free"]
             lot.save(update_fields=["deforestation_free"])
+            # Fire EUDR alert if overlap newly detected
+            if defor_result["status"] == "overlap":
+                try:
+                    from .signals import create_eudr_alert_notification
+                    create_eudr_alert_notification(lot, "overlap")
+                except Exception:
+                    pass
         gates = {
             "gps_verified":        lot.gps_verified,
             "deforestation_free":  lot.deforestation_free,
