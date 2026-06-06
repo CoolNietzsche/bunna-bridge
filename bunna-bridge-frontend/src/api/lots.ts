@@ -34,6 +34,70 @@ export interface CoffeeLot {
   gps_lat: number | null;
   gps_lng: number | null;
   boundary?: GeoPolygon | null;
+  // marketplace fields
+  flavor_tags: string[];
+  farm_photos: string[];
+  available_qty_kg: string;
+  fob_price_usd: string | null;
+  min_order_kg: string;
+  delivery_window: string;
+  lot_type: "spot" | "forward" | "reserve";
+  is_organic: boolean;
+  is_fair_trade: boolean;
+  is_rainforest_alliance: boolean;
+  tasting_notes: string;
+  farm_story: string;
+  compliance_score: number;
+  is_eudr_ready: boolean;
+  latest_sca_score: number | null;
+  exporter_name: string;
+  exporter_company: string;
+  cupping_scores?: CuppingScore[];
+  sample_requests_count?: number;
+  offers_count?: number;
+}
+
+export interface CuppingScore {
+  id: string;
+  grader_name: string;
+  status: string;
+  total_score: number;
+  fragrance_aroma: number;
+  flavor: number;
+  aftertaste: number;
+  acidity: number;
+  body: number;
+  balance: number;
+  uniformity: number;
+  clean_cup: number;
+  sweetness: number;
+  overall: number;
+  defects: number;
+  flavor_notes: string;
+  cupping_date: string;
+}
+
+export interface Offer {
+  id: string;
+  lot: string;
+  lot_name: string;
+  lot_id_display: string;
+  lot_region: string;
+  lot_fob_price: string | null;
+  buyer: number;
+  buyer_email: string;
+  buyer_name: string;
+  buyer_company: string;
+  quantity_kg: string;
+  price_per_kg_usd: string;
+  delivery_window: string;
+  notes: string;
+  status: "pending" | "countered" | "accepted" | "rejected" | "withdrawn";
+  counter_price: string | null;
+  counter_qty: string | null;
+  exporter_notes: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ComplianceCheck {
@@ -65,10 +129,8 @@ export const getLots = async (params?: Record<string, string>) => {
   return data;
 };
 
-// Detail endpoint returns GeoJSON — extract properties + id
 export const getLot = async (id: string): Promise<CoffeeLot> => {
   const { data } = await api.get(`/v1/lots/${id}/`);
-  // GeoFeatureModelSerializer wraps in { id, type, geometry, properties }
   if (data.properties) {
     const coords = data.geometry?.coordinates;
     return {
@@ -98,9 +160,7 @@ export const createLot = async (lot: Partial<CoffeeLot>) => {
 };
 
 export const downloadEudrDds = async (lotId: string): Promise<void> => {
-  const response = await api.get(`/v1/lots/${lotId}/eudr-dds/`, {
-    responseType: "blob",
-  });
+  const response = await api.get(`/v1/lots/${lotId}/eudr-dds/`, { responseType: "blob" });
   const blob = new Blob([response.data], { type: "application/pdf" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
@@ -111,4 +171,41 @@ export const downloadEudrDds = async (lotId: string): Promise<void> => {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+};
+
+// ── Offers ────────────────────────────────────────────────────────────────────
+
+export const getOffers = async () => {
+  const { data } = await api.get<{ results: Offer[] }>("/v1/offers/");
+  return data.results ?? data;
+};
+
+export const createOffer = async (payload: {
+  lot: string;
+  quantity_kg: number;
+  price_per_kg_usd: number;
+  delivery_window?: string;
+  notes?: string;
+}) => {
+  const { data } = await api.post<Offer>("/v1/offers/", payload);
+  return data;
+};
+
+export const respondToOffer = async (
+  offerId: string,
+  action: "accept" | "reject" | "counter",
+  extra?: { counter_price?: number; counter_qty?: number; exporter_notes?: string }
+) => {
+  const { data } = await api.post<Offer>(`/v1/offers/${offerId}/respond/`, { action, ...extra });
+  return data;
+};
+
+export const withdrawOffer = async (offerId: string) => {
+  const { data } = await api.post<Offer>(`/v1/offers/${offerId}/withdraw/`);
+  return data;
+};
+
+export const acceptCounter = async (offerId: string) => {
+  const { data } = await api.post<Offer>(`/v1/offers/${offerId}/accept-counter/`);
+  return data;
 };

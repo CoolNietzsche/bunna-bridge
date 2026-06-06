@@ -10,6 +10,7 @@ import FarmMapDisplay from '../components/FarmMapDisplay';
 import CuppingHistory from '../components/CuppingHistory';
 import SampleRequestWidget from '../components/SampleRequestWidget';
 import SettlementWidget from '../components/SettlementWidget';
+import LotDocuments from '../components/LotDocuments';
 import { useState } from "react";
 import {
   ArrowLeft, MapPin, Mountain, Layers, Award, Download,
@@ -419,6 +420,9 @@ export default function LotDetail() {
               </div>
             </div>
 
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <LotDocuments lot={lot} lotId={lot.id} />
+            </div>
             {/* Boundary capture — exporter/admin only */}
             {isExporter && (
               <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>

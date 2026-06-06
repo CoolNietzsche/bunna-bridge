@@ -36,6 +36,11 @@ class User(AbstractUser):
         help_text='Farm boundary polygon (GPS, WGS84)'
     )
 
+    # ECTA Export License (exporter profile)
+    ecta_license_number = models.CharField(max_length=100, blank=True, default="")
+    ecta_license_file   = models.FileField(upload_to="users/ecta/", null=True, blank=True)
+    ecta_license_expiry = models.DateField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.email} ({self.role})"
 

@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, filters, status, generics
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
@@ -26,6 +27,7 @@ class IsExporterOrReadOnly(permissions.BasePermission):
 
 
 class CoffeeLotViewSet(viewsets.ModelViewSet):
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     queryset           = CoffeeLot.objects.select_related("exporter").all()
     permission_classes = [IsExporterOrReadOnly]
     filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]

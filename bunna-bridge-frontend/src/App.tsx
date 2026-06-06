@@ -15,7 +15,12 @@ import LotPipeline from "./pages/LotPipeline";
 import EditLot from "./pages/EditLot";
 import FarmerLotsMap from "./pages/FarmerLotsMap";
 import SampleRequests from "./pages/SampleRequests";
+import Settings from "./pages/Settings";
 import CuppingForm from "./pages/CuppingForm";
+import BuyerOffers from "./pages/BuyerOffers";
+import BuyerWatchlist from "./pages/BuyerWatchlist";
+import ExporterOffers from "./pages/ExporterOffers";
+import MarketplaceLotDetail from "./pages/MarketplaceLotDetail";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +44,11 @@ export default function App() {
             <Route path="/samples"       element={<ProtectedRoute><SampleRequests /></ProtectedRoute>} />
             <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+            <Route path="/marketplace/:id" element={<ProtectedRoute><MarketplaceLotDetail /></ProtectedRoute>} />
+            <Route path="/buyer/offers"     element={<ProtectedRoute><BuyerOffers /></ProtectedRoute>} />
+            <Route path="/buyer/watchlist"  element={<ProtectedRoute><BuyerWatchlist /></ProtectedRoute>} />
+            <Route path="/offers"       element={<ProtectedRoute><ExporterOffers /></ProtectedRoute>} />
+            <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*"            element={<Navigate to="/login" replace />} />
           </Routes>
         </BrowserRouter>

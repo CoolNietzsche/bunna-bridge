@@ -14,6 +14,9 @@ export interface UserProfile {
   is_verified: boolean;
   first_name?: string;
   last_name?: string;
+  ecta_license_file?: string | null;
+  ecta_license_number?: string | null;
+  ecta_license_expiry?: string | null;
 }
 
 export interface AuthTokens {

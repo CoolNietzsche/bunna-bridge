@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag, Sprout,
   ChevronLeft, ChevronRight, Coffee, FileCheck,
   GitBranch, FlaskConical, ClipboardList, Settings, HelpCircle, X
-, Map as MapIcon } from "lucide-react";
+, Map as MapIcon, TrendingUp, Inbox, Heart } from "lucide-react";
 import RoleBadge from "./RoleBadge";
 
 const NAV_ITEMS = [
@@ -17,6 +17,9 @@ const NAV_ITEMS = [
   { label: "Pipeline",    path: "/pipeline",    icon: <GitBranch size={15} />,       roles: ["admin","exporter"] },
   { label: "Samples",     path: "/samples",     icon: <FlaskConical size={15} />,    roles: ["admin","exporter","buyer"] },
   { label: "Reports",     path: "/reports",     icon: <ClipboardList size={15} />,   roles: ["admin"] },
+  { label: "My Offers",   path: "/buyer/offers",    icon: <TrendingUp size={15} />, roles: ["buyer"] },
+  { label: "Watchlist",   path: "/buyer/watchlist", icon: <Heart size={15} />,      roles: ["buyer"] },
+  { label: "Offers",      path: "/offers",      icon: <Inbox size={15} />,           roles: ["exporter","admin"] },
 ];
 
 const BOTTOM_ITEMS = [
