@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLot, createOffer, downloadEudrDds } from "../api/lots";
+import { getLot, createOffer, downloadEudrDds, downloadSpecSheet } from "../api/lots";
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
 import {
   ShieldCheck, Mountain, Leaf, FlaskConical, TrendingUp,
   ArrowLeft, Award, CheckCircle, XCircle, Download,
-  MapPin, Calendar, Package, X
+  MapPin, Calendar, Package, X, FileText
 } from "lucide-react";
 
 // ── Radar chart (pure SVG, no lib needed) ─────────────────────────────────────
@@ -375,6 +375,12 @@ export default function MarketplaceLotDetail() {
                   <Download size={14} /> Download DDS
                 </button>
               )}
+              <button
+                onClick={() => downloadSpecSheet(lot.id, lot.lot_id)}
+                style={{ background: "transparent", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "4px", padding: "10px", color: "#C9952A", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px" }}
+              >
+                <FileText size={14} /> Download Spec Sheet
+              </button>
             </div>
           </div>
         </div>

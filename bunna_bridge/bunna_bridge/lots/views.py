@@ -647,7 +647,7 @@ class LotSpecSheetView(APIView):
 
     def get(self, request, lot_pk=None):
         lot = get_object_or_404(
-            CoffeeLot.objects.select_related("exporter").prefetch_related("cuppingscores"),
+            CoffeeLot.objects.select_related("exporter").prefetch_related("cupping_scores"),
             pk=lot_pk,
         )
         pdf_bytes = generate_spec_sheet(lot)

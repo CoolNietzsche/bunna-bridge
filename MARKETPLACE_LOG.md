@@ -128,3 +128,38 @@ _Date: June 2026_
 - `exporter?: number` field added to `CoffeeLot` interface in `lots.ts`
 - Exporter name on Marketplace cards now links to `/exporters/:id`
 - Route `/exporters/:id` added to App.tsx
+
+---
+
+## Phase 6 — Spec Sheet PDF ✅ Deployed
+
+### Backend (pre-existing, fixed)
+- `lots/spec_sheet.py` — ReportLab A4 PDF generator
+  - Lot details + pricing in two-column layout
+  - SCA cupping profile with ASCII bar chart
+  - 7-gate EUDR compliance checklist
+  - Farm story + tasting notes
+  - Bunna Bridge branded header + footer disclaimer
+- `LotSpecSheetView` at `GET /api/v1/lots/<id>/spec-sheet/`
+- Fix applied: `cuppingscores` → `cupping_scores` (correct related_name)
+- Fix applied: prefetch_related used wrong name in view — corrected
+
+### Frontend
+- `downloadSpecSheet(lotId, lotCode)` already in `lots.ts`
+- Download Spec Sheet button added to `MarketplaceLotDetail.tsx`
+  - Visible to all authenticated users
+  - Uses FileText icon, gold border styling
+  - Sits below the DDS download button in the price/CTA block
+
+---
+
+## All Phases Complete ✅
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 1 | Data foundation — Offer model, marketplace fields, demo data | ✅ |
+| 2 | Marketplace UI — lot cards, lot detail page | ✅ |
+| 3 | Offer management — buyer offers, exporter inbox | ✅ |
+| 4 | Watchlist — heart icon, /buyer/watchlist page | ✅ |
+| 5 | Exporter storefront — /exporters/:id | ✅ |
+| 6 | Spec sheet PDF — download button on lot detail | ✅ |

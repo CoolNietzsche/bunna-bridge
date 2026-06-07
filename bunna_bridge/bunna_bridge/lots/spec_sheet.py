@@ -307,7 +307,7 @@ def generate_spec_sheet(lot) -> bytes:
 
     # Latest confirmed cupping score attributes
     try:
-        latest = lot.cuppingscores.filter(status="confirmed").order_by("-cupping_date").first()
+        latest = lot.cupping_scores.filter(status="confirmed").order_by("-cupping_date").first()
     except Exception:
         latest = None
 
