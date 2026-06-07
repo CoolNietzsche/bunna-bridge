@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer, ExporterPublicSerializer
 User = get_user_model()
 
 
@@ -56,3 +56,27 @@ def farmer_lots(request):
         region=user.farm_region
     ) if user.farm_region else CoffeeLot.objects.none()
     return Response(CoffeeLotListSerializer(qs, many=True).data)
+
+
+class ExporterProfileView(generics.RetrieveAPIView):
+    serializer_class   = ExporterPublicSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return generics.get_object_or_404(
+            User, id=self.kwargs["pk"], role="exporter"
+        )
+
+class ExporterLotsView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        from bunna_bridge.lots.models import CoffeeLot
+        return CoffeeLot.objects.filter(
+            exporter_id=self.kwargs["pk"],
+            status__in=["listed", "contracted", "exported"]
+        ).order_by("-created_at")
+
+    def get_serializer_class(self):
+        from bunna_bridge.lots.serializers import CoffeeLotListSerializer
+        return CoffeeLotListSerializer

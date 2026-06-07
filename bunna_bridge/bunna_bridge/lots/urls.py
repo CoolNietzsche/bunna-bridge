@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (
+    LotSpecSheetView,
     CoffeeLotViewSet, CuppingScoreViewSet,
     SettlementView, SampleRequestViewSet,
     LotStatusUpdateView, EudrDdsView,
@@ -51,4 +52,7 @@ urlpatterns = router.urls + [
          OfferWithdrawView.as_view(),                         name="offer-withdraw"),
     path("offers/<uuid:pk>/accept-counter/",
          OfferAcceptCounterView.as_view(),                    name="offer-accept-counter"),
+    # ── Spec Sheet ──────────────────────────────────────────────────────────
+    path("lots/<uuid:lot_pk>/spec-sheet/",
+         LotSpecSheetView.as_view(),                            name="lot-spec-sheet"),
 ]

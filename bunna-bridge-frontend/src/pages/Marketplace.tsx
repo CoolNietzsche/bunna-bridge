@@ -337,7 +337,10 @@ export default function Marketplace() {
                   </span>
                 </div>
                 <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.25)", maxWidth: "80px", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {lot.exporter_company || lot.exporter_name}
+                  <span
+                    onClick={e => { e.stopPropagation(); if(lot.exporter) navigate(`/exporters/${lot.exporter}`); }}
+                    style={{ cursor: lot.exporter ? "pointer" : "default", textDecoration: lot.exporter ? "underline" : "none", textDecorationColor: "rgba(245,237,216,0.2)" }}
+                  >{lot.exporter_company || lot.exporter_name}</span>
                 </span>
               </div>
 

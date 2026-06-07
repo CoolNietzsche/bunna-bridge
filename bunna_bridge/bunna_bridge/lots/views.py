@@ -631,3 +631,27 @@ def notification_mark_all_read(request):
     from .models import Notification
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     return Response({'status': 'ok'})
+
+
+
+# ── Spec Sheet PDF ──────────────────────────────────────────────────────────
+from django.http import HttpResponse
+from .spec_sheet import generate_spec_sheet
+
+class LotSpecSheetView(APIView):
+    """
+    GET /api/v1/lots/<lot_pk>/spec-sheet/
+    Accessible to all authenticated users.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, lot_pk=None):
+        lot = get_object_or_404(
+            CoffeeLot.objects.select_related("exporter").prefetch_related("cuppingscores"),
+            pk=lot_pk,
+        )
+        pdf_bytes = generate_spec_sheet(lot)
+        filename = f"spec-sheet-{lot.lot_id}.pdf"
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response

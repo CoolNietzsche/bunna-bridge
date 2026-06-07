@@ -77,3 +77,36 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "is_verified":  user.is_verified,
             },
         }
+
+class ExporterPublicSerializer(serializers.ModelSerializer):
+    full_name    = serializers.SerializerMethodField()
+    lots_count   = serializers.SerializerMethodField()
+    exported_count = serializers.SerializerMethodField()
+    avg_sca_score  = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = User
+        fields = [
+            "id", "full_name", "company_name", "country", "bio",
+            "is_verified", "date_joined",
+            "ecta_license_number", "ecta_license_expiry",
+            "lots_count", "exported_count", "avg_sca_score",
+        ]
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.email
+
+    def get_lots_count(self, obj):
+        from bunna_bridge.lots.models import CoffeeLot
+        return CoffeeLot.objects.filter(exporter=obj, status__in=["listed","contracted","exported"]).count()
+
+    def get_exported_count(self, obj):
+        from bunna_bridge.lots.models import CoffeeLot
+        return CoffeeLot.objects.filter(exporter=obj, status="exported").count()
+
+    def get_avg_sca_score(self, obj):
+        from django.db.models import Avg
+        from bunna_bridge.lots.models import CoffeeLot
+        result = CoffeeLot.objects.filter(exporter=obj, sca_score__isnull=False).aggregate(avg=Avg("sca_score"))
+        avg = result.get("avg")
+        return round(float(avg), 2) if avg else None

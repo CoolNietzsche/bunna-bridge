@@ -50,6 +50,7 @@ export interface CoffeeLot {
   compliance_score: number;
   is_eudr_ready: boolean;
   latest_sca_score: number | null;
+  exporter?: number;
   exporter_name: string;
   exporter_company: string;
   cupping_scores?: CuppingScore[];
@@ -209,3 +210,17 @@ export const acceptCounter = async (offerId: string) => {
   const { data } = await api.post<Offer>(`/v1/offers/${offerId}/accept-counter/`);
   return data;
 };
+
+export async function downloadSpecSheet(lotId: string, lotCode: string): Promise<void> {
+  const response = await api.get(`/lots/${lotId}/spec-sheet/`, {
+    responseType: "blob",
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `spec-sheet-${lotCode}.pdf`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
