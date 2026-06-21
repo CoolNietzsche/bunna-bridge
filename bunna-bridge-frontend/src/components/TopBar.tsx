@@ -3,8 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  Bell, Menu, Mail, Coffee, AlertTriangle,
-  CheckSquare, ChevronDown, LogOut, Settings, User
+  Bell, Menu, Mail, AlertTriangle,
+  CheckSquare, ChevronDown, LogOut, Settings, User, Leaf
 } from 'lucide-react';
 import RoleBadge from './RoleBadge';
 import {
@@ -17,17 +17,16 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
-  const [notifOpen, setNotifOpen]   = useState(false);
-  const [profileOpen, setProfile]   = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [profileOpen, setProfile] = useState(false);
   const notifRef   = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const navigate    = useNavigate();
   const { user, logout } = useAuth();
 
-  // Track IDs we have already notified about to avoid push on first load
-  const notifiedIds = useRef<Set<number>>(new Set());
-  const initialLoadDone = useRef(false);
+  const notifiedIds      = useRef<Set<number>>(new Set());
+  const initialLoadDone  = useRef(false);
 
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
@@ -43,7 +42,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
 
   const unreadCount = unreadData?.count ?? 0;
 
-  // Fix 2 — invalidate BOTH queries on any read action
   const invalidateBoth = () => {
     queryClient.invalidateQueries({ queryKey: ['notifications'] });
     queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
@@ -52,7 +50,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
   const markReadMutation    = useMutation({ mutationFn: markRead,    onSuccess: invalidateBoth });
   const markAllReadMutation = useMutation({ mutationFn: markAllRead, onSuccess: invalidateBoth });
 
-  // Fix 3 — on first load, seed known IDs without pushing. Only push truly new ones after.
   useEffect(() => {
     if (notifications.length === 0) return;
     if (!initialLoadDone.current) {
@@ -68,14 +65,12 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
     });
   }, [notifications]);
 
-  // Request push permission once
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }, []);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (notifRef.current   && !notifRef.current.contains(e.target as Node))   setNotifOpen(false);
@@ -93,10 +88,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'sample_request': return <Mail      className="w-4 h-4" style={{ color: '#C9952A' }} />;
-      case 'lot_status':     return <Coffee    className="w-4 h-4" style={{ color: '#D4824A' }} />;
-      case 'eudr_alert':     return <AlertTriangle className="w-4 h-4" style={{ color: '#C1440E' }} />;
-      default:               return <Bell      className="w-4 h-4" style={{ color: '#EDE0C4' }} />;
+      case 'sample_request': return <Mail      className="w-4 h-4" style={{ color: '#7B4B2A' }} />;
+      case 'lot_status':     return <Leaf      className="w-4 h-4" style={{ color: '#1B4D35' }} />;
+      case 'eudr_alert':     return <AlertTriangle className="w-4 h-4" style={{ color: '#C0392B' }} />;
+      default:               return <Bell      className="w-4 h-4" style={{ color: '#4A4A45' }} />;
     }
   };
 
@@ -108,19 +103,19 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
 
   return (
     <header
-      style={{ backgroundColor: '#1E1208', borderBottom: '1px solid #4A2515' }}
+      style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(28,28,26,0.08)', boxShadow: '0 1px 0 rgba(28,28,26,0.06)' }}
       className="h-14 flex items-center justify-between px-4 sticky top-0 z-40"
     >
       {/* Left — hamburger + brand */}
       <div className="flex items-center gap-3">
-        <button onClick={onMenuToggle} className="md:hidden text-[#F5EDD8]">
+        <button onClick={onMenuToggle} className="md:hidden" style={{ color: '#4A4A45', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
           <Menu className="w-5 h-5" />
         </button>
         <span
-          style={{ fontFamily: 'Cormorant Garamond, serif' }}
-          className="text-lg font-medium text-[#F5EDD8] tracking-wide hidden md:block"
+          style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.1rem', fontWeight: 500, color: '#1B4D35', letterSpacing: '0.01em' }}
+          className="hidden md:block"
         >
-          Bunna Bridge
+          Beersheba
         </span>
       </div>
 
@@ -131,14 +126,18 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => { setNotifOpen(o => !o); setProfile(false); }}
-            className="p-2 text-[#EDE0C4] hover:text-[#F5EDD8] transition-colors relative rounded"
-            style={{ background: notifOpen ? 'rgba(74,37,21,0.4)' : 'transparent' }}
+            className="p-2 rounded transition-colors relative"
+            style={{
+              color: notifOpen ? '#1B4D35' : '#4A4A45',
+              background: notifOpen ? '#E8F2EC' : 'transparent',
+              border: 'none', cursor: 'pointer',
+            }}
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span
-                style={{ backgroundColor: '#C1440E' }}
-                className="absolute top-1 right-1 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full animate-pulse"
+                style={{ backgroundColor: '#C0392B' }}
+                className="absolute top-1 right-1 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full"
               >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
@@ -147,23 +146,23 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
 
           {notifOpen && (
             <div
-              style={{ backgroundColor: '#2C1810', border: '1px solid #4A2515' }}
-              className="absolute right-0 mt-2 w-80 rounded shadow-xl overflow-hidden flex flex-col z-50"
+              style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(28,28,26,0.1)', boxShadow: '0 4px 16px rgba(28,28,26,0.12)' }}
+              className="absolute right-0 mt-2 w-80 rounded-lg overflow-hidden flex flex-col z-50"
             >
               {/* Header */}
               <div
-                style={{ backgroundColor: '#1E1208', borderBottom: '1px solid #4A2515' }}
+                style={{ backgroundColor: '#F7F5F0', borderBottom: '1px solid rgba(28,28,26,0.08)' }}
                 className="px-3 py-2 flex justify-between items-center"
               >
-                <span style={{ fontFamily: 'DM Mono, monospace' }} className="text-xs text-[#F5EDD8] tracking-widest uppercase">
+                <span style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(28,28,26,0.5)' }}>
                   Notifications
                 </span>
                 {unreadCount > 0 && (
                   <button
                     onClick={() => markAllReadMutation.mutate()}
                     disabled={markAllReadMutation.isPending}
-                    className="flex items-center gap-1 text-[10px] text-[#D4824A] hover:text-[#F5EDD8] transition-colors"
-                    style={{ fontFamily: 'DM Mono, monospace' }}
+                    className="flex items-center gap-1 transition-colors"
+                    style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.6rem', color: '#1B4D35', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     <CheckSquare className="w-3 h-3" />
                     Mark all read
@@ -174,7 +173,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
               {/* List */}
               <div className="overflow-y-auto max-h-80">
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-[#EDE0C4]" style={{ fontFamily: 'DM Mono, monospace' }}>
+                  <div className="p-6 text-center" style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.7rem', color: 'rgba(28,28,26,0.3)' }}>
                     No notifications yet
                   </div>
                 ) : (
@@ -183,23 +182,23 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
                       key={item.id}
                       onClick={() => handleNotificationClick(item)}
                       style={{
-                        borderBottom: '1px solid rgba(74,37,21,0.4)',
-                        background: !item.is_read ? 'rgba(74,37,21,0.25)' : 'transparent',
+                        borderBottom: '1px solid rgba(28,28,26,0.06)',
+                        background: !item.is_read ? '#F0EDE6' : 'transparent',
                         cursor: 'pointer',
                       }}
-                      className="px-3 py-2.5 flex gap-2.5 items-start hover:bg-[#1A0F07] transition-colors"
+                      className="px-3 py-2.5 flex gap-2.5 items-start transition-colors hover:bg-[#F7F5F0]"
                     >
-                      <div style={{ background: '#1A0F07', borderRadius: '4px' }} className="p-1 mt-0.5 shrink-0">
+                      <div style={{ background: '#F0EDE6', borderRadius: '4px', border: '1px solid rgba(28,28,26,0.06)' }} className="p-1 mt-0.5 shrink-0">
                         {getIcon(item.notification_type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-xs truncate text-[#F5EDD8] ${!item.is_read ? 'font-semibold' : ''}`}>
+                        <p className="text-xs truncate" style={{ color: '#1C1C1A', fontWeight: !item.is_read ? 600 : 400 }}>
                           {item.title}
                         </p>
-                        <p className="text-[11px] text-[#EDE0C4] line-clamp-2 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] line-clamp-2 mt-0.5 leading-relaxed" style={{ color: 'rgba(28,28,26,0.55)' }}>
                           {item.message}
                         </p>
-                        <p style={{ fontFamily: 'DM Mono, monospace' }} className="text-[9px] text-[#EDE0C4]/50 mt-1 uppercase">
+                        <p style={{ fontFamily: 'DM Mono, monospace', fontSize: '0.55rem', color: 'rgba(28,28,26,0.3)', marginTop: '4px', textTransform: 'uppercase' }}>
                           {new Date(item.created_at).toLocaleString([], {
                             month: 'short', day: 'numeric',
                             hour: '2-digit', minute: '2-digit',
@@ -207,7 +206,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
                         </p>
                       </div>
                       {!item.is_read && (
-                        <div style={{ backgroundColor: '#C1440E' }} className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" />
+                        <div style={{ backgroundColor: '#1B4D35' }} className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" />
                       )}
                     </div>
                   ))
@@ -218,42 +217,41 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
         </div>
 
         {/* Divider */}
-        <div style={{ width: '1px', height: '20px', background: '#4A2515' }} />
+        <div style={{ width: '1px', height: '20px', background: 'rgba(28,28,26,0.1)' }} />
 
         {/* Profile dropdown */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => { setProfile(o => !o); setNotifOpen(false); }}
-            className="flex items-center gap-2 px-2 py-1 rounded transition-colors hover:bg-[#2C1810]"
+            className="flex items-center gap-2 px-2 py-1 rounded transition-colors"
+            style={{ background: profileOpen ? '#F0EDE6' : 'transparent', border: 'none', cursor: 'pointer' }}
           >
-            <div
-              style={{
-                width: '28px', height: '28px', borderRadius: '4px',
-                background: 'rgba(193,68,14,0.15)', border: '1px solid rgba(193,68,14,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#C1440E', fontWeight: 600,
-              }}
-            >
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '4px',
+              background: '#E8F2EC', border: '1px solid rgba(27,77,53,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'DM Mono, monospace', fontSize: '11px', color: '#1B4D35', fontWeight: 600,
+            }}>
               {initials}
             </div>
-            <span className="text-xs text-[#F5EDD8] hidden md:block" style={{ fontFamily: 'DM Mono, monospace' }}>
+            <span className="text-xs hidden md:block" style={{ fontFamily: 'DM Mono, monospace', color: '#4A4A45' }}>
               {userName}
             </span>
             <ChevronDown
-              className="w-3 h-3 text-[#EDE0C4]/50 hidden md:block"
-              style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+              className="w-3 h-3 hidden md:block"
+              style={{ color: 'rgba(28,28,26,0.35)', transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
             />
           </button>
 
           {profileOpen && (
             <div
-              style={{ backgroundColor: '#2C1810', border: '1px solid #4A2515' }}
-              className="absolute right-0 mt-2 w-56 rounded shadow-xl z-50 overflow-hidden"
+              style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(28,28,26,0.1)', boxShadow: '0 4px 16px rgba(28,28,26,0.12)' }}
+              className="absolute right-0 mt-2 w-56 rounded-lg z-50 overflow-hidden"
             >
               {/* User info */}
-              <div style={{ borderBottom: '1px solid #4A2515', background: '#1E1208' }} className="px-3 py-2.5">
-                <p className="text-xs text-[#F5EDD8] font-medium truncate">{userName}</p>
-                <p className="text-[10px] text-[#EDE0C4]/50 truncate mt-0.5" style={{ fontFamily: 'DM Mono, monospace' }}>
+              <div style={{ borderBottom: '1px solid rgba(28,28,26,0.08)', background: '#F7F5F0' }} className="px-3 py-2.5">
+                <p className="text-xs font-medium truncate" style={{ color: '#1C1C1A' }}>{userName}</p>
+                <p className="text-[10px] truncate mt-0.5" style={{ fontFamily: 'DM Mono, monospace', color: 'rgba(28,28,26,0.4)' }}>
                   {user?.email}
                 </p>
                 {user && <div className="mt-1.5"><RoleBadge role={user.role} /></div>}
@@ -268,21 +266,21 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
                   <button
                     key={item.label}
                     onClick={item.action}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-[#EDE0C4]/60 hover:text-[#F5EDD8] hover:bg-[#1A0F07] transition-colors"
-                    style={{ fontFamily: 'DM Mono, monospace' }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-[#F7F5F0]"
+                    style={{ fontFamily: 'DM Mono, monospace', color: 'rgba(28,28,26,0.55)', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
-                    <span className="text-[#EDE0C4]/40">{item.icon}</span>
+                    <span style={{ color: 'rgba(28,28,26,0.3)' }}>{item.icon}</span>
                     {item.label}
                   </button>
                 ))}
               </div>
 
               {/* Logout */}
-              <div style={{ borderTop: '1px solid #4A2515' }} className="py-1">
+              <div style={{ borderTop: '1px solid rgba(28,28,26,0.08)' }} className="py-1">
                 <button
                   onClick={() => { logout(); setProfile(false); }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-xs hover:bg-[#1A0F07] transition-colors"
-                  style={{ fontFamily: 'DM Mono, monospace', color: 'rgba(193,68,14,0.7)' }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-[#FDECEA]"
+                  style={{ fontFamily: 'DM Mono, monospace', color: '#C0392B', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   Sign out

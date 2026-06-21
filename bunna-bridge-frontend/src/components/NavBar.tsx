@@ -19,27 +19,25 @@ export default function NavBar() {
   const links = allLinks.filter(l => l.roles.includes(role));
 
   const s = {
-    nav:    { background: "#2C1810", borderBottom: "1px solid rgba(201,149,42,0.15)", padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px", position: "fixed" as const, top: 0, left: 0, right: 0, zIndex: 100 },
-    logo:   { fontFamily: "serif", fontSize: "1.3rem", fontWeight: 300, color: "#F5EDD8", cursor: "pointer" },
-    sub:    { fontFamily: "monospace", fontSize: "0.5rem", color: "#D4824A", letterSpacing: "0.15em", marginLeft: "0.5rem" },
+    nav:    { background: "#FFFFFF", borderBottom: "1px solid rgba(28,28,26,0.08)", boxShadow: "0 1px 0 rgba(28,28,26,0.06)", padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px", position: "fixed" as const, top: 0, left: 0, right: 0, zIndex: 100 },
+    logo:   { fontFamily: "Playfair Display, serif", fontSize: "1.1rem", fontWeight: 500, color: "#1B4D35", cursor: "pointer", letterSpacing: "0.01em" },
     links:  { display: "flex", gap: "2rem", alignItems: "center" },
     link:   (active: boolean) => ({
-      fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.15em",
-      textTransform: "uppercase" as const, cursor: "pointer", transition: "color 0.2s",
-      color: active ? "#D4824A" : "rgba(245,237,216,0.5)",
-      borderBottom: active ? "1px solid #D4824A" : "1px solid transparent",
+      fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.12em",
+      textTransform: "uppercase" as const, cursor: "pointer", transition: "color 0.15s",
+      color: active ? "#1B4D35" : "rgba(28,28,26,0.45)",
+      borderBottom: active ? "1px solid #1B4D35" : "1px solid transparent",
       paddingBottom: "2px",
     }),
     right:  { display: "flex", alignItems: "center", gap: "1rem" },
-    user:   { fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.05em" },
-    logout: { background: "none", border: "1px solid rgba(193,68,14,0.4)", borderRadius: "2px", padding: "0.35rem 0.9rem", fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#C1440E", cursor: "pointer" },
+    user:   { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.4)", letterSpacing: "0.05em" },
+    logout: { background: "none", border: "1px solid rgba(27,77,53,0.3)", borderRadius: "4px", padding: "0.35rem 0.9rem", fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#1B4D35", cursor: "pointer" },
   };
 
   return (
     <nav style={s.nav}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-        <span style={s.logo} onClick={() => navigate("/dashboard")}>Bunna Bridge</span>
-        <span style={s.sub}>ቡና ብሪጅ</span>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <span style={s.logo} onClick={() => navigate("/dashboard")}>Beersheba</span>
       </div>
 
       <div style={s.links}>
@@ -53,11 +51,7 @@ export default function NavBar() {
       </div>
 
       <div style={s.right}>
-        {user && (
-          <span style={s.user}>
-            {user.first_name || user.email.split("@")[0]}
-          </span>
-        )}
+        {user && <span style={s.user}>{user.first_name || user.email.split("@")[0]}</span>}
         {user && <RoleBadge role={user.role} />}
         <button style={s.logout} onClick={logout}>Sign out</button>
       </div>

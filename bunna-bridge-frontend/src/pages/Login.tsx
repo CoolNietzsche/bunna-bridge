@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Coffee, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 export default function Login() {
   const { login }  = useAuth();
@@ -32,111 +32,129 @@ export default function Login() {
   ];
 
   const inp = {
-    width: "100%", background: "rgba(245,237,216,0.04)",
-    border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px",
-    padding: "10px 14px", color: "#F5EDD8",
+    width: "100%", background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.15)", borderRadius: "4px",
+    padding: "10px 14px", color: "#1C1C1A",
     fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
     outline: "none", boxSizing: "border-box" as const,
-    transition: "border-color 0.15s",
+    transition: "border-color 0.15s, box-shadow 0.15s",
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1A0F07", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
-      <div style={{ width: "100%", maxWidth: "400px" }}>
+    <div style={{ minHeight: "100vh", background: "#F7F5F0", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+      <div style={{ width: "100%", maxWidth: "420px" }}>
 
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div style={{ width: "44px", height: "44px", borderRadius: "4px", background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-            <Coffee size={20} color="#C1440E" />
+        {/* Logo + wordmark */}
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
+          {/* Inline SVG B-leaf mark */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "14px" }}>
+            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="52" height="52" rx="8" fill="#1B4D35"/>
+              <rect x="13" y="12" width="5" height="28" rx="2" fill="white"/>
+              <rect x="18" y="12" width="10" height="5" rx="2" fill="white"/>
+              <rect x="18" y="21" width="9" height="5" rx="2" fill="white"/>
+              <rect x="18" y="30" width="11" height="5" rx="2.5" fill="white"/>
+              <rect x="28" y="17" width="5" height="4" rx="2" fill="white"/>
+              <rect x="29" y="25" width="5" height="5" rx="2" fill="white"/>
+              <path d="M34 14 C37 11, 41 13, 41 17 C41 21, 37 22, 34 19 C31 16, 31 14, 34 14Z" fill="#A8D5BC"/>
+            </svg>
           </div>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
-            Bunna Bridge
+          <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.6rem", fontWeight: 500, color: "#1B4D35", margin: "0 0 6px" }}>
+            Beersheba
           </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
-            Export-Ready by Design
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.35)", margin: 0 }}>
+            Ethiopian Coffee Export Platform
           </p>
         </div>
 
         {/* Card */}
-        <div style={{ background: "#2C1810", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "6px", padding: "28px" }}>
-          <h2 style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "1.1rem", fontWeight: 500, color: "#F5EDD8", margin: "0 0 20px" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.08)", borderRadius: "8px", boxShadow: "0 4px 24px rgba(28,28,26,0.1)", padding: "28px" }}>
+          <h2 style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#1C1C1A", margin: "0 0 20px" }}>
             Sign in to your account
           </h2>
 
           {params.get("registered") && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(74,124,89,0.15)", border: "1px solid rgba(74,124,89,0.3)", borderRadius: "3px", padding: "10px 14px", marginBottom: "16px" }}>
-              <CheckCircle size={14} color="#A8C5A0" />
-              <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8C5A0" }}>Account created. Sign in below.</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#E8F2EC", border: "1px solid rgba(27,77,53,0.2)", borderRadius: "4px", padding: "10px 14px", marginBottom: "16px" }}>
+              <CheckCircle size={14} color="#1B4D35" />
+              <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1B4D35" }}>Account created. Sign in below.</span>
             </div>
           )}
 
           {error && (
-            <div style={{ background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "3px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+            <div style={{ background: "#FDECEA", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "4px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C0392B", marginBottom: "16px" }}>
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: "14px" }}>
-              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(28,28,26,0.45)", marginBottom: "6px" }}>
                 Email
               </label>
               <input style={inp} type="email" value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com" required
-                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
-                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+                onFocus={e => { e.target.style.borderColor = "#1B4D35"; e.target.style.boxShadow = "0 0 0 3px rgba(27,77,53,0.08)"; }}
+                onBlur={e  => { e.target.style.borderColor = "rgba(28,28,26,0.15)"; e.target.style.boxShadow = "none"; }}
               />
             </div>
             <div style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(28,28,26,0.45)", marginBottom: "6px" }}>
                 Password
               </label>
               <input style={inp} type="password" value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••" required
-                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
-                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+                onFocus={e => { e.target.style.borderColor = "#1B4D35"; e.target.style.boxShadow = "0 0 0 3px rgba(27,77,53,0.08)"; }}
+                onBlur={e  => { e.target.style.borderColor = "rgba(28,28,26,0.15)"; e.target.style.boxShadow = "none"; }}
               />
             </div>
             <button type="submit" disabled={loading} style={{
-              width: "100%", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E",
-              border: "none", borderRadius: "3px", padding: "11px",
+              width: "100%", background: loading ? "rgba(27,77,53,0.6)" : "#1B4D35",
+              border: "none", borderRadius: "4px", padding: "12px",
               color: "white", fontFamily: "Instrument Sans, sans-serif",
               fontSize: "0.9rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer",
               transition: "background 0.15s",
-            }}>
+            }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#163D2A"; }}
+              onMouseLeave={e => { if (!loading) e.currentTarget.style.background = "#1B4D35"; }}
+            >
               {loading ? "Signing in..." : "Sign In →"}
             </button>
           </form>
 
-          <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.35)", margin: "16px 0 0" }}>
+          <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.4)", margin: "16px 0 0" }}>
             No account?{" "}
-            <Link to="/register" style={{ color: "#D4824A", textDecoration: "none" }}>Create one →</Link>
+            <Link to="/register" style={{ color: "#1B4D35", textDecoration: "none", fontWeight: 500 }}>Create one →</Link>
           </p>
         </div>
 
         {/* Demo accounts */}
-        <div style={{ background: "rgba(245,237,216,0.02)", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "16px", marginTop: "12px" }}>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,237,216,0.25)", margin: "0 0 10px" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.07)", borderRadius: "6px", padding: "16px", marginTop: "12px", boxShadow: "0 1px 3px rgba(28,28,26,0.04)" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)", margin: "0 0 10px" }}>
             Demo Accounts
           </p>
           {demoAccounts.map(({ role, email: e, pw }) => (
             <div key={role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.25)" }}>{role}</span>
+              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(28,28,26,0.35)" }}>{role}</span>
               <span
                 onClick={() => { setEmail(e); setPassword(pw); }}
-                style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.45)", cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+                style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#1B4D35", cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
                 title="Click to autofill"
               >
                 {e}
               </span>
             </div>
           ))}
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(245,237,216,0.18)", margin: "8px 0 0" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.2)", margin: "8px 0 0" }}>
             Click any email to autofill credentials
           </p>
         </div>
+
+        {/* Footer note */}
+        <p style={{ textAlign: "center", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.25)", letterSpacing: "0.1em", margin: "16px 0 0" }}>
+          Secure Ethiopian coffee export compliance
+        </p>
       </div>
     </div>
   );

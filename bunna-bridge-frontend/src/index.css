@@ -1,42 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ── Brand token definitions ──────────────────────────────────── */
 :root {
-  --color-espresso:   #1A0F07;
-  --color-roast:      #2C1810;
-  --color-mahogany:   #4A2515;
-  --color-terracotta: #C1440E;
-  --color-amber:      #D4824A;
-  --color-gold:       #C9952A;
-  --color-forest:     #1E3A2F;
-  --color-sage:       #4A7C59;
-  --color-mist:       #A8C5A0;
-  --color-cream:      #F5EDD8;
-  --color-parchment:  #EDE0C4;
-  --color-border:     rgba(245,237,216,0.08);
-  --color-border-strong: rgba(245,237,216,0.15);
+  --color-forest:      #1B4D35;
+  --color-forest-dark: #163D2A;
+  --color-forest-light:#E8F2EC;
+  --color-coffee:      #7B4B2A;
+  --color-coffee-light:#F5EDE4;
+  --color-sage:        #2D7A52;
+  --color-linen:       #F7F5F0;
+  --color-stone:       #F0EDE6;
+  --color-ink:         #1C1C1A;
+  --color-slate:       #4A4A45;
+  --color-border:      rgba(28,28,26,0.08);
+  --color-border-strong: rgba(28,28,26,0.14);
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 64px;
   --topbar-height: 56px;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /* ── Tailwind v4 theme tokens ─────────────────────────────────── */
 @theme {
-  --color-espresso:   #1A0F07;
-  --color-roast:      #2C1810;
-  --color-mahogany:   #4A2515;
-  --color-terracotta: #C1440E;
-  --color-amber:      #D4824A;
-  --color-gold:       #C9952A;
-  --color-forest:     #1E3A2F;
-  --color-sage:       #4A7C59;
-  --color-mist:       #A8C5A0;
-  --color-cream:      #F5EDD8;
-  --color-parchment:  #EDE0C4;
-  --color-border:     rgba(245,237,216,0.08);
-  --color-border-strong: rgba(245,237,216,0.15);
+  --color-forest:      #1B4D35;
+  --color-forest-dark: #163D2A;
+  --color-forest-light:#E8F2EC;
+  --color-coffee:      #7B4B2A;
+  --color-coffee-light:#F5EDE4;
+  --color-sage:        #2D7A52;
+  --color-linen:       #F7F5F0;
+  --color-stone:       #F0EDE6;
+  --color-ink:         #1C1C1A;
+  --color-slate:       #4A4A45;
+  --color-border:      rgba(28,28,26,0.08);
+  --color-border-strong: rgba(28,28,26,0.14);
+  --color-mint:        #A8D5BC;
 
   --font-display: "Cormorant Garamond", Georgia, serif;
   --font-mono:    "DM Mono", monospace;
@@ -57,40 +56,30 @@
 
 body {
   margin: 0;
-  background: #1A0F07;
-  color: #F5EDD8;
+  background: #F7F5F0;
+  color: #1C1C1A;
   font-family: "Instrument Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-/* ── Grain texture overlay ────────────────────────────────────── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.3;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(245,237,216,0.12); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(245,237,216,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(28,28,26,0.15); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(28,28,26,0.25); }
 
 /* ── Focus ────────────────────────────────────────────────────── */
-*:focus-visible { outline: 1px solid #C1440E; outline-offset: 2px; }
+*:focus-visible { outline: 1px solid #1B4D35; outline-offset: 2px; }
 
 /* ── Component classes ────────────────────────────────────────── */
 @layer components {
 
   /* Card — the main surface unit */
   .card {
-    background: #2C1810;
-    border: 1px solid rgba(245,237,216,0.08);
-    border-radius: 4px;
+    background: #FFFFFF;
+    border: 1px solid rgba(28,28,26,0.08);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(28,28,26,0.06);
   }
 
   .card-title {
@@ -98,15 +87,15 @@ body::after {
     font-size: 0.625rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(245,237,216,0.35);
+    color: rgba(28,28,26,0.4);
     margin: 0 0 16px;
   }
 
   /* Subtle inner card */
   .card-inner {
-    background: rgba(26,15,7,0.5);
-    border: 1px solid rgba(245,237,216,0.06);
-    border-radius: 2px;
+    background: #F7F5F0;
+    border: 1px solid rgba(28,28,26,0.07);
+    border-radius: 4px;
   }
 
   /* Stat value */
@@ -115,6 +104,7 @@ body::after {
     font-size: 2.5rem;
     font-weight: 300;
     line-height: 1;
+    color: #1C1C1A;
   }
 
   /* Pill / badge */
@@ -136,10 +126,10 @@ body::after {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    border-radius: 2px;
-    background: rgba(193,68,14,0.15);
-    border: 1px solid rgba(193,68,14,0.35);
-    color: #C1440E;
+    border-radius: 4px;
+    background: #1B4D35;
+    border: 1px solid #1B4D35;
+    color: #FFFFFF;
     font-family: "DM Mono", monospace;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
@@ -147,8 +137,8 @@ body::after {
     transition: all 0.15s;
   }
   .btn-primary:hover {
-    background: rgba(193,68,14,0.25);
-    border-color: rgba(193,68,14,0.5);
+    background: #163D2A;
+    border-color: #163D2A;
   }
 
   /* Ghost button */
@@ -157,10 +147,10 @@ body::after {
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    border-radius: 2px;
+    border-radius: 4px;
     background: transparent;
-    border: 1px solid rgba(245,237,216,0.08);
-    color: rgba(245,237,216,0.5);
+    border: 1px solid rgba(28,28,26,0.12);
+    color: rgba(28,28,26,0.6);
     font-family: "DM Mono", monospace;
     font-size: 0.75rem;
     letter-spacing: 0.05em;
@@ -168,8 +158,8 @@ body::after {
     transition: all 0.15s;
   }
   .btn-ghost:hover {
-    border-color: rgba(245,237,216,0.15);
-    color: rgba(245,237,216,0.8);
+    border-color: rgba(28,28,26,0.25);
+    color: #1C1C1A;
   }
 
   /* Table row */
@@ -178,41 +168,42 @@ body::after {
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border-radius: 2px;
+    border-radius: 4px;
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.15s;
   }
   .table-row:hover {
-    background: rgba(245,237,216,0.02);
-    border-color: rgba(245,237,216,0.06);
+    background: #F7F5F0;
+    border-color: rgba(28,28,26,0.08);
   }
 
   /* Section divider */
   .divider {
     border: none;
-    border-top: 1px solid rgba(245,237,216,0.08);
+    border-top: 1px solid rgba(28,28,26,0.08);
     margin: 16px 0;
   }
 
   /* Input */
   .input {
     width: 100%;
-    background: #1A0F07;
-    border: 1px solid rgba(245,237,216,0.1);
-    border-radius: 2px;
+    background: #FFFFFF;
+    border: 1px solid rgba(28,28,26,0.15);
+    border-radius: 4px;
     padding: 8px 12px;
-    color: #F5EDD8;
+    color: #1C1C1A;
     font-family: "Instrument Sans", sans-serif;
     font-size: 0.875rem;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
   .input:focus {
-    border-color: rgba(193,68,14,0.5);
+    border-color: #1B4D35;
+    box-shadow: 0 0 0 3px rgba(27,77,53,0.08);
   }
   .input::placeholder {
-    color: rgba(245,237,216,0.2);
+    color: rgba(28,28,26,0.3);
   }
 
   /* Label */
@@ -222,7 +213,7 @@ body::after {
     font-size: 0.625rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: rgba(245,237,216,0.35);
+    color: rgba(28,28,26,0.45);
     margin-bottom: 6px;
   }
 
@@ -238,7 +229,7 @@ body::after {
     font-family: "Cormorant Garamond", serif;
     font-size: 1.75rem;
     font-weight: 400;
-    color: #F5EDD8;
+    color: #1C1C1A;
     margin: 0 0 4px;
     line-height: 1.2;
   }
@@ -248,7 +239,7 @@ body::after {
     font-size: 0.625rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(245,237,216,0.25);
+    color: rgba(28,28,26,0.3);
     margin: 0;
   }
 }
@@ -261,15 +252,15 @@ body::after {
   }
 
   .border-border {
-    border-color: rgba(245,237,216,0.08);
+    border-color: rgba(28,28,26,0.08);
   }
 
   .border-border-strong {
-    border-color: rgba(245,237,216,0.15);
+    border-color: rgba(28,28,26,0.14);
   }
 
-  .bg-white\/3 {
-    background-color: rgba(255,255,255,0.03);
+  .bg-stone\/50 {
+    background-color: rgba(240,237,230,0.5);
   }
 
   .font-display {

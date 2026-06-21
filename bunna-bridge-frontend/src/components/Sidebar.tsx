@@ -2,24 +2,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Sprout,
-  ChevronLeft, ChevronRight, Coffee, FileCheck,
-  GitBranch, FlaskConical, ClipboardList, Settings, HelpCircle, X
-, Map as MapIcon, TrendingUp, Inbox, Heart } from "lucide-react";
+  ChevronLeft, ChevronRight, FileCheck,
+  GitBranch, FlaskConical, ClipboardList, Settings, HelpCircle, X,
+  Map as MapIcon, TrendingUp, Inbox, Heart
+} from "lucide-react";
 import RoleBadge from "./RoleBadge";
 
 const NAV_ITEMS = [
-  { label: "Dashboard",   path: "/dashboard",  icon: <LayoutDashboard size={15} />, roles: ["admin","exporter","buyer","farmer","qgrader"] },
-  { label: "Lots",        path: "/lots",        icon: <Package size={15} />,         roles: ["admin","exporter","qgrader"] },
-  { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={15} />,     roles: ["buyer","admin"] },
-  { label: "My Farm",     path: "/farm",        icon: <Sprout size={15} />,          roles: ["farmer"] },
-  { label: "Compliance",  path: "/compliance",  icon: <FileCheck size={15} />,       roles: ["admin","exporter"] },
-  { label: "Lot Map",     path: "/map",         icon: <MapIcon size={16} />,            roles: ["admin","exporter","farmer"] },
-  { label: "Pipeline",    path: "/pipeline",    icon: <GitBranch size={15} />,       roles: ["admin","exporter"] },
-  { label: "Samples",     path: "/samples",     icon: <FlaskConical size={15} />,    roles: ["admin","exporter","buyer"] },
-  { label: "Reports",     path: "/reports",     icon: <ClipboardList size={15} />,   roles: ["admin"] },
-  { label: "My Offers",   path: "/buyer/offers",    icon: <TrendingUp size={15} />, roles: ["buyer"] },
-  { label: "Watchlist",   path: "/buyer/watchlist", icon: <Heart size={15} />,      roles: ["buyer"] },
-  { label: "Offers",      path: "/offers",      icon: <Inbox size={15} />,           roles: ["exporter","admin"] },
+  { label: "Dashboard",   path: "/dashboard",   icon: <LayoutDashboard size={15} />, roles: ["admin","exporter","buyer","farmer","qgrader"] },
+  { label: "Lots",        path: "/lots",         icon: <Package size={15} />,         roles: ["admin","exporter","qgrader"] },
+  { label: "Marketplace", path: "/marketplace",  icon: <ShoppingBag size={15} />,     roles: ["buyer","admin"] },
+  { label: "My Farm",     path: "/farm",         icon: <Sprout size={15} />,          roles: ["farmer"] },
+  { label: "Compliance",  path: "/compliance",   icon: <FileCheck size={15} />,       roles: ["admin","exporter"] },
+  { label: "Lot Map",     path: "/map",          icon: <MapIcon size={16} />,         roles: ["admin","exporter","farmer"] },
+  { label: "Pipeline",    path: "/pipeline",     icon: <GitBranch size={15} />,       roles: ["admin","exporter"] },
+  { label: "Samples",     path: "/samples",      icon: <FlaskConical size={15} />,    roles: ["admin","exporter","buyer"] },
+  { label: "Reports",     path: "/reports",      icon: <ClipboardList size={15} />,   roles: ["admin"] },
+  { label: "My Offers",   path: "/buyer/offers", icon: <TrendingUp size={15} />,      roles: ["buyer"] },
+  { label: "Watchlist",   path: "/buyer/watchlist", icon: <Heart size={15} />,        roles: ["buyer"] },
+  { label: "Offers",      path: "/offers",       icon: <Inbox size={15} />,           roles: ["exporter","admin"] },
 ];
 
 const BOTTOM_ITEMS = [
@@ -47,8 +48,8 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
         .bb-sidebar {
           position: fixed; left: 0; top: 0; height: 100vh;
           width: ${collapsed ? "64px" : "240px"};
-          background: #1E1208;
-          border-right: 1px solid rgba(245,237,216,0.07);
+          background: #1B4D35;
+          border-right: 1px solid rgba(255,255,255,0.08);
           display: flex; flex-direction: column;
           transition: width 0.25s ease;
           z-index: 50; overflow: hidden;
@@ -73,13 +74,13 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
           justify-content: ${collapsed ? "center" : "flex-start"};
           white-space: nowrap; overflow: hidden;
         }
-        .nav-btn:hover { background: rgba(245,237,216,0.04); }
+        .nav-btn:hover { background: rgba(255,255,255,0.07); }
         .nav-btn.active {
-          background: rgba(193,68,14,0.1);
-          border-color: rgba(193,68,14,0.2);
-          color: #D4824A !important;
+          background: rgba(255,255,255,0.13);
+          border-left: 3px solid #A8D5BC !important;
+          color: #FFFFFF !important;
         }
-        .nav-btn.active .nav-icon { color: #C1440E !important; }
+        .nav-btn.active .nav-icon { color: #A8D5BC !important; }
         .nav-label { overflow: hidden; text-overflow: ellipsis; }
       `}</style>
 
@@ -87,30 +88,40 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
 
         {/* Logo */}
         <div style={{
-          display: "flex", alignItems: "center", height: "56px", flexShrink: 0,
-          padding: collapsed ? "0 18px" : "0 14px", gap: "10px",
-          borderBottom: "1px solid rgba(245,237,216,0.07)",
+          display: "flex", alignItems: "center", height: "60px", flexShrink: 0,
+          padding: collapsed ? "0 16px" : "0 14px", gap: "10px",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
           justifyContent: collapsed ? "center" : "flex-start",
         }}>
-          <div style={{
-            width: "28px", height: "28px", flexShrink: 0, borderRadius: "3px",
-            background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Coffee size={13} color="#C1440E" />
+          {/* B-leaf mark — always visible */}
+          <div style={{ flexShrink: 0, width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* B letterform */}
+              <rect x="6" y="6" width="4" height="20" rx="1.5" fill="white"/>
+              <rect x="10" y="6" width="8" height="4" rx="1.5" fill="white"/>
+              <rect x="10" y="14" width="7" height="4" rx="1.5" fill="white"/>
+              <rect x="10" y="22" width="9" height="4" rx="1.5" fill="white"/>
+              <rect x="18" y="10" width="4" height="4" rx="1.5" fill="white"/>
+              <rect x="19" y="18" width="4" height="4" rx="1.5" fill="white"/>
+              {/* leaf */}
+              <path d="M22 8 C24 6, 27 7, 27 10 C27 13, 24 14, 22 12 C20 10, 20 8, 22 8Z" fill="#A8D5BC"/>
+              <line x1="22" y1="12" x2="25" y2="8" stroke="#1B4D35" strokeWidth="0.8"/>
+            </svg>
           </div>
+
           {!collapsed && (
             <span style={{
-              fontFamily: "Cormorant Garamond, serif",
-              fontSize: "1.05rem", fontWeight: 500,
-              color: "#F5EDD8", letterSpacing: "0.02em",
+              fontFamily: "Playfair Display, serif",
+              fontSize: "1.1rem", fontWeight: 500,
+              color: "#FFFFFF", letterSpacing: "0.01em",
             }}>
-              Bunna Bridge
+              Beersheba
             </span>
           )}
+
           <button className="bb-close-btn" onClick={onMobileClose} style={{
             marginLeft: "auto", background: "none", border: "none",
-            color: "rgba(245,237,216,0.35)", cursor: "pointer",
+            color: "rgba(255,255,255,0.4)", cursor: "pointer",
             padding: "4px", display: "none", alignItems: "center",
           }}>
             <X size={15} />
@@ -123,7 +134,7 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
             <span style={{
               fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
               letterSpacing: "0.2em", textTransform: "uppercase",
-              color: "rgba(245,237,216,0.18)", padding: "0 6px",
+              color: "rgba(255,255,255,0.25)", padding: "0 6px",
               marginBottom: "6px", display: "block",
             }}>
               Navigation
@@ -137,13 +148,13 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
                 <li key={item.path}>
                   <button
                     className={`nav-btn${active ? " active" : ""}`}
-                    style={{ color: active ? "#D4824A" : "rgba(245,237,216,0.5)" }}
+                    style={{ color: active ? "#FFFFFF" : "rgba(255,255,255,0.6)" }}
                     title={collapsed ? item.label : undefined}
                     onClick={() => { navigate(item.path); onMobileClose(); }}
                   >
                     <span className="nav-icon" style={{
                       flexShrink: 0,
-                      color: active ? "#C1440E" : "rgba(245,237,216,0.35)",
+                      color: active ? "#A8D5BC" : "rgba(255,255,255,0.4)",
                     }}>
                       {item.icon}
                     </span>
@@ -159,7 +170,7 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
               <span style={{
                 fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
                 letterSpacing: "0.2em", textTransform: "uppercase",
-                color: "rgba(245,237,216,0.18)", padding: "0 6px",
+                color: "rgba(255,255,255,0.25)", padding: "0 6px",
                 marginBottom: "6px", display: "block",
               }}>
                 Support
@@ -170,11 +181,11 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
                 <li key={item.path}>
                   <button
                     className="nav-btn"
-                    style={{ color: "rgba(245,237,216,0.25)" }}
+                    style={{ color: "rgba(255,255,255,0.4)" }}
                     title={collapsed ? item.label : undefined}
                     onClick={() => { navigate(item.path); onMobileClose(); }}
                   >
-                    <span style={{ flexShrink: 0, color: "rgba(245,237,216,0.2)" }}>{item.icon}</span>
+                    <span style={{ flexShrink: 0, color: "rgba(255,255,255,0.3)" }}>{item.icon}</span>
                     {!collapsed && <span className="nav-label">{item.label}</span>}
                   </button>
                 </li>
@@ -186,7 +197,7 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
         {/* User strip */}
         {user && (
           <div style={{
-            borderTop: "1px solid rgba(245,237,216,0.07)",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
             padding: collapsed ? "12px 8px" : "12px",
             flexShrink: 0,
             display: "flex", alignItems: "center", gap: "10px",
@@ -194,10 +205,10 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
           }}>
             <div style={{
               width: "28px", height: "28px", borderRadius: "3px", flexShrink: 0,
-              background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)",
+              background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "DM Mono, monospace", fontSize: "0.6rem",
-              color: "#C1440E", fontWeight: 500,
+              color: "#FFFFFF", fontWeight: 500,
             }}>
               {(user.first_name?.[0] || user.email[0]).toUpperCase()}
             </div>
@@ -205,7 +216,7 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
               <div style={{ minWidth: 0, flex: 1 }}>
                 <p style={{
                   fontFamily: "Instrument Sans, sans-serif",
-                  fontSize: "0.8rem", color: "#F5EDD8",
+                  fontSize: "0.8rem", color: "#FFFFFF",
                   margin: "0 0 3px", overflow: "hidden",
                   textOverflow: "ellipsis", whiteSpace: "nowrap",
                 }}>
@@ -224,9 +235,9 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
           style={{
             position: "absolute", right: "-10px", top: "76px",
             width: "20px", height: "20px", borderRadius: "50%",
-            background: "#1E1208", border: "1px solid rgba(245,237,216,0.1)",
+            background: "#163D2A", border: "1px solid rgba(255,255,255,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "rgba(245,237,216,0.3)", cursor: "pointer", zIndex: 10,
+            color: "#FFFFFF", cursor: "pointer", zIndex: 10,
           }}
         >
           {collapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}

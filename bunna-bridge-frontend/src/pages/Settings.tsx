@@ -127,7 +127,7 @@ export default function Settings() {
               fontFamily: "Instrument Sans, sans-serif",
               fontSize: "0.82rem", color: "rgba(245,237,216,0.5)",
             }}>
-              Sign out of Bunna Bridge?
+              Sign out of Beersheba?
             </span>
             <button
               onClick={logout}

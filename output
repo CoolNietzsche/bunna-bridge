@@ -1,0 +1,2001 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+/* ── Brand token definitions ──────────────────────────────────── */
+:root {
+  --color-espresso:   #1A0F07;
+  --color-roast:      #2C1810;
+  --color-mahogany:   #4A2515;
+  --color-terracotta: #C1440E;
+  --color-amber:      #D4824A;
+  --color-gold:       #C9952A;
+  --color-forest:     #1E3A2F;
+  --color-sage:       #4A7C59;
+  --color-mist:       #A8C5A0;
+  --color-cream:      #F5EDD8;
+  --color-parchment:  #EDE0C4;
+  --color-border:     rgba(245,237,216,0.08);
+  --color-border-strong: rgba(245,237,216,0.15);
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 64px;
+  --topbar-height: 56px;
+  color-scheme: dark;
+}
+
+/* ── Tailwind v4 theme tokens ─────────────────────────────────── */
+@theme {
+  --color-espresso:   #1A0F07;
+  --color-roast:      #2C1810;
+  --color-mahogany:   #4A2515;
+  --color-terracotta: #C1440E;
+  --color-amber:      #D4824A;
+  --color-gold:       #C9952A;
+  --color-forest:     #1E3A2F;
+  --color-sage:       #4A7C59;
+  --color-mist:       #A8C5A0;
+  --color-cream:      #F5EDD8;
+  --color-parchment:  #EDE0C4;
+  --color-border:     rgba(245,237,216,0.08);
+  --color-border-strong: rgba(245,237,216,0.15);
+
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-mono:    "DM Mono", monospace;
+  --font-sans:    "Instrument Sans", sans-serif;
+
+  --text-2xs: 0.625rem;
+  --text-2xs--line-height: 1rem;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  --spacing-18: 4.5rem;
+}
+
+/* ── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #1A0F07;
+  color: #F5EDD8;
+  font-family: "Instrument Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Grain texture overlay ────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.3;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(245,237,216,0.12); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(245,237,216,0.2); }
+
+/* ── Focus ────────────────────────────────────────────────────── */
+*:focus-visible { outline: 1px solid #C1440E; outline-offset: 2px; }
+
+/* ── Component classes ────────────────────────────────────────── */
+@layer components {
+
+  /* Card — the main surface unit */
+  .card {
+    background: #2C1810;
+    border: 1px solid rgba(245,237,216,0.08);
+    border-radius: 4px;
+  }
+
+  .card-title {
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,237,216,0.35);
+    margin: 0 0 16px;
+  }
+
+  /* Subtle inner card */
+  .card-inner {
+    background: rgba(26,15,7,0.5);
+    border: 1px solid rgba(245,237,216,0.06);
+    border-radius: 2px;
+  }
+
+  /* Stat value */
+  .stat-value {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  /* Pill / badge */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: "DM Mono", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  /* Primary action button */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 2px;
+    background: rgba(193,68,14,0.15);
+    border: 1px solid rgba(193,68,14,0.35);
+    color: #C1440E;
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover {
+    background: rgba(193,68,14,0.25);
+    border-color: rgba(193,68,14,0.5);
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 2px;
+    background: transparent;
+    border: 1px solid rgba(245,237,216,0.08);
+    color: rgba(245,237,216,0.5);
+    font-family: "DM Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(245,237,216,0.15);
+    color: rgba(245,237,216,0.8);
+  }
+
+  /* Table row */
+  .table-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .table-row:hover {
+    background: rgba(245,237,216,0.02);
+    border-color: rgba(245,237,216,0.06);
+  }
+
+  /* Section divider */
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(245,237,216,0.08);
+    margin: 16px 0;
+  }
+
+  /* Input */
+  .input {
+    width: 100%;
+    background: #1A0F07;
+    border: 1px solid rgba(245,237,216,0.1);
+    border-radius: 2px;
+    padding: 8px 12px;
+    color: #F5EDD8;
+    font-family: "Instrument Sans", sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input:focus {
+    border-color: rgba(193,68,14,0.5);
+  }
+  .input::placeholder {
+    color: rgba(245,237,216,0.2);
+  }
+
+  /* Label */
+  .label {
+    display: block;
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,237,216,0.35);
+    margin-bottom: 6px;
+  }
+
+  /* Page header */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #F5EDD8;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .page-subtitle {
+    font-family: "DM Mono", monospace;
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,237,216,0.25);
+    margin: 0;
+  }
+}
+
+/* ── Utility extensions ───────────────────────────────────────── */
+@layer utilities {
+  .text-2xs {
+    font-size: 0.625rem;
+    line-height: 1rem;
+  }
+
+  .border-border {
+    border-color: rgba(245,237,216,0.08);
+  }
+
+  .border-border-strong {
+    border-color: rgba(245,237,216,0.15);
+  }
+
+  .bg-white\/3 {
+    background-color: rgba(255,255,255,0.03);
+  }
+
+  .font-display {
+    font-family: "Cormorant Garamond", Georgia, serif;
+  }
+
+  .font-mono {
+    font-family: "DM Mono", monospace;
+  }
+
+  .tracking-widest {
+    letter-spacing: 0.2em;
+  }
+}
+---SIDEBAR---
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  LayoutDashboard, Package, ShoppingBag, Sprout,
+  ChevronLeft, ChevronRight, Coffee, FileCheck,
+  GitBranch, FlaskConical, ClipboardList, Settings, HelpCircle, X
+, Map as MapIcon, TrendingUp, Inbox, Heart } from "lucide-react";
+import RoleBadge from "./RoleBadge";
+
+const NAV_ITEMS = [
+  { label: "Dashboard",   path: "/dashboard",  icon: <LayoutDashboard size={15} />, roles: ["admin","exporter","buyer","farmer","qgrader"] },
+  { label: "Lots",        path: "/lots",        icon: <Package size={15} />,         roles: ["admin","exporter","qgrader"] },
+  { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={15} />,     roles: ["buyer","admin"] },
+  { label: "My Farm",     path: "/farm",        icon: <Sprout size={15} />,          roles: ["farmer"] },
+  { label: "Compliance",  path: "/compliance",  icon: <FileCheck size={15} />,       roles: ["admin","exporter"] },
+  { label: "Lot Map",     path: "/map",         icon: <MapIcon size={16} />,            roles: ["admin","exporter","farmer"] },
+  { label: "Pipeline",    path: "/pipeline",    icon: <GitBranch size={15} />,       roles: ["admin","exporter"] },
+  { label: "Samples",     path: "/samples",     icon: <FlaskConical size={15} />,    roles: ["admin","exporter","buyer"] },
+  { label: "Reports",     path: "/reports",     icon: <ClipboardList size={15} />,   roles: ["admin"] },
+  { label: "My Offers",   path: "/buyer/offers",    icon: <TrendingUp size={15} />, roles: ["buyer"] },
+  { label: "Watchlist",   path: "/buyer/watchlist", icon: <Heart size={15} />,      roles: ["buyer"] },
+  { label: "Offers",      path: "/offers",      icon: <Inbox size={15} />,           roles: ["exporter","admin"] },
+];
+
+const BOTTOM_ITEMS = [
+  { label: "Settings", path: "/settings", icon: <Settings size={15} /> },
+  { label: "Help",     path: "/help",     icon: <HelpCircle size={15} /> },
+];
+
+interface SidebarProps {
+  collapsed: boolean;
+  onCollapse: (v: boolean) => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
+
+export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClose }: SidebarProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const role = user?.role ?? "exporter";
+  const visibleItems = NAV_ITEMS.filter(i => i.roles.includes(role));
+
+  return (
+    <>
+      <style>{`
+        .bb-sidebar {
+          position: fixed; left: 0; top: 0; height: 100vh;
+          width: ${collapsed ? "64px" : "240px"};
+          background: #1E1208;
+          border-right: 1px solid rgba(245,237,216,0.07);
+          display: flex; flex-direction: column;
+          transition: width 0.25s ease;
+          z-index: 50; overflow: hidden;
+        }
+        @media (max-width: 768px) {
+          .bb-sidebar { transform: translateX(-100%) !important; width: 240px !important; }
+          .bb-sidebar.open { transform: translateX(0) !important; }
+          .bb-collapse-btn { display: none !important; }
+          .bb-close-btn { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .bb-close-btn { display: none !important; }
+        }
+        .nav-btn {
+          width: 100%; display: flex; align-items: center;
+          gap: 10px; padding: 7px 10px; border-radius: 3px;
+          border: 1px solid transparent;
+          background: transparent; cursor: pointer;
+          transition: all 0.12s;
+          font-family: "Instrument Sans", sans-serif;
+          font-size: 0.8125rem;
+          justify-content: ${collapsed ? "center" : "flex-start"};
+          white-space: nowrap; overflow: hidden;
+        }
+        .nav-btn:hover { background: rgba(245,237,216,0.04); }
+        .nav-btn.active {
+          background: rgba(193,68,14,0.1);
+          border-color: rgba(193,68,14,0.2);
+          color: #D4824A !important;
+        }
+        .nav-btn.active .nav-icon { color: #C1440E !important; }
+        .nav-label { overflow: hidden; text-overflow: ellipsis; }
+      `}</style>
+
+      <aside className={`bb-sidebar${mobileOpen ? " open" : ""}`}>
+
+        {/* Logo */}
+        <div style={{
+          display: "flex", alignItems: "center", height: "56px", flexShrink: 0,
+          padding: collapsed ? "0 18px" : "0 14px", gap: "10px",
+          borderBottom: "1px solid rgba(245,237,216,0.07)",
+          justifyContent: collapsed ? "center" : "flex-start",
+        }}>
+          <div style={{
+            width: "28px", height: "28px", flexShrink: 0, borderRadius: "3px",
+            background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <Coffee size={13} color="#C1440E" />
+          </div>
+          {!collapsed && (
+            <span style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontSize: "1.05rem", fontWeight: 500,
+              color: "#F5EDD8", letterSpacing: "0.02em",
+            }}>
+              Bunna Bridge
+            </span>
+          )}
+          <button className="bb-close-btn" onClick={onMobileClose} style={{
+            marginLeft: "auto", background: "none", border: "none",
+            color: "rgba(245,237,216,0.35)", cursor: "pointer",
+            padding: "4px", display: "none", alignItems: "center",
+          }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: "12px 8px", overflowY: "auto" }}>
+          {!collapsed && (
+            <span style={{
+              fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+              letterSpacing: "0.2em", textTransform: "uppercase",
+              color: "rgba(245,237,216,0.18)", padding: "0 6px",
+              marginBottom: "6px", display: "block",
+            }}>
+              Navigation
+            </span>
+          )}
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "1px" }}>
+            {visibleItems.map(item => {
+              const active = location.pathname === item.path ||
+                (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
+              return (
+                <li key={item.path}>
+                  <button
+                    className={`nav-btn${active ? " active" : ""}`}
+                    style={{ color: active ? "#D4824A" : "rgba(245,237,216,0.5)" }}
+                    title={collapsed ? item.label : undefined}
+                    onClick={() => { navigate(item.path); onMobileClose(); }}
+                  >
+                    <span className="nav-icon" style={{
+                      flexShrink: 0,
+                      color: active ? "#C1440E" : "rgba(245,237,216,0.35)",
+                    }}>
+                      {item.icon}
+                    </span>
+                    {!collapsed && <span className="nav-label">{item.label}</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div style={{ marginTop: "20px" }}>
+            {!collapsed && (
+              <span style={{
+                fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+                letterSpacing: "0.2em", textTransform: "uppercase",
+                color: "rgba(245,237,216,0.18)", padding: "0 6px",
+                marginBottom: "6px", display: "block",
+              }}>
+                Support
+              </span>
+            )}
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "1px" }}>
+              {BOTTOM_ITEMS.map(item => (
+                <li key={item.path}>
+                  <button
+                    className="nav-btn"
+                    style={{ color: "rgba(245,237,216,0.25)" }}
+                    title={collapsed ? item.label : undefined}
+                    onClick={() => { navigate(item.path); onMobileClose(); }}
+                  >
+                    <span style={{ flexShrink: 0, color: "rgba(245,237,216,0.2)" }}>{item.icon}</span>
+                    {!collapsed && <span className="nav-label">{item.label}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        {/* User strip */}
+        {user && (
+          <div style={{
+            borderTop: "1px solid rgba(245,237,216,0.07)",
+            padding: collapsed ? "12px 8px" : "12px",
+            flexShrink: 0,
+            display: "flex", alignItems: "center", gap: "10px",
+            justifyContent: collapsed ? "center" : "flex-start",
+          }}>
+            <div style={{
+              width: "28px", height: "28px", borderRadius: "3px", flexShrink: 0,
+              background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "DM Mono, monospace", fontSize: "0.6rem",
+              color: "#C1440E", fontWeight: 500,
+            }}>
+              {(user.first_name?.[0] || user.email[0]).toUpperCase()}
+            </div>
+            {!collapsed && (
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p style={{
+                  fontFamily: "Instrument Sans, sans-serif",
+                  fontSize: "0.8rem", color: "#F5EDD8",
+                  margin: "0 0 3px", overflow: "hidden",
+                  textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {user.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : user.email}
+                </p>
+                <RoleBadge role={user.role} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Collapse toggle */}
+        <button
+          className="bb-collapse-btn"
+          onClick={() => onCollapse(!collapsed)}
+          style={{
+            position: "absolute", right: "-10px", top: "76px",
+            width: "20px", height: "20px", borderRadius: "50%",
+            background: "#1E1208", border: "1px solid rgba(245,237,216,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "rgba(245,237,216,0.3)", cursor: "pointer", zIndex: 10,
+          }}
+        >
+          {collapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+        </button>
+      </aside>
+    </>
+  );
+}
+---PAGEWRAPPER---
+import type { ReactNode } from "react";
+import AppLayout from "./AppLayout";
+
+export default function PageWrapper({ children }: { children: ReactNode }) {
+  return <AppLayout>{children}</AppLayout>;
+}
+---DASHBOARD---
+import { useAuth } from "../context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { getLots } from "../api/lots";
+import PageWrapper from "../components/PageWrapper";
+import RoleBadge from "../components/RoleBadge";
+import {
+  Package, ShieldCheck, TrendingUp, AlertTriangle,
+  ArrowRight, Plus, Coffee
+} from "lucide-react";
+
+export default function Dashboard() {
+  const { user }  = useAuth();
+  const navigate  = useNavigate();
+  const role      = user?.role ?? "exporter";
+
+  const { data } = useQuery({
+    queryKey: ["lots-dashboard", role],
+    queryFn:  () => getLots(),
+  });
+
+  const total       = data?.count ?? 0;
+  const eudrReady   = data?.results.filter(l => l.eudr_dds_ready).length  ?? 0;
+  const exportReady = data?.results.filter(l => l.export_ready).length    ?? 0;
+  const pending     = data?.results.filter(l => !l.export_ready).length   ?? 0;
+
+  const greeting = () => {
+    const name = user?.first_name || user?.email?.split("@")[0] || "there";
+    const h    = new Date().getHours();
+    return `${h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"}, ${name}.`;
+  };
+
+  const stats = role === "buyer"
+    ? [
+        { label: "Available Lots",   value: total,     icon: <Package size={16} />,      color: "text-cream",      bg: "bg-cream/5",       border: "border-border",           path: "/marketplace" },
+        { label: "EUDR Verified",    value: eudrReady, icon: <ShieldCheck size={16} />,  color: "text-mist",       bg: "bg-mist/10",       border: "border-mist/20",          path: "/marketplace?eudr_dds_ready=true" },
+        { label: "Green Passport",   value: eudrReady, icon: <Coffee size={16} />,       color: "text-sage",       bg: "bg-sage/10",       border: "border-sage/20",          path: "/marketplace" },
+        { label: "Regions",          value: 7,         icon: <TrendingUp size={16} />,   color: "text-gold",       bg: "bg-gold/10",       border: "border-gold/20",          path: "/marketplace" },
+      ]
+    : [
+        { label: "Total Lots",         value: total,       icon: <Package size={16} />,      color: "text-cream",      bg: "bg-cream/5",       border: "border-border",           path: "/lots" },
+        { label: "EUDR Ready",         value: eudrReady,   icon: <ShieldCheck size={16} />,  color: "text-mist",       bg: "bg-mist/10",       border: "border-mist/20",          path: "/lots" },
+        { label: "Export Ready",       value: exportReady, icon: <TrendingUp size={16} />,   color: "text-gold",       bg: "bg-gold/10",       border: "border-gold/20",          path: "/lots" },
+        { label: "Pending Compliance", value: pending,     icon: <AlertTriangle size={16} />, color: "text-terracotta", bg: "bg-terracotta/10", border: "border-terracotta/20",    path: "/lots" },
+      ];
+
+  const quickActions: Record<string, { label: string; path: string; icon: React.ReactNode; primary?: boolean }[]> = {
+    admin:    [
+      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,      primary: true },
+      { label: "Browse All Lots",    path: "/lots",         icon: <Package size={14} />    },
+      { label: "View Marketplace",   path: "/marketplace",  icon: <Coffee size={14} />     },
+    ],
+    exporter: [
+      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,      primary: true },
+      { label: "View My Lots",       path: "/lots",         icon: <Package size={14} />    },
+    ],
+    buyer:    [
+      { label: "Browse Marketplace", path: "/marketplace",  icon: <Coffee size={14} />,    primary: true },
+    ],
+    farmer:   [
+      { label: "My Farm Profile",    path: "/farm",         icon: <Coffee size={14} />,    primary: true },
+    ],
+    qgrader:  [
+      { label: "Lots to Cup",        path: "/lots",         icon: <Package size={14} />,   primary: true },
+    ],
+  };
+
+  const actions = quickActions[role] || quickActions.exporter;
+
+  return (
+    <PageWrapper>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <h1 className="font-display text-3xl font-light text-cream mb-1">{greeting()}</h1>
+          <p className="font-mono text-2xs text-cream/30 tracking-widest uppercase">
+            Bunna Bridge Operations · {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </p>
+        </div>
+        <RoleBadge role={role} />
+      </div>
+
+      {/* Stat cards */}
+      {role !== "farmer" && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {stats.map(stat => (
+            <button
+              key={stat.label}
+              onClick={() => navigate(stat.path)}
+              className={`card p-5 text-left hover:border-border-strong transition-all duration-200 group ${stat.border}`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-8 h-8 rounded-sm ${stat.bg} border ${stat.border} flex items-center justify-center`}>
+                  <span className={stat.color}>{stat.icon}</span>
+                </div>
+                <ArrowRight size={12} className="text-cream/20 group-hover:text-cream/50 group-hover:translate-x-0.5 transition-all" />
+              </div>
+              <p className={`font-display text-4xl font-light ${stat.color} mb-1 leading-none`}>
+                {stat.value}
+              </p>
+              <p className="font-mono text-2xs text-cream/35 tracking-wider uppercase">{stat.label}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Quick actions + Recent lots */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick actions */}
+        <div className="card p-5">
+          <p className="card-title">Quick Actions</p>
+          <div className="space-y-2">
+            {actions.map(action => (
+              <button
+                key={action.path}
+                onClick={() => navigate(action.path)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-sm font-mono text-xs tracking-wide transition-all ${
+                  action.primary
+                    ? "bg-terracotta/15 border border-terracotta/30 text-terracotta hover:bg-terracotta/25"
+                    : "bg-transparent border border-border text-cream/50 hover:text-cream hover:border-border-strong"
+                }`}
+              >
+                <span>{action.icon}</span>
+                <span>{action.label}</span>
+                <ArrowRight size={11} className="ml-auto opacity-50" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent lots */}
+        <div className="card p-5 lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <p className="card-title mb-0">Recent Lots</p>
+            <button
+              onClick={() => navigate("/lots")}
+              className="font-mono text-2xs text-amber hover:text-gold transition-colors"
+            >
+              View all →
+            </button>
+          </div>
+          {data && data.results.length > 0 ? (
+            <div className="space-y-2">
+              {data.results.slice(0, 5).map(lot => (
+                <div
+                  key={lot.id}
+                  onClick={() => navigate(`/lots/${lot.id}`)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-sm border border-transparent hover:border-border hover:bg-white/3 cursor-pointer transition-all group"
+                >
+                  <div className="w-6 h-6 rounded-sm bg-terracotta/10 border border-terracotta/20 flex items-center justify-center shrink-0">
+                    <Coffee size={10} className="text-terracotta/60" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-mono text-xs text-cream truncate">{lot.name}</p>
+                    <p className="font-mono text-2xs text-cream/30">{lot.lot_id} · {lot.region}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {lot.sca_score && (
+                      <p className="font-mono text-xs text-gold">{lot.sca_score} pts</p>
+                    )}
+                    <p className="font-mono text-2xs text-cream/30">{lot.grade}</p>
+                  </div>
+                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${lot.export_ready ? "bg-mist" : lot.eudr_dds_ready ? "bg-gold" : "bg-terracotta/50"}`} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <Package size={24} className="text-cream/15 mb-2" />
+              <p className="font-mono text-xs text-cream/25">No lots yet</p>
+              <button
+                onClick={() => navigate("/lots/new")}
+                className="font-mono text-2xs text-amber hover:text-gold mt-2 transition-colors"
+              >
+                Register first lot →
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Farmer stub */}
+      {role === "farmer" && (
+        <div className="card p-5 border-mist/15">
+          <p className="font-mono text-2xs text-mist tracking-widest uppercase mb-3">Farm Status</p>
+          <p className="font-mono text-xs text-cream/30">Farm profile and lot history — coming soon.</p>
+        </div>
+      )}
+    </PageWrapper>
+  );
+}
+---MARKETPLACE---
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { getLots } from "../api/lots";
+import { useAuth } from "../context/AuthContext";
+import { useWatchlist } from "../hooks/useWatchlist";
+import PageWrapper from "../components/PageWrapper";
+import {
+  Search, ShieldCheck, Leaf, Mountain, Package,
+  FlaskConical, TrendingUp, Award, Filter, X, Heart
+} from "lucide-react";
+
+const REGIONS    = ["yirgacheffe","sidama","guji","jimma","harrar","limu","nekemte"];
+const GRADES     = ["G1","G2","G3"];
+const PROCESSING = ["washed","natural","honey","anaerobic"];
+
+const PROCESS_COLOR: Record<string, string> = {
+  washed:   "#3B7DD8",
+  natural:  "#C1440E",
+  honey:    "#C9952A",
+  anaerobic:"#7C4DFF",
+  other:    "#666",
+};
+
+function ScaBadge({ score }: { score: number | null }) {
+  if (!score) return null;
+  const color = score >= 85 ? "#C9952A" : score >= 80 ? "#A8C5A0" : "rgba(245,237,216,0.4)";
+  const label = score >= 90 ? "OUTSTANDING" : score >= 85 ? "EXCELLENT" : score >= 80 ? "VERY GOOD" : "GOOD";
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+      <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", fontWeight: 300, color, lineHeight: 1 }}>
+        {score.toFixed(1)}
+      </span>
+      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.48rem", letterSpacing: "0.12em", color, opacity: 0.7 }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function FlavorTag({ tag }: { tag: string }) {
+  return (
+    <span style={{
+      padding: "2px 8px",
+      background: "rgba(74,37,21,0.6)",
+      border: "1px solid rgba(201,149,42,0.2)",
+      borderRadius: "20px",
+      fontFamily: "Instrument Sans, sans-serif",
+      fontSize: "0.62rem",
+      color: "#EDE0C4",
+      whiteSpace: "nowrap",
+    }}>
+      {tag}
+    </span>
+  );
+}
+
+export default function Marketplace() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "listed" });
+  const [search, setSearch]   = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  const params = { ...filters, ...(search ? { search } : {}) };
+  const { data, isLoading } = useQuery({
+    queryKey: ["marketplace", params],
+    queryFn:  () => getLots(params),
+  });
+
+  const setFilter = (k: string, v: string) =>
+    setFilters(f => v
+      ? { ...f, [k]: v }
+      : Object.fromEntries(Object.entries(f).filter(([key]) => key !== k))
+    );
+
+  const isBuyer = user?.role === "buyer" || user?.role === "admin";
+  const { toggle, isWatched } = useWatchlist();
+
+  const sel = {
+    background: "rgba(245,237,216,0.04)",
+    border: "1px solid rgba(245,237,216,0.09)",
+    borderRadius: "4px", padding: "8px 12px",
+    color: "#F5EDD8",
+    fontFamily: "Instrument Sans, sans-serif",
+    fontSize: "0.8125rem", outline: "none",
+    flex: "1 1 140px",
+  };
+
+  const activeFilterCount = Object.keys(filters).filter(k => k !== "status").length;
+
+  return (
+    <PageWrapper>
+      {/* Header */}
+      <div style={{ marginBottom: "28px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px" }}>
+        <div>
+          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.9rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
+            Specialty Lot Marketplace
+          </h1>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+            EUDR-Verified Ethiopian Coffee · Direct from Origin
+          </p>
+        </div>
+        {data && (
+          <div style={{ fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "rgba(245,237,216,0.3)", paddingTop: "6px" }}>
+            {data.count} lot{data.count !== 1 ? "s" : ""}
+          </div>
+        )}
+      </div>
+
+      {/* Search + filter bar */}
+      <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: "8px",
+          background: "rgba(245,237,216,0.04)",
+          border: "1px solid rgba(245,237,216,0.09)",
+          borderRadius: "4px", padding: "8px 12px",
+          flex: "2 1 220px",
+        }}>
+          <Search size={13} color="rgba(245,237,216,0.25)" />
+          <input
+            style={{ background: "transparent", border: "none", outline: "none", color: "#F5EDD8", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8125rem", width: "100%" }}
+            placeholder="Search lot name, origin, lot ID..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {search && <X size={12} color="rgba(245,237,216,0.3)" style={{ cursor: "pointer" }} onClick={() => setSearch("")} />}
+        </div>
+        <button
+          onClick={() => setShowFilters(f => !f)}
+          style={{
+            display: "flex", alignItems: "center", gap: "6px",
+            background: showFilters ? "rgba(201,149,42,0.12)" : "rgba(245,237,216,0.04)",
+            border: showFilters ? "1px solid rgba(201,149,42,0.3)" : "1px solid rgba(245,237,216,0.09)",
+            borderRadius: "4px", padding: "8px 14px",
+            color: showFilters ? "#C9952A" : "rgba(245,237,216,0.5)",
+            fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8125rem",
+            cursor: "pointer",
+          }}
+        >
+          <Filter size={13} />
+          Filters
+          {activeFilterCount > 0 && (
+            <span style={{ background: "#C1440E", color: "white", borderRadius: "10px", padding: "1px 6px", fontSize: "0.6rem", fontFamily: "DM Mono, monospace" }}>
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Expanded filters */}
+      {showFilters && (
+        <div style={{
+          display: "flex", gap: "8px", flexWrap: "wrap",
+          marginBottom: "16px",
+          padding: "14px",
+          background: "rgba(245,237,216,0.02)",
+          border: "1px solid rgba(245,237,216,0.06)",
+          borderRadius: "6px",
+        }}>
+          <select style={sel} onChange={e => setFilter("region", e.target.value)}>
+            <option value="">All Regions</option>
+            {REGIONS.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+          </select>
+          <select style={sel} onChange={e => setFilter("grade", e.target.value)}>
+            <option value="">All Grades</option>
+            {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <select style={sel} onChange={e => setFilter("processing", e.target.value)}>
+            <option value="">All Processing</option>
+            {PROCESSING.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+          </select>
+          <select style={sel} onChange={e => setFilter("lot_type", e.target.value)}>
+            <option value="">Spot + Forward</option>
+            <option value="spot">Spot Only</option>
+            <option value="forward">Forward Only</option>
+            <option value="reserve">Reserve</option>
+          </select>
+          <select style={sel} onChange={e => setFilter("eudr_dds_ready", e.target.value)}>
+            <option value="">All Compliance</option>
+            <option value="true">EUDR Ready Only</option>
+          </select>
+          <select style={sel} onChange={e => setFilter("is_organic", e.target.value)}>
+            <option value="">All Certifications</option>
+            <option value="true">Organic Only</option>
+          </select>
+        </div>
+      )}
+
+      {isLoading && (
+        <div style={{ textAlign: "center", padding: "64px", fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.25)" }}>
+          Loading marketplace...
+        </div>
+      )}
+
+      {data && data.results.length === 0 && (
+        <div style={{ textAlign: "center", padding: "64px" }}>
+          <Package size={32} color="rgba(245,237,216,0.1)" style={{ marginBottom: "12px" }} />
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.25)" }}>
+            No lots available matching your filters.
+          </p>
+        </div>
+      )}
+
+      {/* Card grid */}
+      {data && data.results.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))", gap: "16px" }}>
+          {data.results.map(lot => (
+            <div
+              key={lot.id}
+              style={{
+                background: "#2C1810",
+                border: "1px solid rgba(245,237,216,0.07)",
+                borderRadius: "8px",
+                display: "flex", flexDirection: "column",
+                transition: "border-color 0.15s, transform 0.15s",
+                overflow: "hidden",
+                cursor: "pointer",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = "rgba(201,149,42,0.3)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = "rgba(245,237,216,0.07)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+              onClick={() => navigate(`/marketplace/${lot.id}`)}
+            >
+              {/* Card header strip */}
+              <div style={{
+                padding: "16px 18px 14px",
+                borderBottom: "1px solid rgba(245,237,216,0.05)",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                  <div>
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.15em", color: "#C9952A", textTransform: "uppercase", margin: "0 0 3px" }}>
+                      {lot.lot_id}
+                    </p>
+                    <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.15rem", fontWeight: 400, color: "#F5EDD8", margin: 0, lineHeight: 1.2 }}>
+                      {lot.name}
+                    </p>
+                  </div>
+                  <ScaBadge score={lot.latest_sca_score ?? (lot.sca_score ? parseFloat(lot.sca_score as unknown as string) : null)} />
+                </div>
+
+                {/* Origin meta */}
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "6px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", textTransform: "capitalize" }}>
+                    <Mountain size={9} /> {lot.region} · {lot.altitude_m}m
+                  </span>
+                  <span style={{
+                    fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+                    color: PROCESS_COLOR[lot.processing] || "#888",
+                    textTransform: "uppercase", letterSpacing: "0.08em",
+                  }}>
+                    {lot.processing}
+                  </span>
+                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(245,237,216,0.3)" }}>
+                    {lot.grade}
+                  </span>
+                  {lot.lot_type === "forward" && (
+                    <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#D4824A", letterSpacing: "0.08em" }}>
+                      FORWARD
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Flavor tags */}
+              {lot.flavor_tags && lot.flavor_tags.length > 0 && (
+                <div style={{ padding: "10px 18px", display: "flex", gap: "5px", flexWrap: "wrap", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
+                  {lot.flavor_tags.slice(0, 4).map(tag => <FlavorTag key={tag} tag={tag} />)}
+                </div>
+              )}
+
+              {/* Tasting notes */}
+              {lot.tasting_notes && (
+                <div style={{ padding: "10px 18px 0", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
+                  <p style={{
+                    fontFamily: "Instrument Sans, sans-serif", fontSize: "0.73rem",
+                    color: "rgba(245,237,216,0.4)", lineHeight: 1.55,
+                    margin: "0 0 10px", fontStyle: "italic",
+                    display: "-webkit-box", WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical", overflow: "hidden",
+                  }}>
+                    {lot.tasting_notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Pricing + availability */}
+              <div style={{ padding: "12px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
+                <div>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", margin: "0 0 2px", letterSpacing: "0.08em" }}>
+                    FOB PRICE / KG
+                  </p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.4rem", fontWeight: 300, color: "#C9952A", margin: 0, lineHeight: 1 }}>
+                    {lot.fob_price_usd ? `$${parseFloat(lot.fob_price_usd).toFixed(2)}` : "Price on Request"}
+                  </p>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", margin: "0 0 2px", letterSpacing: "0.08em" }}>
+                    AVAILABLE
+                  </p>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.78rem", color: "#F5EDD8", margin: 0 }}>
+                    {lot.available_qty_kg ? `${parseFloat(lot.available_qty_kg).toLocaleString()} kg` : `${lot.volume_kg} kg`}
+                  </p>
+                  {lot.delivery_window && (
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", margin: "2px 0 0" }}>
+                      {lot.delivery_window}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Badges + exporter */}
+              <div style={{ padding: "10px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+                  {lot.is_eudr_ready && (
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px", padding: "3px 7px", background: "rgba(30,58,47,0.5)", border: "1px solid rgba(74,124,89,0.4)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#A8C5A0" }}>
+                      <ShieldCheck size={8} /> EUDR
+                    </span>
+                  )}
+                  {lot.green_passport_ready && (
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px", padding: "3px 7px", background: "rgba(74,124,89,0.1)", border: "1px solid rgba(74,124,89,0.2)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#4A7C59" }}>
+                      <Leaf size={8} /> Passport
+                    </span>
+                  )}
+                  {lot.is_organic && (
+                    <span style={{ padding: "3px 7px", background: "rgba(74,124,89,0.1)", border: "1px solid rgba(74,124,89,0.2)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#4A7C59" }}>
+                      Organic
+                    </span>
+                  )}
+                  <span style={{ display: "flex", alignItems: "center", gap: "3px", padding: "3px 7px", background: "rgba(245,237,216,0.03)", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.35)" }}>
+                    <Award size={8} /> {lot.compliance_score ?? 0}/7 Gates
+                  </span>
+                </div>
+                <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.25)", maxWidth: "80px", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <span
+                    onClick={e => { e.stopPropagation(); if(lot.exporter) navigate(`/exporters/${lot.exporter}`); }}
+                    style={{ cursor: lot.exporter ? "pointer" : "default", textDecoration: lot.exporter ? "underline" : "none", textDecorationColor: "rgba(245,237,216,0.2)" }}
+                  >{lot.exporter_company || lot.exporter_name}</span>
+                </span>
+              </div>
+
+              {/* CTA buttons */}
+              <div style={{ padding: "0 18px 16px", display: "flex", gap: "8px" }} onClick={e => e.stopPropagation()}>
+                {isBuyer && (
+                  <button
+                    onClick={() => toggle(lot.id)}
+                    title={isWatched(lot.id) ? "Remove from watchlist" : "Add to watchlist"}
+                    style={{ background: "transparent", border: `1px solid ${isWatched(lot.id) ? "rgba(193,68,14,0.4)" : "rgba(245,237,216,0.1)"}`, borderRadius: "4px", padding: "9px 10px", color: isWatched(lot.id) ? "#C1440E" : "rgba(245,237,216,0.3)", cursor: "pointer", display: "flex", alignItems: "center", flexShrink: 0 }}>
+                    <Heart size={13} fill={isWatched(lot.id) ? "#C1440E" : "none"} />
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate(`/marketplace/${lot.id}`)}
+                  style={{ flex: 1, background: "transparent", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "4px", padding: "9px", color: "rgba(245,237,216,0.6)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", transition: "all 0.12s" }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(245,237,216,0.25)"; e.currentTarget.style.color = "#F5EDD8"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(245,237,216,0.12)"; e.currentTarget.style.color = "rgba(245,237,216,0.6)"; }}
+                >
+                  View Lot
+                </button>
+                {isBuyer && (
+                  <button
+                    onClick={() => navigate(`/marketplace/${lot.id}?offer=1`)}
+                    style={{ flex: 1, background: "#C1440E", border: "none", borderRadius: "4px", padding: "9px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", transition: "background 0.12s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "#A83509"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "#C1440E"; }}
+                  >
+                    <TrendingUp size={13} /> Make Offer
+                  </button>
+                )}
+                {isBuyer && (
+                  <button
+                    onClick={() => navigate(`/marketplace/${lot.id}?sample=1`)}
+                    style={{ background: "transparent", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "4px", padding: "9px 12px", color: "#C1440E", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", display: "flex", alignItems: "center", gap: "5px", transition: "all 0.12s" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(193,68,14,0.08)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <FlaskConical size={13} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </PageWrapper>
+  );
+}
+---LOTDETAIL---
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getLot, getComplianceCheck, downloadEudrDds } from "../api/lots";
+import { getCuppingScores } from "../api/cupping";
+import { useAuth } from "../context/AuthContext";
+import PageWrapper from "../components/PageWrapper";
+import StatusPill from "../components/StatusPill";
+import PolygonCaptureWidget from '../components/PolygonCaptureWidget';
+import FarmMapDisplay from '../components/FarmMapDisplay';
+import CuppingHistory from '../components/CuppingHistory';
+import SampleRequestWidget from '../components/SampleRequestWidget';
+import SettlementWidget from '../components/SettlementWidget';
+import LotDocuments from '../components/LotDocuments';
+import { useState } from "react";
+import {
+  ArrowLeft, MapPin, Mountain, Layers, Award, Download,
+  ShieldCheck, ShieldAlert, ShieldOff, Clock, CheckCircle,
+  XCircle, AlertTriangle, Leaf, FileCheck, Upload, Lock,
+  Pencil, FlaskConical, TrendingUp, Package, Users,
+  Globe, BadgeCheck
+} from "lucide-react";
+
+function RadarChart({ scores }: { scores: Record<string, number> }) {
+  const attrs = ["fragrance_aroma","flavor","aftertaste","acidity","body","balance","sweetness","overall"];
+  const labels = ["Fragrance","Flavor","Aftertaste","Acidity","Body","Balance","Sweetness","Overall"];
+  const cx = 110; const cy = 110; const r = 80;
+  const min = 6; const max = 10;
+  const angle = (i: number) => (i * 2 * Math.PI) / attrs.length - Math.PI / 2;
+  const point = (i: number, val: number) => {
+    const pct = (val - min) / (max - min);
+    const a = angle(i);
+    return [cx + r * pct * Math.cos(a), cy + r * pct * Math.sin(a)];
+  };
+  const gridPoint = (i: number, pct: number) => {
+    const a = angle(i);
+    return [cx + r * pct * Math.cos(a), cy + r * pct * Math.sin(a)];
+  };
+  const scorePoints = attrs.map((k, i) => point(i, scores[k] ?? 8));
+  const polyline = scorePoints.map(p => p.join(",")).join(" ");
+  return (
+    <svg viewBox="0 0 220 220" style={{ width: "100%", maxWidth: 220 }}>
+      {[0.25, 0.5, 0.75, 1].map(pct => (
+        <polygon key={pct} points={attrs.map((_, i) => gridPoint(i, pct).join(",")).join(" ")} fill="none" stroke="rgba(245,237,216,0.07)" strokeWidth="1" />
+      ))}
+      {attrs.map((_, i) => (
+        <line key={i} x1={cx} y1={cy} x2={gridPoint(i, 1)[0]} y2={gridPoint(i, 1)[1]} stroke="rgba(245,237,216,0.07)" strokeWidth="1" />
+      ))}
+      <polygon points={polyline} fill="rgba(201,149,42,0.15)" stroke="#C9952A" strokeWidth="1.5" />
+      {scorePoints.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="3" fill="#C9952A" stroke="#1A0F07" strokeWidth="1.5" />
+      ))}
+      {attrs.map((_, i) => {
+        const [x, y] = gridPoint(i, 1.22);
+        return (
+          <text key={i} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fontSize="7.5" fill="rgba(245,237,216,0.45)" fontFamily="DM Mono, monospace">
+            {labels[i]}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+// Region hero images (Unsplash, free to use)
+const REGION_IMAGES: Record<string, string> = {
+  yirgacheffe: "https://images.unsplash.com/photo-1611280564029-cf77b5b5caf4?w=900&q=80",
+  guji:        "https://images.unsplash.com/photo-1599639668273-bfa2b9a56b50?w=900&q=80",
+  sidama:      "https://images.unsplash.com/photo-1501621965065-7b2153cbf0c3?w=900&q=80",
+  harrar:      "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=900&q=80",
+  jimma:       "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=80",
+  gedeo:       "https://images.unsplash.com/photo-1611280564029-cf77b5b5caf4?w=900&q=80",
+  default:     "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=80",
+};
+
+function getRegionImage(region: string): string {
+  const key = region?.toLowerCase() ?? "";
+  for (const k of Object.keys(REGION_IMAGES)) {
+    if (key.includes(k)) return REGION_IMAGES[k];
+  }
+  return REGION_IMAGES.default;
+}
+
+export default function LotDetail() {
+  const { id }     = useParams<{ id: string }>();
+  const navigate   = useNavigate();
+  const { user }   = useAuth();
+  const isExporter = user?.role === "exporter" || user?.role === "admin";
+  const [ddsLoading, setDdsLoading] = useState(false);
+  const [ddsError,   setDdsError]   = useState("");
+
+  const { data: lot, isLoading, refetch } = useQuery({
+    queryKey: ["lot", id],
+    queryFn:  () => getLot(id!),
+    enabled:  !!id,
+  });
+  const { data: compliance } = useQuery({
+    queryKey: ["compliance", id],
+    queryFn:  () => getComplianceCheck(id!),
+    enabled:  !!id,
+  });
+  const { data: cuppingScores } = useQuery({
+    queryKey: ["cupping-scores", id],
+    queryFn:  () => getCuppingScores(id!),
+    enabled:  !!id,
+  });
+
+  const gateLabels: Record<string, string> = {
+    gps_verified:        "GPS Verified",
+    deforestation_free:  "Deforestation Free",
+    eudr_dds_ready:      "EUDR DDS Ready",
+    phyto_cert_uploaded: "Phytosanitary Cert",
+    ecta_license_active: "ECTA License",
+    nbe_fx_declared:     "NBE FX Declaration",
+    cta_floor_met:       "CTA Floor Price Met",
+  };
+  const gateIcons: Record<string, React.ReactNode> = {
+    gps_verified:        <MapPin size={12} />,
+    deforestation_free:  <Leaf size={12} />,
+    eudr_dds_ready:      <FileCheck size={12} />,
+    phyto_cert_uploaded: <Upload size={12} />,
+    ecta_license_active: <ShieldCheck size={12} />,
+    nbe_fx_declared:     <TrendingUp size={12} />,
+    cta_floor_met:       <Award size={12} />,
+  };
+
+  if (isLoading) return (
+    <PageWrapper>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
+        <p style={{ fontFamily: "DM Mono, monospace", color: "#D4824A", letterSpacing: "0.2em", fontSize: "0.75rem" }}>LOADING LOT...</p>
+      </div>
+    </PageWrapper>
+  );
+  if (!lot) return (
+    <PageWrapper>
+      <p style={{ fontFamily: "DM Mono, monospace", color: "#C1440E" }}>Lot not found.</p>
+    </PageWrapper>
+  );
+
+  const bestScore = cuppingScores?.find(s => s.status === "confirmed") ?? cuppingScores?.[0] ?? null;
+  const radarScores: Record<string, number> = bestScore ? {
+    fragrance_aroma: parseFloat(String(bestScore.fragrance_aroma)) || 8,
+    flavor:          parseFloat(String(bestScore.flavor))          || 8,
+    aftertaste:      parseFloat(String(bestScore.aftertaste))      || 8,
+    acidity:         parseFloat(String(bestScore.acidity))         || 8,
+    body:            parseFloat(String(bestScore.body))            || 8,
+    balance:         parseFloat(String(bestScore.balance))         || 8,
+    sweetness:       parseFloat(String(bestScore.sweetness))       || 8,
+    overall:         parseFloat(String(bestScore.overall))         || 8,
+  } : { fragrance_aroma: 8, flavor: 8, aftertaste: 8, acidity: 8, body: 8, balance: 8, sweetness: 8, overall: 8 };
+
+  const hasRealScores = !!bestScore;
+  const dcStatus = compliance?.deforestation_check?.status;
+  const allGatesPass = compliance && compliance.failed_gates.length === 0;
+  const heroImg = getRegionImage(lot.region);
+
+  const trustBadges = [
+    { icon: <Globe size={14} />,      label: "100% Traceable",     active: lot.gps_verified },
+    { icon: <Leaf size={14} />,       label: "Zero Deforestation", active: lot.deforestation_free },
+    { icon: <Users size={14} />,      label: "Farmer Positive",    active: true },
+    { icon: <BadgeCheck size={14} />, label: "EU Compliant",       active: lot.eudr_dds_ready },
+  ];
+
+  return (
+    <PageWrapper>
+      <div style={{ maxWidth: "1140px" }}>
+
+        {/* Back */}
+        <button onClick={() => navigate("/lots")} style={{
+          display: "flex", alignItems: "center", gap: "6px",
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+          letterSpacing: "0.1em", color: "rgba(245,237,216,0.35)",
+          padding: 0, marginBottom: "20px", textTransform: "uppercase",
+        }}>
+          <ArrowLeft size={12} /> Back to Lots
+        </button>
+
+        {/* ── HERO with region image ─────────────────────────── */}
+        <div style={{
+          borderRadius: "8px", overflow: "hidden",
+          marginBottom: "20px", position: "relative",
+          border: "1px solid rgba(74,124,89,0.2)",
+        }}>
+          {/* Landscape image */}
+          <div style={{
+            height: "200px", position: "relative", overflow: "hidden",
+          }}>
+            <img
+              src={heroImg}
+              alt={lot.region}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(to bottom, rgba(26,15,7,0.2) 0%, rgba(26,15,7,0.85) 100%)",
+            }} />
+            {/* Lot ID chip over image */}
+            <div style={{
+              position: "absolute", top: "14px", left: "18px",
+              background: "rgba(26,15,7,0.7)", backdropFilter: "blur(8px)",
+              border: "1px solid rgba(245,237,216,0.15)", borderRadius: "4px",
+              padding: "4px 10px",
+              fontFamily: "DM Mono, monospace", fontSize: "0.6rem",
+              letterSpacing: "0.12em", color: "rgba(245,237,216,0.6)",
+            }}>
+              {lot.lot_id}
+            </div>
+            {/* Status pill over image */}
+            <div style={{ position: "absolute", top: "12px", right: "16px" }}>
+              <StatusPill status={lot.status} />
+            </div>
+          </div>
+
+          {/* Info bar below image */}
+          <div style={{
+            background: "linear-gradient(135deg, #2C1810 0%, #1E3A2F 100%)",
+            padding: "20px 28px",
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+              <div>
+                <h1 style={{
+                  fontFamily: "Cormorant Garamond, serif",
+                  fontSize: "1.85rem", fontWeight: 400,
+                  color: "#F5EDD8", margin: "0 0 4px", lineHeight: 1.1,
+                }}>
+                  {lot.name}
+                </h1>
+                <p style={{
+                  fontFamily: "DM Mono, monospace", fontSize: "0.62rem",
+                  color: "rgba(245,237,216,0.4)", margin: "0 0 14px", letterSpacing: "0.1em",
+                }}>
+                  {lot.region.toUpperCase()} · {lot.processing.toUpperCase()} · {lot.grade}
+                </p>
+                <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                  {[
+                    { icon: <Mountain size={11} />, label: "Altitude", val: `${lot.altitude_m} masl` },
+                    { icon: <Package size={11} />,  label: "Volume",   val: `${lot.volume_kg} kg` },
+                    { icon: <MapPin size={11} />,   label: "Kebele",   val: lot.kebele || lot.region },
+                  ].map(m => (
+                    <div key={m.label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      <span style={{ color: "rgba(245,237,216,0.3)" }}>{m.icon}</span>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", marginRight: "3px" }}>{m.label}</span>
+                      <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.78rem", color: "#F5EDD8" }}>{m.val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Q-Score badge */}
+              {lot.sca_score && (
+                <div style={{
+                  background: "rgba(201,149,42,0.12)", border: "1px solid rgba(201,149,42,0.25)",
+                  borderRadius: "6px", padding: "14px 22px", textAlign: "center", flexShrink: 0,
+                }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", letterSpacing: "0.15em", color: "rgba(201,149,42,0.6)", margin: "0 0 2px", textTransform: "uppercase" }}>Q-Score</p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.8rem", fontWeight: 300, color: "#C9952A", margin: 0, lineHeight: 1 }}>{lot.sca_score}</p>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(201,149,42,0.5)", margin: "3px 0 0" }}>
+                    {parseFloat(String(lot.sca_score)) >= 90 ? "OUTSTANDING" : parseFloat(String(lot.sca_score)) >= 85 ? "EXCELLENT" : parseFloat(String(lot.sca_score)) >= 80 ? "SPECIALTY" : "STANDARD"}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Trust badges */}
+            <div style={{
+              display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "18px",
+              paddingTop: "16px", borderTop: "1px solid rgba(245,237,216,0.07)",
+            }}>
+              {trustBadges.map(b => (
+                <div key={b.label} style={{
+                  display: "flex", alignItems: "center", gap: "6px",
+                  padding: "5px 12px", borderRadius: "20px",
+                  background: b.active ? "rgba(30,58,47,0.5)" : "rgba(245,237,216,0.04)",
+                  border: `1px solid ${b.active ? "rgba(74,124,89,0.4)" : "rgba(245,237,216,0.1)"}`,
+                  fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
+                  color: b.active ? "#A8C5A0" : "rgba(245,237,216,0.25)",
+                  letterSpacing: "0.06em",
+                }}>
+                  {b.icon} {b.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Two column grid ───────────────────────────────────── */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "clamp(1px,100%,1.4fr) clamp(1px,100%,1fr)",
+          gap: "20px", alignItems: "start",
+        }}>
+
+          {/* ══ LEFT COLUMN ══════════════════════════════════════ */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+            {/* Quality & Sensory */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 18px" }}>
+                Quality & Sensory
+              </p>
+
+              {/* Metrics row */}
+              <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
+                {lot.sca_score && (
+                  <div style={{
+                    flex: 1, minWidth: "90px",
+                    background: "rgba(201,149,42,0.08)", border: "1px solid rgba(201,149,42,0.2)",
+                    borderRadius: "6px", padding: "14px 16px", textAlign: "center",
+                  }}>
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(201,149,42,0.5)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Q-Score</p>
+                    <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#C9952A", margin: 0, lineHeight: 1 }}>{lot.sca_score}</p>
+                  </div>
+                )}
+                <div style={{
+                  flex: 1, minWidth: "90px",
+                  background: "rgba(30,58,47,0.2)", border: "1px solid rgba(74,124,89,0.15)",
+                  borderRadius: "6px", padding: "14px 16px", textAlign: "center",
+                }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(168,197,160,0.5)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Altitude</p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#A8C5A0", margin: 0, lineHeight: 1 }}>{lot.altitude_m}</p>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(168,197,160,0.4)", margin: "2px 0 0" }}>MASL</p>
+                </div>
+                <div style={{
+                  flex: 1, minWidth: "90px",
+                  background: "rgba(212,130,74,0.08)", border: "1px solid rgba(212,130,74,0.15)",
+                  borderRadius: "6px", padding: "14px 16px", textAlign: "center",
+                }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(212,130,74,0.5)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Volume</p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#D4824A", margin: 0, lineHeight: 1 }}>{lot.volume_kg}</p>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(212,130,74,0.4)", margin: "2px 0 0" }}>KG</p>
+                </div>
+              </div>
+
+              {/* Radar + score details */}
+              <div style={{ display: "flex", gap: "24px", alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ flexShrink: 0, width: "180px" }}>
+                  <RadarChart scores={radarScores} />
+                  <p style={{
+                    fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+                    textAlign: "center", margin: "4px 0 0",
+                    color: hasRealScores ? "rgba(201,149,42,0.5)" : "rgba(245,237,216,0.2)",
+                    letterSpacing: "0.08em",
+                  }}>
+                    {hasRealScores ? (bestScore?.status === "confirmed" ? "CONFIRMED SCORE" : "LATEST SCORE") : "NO SCORE YET"}
+                  </p>
+                </div>
+                <div style={{ flex: 1, minWidth: "140px" }}>
+                  {lot.q_grader_name && (
+                    <div style={{ marginBottom: "12px" }}>
+                      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 3px" }}>Q-Grader</p>
+                      <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#F5EDD8", margin: 0 }}>
+                        {lot.q_grader_name}
+                        {lot.q_grader_cert_id && <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "rgba(245,237,216,0.3)" }}> · #{lot.q_grader_cert_id}</span>}
+                      </p>
+                    </div>
+                  )}
+                  {lot.flavor_notes && (
+                    <div>
+                      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 6px" }}>Flavor Notes</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                        {lot.flavor_notes.split(",").map((f: string) => (
+                          <span key={f} style={{
+                            padding: "3px 8px",
+                            background: "rgba(201,149,42,0.08)", border: "1px solid rgba(201,149,42,0.2)",
+                            borderRadius: "20px", fontFamily: "DM Mono, monospace",
+                            fontSize: "0.58rem", color: "#C9952A",
+                          }}>{f.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Score bar */}
+                  {lot.sca_score && (
+                    <div style={{ marginTop: "12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                        <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.1em" }}>80</span>
+                        <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.1em" }}>100</span>
+                      </div>
+                      <div style={{ height: "4px", background: "rgba(245,237,216,0.08)", borderRadius: "2px", overflow: "hidden" }}>
+                        <div style={{ height: "100%", borderRadius: "2px", background: "linear-gradient(to right, #C1440E, #C9952A)", width: `${((parseFloat(String(lot.sca_score)) - 80) / 20) * 100}%`, transition: "width 0.6s ease" }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Origin & Processing */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 16px" }}>
+                Origin & Processing
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                {[
+                  ["Processing",      lot.processing],
+                  ["Varietal",        lot.varietal || "Ethiopian Heirloom"],
+                  ["Harvest Date",    lot.harvest_date],
+                  ["Washing Station", lot.washing_station || "—"],
+                  ["Kebele",          lot.kebele || "—"],
+                  ["Price / kg",      lot.price_per_kg ? `$${lot.price_per_kg}` : "—"],
+                ].map(([label, val]) => (
+                  <div key={label}>
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 4px" }}>{label}</p>
+                    <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "#F5EDD8", margin: 0 }}>{val}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Cupping History + Settlement */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <CuppingHistory lotId={lot.id} />
+              <div style={{ marginTop: "24px" }}>
+                <SettlementWidget lotId={lot.id} lotRef={lot.lot_id}
+                  defaultUsd={lot.price_per_kg && lot.volume_kg
+                    ? parseFloat(String(lot.price_per_kg)) * parseFloat(String(lot.volume_kg))
+                    : undefined}
+                />
+              </div>
+            </div>
+
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <LotDocuments lot={lot} lotId={lot.id} />
+            </div>
+            {/* Boundary capture — exporter/admin only */}
+            {isExporter && (
+              <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+                <PolygonCaptureWidget
+                  mode="lot" lotId={lot.id}
+                  existingPolygon={lot.boundary ?? null}
+                  canInherit={true} onSaved={() => refetch()}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ══ RIGHT COLUMN ═════════════════════════════════════ */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+            {/* Boundary map */}
+            {lot.boundary && (
+              <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", overflow: "hidden" }}>
+                <FarmMapDisplay polygon={lot.boundary} label="Lot Boundary" height={200} />
+              </div>
+            )}
+
+            {/* EUDR Compliance */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "24px" }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 14px" }}>
+                EUDR Compliance
+              </p>
+
+              {/* Big status banner */}
+              {compliance && (
+                <div style={{
+                  padding: "16px", borderRadius: "6px", marginBottom: "16px",
+                  background: allGatesPass ? "rgba(30,58,47,0.5)" : "rgba(193,68,14,0.12)",
+                  border: `1px solid ${allGatesPass ? "rgba(74,124,89,0.5)" : "rgba(193,68,14,0.3)"}`,
+                  textAlign: "center",
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "4px" }}>
+                    {allGatesPass
+                      ? <ShieldCheck size={18} color="#A8C5A0" />
+                      : <ShieldAlert size={18} color="#C1440E" />
+                    }
+                    <p style={{
+                      fontFamily: "Instrument Sans, sans-serif", fontSize: "0.95rem", fontWeight: 600,
+                      color: allGatesPass ? "#A8C5A0" : "#C1440E", margin: 0,
+                    }}>
+                      {allGatesPass ? "STATUS: VERIFIED" : `${compliance.failed_gates.length} GATE${compliance.failed_gates.length > 1 ? "S" : ""} FAILING`}
+                    </p>
+                  </div>
+                  <p style={{
+                    fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.08em",
+                    color: allGatesPass ? "rgba(168,197,160,0.6)" : "rgba(193,68,14,0.7)", margin: 0,
+                  }}>
+                    {allGatesPass ? "Negligible Risk · Export Cleared" : "Export button blocked until all gates pass"}
+                  </p>
+                </div>
+              )}
+
+              {/* Deforestation check banner */}
+              {compliance?.deforestation_check && (
+                <div style={{
+                  display: "flex", alignItems: "flex-start", gap: "10px",
+                  padding: "10px 12px", borderRadius: "4px", marginBottom: "14px",
+                  background: dcStatus === "clear"   ? "rgba(30,58,47,0.3)"   :
+                              dcStatus === "overlap" ? "rgba(193,68,14,0.12)" : "rgba(201,149,42,0.08)",
+                  border: `1px solid ${
+                    dcStatus === "clear"   ? "rgba(74,124,89,0.35)"  :
+                    dcStatus === "overlap" ? "rgba(193,68,14,0.35)"  : "rgba(201,149,42,0.25)"}`,
+                }}>
+                  <span style={{ flexShrink: 0, marginTop: "1px", color: dcStatus === "clear" ? "#A8C5A0" : dcStatus === "overlap" ? "#C1440E" : "#C9952A" }}>
+                    {dcStatus === "clear"   && <ShieldCheck size={13} />}
+                    {dcStatus === "overlap" && <ShieldAlert size={13} />}
+                    {dcStatus === "pending" && <Clock size={13} />}
+                    {dcStatus === "no_data" && <ShieldOff size={13} />}
+                  </span>
+                  <p style={{
+                    fontFamily: "Instrument Sans, sans-serif", fontSize: "0.77rem", margin: 0,
+                    color: dcStatus === "clear" ? "#A8C5A0" : dcStatus === "overlap" ? "#C1440E" : "#C9952A",
+                  }}>
+                    {compliance.deforestation_check.message}
+                  </p>
+                </div>
+              )}
+
+              {/* Gate list */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px", marginBottom: "18px" }}>
+                {compliance ? Object.entries(compliance.gates).map(([key, pass]) => {
+                  if (key === "deforestation_free") {
+                    const dc = compliance.deforestation_check;
+                    const isPending = dc?.status === "pending" || dc?.status === "no_data";
+                    const isOverlap = dc?.status === "overlap";
+                    const bg = isPending ? "rgba(201,149,42,0.06)" : isOverlap ? "rgba(193,68,14,0.08)" : "rgba(30,58,47,0.12)";
+                    const bd = isPending ? "rgba(201,149,42,0.18)" : isOverlap ? "rgba(193,68,14,0.22)" : "rgba(74,124,89,0.18)";
+                    const ic = isPending ? "#C9952A" : isOverlap ? "#C1440E" : "#A8C5A0";
+                    return (
+                      <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 10px", borderRadius: "3px", background: bg, border: `1px solid ${bd}` }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                          <span style={{ color: ic, flexShrink: 0 }}>{gateIcons[key]}</span>
+                          <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.78rem", color: "rgba(245,237,216,0.7)" }}>{gateLabels[key]}</span>
+                        </div>
+                        <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.56rem", color: ic, fontWeight: 600 }}>
+                          {isPending ? <Clock size={9} /> : isOverlap ? <XCircle size={9} /> : <CheckCircle size={9} />}
+                          {isPending ? "PENDING" : isOverlap ? "OVERLAP" : "PASS"}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={key} style={{
+                      display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "7px 10px", borderRadius: "3px",
+                      background: pass ? "rgba(30,58,47,0.12)" : "rgba(193,68,14,0.08)",
+                      border: `1px solid ${pass ? "rgba(74,124,89,0.18)" : "rgba(193,68,14,0.18)"}`,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                        <span style={{ color: pass ? "#4A7C59" : "#C1440E", flexShrink: 0 }}>{gateIcons[key]}</span>
+                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.78rem", color: "rgba(245,237,216,0.7)" }}>{gateLabels[key] || key}</span>
+                      </div>
+                      <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.56rem", color: pass ? "#A8C5A0" : "#C1440E", fontWeight: 600 }}>
+                        {pass ? <CheckCircle size={9} /> : <XCircle size={9} />}
+                        {pass ? "PASS" : "FAIL"}
+                      </span>
+                    </div>
+                  );
+                }) : (
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "rgba(245,237,216,0.2)" }}>Loading...</p>
+                )}
+              </div>
+
+              {/* Failed gates summary */}
+              {compliance && compliance.failed_gates.length > 0 && (
+                <div style={{
+                  display: "flex", alignItems: "flex-start", gap: "10px",
+                  padding: "10px 12px", borderRadius: "4px", marginBottom: "14px",
+                  background: "rgba(193,68,14,0.08)", border: "1px solid rgba(193,68,14,0.2)",
+                }}>
+                  <AlertTriangle size={12} style={{ color: "#C1440E", flexShrink: 0, marginTop: "1px" }} />
+                  <div>
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.56rem", color: "#C1440E", letterSpacing: "0.1em", margin: "0 0 3px", textTransform: "uppercase" }}>
+                      {compliance.failed_gates.length} gate{compliance.failed_gates.length > 1 ? "s" : ""} failing
+                    </p>
+                    {compliance.failed_gates.map((g: string) => (
+                      <p key={g} style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.72rem", color: "rgba(193,68,14,0.7)", margin: "2px 0" }}>{gateLabels[g] || g}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {/* EUDR DDS — prominent full-width green */}
+                <button
+                  onClick={async () => {
+                    setDdsLoading(true); setDdsError("");
+                    try { await downloadEudrDds(lot.id); }
+                    catch(e: unknown) { setDdsError((e as Error).message); }
+                    finally { setDdsLoading(false); }
+                  }}
+                  disabled={!lot.eudr_dds_ready || ddsLoading}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center",
+                    justifyContent: "center", gap: "8px",
+                    padding: "13px", borderRadius: "4px", border: "none",
+                    cursor: lot.eudr_dds_ready ? "pointer" : "not-allowed",
+                    background: lot.eudr_dds_ready
+                      ? "linear-gradient(135deg, #1E3A2F 0%, #2C5940 100%)"
+                      : "rgba(245,237,216,0.04)",
+                    color: lot.eudr_dds_ready ? "#A8C5A0" : "rgba(245,237,216,0.2)",
+                    fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                    boxShadow: lot.eudr_dds_ready ? "0 2px 12px rgba(30,58,47,0.4)" : "none",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {ddsLoading ? <Clock size={13} /> : <Download size={13} />}
+                  {ddsLoading ? "Generating PDF..." : "Generate EUDR DDS Certificate"}
+                </button>
+                {ddsError && <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#C1440E", margin: 0 }}>{ddsError}</p>}
+
+                {isExporter && (
+                  <button
+                    onClick={() => navigate(`/lots/${lot.id}/edit`)}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center",
+                      justifyContent: "center", gap: "8px",
+                      padding: "10px", borderRadius: "3px",
+                      background: "transparent", border: "1px solid rgba(245,237,216,0.1)",
+                      color: "rgba(245,237,216,0.5)",
+                      fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                      letterSpacing: "0.12em", textTransform: "uppercase",
+                      cursor: "pointer", transition: "all 0.15s",
+                    }}
+                  >
+                    <Pencil size={12} /> Edit Lot
+                  </button>
+                )}
+
+                {/* Export CTA */}
+                <button
+                  disabled={!lot.export_ready}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center",
+                    justifyContent: "center", gap: "8px",
+                    padding: "13px", borderRadius: "4px", border: "none",
+                    cursor: lot.export_ready ? "pointer" : "not-allowed",
+                    background: lot.export_ready
+                      ? "linear-gradient(135deg, #C1440E 0%, #A03008 100%)"
+                      : "rgba(245,237,216,0.04)",
+                    color: lot.export_ready ? "#fff" : "rgba(245,237,216,0.2)",
+                    fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                    boxShadow: lot.export_ready ? "0 2px 12px rgba(193,68,14,0.3)" : "none",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {lot.export_ready ? <><TrendingUp size={13} /> Proceed to Export</> : <><Lock size={13} /> Export Locked</>}
+                </button>
+              </div>
+            </div>
+
+            {/* Traceability card */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "20px 24px" }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 14px" }}>
+                Traceability
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  { icon: <MapPin size={12} />,    label: "Washing Station", val: lot.washing_station || "—" },
+                  { icon: <Layers size={12} />,    label: "Kebele",          val: lot.kebele || lot.region },
+                  { icon: <Mountain size={12} />,  label: "Region",          val: lot.region },
+                  { icon: <Globe size={12} />,     label: "Country",         val: "Ethiopia" },
+                ].map(row => (
+                  <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                      <span style={{ color: "rgba(245,237,216,0.25)" }}>{row.icon}</span>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{row.label}</span>
+                    </div>
+                    <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "#F5EDD8" }}>{row.val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Green Passport */}
+            <div style={{ background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "20px 24px" }}>
+              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: "0 0 12px" }}>
+                Green Passport
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>
+                {[
+                  { label: "GPS Verified",      pass: lot.gps_verified,      icon: <MapPin size={11} /> },
+                  { label: "Deforestation Free", pass: lot.deforestation_free, icon: <Leaf size={11} /> },
+                  { label: "EUDR DDS Ready",     pass: lot.eudr_dds_ready,    icon: <FileCheck size={11} /> },
+                ].map(item => (
+                  <div key={item.label} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "7px 10px", borderRadius: "3px",
+                    background: item.pass ? "rgba(30,58,47,0.15)" : "rgba(245,237,216,0.03)",
+                    border: `1px solid ${item.pass ? "rgba(74,124,89,0.25)" : "rgba(245,237,216,0.07)"}`,
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+                      <span style={{ color: item.pass ? "#4A7C59" : "rgba(245,237,216,0.2)" }}>{item.icon}</span>
+                      <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.78rem", color: item.pass ? "rgba(245,237,216,0.8)" : "rgba(245,237,216,0.35)" }}>{item.label}</span>
+                    </div>
+                    {item.pass ? <CheckCircle size={13} color="#4A7C59" /> : <XCircle size={13} color="rgba(245,237,216,0.15)" />}
+                  </div>
+                ))}
+              </div>
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "11px",
+                background: lot.green_passport_ready ? "rgba(74,124,89,0.12)" : "rgba(245,237,216,0.03)",
+                border: `1px solid ${lot.green_passport_ready ? "rgba(74,124,89,0.3)" : "rgba(245,237,216,0.07)"}`,
+                borderRadius: "3px",
+              }}>
+                <Leaf size={12} color={lot.green_passport_ready ? "#A8C5A0" : "rgba(245,237,216,0.2)"} />
+                <p style={{
+                  fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.1em",
+                  textTransform: "uppercase", margin: 0,
+                  color: lot.green_passport_ready ? "#A8C5A0" : "rgba(245,237,216,0.2)",
+                }}>
+                  {lot.green_passport_ready ? "Green Passport Issued" : "Passport Not Yet Issued"}
+                </p>
+              </div>
+            </div>
+
+            {/* Sample Request */}
+            <SampleRequestWidget lotId={lot.id} lotRef={lot.lot_id} />
+
+            {/* Q-Grader actions */}
+            {(user?.role === "qgrader" || user?.role === "admin") && (
+              <div style={{ background: "#2C1810", border: "1px solid rgba(212,130,74,0.15)", borderRadius: "6px", padding: "20px 24px" }}>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#D4824A", margin: "0 0 12px" }}>
+                  Q-Grader Actions
+                </p>
+                <button
+                  onClick={() => navigate(`/lots/${lot.id}/cup`)}
+                  style={{
+                    width: "100%", display: "flex", alignItems: "center",
+                    justifyContent: "center", gap: "8px", padding: "11px", borderRadius: "3px",
+                    background: "rgba(212,130,74,0.08)", border: "1px solid rgba(212,130,74,0.3)",
+                    color: "#D4824A", cursor: "pointer",
+                    fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                    letterSpacing: "0.12em", textTransform: "uppercase",
+                  }}
+                >
+                  <FlaskConical size={13} /> Submit Cupping Score
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    </PageWrapper>
+  );
+}
+---LOGIN---
+import { useState } from "react";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { Coffee, CheckCircle } from "lucide-react";
+
+export default function Login() {
+  const { login }  = useAuth();
+  const navigate   = useNavigate();
+  const [params]   = useSearchParams();
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true); setError("");
+    try {
+      await login({ email, password });
+      navigate("/dashboard");
+    } catch {
+      setError("Invalid credentials. Please try again.");
+    } finally { setLoading(false); }
+  };
+
+  const demoAccounts = [
+    { role: "Admin",    email: "admin@bunnabridge.com", pw: "BunnaAdmin2026!" },
+    { role: "Exporter", email: "dawit@addiscoffee.et",  pw: "Bunna2026!" },
+    { role: "Buyer",    email: "sarah@nordicros.de",    pw: "Bunna2026!" },
+    { role: "Farmer",   email: "abebe@kochere.et",      pw: "Bunna2026!" },
+    { role: "Q-Grader", email: "tigist@scaethiopia.et", pw: "Bunna2026!" },
+  ];
+
+  const inp = {
+    width: "100%", background: "rgba(245,237,216,0.04)",
+    border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px",
+    padding: "10px 14px", color: "#F5EDD8",
+    fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
+    outline: "none", boxSizing: "border-box" as const,
+    transition: "border-color 0.15s",
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#1A0F07", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div style={{ width: "44px", height: "44px", borderRadius: "4px", background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+            <Coffee size={20} color="#C1440E" />
+          </div>
+          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
+            Bunna Bridge
+          </h1>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+            Export-Ready by Design
+          </p>
+        </div>
+
+        {/* Card */}
+        <div style={{ background: "#2C1810", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "6px", padding: "28px" }}>
+          <h2 style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "1.1rem", fontWeight: 500, color: "#F5EDD8", margin: "0 0 20px" }}>
+            Sign in to your account
+          </h2>
+
+          {params.get("registered") && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(74,124,89,0.15)", border: "1px solid rgba(74,124,89,0.3)", borderRadius: "3px", padding: "10px 14px", marginBottom: "16px" }}>
+              <CheckCircle size={14} color="#A8C5A0" />
+              <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8C5A0" }}>Account created. Sign in below.</span>
+            </div>
+          )}
+
+          {error && (
+            <div style={{ background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "3px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "14px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+                Email
+              </label>
+              <input style={inp} type="email" value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com" required
+                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
+                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+              />
+            </div>
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(245,237,216,0.4)", marginBottom: "6px" }}>
+                Password
+              </label>
+              <input style={inp} type="password" value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••" required
+                onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")}
+                onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.1)")}
+              />
+            </div>
+            <button type="submit" disabled={loading} style={{
+              width: "100%", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E",
+              border: "none", borderRadius: "3px", padding: "11px",
+              color: "white", fontFamily: "Instrument Sans, sans-serif",
+              fontSize: "0.9rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer",
+              transition: "background 0.15s",
+            }}>
+              {loading ? "Signing in..." : "Sign In →"}
+            </button>
+          </form>
+
+          <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.35)", margin: "16px 0 0" }}>
+            No account?{" "}
+            <Link to="/register" style={{ color: "#D4824A", textDecoration: "none" }}>Create one →</Link>
+          </p>
+        </div>
+
+        {/* Demo accounts */}
+        <div style={{ background: "rgba(245,237,216,0.02)", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", padding: "16px", marginTop: "12px" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(245,237,216,0.25)", margin: "0 0 10px" }}>
+            Demo Accounts
+          </p>
+          {demoAccounts.map(({ role, email: e, pw }) => (
+            <div key={role} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.25)" }}>{role}</span>
+              <span
+                onClick={() => { setEmail(e); setPassword(pw); }}
+                style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.45)", cursor: "pointer", textDecoration: "underline", textDecorationStyle: "dotted" }}
+                title="Click to autofill"
+              >
+                {e}
+              </span>
+            </div>
+          ))}
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(245,237,216,0.18)", margin: "8px 0 0" }}>
+            Click any email to autofill credentials
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

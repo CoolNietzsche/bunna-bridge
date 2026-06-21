@@ -67,7 +67,7 @@ export default function Register() {
             <Coffee size={18} color="#C1440E" />
           </div>
           <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
-            Bunna Bridge
+            Beersheba
           </h1>
           <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
             Create your account
