@@ -10,7 +10,7 @@ const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string;
   approved:  { color: "#A8D5BC", bg: "rgba(74,124,89,0.12)",  border: "rgba(74,124,89,0.3)",    icon: <CheckCircle size={11} /> },
   rejected:  { color: "#1B4D35", bg: "rgba(192,57,43,0.1)",  border: "rgba(192,57,43,0.25)",    icon: <XCircle size={11} />     },
   shipped:   { color: "#1B4D35", bg: "rgba(212,130,74,0.12)", border: "rgba(212,130,74,0.3)",   icon: <Truck size={11} />       },
-  received:  { color: "#2D7A52", bg: "rgba(30,58,47,0.3)",    border: "rgba(74,124,89,0.3)",    icon: <Package size={11} />     },
+  received:  { color: "#2D7A52", bg: "rgba(27,77,53,0.3)",    border: "rgba(74,124,89,0.3)",    icon: <Package size={11} />     },
 };
 
 export default function SampleRequests() {
@@ -113,7 +113,7 @@ export default function SampleRequests() {
                   { label: role === "exporter" ? "Company" : "Requested", val: role === "exporter" ? (req.buyer_company || "—") : new Date(req.created_at).toLocaleDateString() },
                   { label: "Quantity", val: `${req.quantity_g}g` },
                 ].map(m => (
-                  <div key={m.label} style={{ background: "rgba(245,237,216,0.03)", borderRadius: "3px", padding: "8px 10px" }}>
+                  <div key={m.label} style={{ background: "rgba(28,28,26,0.03)", borderRadius: "3px", padding: "8px 10px" }}>
                     <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)", margin: "0 0 3px" }}>{m.label}</p>
                     <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1C1C1A", margin: 0 }}>{m.val}</p>
                   </div>
@@ -122,7 +122,7 @@ export default function SampleRequests() {
 
               {/* Message */}
               {req.message && (
-                <div style={{ background: "rgba(245,237,216,0.03)", borderRadius: "3px", padding: "10px 12px", marginBottom: "8px" }}>
+                <div style={{ background: "rgba(28,28,26,0.03)", borderRadius: "3px", padding: "10px 12px", marginBottom: "8px" }}>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(28,28,26,0.25)", margin: "0 0 4px" }}>Message</p>
                   <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.6)", margin: 0, lineHeight: 1.5 }}>{req.message}</p>
                 </div>
@@ -130,7 +130,7 @@ export default function SampleRequests() {
 
               {/* Response */}
               {req.response && (
-                <div style={{ background: "rgba(30,58,47,0.2)", border: "1px solid rgba(74,124,89,0.15)", borderRadius: "3px", padding: "10px 12px", marginBottom: "8px" }}>
+                <div style={{ background: "rgba(27,77,53,0.2)", border: "1px solid rgba(74,124,89,0.15)", borderRadius: "3px", padding: "10px 12px", marginBottom: "8px" }}>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(168,197,160,0.5)", margin: "0 0 4px" }}>Response</p>
                   <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8D5BC", margin: 0, lineHeight: 1.5 }}>{req.response}</p>
                 </div>
@@ -171,7 +171,7 @@ export default function SampleRequests() {
 
               {/* Response form */}
               {isResponding && (
-                <div style={{ background: "rgba(245,237,216,0.03)", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "4px", padding: "16px", marginTop: "12px" }}>
+                <div style={{ background: "rgba(28,28,26,0.03)", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "4px", padding: "16px", marginTop: "12px" }}>
                   <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(28,28,26,0.35)", marginBottom: "5px" }}>
                     Decision
                   </label>

@@ -38,7 +38,7 @@ function CounterModal({ offer, onClose }: { offer: Offer; onClose: () => void })
           <>
             <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "#1B4D35", letterSpacing: "0.12em", margin: "0 0 4px" }}>COUNTER OFFER</p>
             <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.2rem", color: "#1C1C1A", margin: "0 0 20px" }}>{offer.lot_name}</p>
-            <div style={{ background: "rgba(245,237,216,0.03)", borderRadius: "6px", padding: "10px 14px", marginBottom: "18px" }}>
+            <div style={{ background: "rgba(28,28,26,0.03)", borderRadius: "6px", padding: "10px 14px", marginBottom: "18px" }}>
               <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.3)", margin: "0 0 4px" }}>BUYER'S OFFER</p>
               <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.2rem", color: "#8B5E3C", margin: 0 }}>
                 ${parseFloat(offer.price_per_kg_usd).toFixed(2)}/kg · {parseFloat(offer.quantity_kg).toLocaleString()} kg
@@ -157,7 +157,7 @@ function OfferRow({ offer }: { offer: Offer }) {
           </p>
         )}
 
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(245,237,216,0.18)", margin: "10px 0 0" }}>
+        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(28,28,26,0.18)", margin: "10px 0 0" }}>
           Received {new Date(offer.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
         </p>
       </div>

@@ -191,7 +191,7 @@ function OfferModal({ lot, onClose }: { lot: any; onClose: () => void }) {
             </div>
 
             {qty && price && (
-              <div style={{ background: "rgba(245,237,216,0.03)", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "6px", padding: "10px 14px", marginBottom: "18px" }}>
+              <div style={{ background: "rgba(28,28,26,0.03)", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "6px", padding: "10px 14px", marginBottom: "18px" }}>
                 <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.35)", margin: "0 0 3px" }}>TOTAL OFFER VALUE</p>
                 <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", color: "#1C1C1A", margin: 0 }}>
                   ${(parseFloat(qty) * parseFloat(price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

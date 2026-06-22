@@ -286,7 +286,7 @@ export default function CreateLot() {
                     </span>
                   </div>
                   <div style={{ height: "3px", background: "rgba(28,28,26,0.07)", borderRadius: "2px", overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${((parseFloat(form.sca_score) - 80) / 20) * 100}%`, background: "linear-gradient(to right, #C1440E, #C9952A)", borderRadius: "2px" }} />
+                    <div style={{ height: "100%", width: `${((parseFloat(form.sca_score) - 80) / 20) * 100}%`, background: "linear-gradient(to right, #1B4D35, #8B5E3C)", borderRadius: "2px" }} />
                   </div>
                 </div>
               )}
@@ -341,7 +341,7 @@ export default function CreateLot() {
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
-                        background: on ? "rgba(30,58,47,0.2)" : "rgba(245,237,216,0.03)",
+                        background: on ? "rgba(27,77,53,0.2)" : "rgba(28,28,26,0.03)",
                         border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.07)"}`,
                         transition: "all 0.15s",
                       }}
@@ -365,7 +365,7 @@ export default function CreateLot() {
             </div>
 
             {/* Live gate preview */}
-            <div style={{ ...card, background: "rgba(30,58,47,0.15)", border: `1px solid ${allGatesPass ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.06)"}` }}>
+            <div style={{ ...card, background: "rgba(27,77,53,0.15)", border: `1px solid ${allGatesPass ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.06)"}` }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
                 <p style={{ ...cardTitle, margin: 0, color: allGatesPass ? "#A8D5BC" : "rgba(28,28,26,0.3)" }}>
                   Gate Status
@@ -375,7 +375,7 @@ export default function CreateLot() {
                 </span>
               </div>
               <div style={{ height: "4px", background: "rgba(28,28,26,0.07)", borderRadius: "2px", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${(gatesPassing / GATES.length) * 100}%`, background: allGatesPass ? "#2D7A52" : "linear-gradient(to right, #C1440E, #C9952A)", borderRadius: "2px", transition: "width 0.3s ease" }} />
+                <div style={{ height: "100%", width: `${(gatesPassing / GATES.length) * 100}%`, background: allGatesPass ? "#2D7A52" : "linear-gradient(to right, #1B4D35, #8B5E3C)", borderRadius: "2px", transition: "width 0.3s ease" }} />
               </div>
               <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: allGatesPass ? "#A8D5BC" : "rgba(28,28,26,0.3)", marginTop: "10px" }}>
                 {allGatesPass ? "All gates pass — Export will be unlocked on creation." : `${GATES.length - gatesPassing} gate${GATES.length - gatesPassing > 1 ? "s" : ""} still pending.`}
@@ -430,7 +430,7 @@ export default function CreateLot() {
                 {GATES.map(g => {
                   const pass = form[g.k as keyof FormData] as boolean;
                   return (
-                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
+                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(27,77,53,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <span style={{ color: pass ? "#2D7A52" : "rgba(28,28,26,0.15)" }}>{g.icon}</span>
                         <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(28,28,26,0.75)" : "rgba(28,28,26,0.35)" }}>{g.label}</span>

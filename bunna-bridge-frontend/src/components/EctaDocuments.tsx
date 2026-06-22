@@ -63,7 +63,7 @@ export default function EctaDocuments() {
 
       <div style={{
         padding: "14px 16px", borderRadius: "4px",
-        background: hasLicense ? "rgba(30,58,47,0.15)" : "rgba(245,237,216,0.03)",
+        background: hasLicense ? "rgba(27,77,53,0.15)" : "rgba(28,28,26,0.03)",
         border: `1px solid ${hasLicense ? "rgba(74,124,89,0.25)" : "rgba(28,28,26,0.07)"}`,
         marginBottom: "12px",
       }}>

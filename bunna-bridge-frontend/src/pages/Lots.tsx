@@ -165,7 +165,7 @@ export default function Lots() {
                       borderBottom: i < data.results.length - 1 ? "1px solid #FFFFFF" : "none",
                       cursor: "pointer", transition: "background 0.12s",
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(245,237,216,0.025)")}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(28,28,26,0.025)")}
                     onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                   >
                     <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "#8B5E3C", whiteSpace: "nowrap" }}>

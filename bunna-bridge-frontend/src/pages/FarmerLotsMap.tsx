@@ -57,7 +57,7 @@ export default function FarmerLotsMap() {
 
         poly.bindPopup(`
           <div style="font-family: DM Mono, monospace; font-size: 12px; min-width: 180px;">
-            <strong style="color: #C9952A">${lot.lot_id}</strong><br/>
+            <strong style="color: #8B5E3C">${lot.lot_id}</strong><br/>
             ${lot.name}<br/>
             <span style="color: #888">${lot.region} · ${lot.grade}</span><br/>
             ${lot.sca_score ? `SCA: ${lot.sca_score} pts<br/>` : ""}
@@ -79,7 +79,7 @@ export default function FarmerLotsMap() {
 
         marker.bindPopup(`
           <div style="font-family: DM Mono, monospace; font-size: 12px; min-width: 180px;">
-            <strong style="color: #C9952A">${lot.lot_id}</strong><br/>
+            <strong style="color: #8B5E3C">${lot.lot_id}</strong><br/>
             ${lot.name}<br/>
             <span style="color: #888">${lot.region} · ${lot.grade}</span><br/>
             <span style="color: #888; font-size: 11px">GPS point only — no boundary</span>

@@ -123,7 +123,7 @@ export default function EditLot() {
 
   const inpReadonly = {
     ...inp,
-    background: "rgba(245,237,216,0.02)",
+    background: "rgba(28,28,26,0.02)",
     color: "rgba(28,28,26,0.3)",
     cursor: "not-allowed",
   };
@@ -388,7 +388,7 @@ export default function EditLot() {
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
-                        background: on ? "rgba(30,58,47,0.2)" : "rgba(245,237,216,0.03)",
+                        background: on ? "rgba(27,77,53,0.2)" : "rgba(28,28,26,0.03)",
                         border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.07)"}`,
                         transition: "all 0.15s",
                       }}
@@ -483,7 +483,7 @@ export default function EditLot() {
                 {GATES.map(g => {
                   const pass = form[g.k as keyof FormData] as boolean;
                   return (
-                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
+                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(27,77,53,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <span style={{ color: pass ? "#2D7A52" : "rgba(28,28,26,0.15)" }}>{g.icon}</span>
                         <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(28,28,26,0.75)" : "rgba(28,28,26,0.35)" }}>{g.label}</span>
@@ -497,7 +497,7 @@ export default function EditLot() {
 
             {/* Phyto cert upload summary */}
             {form.phyto_cert_file && (
-              <div style={{ ...card, background: "rgba(30,58,47,0.15)", border: "1px solid rgba(74,124,89,0.2)" }}>
+              <div style={{ ...card, background: "rgba(27,77,53,0.15)", border: "1px solid rgba(74,124,89,0.2)" }}>
                 <p style={{ ...cardTitle, color: "#A8D5BC" }}>Phytosanitary Certificate</p>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <Upload size={14} color="#A8D5BC" />

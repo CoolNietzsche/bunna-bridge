@@ -69,7 +69,7 @@ export default function MyFarm() {
     card:      { background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "4px", padding: "20px" },
     cardTitle: { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#1B4D35", margin: "0 0 16px" },
     statGrid:  { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" },
-    stat:      { background: "rgba(245,237,216,0.03)", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "2px", padding: "12px" },
+    stat:      { background: "rgba(28,28,26,0.03)", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "2px", padding: "12px" },
     statVal:   { fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", fontWeight: 300, color: "#8B5E3C", lineHeight: 1, marginBottom: "4px" },
     statLbl:   { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" as const },
     field:     { marginBottom: "14px" },
@@ -77,7 +77,7 @@ export default function MyFarm() {
     fval:      { fontSize: "0.9rem", color: "#1C1C1A" },
     fvalMono:  { fontFamily: "DM Mono, monospace", fontSize: "0.8rem", color: "#1C1C1A" },
     input:     { width: "100%", background: "#F7F5F0", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", padding: "8px 10px", color: "#1C1C1A", fontFamily: "DM Mono, monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const },
-    gpsBox:    { background: "rgba(30,58,47,0.3)", border: "1px solid rgba(74,124,89,0.25)", borderRadius: "2px", padding: "12px", marginTop: "8px" },
+    gpsBox:    { background: "rgba(27,77,53,0.3)", border: "1px solid rgba(74,124,89,0.25)", borderRadius: "2px", padding: "12px", marginTop: "8px" },
     gpsRow:    { display: "flex", justifyContent: "space-between", marginBottom: "4px" },
     gpsLbl:    { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.08em" },
     gpsVal:    { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#A8D5BC" },
@@ -299,7 +299,7 @@ export default function MyFarm() {
                 ))}
 
                 {/* EUDR status */}
-                <div style={{ marginTop: "12px", padding: "10px", background: p?.gps_lat ? "rgba(30,58,47,0.3)" : "rgba(192,57,43,0.08)", border: `1px solid ${p?.gps_lat ? "rgba(74,124,89,0.25)" : "rgba(192,57,43,0.15)"}`, borderRadius: "2px" }}>
+                <div style={{ marginTop: "12px", padding: "10px", background: p?.gps_lat ? "rgba(27,77,53,0.3)" : "rgba(192,57,43,0.08)", border: `1px solid ${p?.gps_lat ? "rgba(74,124,89,0.25)" : "rgba(192,57,43,0.15)"}`, borderRadius: "2px" }}>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: p?.gps_lat ? "#A8D5BC" : "#1B4D35", margin: 0, letterSpacing: "0.05em" }}>
                     {p?.gps_lat
                       ? "🌿 EUDR GPS Profile Complete"
@@ -333,7 +333,7 @@ export default function MyFarm() {
                   <div key={lot.id} style={S.lotRow}
                     onClick={() => navigate(`/lots/${lot.id}`)}
                     onMouseEnter={e => {
-                      e.currentTarget.style.background = "rgba(245,237,216,0.03)";
+                      e.currentTarget.style.background = "rgba(28,28,26,0.03)";
                       e.currentTarget.style.borderColor = "rgba(28,28,26,0.07)";
                     }}
                     onMouseLeave={e => {
