@@ -63,39 +63,39 @@ export default function MyFarm() {
 
   const S = {
     header:    { marginBottom: "24px" },
-    title:     { fontSize: "1.8rem", fontWeight: 300, color: "#F5EDD8", margin: "0 0 4px", fontFamily: "Cormorant Garamond, serif" },
-    sub:       { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#D4824A", textTransform: "uppercase" as const },
+    title:     { fontSize: "1.8rem", fontWeight: 300, color: "#1C1C1A", margin: "0 0 4px", fontFamily: "Cormorant Garamond, serif" },
+    sub:       { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#1B4D35", textTransform: "uppercase" as const },
     grid:      { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" },
-    card:      { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "20px" },
-    cardTitle: { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#D4824A", margin: "0 0 16px" },
+    card:      { background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "4px", padding: "20px" },
+    cardTitle: { fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#1B4D35", margin: "0 0 16px" },
     statGrid:  { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" },
-    stat:      { background: "rgba(245,237,216,0.03)", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "2px", padding: "12px" },
-    statVal:   { fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", fontWeight: 300, color: "#C9952A", lineHeight: 1, marginBottom: "4px" },
-    statLbl:   { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" as const },
+    stat:      { background: "rgba(245,237,216,0.03)", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "2px", padding: "12px" },
+    statVal:   { fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", fontWeight: 300, color: "#8B5E3C", lineHeight: 1, marginBottom: "4px" },
+    statLbl:   { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", letterSpacing: "0.1em", textTransform: "uppercase" as const },
     field:     { marginBottom: "14px" },
-    flabel:    { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.35)", display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" },
-    fval:      { fontSize: "0.9rem", color: "#F5EDD8" },
-    fvalMono:  { fontFamily: "DM Mono, monospace", fontSize: "0.8rem", color: "#F5EDD8" },
-    input:     { width: "100%", background: "#1A0F07", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "8px 10px", color: "#F5EDD8", fontFamily: "DM Mono, monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const },
+    flabel:    { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: "rgba(28,28,26,0.35)", display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" },
+    fval:      { fontSize: "0.9rem", color: "#1C1C1A" },
+    fvalMono:  { fontFamily: "DM Mono, monospace", fontSize: "0.8rem", color: "#1C1C1A" },
+    input:     { width: "100%", background: "#F7F5F0", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", padding: "8px 10px", color: "#1C1C1A", fontFamily: "DM Mono, monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const },
     gpsBox:    { background: "rgba(30,58,47,0.3)", border: "1px solid rgba(74,124,89,0.25)", borderRadius: "2px", padding: "12px", marginTop: "8px" },
     gpsRow:    { display: "flex", justifyContent: "space-between", marginBottom: "4px" },
-    gpsLbl:    { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.08em" },
-    gpsVal:    { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#A8C5A0" },
-    editBtn:   { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "6px 12px", color: "rgba(245,237,216,0.5)", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
-    saveBtn:   { display: "flex", alignItems: "center", gap: "6px", background: "#1E3A2F", border: "1px solid rgba(74,124,89,0.4)", borderRadius: "2px", padding: "6px 14px", color: "#A8C5A0", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
-    cancelBtn: { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "2px", padding: "6px 12px", color: "#C1440E", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
-    savedMsg:  { display: "flex", alignItems: "center", gap: "6px", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#A8C5A0" },
+    gpsLbl:    { fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.08em" },
+    gpsVal:    { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#A8D5BC" },
+    editBtn:   { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", padding: "6px 12px", color: "rgba(28,28,26,0.5)", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
+    saveBtn:   { display: "flex", alignItems: "center", gap: "6px", background: "#1B4D35", border: "1px solid rgba(74,124,89,0.4)", borderRadius: "2px", padding: "6px 14px", color: "#A8D5BC", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
+    cancelBtn: { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "2px", padding: "6px 12px", color: "#1B4D35", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, cursor: "pointer" },
+    savedMsg:  { display: "flex", alignItems: "center", gap: "6px", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#A8D5BC" },
     lotRow:    { display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", borderRadius: "2px", border: "1px solid transparent", cursor: "pointer", transition: "all 0.15s" },
-    lotId:     { fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#C9952A", minWidth: "120px" },
-    lotName:   { fontSize: "0.88rem", color: "#F5EDD8", flex: 1 },
-    lotSca:    { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#C9952A" },
-    empty:     { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(245,237,216,0.25)", textAlign: "center" as const, padding: "24px 0" },
+    lotId:     { fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#8B5E3C", minWidth: "120px" },
+    lotName:   { fontSize: "0.88rem", color: "#1C1C1A", flex: 1 },
+    lotSca:    { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#8B5E3C" },
+    empty:     { fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(28,28,26,0.25)", textAlign: "center" as const, padding: "24px 0" },
   };
 
   if (profileLoading) return (
     <PageWrapper>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-        <p style={{ fontFamily: "DM Mono, monospace", color: "#D4824A", letterSpacing: "0.2em", fontSize: "0.75rem" }}>
+        <p style={{ fontFamily: "DM Mono, monospace", color: "#1B4D35", letterSpacing: "0.2em", fontSize: "0.75rem" }}>
           LOADING FARM PROFILE...
         </p>
       </div>
@@ -150,7 +150,7 @@ export default function MyFarm() {
           { icon: <Users size={14} />,    val: p?.cooperative     ? "✓" : "—",                     lbl: "Cooperative" },
         ].map(s => (
           <div key={s.lbl} style={S.stat}>
-            <div style={{ color: "#D4824A", marginBottom: "8px" }}>{s.icon}</div>
+            <div style={{ color: "#1B4D35", marginBottom: "8px" }}>{s.icon}</div>
             <p style={{ ...S.statVal, margin: "0 0 4px" }}>{s.val}</p>
             <p style={{ ...S.statLbl, margin: 0 }}>{s.lbl}</p>
           </div>
@@ -234,7 +234,7 @@ export default function MyFarm() {
                 {(p?.gps_lat || p?.gps_lng) && (
                   <div style={S.gpsBox}>
                     <p style={{ ...S.flabel, margin: "0 0 8px" }}>
-                      <MapPin size={12} color="#A8C5A0" /> GPS Coordinates
+                      <MapPin size={12} color="#A8D5BC" /> GPS Coordinates
                     </p>
                     <div style={S.gpsRow}>
                       <span style={S.gpsLbl}>Latitude</span>
@@ -245,7 +245,7 @@ export default function MyFarm() {
                       <span style={S.gpsVal}>{p?.gps_lng}°E</span>
                     </div>
                     <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid rgba(74,124,89,0.2)" }}>
-                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8C5A0" }}>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8D5BC" }}>
                         ✓ EUDR-compliant GPS point recorded
                       </span>
                     </div>
@@ -253,8 +253,8 @@ export default function MyFarm() {
                 )}
 
                 {!p?.gps_lat && (
-                  <div style={{ ...S.gpsBox, background: "rgba(193,68,14,0.08)", borderColor: "rgba(193,68,14,0.2)" }}>
-                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#C1440E", margin: 0 }}>
+                  <div style={{ ...S.gpsBox, background: "rgba(192,57,43,0.08)", borderColor: "rgba(192,57,43,0.15)" }}>
+                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "#1B4D35", margin: 0 }}>
                       ⚠ GPS coordinates not set — required for EUDR compliance
                     </p>
                   </div>
@@ -299,8 +299,8 @@ export default function MyFarm() {
                 ))}
 
                 {/* EUDR status */}
-                <div style={{ marginTop: "12px", padding: "10px", background: p?.gps_lat ? "rgba(30,58,47,0.3)" : "rgba(193,68,14,0.08)", border: `1px solid ${p?.gps_lat ? "rgba(74,124,89,0.25)" : "rgba(193,68,14,0.2)"}`, borderRadius: "2px" }}>
-                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: p?.gps_lat ? "#A8C5A0" : "#C1440E", margin: 0, letterSpacing: "0.05em" }}>
+                <div style={{ marginTop: "12px", padding: "10px", background: p?.gps_lat ? "rgba(30,58,47,0.3)" : "rgba(192,57,43,0.08)", border: `1px solid ${p?.gps_lat ? "rgba(74,124,89,0.25)" : "rgba(192,57,43,0.15)"}`, borderRadius: "2px" }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: p?.gps_lat ? "#A8D5BC" : "#1B4D35", margin: 0, letterSpacing: "0.05em" }}>
                     {p?.gps_lat
                       ? "🌿 EUDR GPS Profile Complete"
                       : "⚠ EUDR GPS Profile Incomplete — Edit profile to add coordinates"}
@@ -320,9 +320,9 @@ export default function MyFarm() {
             )}
             {!lotsLoading && (!lots || lots.length === 0) && (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <Coffee size={20} style={{ color: "rgba(245,237,216,0.15)", marginBottom: "8px" }} />
+                <Coffee size={20} style={{ color: "rgba(28,28,26,0.12)", marginBottom: "8px" }} />
                 <p style={S.empty}>No lots linked to your farm yet.</p>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.2)" }}>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(28,28,26,0.15)" }}>
                   Lots from your kebele ({p?.farm_kebele || "—"}) will appear here.
                 </p>
               </div>
@@ -334,7 +334,7 @@ export default function MyFarm() {
                     onClick={() => navigate(`/lots/${lot.id}`)}
                     onMouseEnter={e => {
                       e.currentTarget.style.background = "rgba(245,237,216,0.03)";
-                      e.currentTarget.style.borderColor = "rgba(245,237,216,0.08)";
+                      e.currentTarget.style.borderColor = "rgba(28,28,26,0.07)";
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.background = "transparent";
@@ -346,7 +346,7 @@ export default function MyFarm() {
                       <span style={S.lotSca}>{lot.sca_score} pts</span>
                     )}
                     <StatusPill status={lot.status} />
-                    <ExternalLink size={12} color="rgba(245,237,216,0.2)" />
+                    <ExternalLink size={12} color="rgba(28,28,26,0.15)" />
                   </div>
                 ))}
               </div>

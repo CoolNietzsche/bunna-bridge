@@ -70,33 +70,33 @@ export default function CreateLot() {
   const allGatesPass = gatesPassing === GATES.length;
 
   const inp = {
-    width: "100%", background: "rgba(245,237,216,0.04)",
-    border: "1px solid rgba(245,237,216,0.09)", borderRadius: "3px",
-    padding: "9px 12px", color: "#F5EDD8",
+    width: "100%", background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.08)", borderRadius: "3px",
+    padding: "9px 12px", color: "#1C1C1A",
     fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
     outline: "none", boxSizing: "border-box" as const,
     transition: "border-color 0.15s",
   };
 
-  const sel = { ...inp, background: "#1A0F07" };
+  const sel = { ...inp, background: "#F7F5F0" };
 
   const lbl = {
     display: "block", fontFamily: "DM Mono, monospace",
     fontSize: "0.55rem", letterSpacing: "0.12em",
     textTransform: "uppercase" as const,
-    color: "rgba(245,237,216,0.35)", marginBottom: "5px",
+    color: "rgba(28,28,26,0.35)", marginBottom: "5px",
   };
 
   const card = {
-    background: "#2C1810",
-    border: "1px solid rgba(245,237,216,0.07)",
+    background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.06)",
     borderRadius: "6px", padding: "24px", marginBottom: "16px",
   };
 
   const cardTitle = {
     fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
     letterSpacing: "0.2em", textTransform: "uppercase" as const,
-    color: "rgba(245,237,216,0.3)", margin: "0 0 18px",
+    color: "rgba(28,28,26,0.3)", margin: "0 0 18px",
   };
 
   const Field = ({ label, k, type = "text", placeholder = "" }: {
@@ -107,8 +107,8 @@ export default function CreateLot() {
       <input style={inp} type={type} placeholder={placeholder}
         value={form[k] as string}
         onChange={e => set(k, e.target.value)}
-        onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.4)")}
-        onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.09)")}
+        onFocus={e => (e.target.style.borderColor = "rgba(27,77,53,0.4)")}
+        onBlur={e  => (e.target.style.borderColor = "rgba(28,28,26,0.08)")}
       />
     </div>
   );
@@ -157,16 +157,16 @@ export default function CreateLot() {
 
         {/* Header */}
         <div style={{ marginBottom: "28px" }}>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
+          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px" }}>
             Register Coffee Lot
           </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)", margin: 0 }}>
             Digital Birth Certificate
           </p>
         </div>
 
         {/* Stepper */}
-        <div style={{ display: "flex", marginBottom: "28px", background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ display: "flex", marginBottom: "28px", background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "6px", overflow: "hidden" }}>
           {STEPS.map((st, i) => {
             const active = st === step;
             const done   = i < stepIndex;
@@ -175,8 +175,8 @@ export default function CreateLot() {
                 onClick={() => done && setStep(st)}
                 style={{
                   flex: 1, padding: "14px 8px", border: "none",
-                  borderBottom: `2px solid ${active ? "#C1440E" : done ? "#4A7C59" : "transparent"}`,
-                  background: active ? "rgba(193,68,14,0.06)" : "transparent",
+                  borderBottom: `2px solid ${active ? "#1B4D35" : done ? "#2D7A52" : "transparent"}`,
+                  background: active ? "rgba(192,57,43,0.06)" : "transparent",
                   cursor: done ? "pointer" : "default",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
                 }}
@@ -184,13 +184,13 @@ export default function CreateLot() {
                 <span style={{
                   fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
                   letterSpacing: "0.1em", textTransform: "uppercase",
-                  color: active ? "#C1440E" : done ? "#A8C5A0" : "rgba(245,237,216,0.25)",
+                  color: active ? "#1B4D35" : done ? "#A8D5BC" : "rgba(28,28,26,0.25)",
                 }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span style={{
                   fontFamily: "Instrument Sans, sans-serif", fontSize: "0.75rem",
-                  color: active ? "#C1440E" : done ? "#A8C5A0" : "rgba(245,237,216,0.35)",
+                  color: active ? "#1B4D35" : done ? "#A8D5BC" : "rgba(28,28,26,0.35)",
                   whiteSpace: "nowrap",
                 }}>
                   {STEP_LABELS[st]}
@@ -247,7 +247,7 @@ export default function CreateLot() {
                 <Field label="Latitude"  k="gps_lat" type="number" placeholder="6.3241" />
                 <Field label="Longitude" k="gps_lng" type="number" placeholder="38.2149" />
               </div>
-              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.775rem", color: "rgba(245,237,216,0.3)", marginTop: "10px", lineHeight: 1.5 }}>
+              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.775rem", color: "rgba(28,28,26,0.3)", marginTop: "10px", lineHeight: 1.5 }}>
                 For farms under 4 hectares, a single GPS point is sufficient for EUDR compliance. You can capture a full boundary polygon after creating the lot.
               </p>
             </div>
@@ -275,17 +275,17 @@ export default function CreateLot() {
               {form.sca_score && (
                 <div style={{ marginTop: "16px", background: "rgba(201,149,42,0.07)", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "4px", padding: "14px 16px" }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "8px" }}>
-                    <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.5rem", fontWeight: 300, color: "#C9952A", lineHeight: 1 }}>
+                    <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.5rem", fontWeight: 300, color: "#8B5E3C", lineHeight: 1 }}>
                       {form.sca_score}
                     </span>
                     <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.65rem", color: "rgba(201,149,42,0.5)" }}>pts</span>
-                    <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "rgba(245,237,216,0.4)", marginLeft: "4px" }}>
+                    <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "rgba(28,28,26,0.4)", marginLeft: "4px" }}>
                       {parseFloat(form.sca_score) >= 90 ? "Outstanding" :
                        parseFloat(form.sca_score) >= 85 ? "Excellent" :
                        parseFloat(form.sca_score) >= 80 ? "Specialty" : "Below Specialty"}
                     </span>
                   </div>
-                  <div style={{ height: "3px", background: "rgba(245,237,216,0.08)", borderRadius: "2px", overflow: "hidden" }}>
+                  <div style={{ height: "3px", background: "rgba(28,28,26,0.07)", borderRadius: "2px", overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${((parseFloat(form.sca_score) - 80) / 20) * 100}%`, background: "linear-gradient(to right, #C1440E, #C9952A)", borderRadius: "2px" }} />
                   </div>
                 </div>
@@ -307,14 +307,14 @@ export default function CreateLot() {
                 <input style={inp} placeholder="e.g. Jasmine, Bergamot, Lemon Zest"
                   value={form.flavor_notes}
                   onChange={e => set("flavor_notes", e.target.value)}
-                  onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.4)")}
-                  onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.09)")}
+                  onFocus={e => (e.target.style.borderColor = "rgba(27,77,53,0.4)")}
+                  onBlur={e  => (e.target.style.borderColor = "rgba(28,28,26,0.08)")}
                 />
               </div>
               {form.flavor_notes && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "10px" }}>
                   {form.flavor_notes.split(",").map(f => f.trim()).filter(Boolean).map(f => (
-                    <span key={f} style={{ padding: "3px 10px", background: "rgba(201,149,42,0.08)", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#C9952A" }}>
+                    <span key={f} style={{ padding: "3px 10px", background: "rgba(201,149,42,0.08)", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#8B5E3C" }}>
                       {f}
                     </span>
                   ))}
@@ -329,7 +329,7 @@ export default function CreateLot() {
           <>
             <div style={card}>
               <p style={cardTitle}>EUDR Compliance Gates</p>
-              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.4)", marginBottom: "18px", lineHeight: 1.6 }}>
+              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.4)", marginBottom: "18px", lineHeight: 1.6 }}>
                 Toggle each gate as documentation is confirmed. All 7 gates must pass before the Export button unlocks.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -342,21 +342,21 @@ export default function CreateLot() {
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
                         background: on ? "rgba(30,58,47,0.2)" : "rgba(245,237,216,0.03)",
-                        border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(245,237,216,0.08)"}`,
+                        border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.07)"}`,
                         transition: "all 0.15s",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ color: on ? "#4A7C59" : "rgba(245,237,216,0.2)", flexShrink: 0 }}>
+                        <span style={{ color: on ? "#2D7A52" : "rgba(28,28,26,0.15)", flexShrink: 0 }}>
                           {g.icon}
                         </span>
-                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: on ? "rgba(245,237,216,0.85)" : "rgba(245,237,216,0.4)" }}>
+                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: on ? "rgba(28,28,26,0.85)" : "rgba(28,28,26,0.4)" }}>
                           {g.label}
                         </span>
                       </div>
                       {on
-                        ? <CheckCircle size={16} color="#4A7C59" />
-                        : <XCircle size={16} color="rgba(245,237,216,0.15)" />
+                        ? <CheckCircle size={16} color="#2D7A52" />
+                        : <XCircle size={16} color="rgba(28,28,26,0.12)" />
                       }
                     </div>
                   );
@@ -365,19 +365,19 @@ export default function CreateLot() {
             </div>
 
             {/* Live gate preview */}
-            <div style={{ ...card, background: "rgba(30,58,47,0.15)", border: `1px solid ${allGatesPass ? "rgba(74,124,89,0.3)" : "rgba(245,237,216,0.07)"}` }}>
+            <div style={{ ...card, background: "rgba(30,58,47,0.15)", border: `1px solid ${allGatesPass ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.06)"}` }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
-                <p style={{ ...cardTitle, margin: 0, color: allGatesPass ? "#A8C5A0" : "rgba(245,237,216,0.3)" }}>
+                <p style={{ ...cardTitle, margin: 0, color: allGatesPass ? "#A8D5BC" : "rgba(28,28,26,0.3)" }}>
                   Gate Status
                 </p>
-                <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.4rem", fontWeight: 300, color: allGatesPass ? "#A8C5A0" : "#C9952A" }}>
+                <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.4rem", fontWeight: 300, color: allGatesPass ? "#A8D5BC" : "#8B5E3C" }}>
                   {gatesPassing} / {GATES.length}
                 </span>
               </div>
-              <div style={{ height: "4px", background: "rgba(245,237,216,0.08)", borderRadius: "2px", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${(gatesPassing / GATES.length) * 100}%`, background: allGatesPass ? "#4A7C59" : "linear-gradient(to right, #C1440E, #C9952A)", borderRadius: "2px", transition: "width 0.3s ease" }} />
+              <div style={{ height: "4px", background: "rgba(28,28,26,0.07)", borderRadius: "2px", overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${(gatesPassing / GATES.length) * 100}%`, background: allGatesPass ? "#2D7A52" : "linear-gradient(to right, #C1440E, #C9952A)", borderRadius: "2px", transition: "width 0.3s ease" }} />
               </div>
-              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: allGatesPass ? "#A8C5A0" : "rgba(245,237,216,0.3)", marginTop: "10px" }}>
+              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: allGatesPass ? "#A8D5BC" : "rgba(28,28,26,0.3)", marginTop: "10px" }}>
                 {allGatesPass ? "All gates pass — Export will be unlocked on creation." : `${GATES.length - gatesPassing} gate${GATES.length - gatesPassing > 1 ? "s" : ""} still pending.`}
               </p>
             </div>
@@ -416,9 +416,9 @@ export default function CreateLot() {
               <div key={section.title} style={card}>
                 <p style={cardTitle}>{section.title}</p>
                 {section.rows.map(([l, v]) => (
-                  <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
-                    <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)" }}>{l}</span>
-                    <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#F5EDD8" }}>{v}</span>
+                  <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(28,28,26,0.04)" }}>
+                    <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)" }}>{l}</span>
+                    <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1C1C1A" }}>{v}</span>
                   </div>
                 ))}
               </div>
@@ -430,14 +430,14 @@ export default function CreateLot() {
                 {GATES.map(g => {
                   const pass = form[g.k as keyof FormData] as boolean;
                   return (
-                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(193,68,14,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(193,68,14,0.15)"}` }}>
+                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ color: pass ? "#4A7C59" : "rgba(245,237,216,0.2)" }}>{g.icon}</span>
-                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(245,237,216,0.75)" : "rgba(245,237,216,0.35)" }}>{g.label}</span>
+                        <span style={{ color: pass ? "#2D7A52" : "rgba(28,28,26,0.15)" }}>{g.icon}</span>
+                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(28,28,26,0.75)" : "rgba(28,28,26,0.35)" }}>{g.label}</span>
                       </div>
                       {pass
-                        ? <CheckCircle size={14} color="#4A7C59" />
-                        : <XCircle size={14} color="rgba(193,68,14,0.4)" />
+                        ? <CheckCircle size={14} color="#2D7A52" />
+                        : <XCircle size={14} color="rgba(27,77,53,0.4)" />
                       }
                     </div>
                   );
@@ -446,7 +446,7 @@ export default function CreateLot() {
             </div>
 
             {error && (
-              <div style={{ background: "rgba(193,68,14,0.1)", border: "1px solid rgba(193,68,14,0.25)", borderRadius: "4px", padding: "12px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+              <div style={{ background: "rgba(192,57,43,0.08)", border: "1px solid rgba(192,57,43,0.2)", borderRadius: "4px", padding: "12px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1B4D35", marginBottom: "16px" }}>
                 {error}
               </div>
             )}
@@ -457,7 +457,7 @@ export default function CreateLot() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
           <button
             onClick={() => stepIndex > 0 ? setStep(STEPS[stepIndex - 1]) : navigate("/lots")}
-            style={{ display: "flex", alignItems: "center", gap: "7px", background: "transparent", border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px", padding: "10px 18px", color: "rgba(245,237,216,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: "7px", background: "transparent", border: "1px solid rgba(28,28,26,0.09)", borderRadius: "3px", padding: "10px 18px", color: "rgba(28,28,26,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer" }}
           >
             <ArrowLeft size={14} /> {stepIndex === 0 ? "Cancel" : "Back"}
           </button>
@@ -465,7 +465,7 @@ export default function CreateLot() {
           {step !== "review" ? (
             <button
               onClick={() => setStep(STEPS[stepIndex + 1])}
-              style={{ display: "flex", alignItems: "center", gap: "7px", background: "#C1440E", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "#1B4D35", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: "pointer" }}
             >
               Continue <ArrowRight size={14} />
             </button>
@@ -473,7 +473,7 @@ export default function CreateLot() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              style={{ display: "flex", alignItems: "center", gap: "7px", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: loading ? "rgba(27,77,53,0.5)" : "#1B4D35", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer" }}
             >
               <Plus size={14} /> {loading ? "Creating..." : "Create Lot"}
             </button>

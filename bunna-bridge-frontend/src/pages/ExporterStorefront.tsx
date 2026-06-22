@@ -26,9 +26,9 @@ interface ExporterProfile {
 }
 
 const PROCESS_COLOR: Record<string, string> = {
-  washed:  "#4A7C59",
-  natural: "#C1440E",
-  honey:   "#C9952A",
+  washed:  "#2D7A52",
+  natural: "#1B4D35",
+  honey:   "#8B5E3C",
 };
 
 export default function ExporterStorefront() {
@@ -60,7 +60,7 @@ export default function ExporterStorefront() {
 
   if (profileLoading) return (
     <PageWrapper>
-      <div style={{ textAlign: "center", padding: "80px", fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.25)" }}>
+      <div style={{ textAlign: "center", padding: "80px", fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(28,28,26,0.25)" }}>
         Loading...
       </div>
     </PageWrapper>
@@ -69,7 +69,7 @@ export default function ExporterStorefront() {
   if (!profile) return (
     <PageWrapper>
       <div style={{ textAlign: "center", padding: "80px" }}>
-        <p style={{ fontFamily: "DM Mono, monospace", color: "rgba(245,237,216,0.3)" }}>Exporter not found.</p>
+        <p style={{ fontFamily: "DM Mono, monospace", color: "rgba(28,28,26,0.3)" }}>Exporter not found.</p>
       </div>
     </PageWrapper>
   );
@@ -80,42 +80,42 @@ export default function ExporterStorefront() {
     <PageWrapper>
       {/* Back */}
       <button onClick={() => navigate("/marketplace")}
-        style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "rgba(245,237,216,0.35)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", marginBottom: "24px", padding: 0 }}>
+        style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "rgba(28,28,26,0.35)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", marginBottom: "24px", padding: 0 }}>
         <ArrowLeft size={14} /> Back to Marketplace
       </button>
 
       {/* Profile hero */}
-      <div style={{ background: "#1E1208", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "10px", padding: "28px", marginBottom: "28px" }}>
+      <div style={{ background: "#1B4D35", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "10px", padding: "28px", marginBottom: "28px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "20px" }}>
           <div style={{ flex: 1, minWidth: "240px" }}>
             {/* Avatar + name */}
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "14px" }}>
-              <div style={{ width: "52px", height: "52px", borderRadius: "6px", background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", color: "#C1440E", flexShrink: 0 }}>
+              <div style={{ width: "52px", height: "52px", borderRadius: "6px", background: "rgba(192,57,43,0.1)", border: "1px solid rgba(192,57,43,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", color: "#1B4D35", flexShrink: 0 }}>
                 {profile.company_name?.[0] || profile.full_name?.[0]}
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "3px" }}>
-                  <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", fontWeight: 400, color: "#F5EDD8", margin: 0, lineHeight: 1 }}>
+                  <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", fontWeight: 400, color: "#1C1C1A", margin: 0, lineHeight: 1 }}>
                     {profile.company_name || profile.full_name}
                   </h1>
                   {profile.is_verified && (
-                    <BadgeCheck size={16} color="#A8C5A0" />
+                    <BadgeCheck size={16} color="#A8D5BC" />
                   )}
                 </div>
                 {profile.company_name && (
-                  <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem", color: "rgba(245,237,216,0.4)", margin: 0 }}>
+                  <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem", color: "rgba(28,28,26,0.4)", margin: 0 }}>
                     {profile.full_name}
                   </p>
                 )}
                 <div style={{ display: "flex", gap: "12px", marginTop: "6px", flexWrap: "wrap" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.3)" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.3)" }}>
                     <MapPin size={9} /> {profile.country}
                   </span>
-                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.3)" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.3)" }}>
                     <Calendar size={9} /> Member since {memberSince}
                   </span>
                   {profile.ecta_license_number && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#4A7C59" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#2D7A52" }}>
                       <ShieldCheck size={9} /> ECTA {profile.ecta_license_number}
                     </span>
                   )}
@@ -125,22 +125,22 @@ export default function ExporterStorefront() {
 
             {/* Bio */}
             {profile.bio && (
-              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "#EDE0C4", lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "rgba(28,28,26,0.5)", lineHeight: 1.7, margin: 0 }}>
                 {profile.bio}
               </p>
             )}
           </div>
 
           {/* Stats block */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "rgba(245,237,216,0.05)", borderRadius: "8px", overflow: "hidden", alignSelf: "flex-start", minWidth: "280px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1px", background: "rgba(28,28,26,0.04)", borderRadius: "8px", overflow: "hidden", alignSelf: "flex-start", minWidth: "280px" }}>
             {[
               ["Active Lots", profile.lots_count],
               ["Exported",    profile.exported_count],
               ["Avg SCA",     profile.avg_sca_score ? profile.avg_sca_score.toFixed(1) : "—"],
             ].map(([label, value]) => (
-              <div key={label} style={{ background: "#2C1810", padding: "16px", textAlign: "center" }}>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", fontWeight: 300, color: "#C9952A", margin: "0 0 3px", lineHeight: 1 }}>{value}</p>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.3)", letterSpacing: "0.1em", margin: 0, textTransform: "uppercase" }}>{label}</p>
+              <div key={label} style={{ background: "#FFFFFF", padding: "16px", textAlign: "center" }}>
+                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.8rem", fontWeight: 300, color: "#8B5E3C", margin: "0 0 3px", lineHeight: 1 }}>{value}</p>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.1em", margin: 0, textTransform: "uppercase" }}>{label}</p>
               </div>
             ))}
           </div>
@@ -149,65 +149,65 @@ export default function ExporterStorefront() {
 
       {/* Lots section */}
       <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "rgba(245,237,216,0.3)", textTransform: "uppercase", margin: 0 }}>
+        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "rgba(28,28,26,0.3)", textTransform: "uppercase", margin: 0 }}>
           Active Lots · {lots.length}
         </p>
       </div>
 
       {lotsLoading && (
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "rgba(245,237,216,0.25)", textAlign: "center", padding: "40px" }}>Loading lots...</p>
+        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "rgba(28,28,26,0.25)", textAlign: "center", padding: "40px" }}>Loading lots...</p>
       )}
 
       {!lotsLoading && lots.length === 0 && (
-        <div style={{ textAlign: "center", padding: "60px 20px", background: "#1E1208", borderRadius: "8px", border: "1px solid rgba(245,237,216,0.05)" }}>
-          <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.2rem", color: "rgba(245,237,216,0.3)", margin: 0 }}>No active lots at the moment.</p>
+        <div style={{ textAlign: "center", padding: "60px 20px", background: "#1B4D35", borderRadius: "8px", border: "1px solid rgba(28,28,26,0.04)" }}>
+          <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.2rem", color: "rgba(28,28,26,0.3)", margin: 0 }}>No active lots at the moment.</p>
         </div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         {lots.map(lot => (
           <div key={lot.id}
-            style={{ background: "#1E1208", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "8px", padding: "18px 20px", cursor: "pointer" }}
+            style={{ background: "#1B4D35", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "8px", padding: "18px 20px", cursor: "pointer" }}
             onClick={() => navigate(`/marketplace/${lot.id}`)}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#C9952A", letterSpacing: "0.15em", margin: "0 0 2px" }}>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#8B5E3C", letterSpacing: "0.15em", margin: "0 0 2px" }}>
                   {lot.lot_id}
                 </p>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.15rem", color: "#F5EDD8", margin: "0 0 6px", lineHeight: 1.2 }}>
+                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.15rem", color: "#1C1C1A", margin: "0 0 6px", lineHeight: 1.2 }}>
                   {lot.name}
                 </p>
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", textTransform: "capitalize" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", textTransform: "capitalize" }}>
                     <Mountain size={9} /> {lot.region} · {lot.altitude_m}m
                   </span>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: PROCESS_COLOR[lot.processing] || "rgba(245,237,216,0.35)", textTransform: "capitalize" }}>
+                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: PROCESS_COLOR[lot.processing] || "rgba(28,28,26,0.35)", textTransform: "capitalize" }}>
                     {lot.processing} · {lot.grade}
                   </span>
                   {lot.is_eudr_ready && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "#4A7C59" }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "#2D7A52" }}>
                       <ShieldCheck size={9} /> EUDR
                     </span>
                   )}
-                  <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(245,237,216,0.3)" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(28,28,26,0.3)" }}>
                     <Award size={9} /> {lot.compliance_score ?? 0}/7
                   </span>
                 </div>
                 {lot.flavor_tags?.length > 0 && (
                   <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginTop: "10px" }}>
                     {lot.flavor_tags.slice(0, 4).map(tag => (
-                      <span key={tag} style={{ padding: "3px 10px", background: "rgba(74,37,21,0.6)", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "20px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.72rem", color: "#EDE0C4" }}>{tag}</span>
+                      <span key={tag} style={{ padding: "3px 10px", background: "rgba(74,37,21,0.6)", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "20px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.72rem", color: "rgba(28,28,26,0.5)" }}>{tag}</span>
                     ))}
                   </div>
                 )}
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px", flexShrink: 0 }}>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", fontWeight: 300, color: "#C9952A", margin: 0, lineHeight: 1 }}>
+                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.6rem", fontWeight: 300, color: "#8B5E3C", margin: 0, lineHeight: 1 }}>
                   {lot.fob_price_usd ? `$${parseFloat(lot.fob_price_usd).toFixed(2)}` : "POA"}
                 </p>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(245,237,216,0.3)", margin: 0 }}>per kg FOB</p>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(28,28,26,0.3)", margin: 0 }}>per kg FOB</p>
                 {lot.latest_sca_score && (
-                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem", color: "#C9952A", margin: "4px 0 0", opacity: 0.7 }}>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem", color: "#8B5E3C", margin: "4px 0 0", opacity: 0.7 }}>
                     {parseFloat(String(lot.latest_sca_score)).toFixed(1)} SCA
                   </p>
                 )}
@@ -217,25 +217,25 @@ export default function ExporterStorefront() {
             {/* CTAs */}
             <div style={{ display: "flex", gap: "8px", marginTop: "14px" }} onClick={e => e.stopPropagation()}>
               <button onClick={() => navigate(`/marketplace/${lot.id}`)}
-                style={{ background: "transparent", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "4px", padding: "8px 16px", color: "rgba(245,237,216,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
+                style={{ background: "transparent", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "4px", padding: "8px 16px", color: "rgba(28,28,26,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
                 View Lot
               </button>
               {isBuyer && (
                 <button onClick={() => navigate(`/marketplace/${lot.id}?offer=1`)}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "#C1440E", border: "none", borderRadius: "4px", padding: "8px 16px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
+                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "#1B4D35", border: "none", borderRadius: "4px", padding: "8px 16px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
                   <TrendingUp size={12} /> Make Offer
                 </button>
               )}
               {isBuyer && (
                 <button onClick={() => navigate(`/marketplace/${lot.id}?sample=1`)}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "4px", padding: "8px 12px", color: "#C1440E", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
+                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "4px", padding: "8px 12px", color: "#1B4D35", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
                   <FlaskConical size={12} />
                 </button>
               )}
               {isBuyer && (
                 <button onClick={() => toggle(lot.id)}
-                  style={{ display: "flex", alignItems: "center", background: "transparent", border: `1px solid ${isWatched(lot.id) ? "rgba(193,68,14,0.4)" : "rgba(245,237,216,0.1)"}`, borderRadius: "4px", padding: "8px 10px", color: isWatched(lot.id) ? "#C1440E" : "rgba(245,237,216,0.3)", cursor: "pointer", marginLeft: "auto" }}>
-                  <Heart size={12} fill={isWatched(lot.id) ? "#C1440E" : "none"} />
+                  style={{ display: "flex", alignItems: "center", background: "transparent", border: `1px solid ${isWatched(lot.id) ? "rgba(27,77,53,0.4)" : "rgba(28,28,26,0.09)"}`, borderRadius: "4px", padding: "8px 10px", color: isWatched(lot.id) ? "#1B4D35" : "rgba(28,28,26,0.3)", cursor: "pointer", marginLeft: "auto" }}>
+                  <Heart size={12} fill={isWatched(lot.id) ? "#1B4D35" : "none"} />
                 </button>
               )}
             </div>

@@ -113,9 +113,9 @@ export default function EditLot() {
   const stepIndex = STEPS.indexOf(step);
 
   const inp = {
-    width: "100%", background: "rgba(245,237,216,0.04)",
-    border: "1px solid rgba(245,237,216,0.09)", borderRadius: "3px",
-    padding: "9px 12px", color: "#F5EDD8",
+    width: "100%", background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.08)", borderRadius: "3px",
+    padding: "9px 12px", color: "#1C1C1A",
     fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
     outline: "none", boxSizing: "border-box" as const,
     transition: "border-color 0.15s",
@@ -124,29 +124,29 @@ export default function EditLot() {
   const inpReadonly = {
     ...inp,
     background: "rgba(245,237,216,0.02)",
-    color: "rgba(245,237,216,0.3)",
+    color: "rgba(28,28,26,0.3)",
     cursor: "not-allowed",
   };
 
-  const sel = { ...inp, background: "#1A0F07" };
+  const sel = { ...inp, background: "#F7F5F0" };
 
   const lbl = {
     display: "block", fontFamily: "DM Mono, monospace",
     fontSize: "0.55rem", letterSpacing: "0.12em",
     textTransform: "uppercase" as const,
-    color: "rgba(245,237,216,0.35)", marginBottom: "5px",
+    color: "rgba(28,28,26,0.35)", marginBottom: "5px",
   };
 
   const card = {
-    background: "#2C1810",
-    border: "1px solid rgba(245,237,216,0.07)",
+    background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.06)",
     borderRadius: "6px", padding: "24px", marginBottom: "16px",
   };
 
   const cardTitle = {
     fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
     letterSpacing: "0.2em", textTransform: "uppercase" as const,
-    color: "rgba(245,237,216,0.3)", margin: "0 0 18px",
+    color: "rgba(28,28,26,0.3)", margin: "0 0 18px",
   };
 
   const Field = ({ label, k, type = "text", placeholder = "", readonly = false }: {
@@ -160,11 +160,11 @@ export default function EditLot() {
         value={form[k] as string}
         readOnly={readonly}
         onChange={e => !readonly && set(k, e.target.value)}
-        onFocus={e => !readonly && (e.target.style.borderColor = "rgba(193,68,14,0.4)")}
-        onBlur={e  => !readonly && (e.target.style.borderColor = "rgba(245,237,216,0.09)")}
+        onFocus={e => !readonly && (e.target.style.borderColor = "rgba(27,77,53,0.4)")}
+        onBlur={e  => !readonly && (e.target.style.borderColor = "rgba(28,28,26,0.08)")}
       />
       {readonly && (
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(245,237,216,0.2)", margin: "4px 0 0" }}>
+        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.15)", margin: "4px 0 0" }}>
           Lot ID cannot be changed after creation
         </p>
       )}
@@ -246,7 +246,7 @@ export default function EditLot() {
   if (lotLoading || !ready) return (
     <PageWrapper>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh" }}>
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(245,237,216,0.25)", letterSpacing: "0.2em" }}>
+        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(28,28,26,0.25)", letterSpacing: "0.2em" }}>
           LOADING LOT...
         </p>
       </div>
@@ -259,16 +259,16 @@ export default function EditLot() {
 
         {/* Header */}
         <div style={{ marginBottom: "28px" }}>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
+          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px" }}>
             Edit Lot — {lot?.lot_id}
           </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)", margin: 0 }}>
             Update lot details · Changes saved on submit
           </p>
         </div>
 
         {/* Stepper */}
-        <div style={{ display: "flex", marginBottom: "28px", background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)", borderRadius: "6px", overflow: "hidden" }}>
+        <div style={{ display: "flex", marginBottom: "28px", background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "6px", overflow: "hidden" }}>
           {STEPS.map((st, i) => {
             const active = st === step;
             const done   = i < stepIndex;
@@ -276,16 +276,16 @@ export default function EditLot() {
               <button key={st} onClick={() => done && setStep(st)}
                 style={{
                   flex: 1, padding: "14px 8px", border: "none",
-                  borderBottom: `2px solid ${active ? "#C1440E" : done ? "#4A7C59" : "transparent"}`,
-                  background: active ? "rgba(193,68,14,0.06)" : "transparent",
+                  borderBottom: `2px solid ${active ? "#1B4D35" : done ? "#2D7A52" : "transparent"}`,
+                  background: active ? "rgba(192,57,43,0.06)" : "transparent",
                   cursor: done ? "pointer" : "default",
                   display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
                 }}
               >
-                <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: active ? "#C1440E" : done ? "#A8C5A0" : "rgba(245,237,216,0.25)" }}>
+                <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.1em", textTransform: "uppercase", color: active ? "#1B4D35" : done ? "#A8D5BC" : "rgba(28,28,26,0.25)" }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.75rem", color: active ? "#C1440E" : done ? "#A8C5A0" : "rgba(245,237,216,0.35)", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.75rem", color: active ? "#1B4D35" : done ? "#A8D5BC" : "rgba(28,28,26,0.35)", whiteSpace: "nowrap" }}>
                   {STEP_LABELS[st]}
                 </span>
               </button>
@@ -359,14 +359,14 @@ export default function EditLot() {
                 <input style={inp} placeholder="e.g. Jasmine, Bergamot, Lemon Zest"
                   value={form.flavor_notes}
                   onChange={e => set("flavor_notes", e.target.value)}
-                  onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.4)")}
-                  onBlur={e  => (e.target.style.borderColor = "rgba(245,237,216,0.09)")}
+                  onFocus={e => (e.target.style.borderColor = "rgba(27,77,53,0.4)")}
+                  onBlur={e  => (e.target.style.borderColor = "rgba(28,28,26,0.08)")}
                 />
               </div>
               {form.flavor_notes && (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginTop: "10px" }}>
                   {form.flavor_notes.split(",").map(f => f.trim()).filter(Boolean).map(f => (
-                    <span key={f} style={{ padding: "3px 10px", background: "rgba(201,149,42,0.08)", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#C9952A" }}>{f}</span>
+                    <span key={f} style={{ padding: "3px 10px", background: "rgba(201,149,42,0.08)", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "20px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#8B5E3C" }}>{f}</span>
                   ))}
                 </div>
               )}
@@ -389,15 +389,15 @@ export default function EditLot() {
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                         padding: "12px 16px", borderRadius: "4px", cursor: "pointer",
                         background: on ? "rgba(30,58,47,0.2)" : "rgba(245,237,216,0.03)",
-                        border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(245,237,216,0.08)"}`,
+                        border: `1px solid ${on ? "rgba(74,124,89,0.3)" : "rgba(28,28,26,0.07)"}`,
                         transition: "all 0.15s",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ color: on ? "#4A7C59" : "rgba(245,237,216,0.2)", flexShrink: 0 }}>{g.icon}</span>
-                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: on ? "rgba(245,237,216,0.85)" : "rgba(245,237,216,0.4)" }}>{g.label}</span>
+                        <span style={{ color: on ? "#2D7A52" : "rgba(28,28,26,0.15)", flexShrink: 0 }}>{g.icon}</span>
+                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: on ? "rgba(28,28,26,0.85)" : "rgba(28,28,26,0.4)" }}>{g.label}</span>
                       </div>
-                      {on ? <CheckCircle size={16} color="#4A7C59" /> : <XCircle size={16} color="rgba(245,237,216,0.15)" />}
+                      {on ? <CheckCircle size={16} color="#2D7A52" /> : <XCircle size={16} color="rgba(28,28,26,0.12)" />}
                     </div>
                   );
                 })}
@@ -407,17 +407,17 @@ export default function EditLot() {
             {/* Phytosanitary Certificate Upload */}
             <div style={card}>
               <p style={cardTitle}>Phytosanitary Certificate</p>
-              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.4)", marginBottom: "16px", lineHeight: 1.5 }}>
+              <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.4)", marginBottom: "16px", lineHeight: 1.5 }}>
                 Upload the phytosanitary certificate PDF. Uploading will automatically mark the Phytosanitary Certificate gate as passed.
               </p>
               <div style={{
-                background: "#1E1208",
+                background: "#1B4D35",
                 border: "2px dashed #4A2515",
                 borderRadius: "4px", padding: "20px",
                 display: "flex", flexDirection: "column", alignItems: "center", gap: "10px",
               }}>
-                <Upload size={20} color="rgba(245,237,216,0.2)" />
-                <label style={{ ...lbl, color: "#EDE0C4", marginBottom: 0, cursor: "pointer", textAlign: "center" }}>
+                <Upload size={20} color="rgba(28,28,26,0.15)" />
+                <label style={{ ...lbl, color: "rgba(28,28,26,0.5)", marginBottom: 0, cursor: "pointer", textAlign: "center" }}>
                   {form.phyto_cert_file
                     ? form.phyto_cert_file.name
                     : "Click to select PDF or drag and drop"
@@ -432,20 +432,20 @@ export default function EditLot() {
                     if (file) set("phyto_cert_uploaded", true);
                   }}
                   style={{
-                    color: "#F5EDD8",
+                    color: "#1C1C1A",
                     fontFamily: "Instrument Sans, sans-serif",
                     fontSize: "0.825rem",
                     cursor: "pointer",
                   }}
                 />
                 {form.phyto_cert_file && (
-                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#A8C5A0", margin: 0 }}>
+                  <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#A8D5BC", margin: 0 }}>
                     {(form.phyto_cert_file.size / 1024).toFixed(1)} KB · PDF ready to upload
                   </p>
                 )}
               </div>
               {lot?.phyto_cert_uploaded && !form.phyto_cert_file && (
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#A8C5A0", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#A8D5BC", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
                   <CheckCircle size={11} /> Certificate already on file — upload a new one to replace it
                 </p>
               )}
@@ -470,9 +470,9 @@ export default function EditLot() {
                 ["Harvest Date", form.harvest_date || "—"],
                 ["GPS",          form.gps_lat && form.gps_lng ? `${form.gps_lat}°N, ${form.gps_lng}°E` : "Not set"],
               ].map(([l, v]) => (
-                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(245,237,216,0.05)" }}>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)" }}>{l}</span>
-                  <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#F5EDD8" }}>{v}</span>
+                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(28,28,26,0.04)" }}>
+                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)" }}>{l}</span>
+                  <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1C1C1A" }}>{v}</span>
                 </div>
               ))}
             </div>
@@ -483,12 +483,12 @@ export default function EditLot() {
                 {GATES.map(g => {
                   const pass = form[g.k as keyof FormData] as boolean;
                   return (
-                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(193,68,14,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(193,68,14,0.15)"}` }}>
+                    <div key={g.k} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: "3px", background: pass ? "rgba(30,58,47,0.12)" : "rgba(192,57,43,0.06)", border: `1px solid ${pass ? "rgba(74,124,89,0.2)" : "rgba(192,57,43,0.12)"}` }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span style={{ color: pass ? "#4A7C59" : "rgba(245,237,216,0.2)" }}>{g.icon}</span>
-                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(245,237,216,0.75)" : "rgba(245,237,216,0.35)" }}>{g.label}</span>
+                        <span style={{ color: pass ? "#2D7A52" : "rgba(28,28,26,0.15)" }}>{g.icon}</span>
+                        <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: pass ? "rgba(28,28,26,0.75)" : "rgba(28,28,26,0.35)" }}>{g.label}</span>
                       </div>
-                      {pass ? <CheckCircle size={14} color="#4A7C59" /> : <XCircle size={14} color="rgba(193,68,14,0.4)" />}
+                      {pass ? <CheckCircle size={14} color="#2D7A52" /> : <XCircle size={14} color="rgba(27,77,53,0.4)" />}
                     </div>
                   );
                 })}
@@ -498,10 +498,10 @@ export default function EditLot() {
             {/* Phyto cert upload summary */}
             {form.phyto_cert_file && (
               <div style={{ ...card, background: "rgba(30,58,47,0.15)", border: "1px solid rgba(74,124,89,0.2)" }}>
-                <p style={{ ...cardTitle, color: "#A8C5A0" }}>Phytosanitary Certificate</p>
+                <p style={{ ...cardTitle, color: "#A8D5BC" }}>Phytosanitary Certificate</p>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <Upload size={14} color="#A8C5A0" />
-                  <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8C5A0" }}>
+                  <Upload size={14} color="#A8D5BC" />
+                  <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#A8D5BC" }}>
                     {form.phyto_cert_file.name}
                   </span>
                   <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "rgba(168,197,160,0.5)", marginLeft: "auto" }}>
@@ -512,7 +512,7 @@ export default function EditLot() {
             )}
 
             {error && (
-              <div style={{ background: "rgba(193,68,14,0.1)", border: "1px solid rgba(193,68,14,0.25)", borderRadius: "4px", padding: "12px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+              <div style={{ background: "rgba(192,57,43,0.08)", border: "1px solid rgba(192,57,43,0.2)", borderRadius: "4px", padding: "12px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1B4D35", marginBottom: "16px" }}>
                 {error}
               </div>
             )}
@@ -523,7 +523,7 @@ export default function EditLot() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
           <button
             onClick={() => stepIndex > 0 ? setStep(STEPS[stepIndex - 1]) : navigate(`/lots/${id}`)}
-            style={{ display: "flex", alignItems: "center", gap: "7px", background: "transparent", border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px", padding: "10px 18px", color: "rgba(245,237,216,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: "7px", background: "transparent", border: "1px solid rgba(28,28,26,0.09)", borderRadius: "3px", padding: "10px 18px", color: "rgba(28,28,26,0.5)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer" }}
           >
             <ArrowLeft size={14} /> {stepIndex === 0 ? "Cancel" : "Back"}
           </button>
@@ -531,7 +531,7 @@ export default function EditLot() {
           {step !== "review" ? (
             <button
               onClick={() => setStep(STEPS[stepIndex + 1])}
-              style={{ display: "flex", alignItems: "center", gap: "7px", background: "#C1440E", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: "#1B4D35", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: "pointer" }}
             >
               Continue <ArrowRight size={14} />
             </button>
@@ -539,7 +539,7 @@ export default function EditLot() {
             <button
               onClick={handleSave}
               disabled={loading}
-              style={{ display: "flex", alignItems: "center", gap: "7px", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer" }}
+              style={{ display: "flex", alignItems: "center", gap: "7px", background: loading ? "rgba(27,77,53,0.5)" : "#1B4D35", border: "none", borderRadius: "3px", padding: "10px 20px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", fontWeight: 500, cursor: loading ? "not-allowed" : "pointer" }}
             >
               <Save size={14} /> {loading ? "Saving..." : "Save Changes"}
             </button>

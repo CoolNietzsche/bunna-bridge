@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
-import { Coffee } from "lucide-react";
+import logoFull from "../assets/logo-full.png";
 
 const ROLES = [
   { value: "exporter", label: "Exporter",  desc: "I export Ethiopian coffee internationally" },
@@ -42,39 +42,43 @@ export default function Register() {
   };
 
   const inp = {
-    width: "100%", background: "rgba(245,237,216,0.04)",
-    border: "1px solid rgba(245,237,216,0.1)", borderRadius: "3px",
-    padding: "9px 12px", color: "#F5EDD8",
+    width: "100%", background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.15)", borderRadius: "4px",
+    padding: "9px 12px", color: "#1C1C1A",
     fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem",
     outline: "none", boxSizing: "border-box" as const,
-    transition: "border-color 0.15s", marginBottom: "12px",
+    transition: "border-color 0.15s, box-shadow 0.15s", marginBottom: "12px",
   };
 
   const lbl = {
     display: "block", fontFamily: "DM Mono, monospace",
     fontSize: "0.58rem", letterSpacing: "0.12em",
     textTransform: "uppercase" as const,
-    color: "rgba(245,237,216,0.4)", marginBottom: "5px",
+    color: "rgba(28,28,26,0.45)", marginBottom: "5px",
+  };
+
+  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "#1B4D35";
+    e.target.style.boxShadow = "0 0 0 3px rgba(27,77,53,0.08)";
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.style.borderColor = "rgba(28,28,26,0.15)";
+    e.target.style.boxShadow = "none";
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#1A0F07", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+    <div style={{ minHeight: "100vh", background: "#F7F5F0", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
       <div style={{ width: "100%", maxWidth: "520px" }}>
 
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          <div style={{ width: "40px", height: "40px", borderRadius: "4px", background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
-            <Coffee size={18} color="#C1440E" />
-          </div>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#F5EDD8", margin: "0 0 4px" }}>
-            Beersheba
-          </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(245,237,216,0.3)", margin: 0 }}>
+          <img src={logoFull} alt="Beersheba" style={{ height: "44px", marginBottom: "12px" }} />
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.35)", margin: 0 }}>
             Create your account
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ background: "#2C1810", border: "1px solid rgba(201,149,42,0.12)", borderRadius: "6px", padding: "28px" }}>
+        <form onSubmit={handleSubmit} style={{ background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.08)", borderRadius: "8px", boxShadow: "0 4px 24px rgba(28,28,26,0.08)", padding: "28px" }}>
 
           {/* Role selector */}
           <p style={{ ...lbl, marginBottom: "10px" }}>I am a...</p>
@@ -84,15 +88,15 @@ export default function Register() {
                 onClick={() => set("role", r.value)}
                 style={{
                   padding: "12px", borderRadius: "4px", cursor: "pointer",
-                  border: `1px solid ${form.role === r.value ? "rgba(193,68,14,0.4)" : "rgba(245,237,216,0.08)"}`,
-                  background: form.role === r.value ? "rgba(193,68,14,0.08)" : "transparent",
+                  border: `1px solid ${form.role === r.value ? "rgba(27,77,53,0.35)" : "rgba(28,28,26,0.1)"}`,
+                  background: form.role === r.value ? "#E8F2EC" : "transparent",
                   transition: "all 0.15s",
                 }}
               >
-                <span style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: form.role === r.value ? "#C1440E" : "rgba(245,237,216,0.5)", marginBottom: "3px" }}>
+                <span style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: form.role === r.value ? "#1B4D35" : "rgba(28,28,26,0.45)", marginBottom: "3px" }}>
                   {r.label}
                 </span>
-                <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.75rem", color: "rgba(245,237,216,0.3)", lineHeight: 1.4 }}>
+                <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.75rem", color: "rgba(28,28,26,0.4)", lineHeight: 1.4 }}>
                   {r.desc}
                 </span>
               </div>
@@ -100,52 +104,53 @@ export default function Register() {
           </div>
 
           {error && (
-            <div style={{ background: "rgba(193,68,14,0.12)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "3px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C1440E", marginBottom: "16px" }}>
+            <div style={{ background: "#FDECEA", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "4px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C0392B", marginBottom: "16px" }}>
               {error}
             </div>
           )}
 
-          {/* Name row */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "0 12px" }}>
-            <div><label style={lbl}>First Name</label><input style={inp} value={form.first_name} onChange={e => set("first_name", e.target.value)} placeholder="Abebe" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
-            <div><label style={lbl}>Last Name</label><input style={inp} value={form.last_name} onChange={e => set("last_name", e.target.value)} placeholder="Girma" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
+            <div><label style={lbl}>First Name</label><input style={inp} value={form.first_name} onChange={e => set("first_name", e.target.value)} placeholder="Abebe" onFocus={onFocus} onBlur={onBlur} /></div>
+            <div><label style={lbl}>Last Name</label><input style={inp} value={form.last_name} onChange={e => set("last_name", e.target.value)} placeholder="Girma" onFocus={onFocus} onBlur={onBlur} /></div>
           </div>
-
           <label style={lbl}>Email *</label>
-          <input style={inp} type="email" required value={form.email} onChange={e => set("email", e.target.value)} placeholder="you@example.com" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} />
-
+          <input style={inp} type="email" required value={form.email} onChange={e => set("email", e.target.value)} placeholder="you@example.com" onFocus={onFocus} onBlur={onBlur} />
           <label style={lbl}>Username *</label>
-          <input style={inp} required value={form.username} onChange={e => set("username", e.target.value)} placeholder="username" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} />
-
+          <input style={inp} required value={form.username} onChange={e => set("username", e.target.value)} placeholder="username" onFocus={onFocus} onBlur={onBlur} />
           <label style={lbl}>
             {form.role === "buyer" ? "Company / Roastery Name" : form.role === "exporter" ? "Export Company Name" : form.role === "farmer" ? "Cooperative / Farm Name" : "Organization"}
           </label>
-          <input style={inp} value={form.company_name} onChange={e => set("company_name", e.target.value)} placeholder="e.g. Nordic Roasters" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} />
-
+          <input style={inp} value={form.company_name} onChange={e => set("company_name", e.target.value)} placeholder="e.g. Nordic Roasters" onFocus={onFocus} onBlur={onBlur} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "0 12px" }}>
-            <div><label style={lbl}>Country</label><input style={inp} value={form.country} onChange={e => set("country", e.target.value)} placeholder="Ethiopia" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
-            <div><label style={lbl}>Phone</label><input style={inp} value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="+251..." onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
+            <div><label style={lbl}>Country</label><input style={inp} value={form.country} onChange={e => set("country", e.target.value)} placeholder="Ethiopia" onFocus={onFocus} onBlur={onBlur} /></div>
+            <div><label style={lbl}>Phone</label><input style={inp} value={form.phone} onChange={e => set("phone", e.target.value)} placeholder="+251..." onFocus={onFocus} onBlur={onBlur} /></div>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "0 12px" }}>
-            <div><label style={lbl}>Password *</label><input style={inp} type="password" required value={form.password} onChange={e => set("password", e.target.value)} placeholder="Min 8 characters" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
-            <div><label style={lbl}>Confirm Password *</label><input style={inp} type="password" required value={form.password2} onChange={e => set("password2", e.target.value)} placeholder="Repeat password" onFocus={e => (e.target.style.borderColor = "rgba(193,68,14,0.5)")} onBlur={e => (e.target.style.borderColor = "rgba(245,237,216,0.1)")} /></div>
+            <div><label style={lbl}>Password *</label><input style={inp} type="password" required value={form.password} onChange={e => set("password", e.target.value)} placeholder="Min 8 characters" onFocus={onFocus} onBlur={onBlur} /></div>
+            <div><label style={lbl}>Confirm Password *</label><input style={inp} type="password" required value={form.password2} onChange={e => set("password2", e.target.value)} placeholder="Repeat password" onFocus={onFocus} onBlur={onBlur} /></div>
           </div>
 
           <button type="submit" disabled={loading} style={{
-            width: "100%", background: loading ? "rgba(193,68,14,0.5)" : "#C1440E",
-            border: "none", borderRadius: "3px", padding: "11px", marginTop: "4px",
+            width: "100%", background: loading ? "rgba(27,77,53,0.6)" : "#1B4D35",
+            border: "none", borderRadius: "4px", padding: "12px", marginTop: "4px",
             color: "white", fontFamily: "Instrument Sans, sans-serif",
             fontSize: "0.9rem", fontWeight: 500,
             cursor: loading ? "not-allowed" : "pointer",
-          }}>
+            transition: "background 0.15s",
+          }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#163D2A"; }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = "#1B4D35"; }}
+          >
             {loading ? "Creating account..." : "Create Account →"}
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(245,237,216,0.35)", marginTop: "16px" }}>
+        <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.4)", marginTop: "16px" }}>
           Already have an account?{" "}
-          <Link to="/login" style={{ color: "#D4824A", textDecoration: "none" }}>Sign in</Link>
+          <Link to="/login" style={{ color: "#1B4D35", textDecoration: "none", fontWeight: 500 }}>Sign in →</Link>
+        </p>
+        <p style={{ textAlign: "center", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.25)", letterSpacing: "0.1em", margin: "16px 0 0" }}>
+          Secure Ethiopian coffee export compliance
         </p>
       </div>
     </div>

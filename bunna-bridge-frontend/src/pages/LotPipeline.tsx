@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { getLots, updateLotStatus } from "../api/lots";
+import { getLots } from "../api/lots";
+import { updateLotStatus } from "../api/samples";
 import type { CoffeeLot } from "../api/lots";
 import PageWrapper from "../components/PageWrapper";
 import { ArrowRight, Lock, ExternalLink, ShieldCheck, TrendingUp, X, Package } from "lucide-react";

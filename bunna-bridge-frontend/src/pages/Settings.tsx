@@ -10,8 +10,8 @@ export default function Settings() {
   const [showLogout, setShowLogout] = useState(false);
 
   const cardStyle: React.CSSProperties = {
-    background: "#2C1810",
-    border: "1px solid rgba(245,237,216,0.07)",
+    background: "#FFFFFF",
+    border: "1px solid rgba(28,28,26,0.06)",
     borderRadius: "6px",
     padding: "24px",
     marginBottom: "16px",
@@ -21,14 +21,14 @@ export default function Settings() {
     fontSize: "0.56rem",
     letterSpacing: "0.12em",
     textTransform: "uppercase",
-    color: "rgba(245,237,216,0.3)",
+    color: "rgba(28,28,26,0.3)",
     marginBottom: "4px",
     display: "block",
   };
   const valueStyle: React.CSSProperties = {
     fontFamily: "Instrument Sans, sans-serif",
     fontSize: "0.88rem",
-    color: "#F5EDD8",
+    color: "#1C1C1A",
   };
 
   return (
@@ -37,13 +37,13 @@ export default function Settings() {
       <p style={{
         fontFamily: "Cormorant Garamond, serif",
         fontSize: "1.7rem", fontWeight: 500,
-        color: "#F5EDD8", margin: "0 0 6px",
+        color: "#1C1C1A", margin: "0 0 6px",
       }}>
         Account Settings
       </p>
       <p style={{
         fontFamily: "DM Mono, monospace", fontSize: "0.62rem",
-        letterSpacing: "0.1em", color: "rgba(245,237,216,0.3)",
+        letterSpacing: "0.1em", color: "rgba(28,28,26,0.3)",
         textTransform: "uppercase", margin: "0 0 28px",
       }}>
         {me?.role?.toUpperCase()} · {me?.company_name || me?.email}
@@ -54,7 +54,7 @@ export default function Settings() {
         <p style={{
           fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
           letterSpacing: "0.2em", textTransform: "uppercase",
-          color: "rgba(245,237,216,0.3)", margin: "0 0 16px",
+          color: "rgba(28,28,26,0.3)", margin: "0 0 16px",
         }}>
           Profile
         </p>
@@ -81,7 +81,7 @@ export default function Settings() {
             <span style={labelStyle}>Verified</span>
             <span style={{
               ...valueStyle,
-              color: me?.is_verified ? "#4A7C59" : "#C1440E",
+              color: me?.is_verified ? "#2D7A52" : "#1B4D35",
             }}>
               {me?.is_verified ? "Verified" : "Not verified"}
             </span>
@@ -97,13 +97,13 @@ export default function Settings() {
       {/* Danger zone */}
       <div style={{
         ...cardStyle,
-        borderColor: "rgba(193,68,14,0.15)",
+        borderColor: "rgba(192,57,43,0.12)",
         marginTop: "8px",
       }}>
         <p style={{
           fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
           letterSpacing: "0.2em", textTransform: "uppercase",
-          color: "rgba(193,68,14,0.4)", margin: "0 0 14px",
+          color: "rgba(27,77,53,0.4)", margin: "0 0 14px",
         }}>
           Session
         </p>
@@ -113,8 +113,8 @@ export default function Settings() {
             style={{
               padding: "8px 18px", borderRadius: "3px",
               background: "transparent",
-              border: "1px solid rgba(193,68,14,0.25)",
-              color: "rgba(193,68,14,0.6)",
+              border: "1px solid rgba(192,57,43,0.2)",
+              color: "rgba(27,77,53,0.6)",
               fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
               letterSpacing: "0.08em", cursor: "pointer",
             }}
@@ -125,7 +125,7 @@ export default function Settings() {
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <span style={{
               fontFamily: "Instrument Sans, sans-serif",
-              fontSize: "0.82rem", color: "rgba(245,237,216,0.5)",
+              fontSize: "0.82rem", color: "rgba(28,28,26,0.5)",
             }}>
               Sign out of Beersheba?
             </span>
@@ -133,7 +133,7 @@ export default function Settings() {
               onClick={logout}
               style={{
                 padding: "6px 14px", borderRadius: "3px", border: "none",
-                background: "#C1440E", color: "#F5EDD8",
+                background: "#1B4D35", color: "#1C1C1A",
                 fontFamily: "DM Mono, monospace", fontSize: "0.62rem",
                 letterSpacing: "0.08em", cursor: "pointer",
               }}
@@ -145,8 +145,8 @@ export default function Settings() {
               style={{
                 padding: "6px 14px", borderRadius: "3px",
                 background: "transparent",
-                border: "1px solid rgba(245,237,216,0.1)",
-                color: "rgba(245,237,216,0.35)",
+                border: "1px solid rgba(28,28,26,0.09)",
+                color: "rgba(28,28,26,0.35)",
                 fontFamily: "DM Mono, monospace", fontSize: "0.62rem",
                 cursor: "pointer",
               }}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { CheckCircle } from "lucide-react";
+import logoFull from "../assets/logo-full.png";
 
 export default function Login() {
   const { login }  = useAuth();
@@ -44,24 +45,9 @@ export default function Login() {
     <div style={{ minHeight: "100vh", background: "#F7F5F0", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem" }}>
       <div style={{ width: "100%", maxWidth: "420px" }}>
 
-        {/* Logo + wordmark */}
+        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
-          {/* Inline SVG B-leaf mark */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "14px" }}>
-            <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="52" height="52" rx="8" fill="#1B4D35"/>
-              <rect x="13" y="12" width="5" height="28" rx="2" fill="white"/>
-              <rect x="18" y="12" width="10" height="5" rx="2" fill="white"/>
-              <rect x="18" y="21" width="9" height="5" rx="2" fill="white"/>
-              <rect x="18" y="30" width="11" height="5" rx="2.5" fill="white"/>
-              <rect x="28" y="17" width="5" height="4" rx="2" fill="white"/>
-              <rect x="29" y="25" width="5" height="5" rx="2" fill="white"/>
-              <path d="M34 14 C37 11, 41 13, 41 17 C41 21, 37 22, 34 19 C31 16, 31 14, 34 14Z" fill="#A8D5BC"/>
-            </svg>
-          </div>
-          <h1 style={{ fontFamily: "Playfair Display, serif", fontSize: "1.6rem", fontWeight: 500, color: "#1B4D35", margin: "0 0 6px" }}>
-            Beersheba
-          </h1>
+          <img src={logoFull} alt="Beersheba" style={{ height: "52px", marginBottom: "12px" }} />
           <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.35)", margin: 0 }}>
             Ethiopian Coffee Export Platform
           </p>
@@ -72,20 +58,17 @@ export default function Login() {
           <h2 style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "1.05rem", fontWeight: 500, color: "#1C1C1A", margin: "0 0 20px" }}>
             Sign in to your account
           </h2>
-
           {params.get("registered") && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "#E8F2EC", border: "1px solid rgba(27,77,53,0.2)", borderRadius: "4px", padding: "10px 14px", marginBottom: "16px" }}>
               <CheckCircle size={14} color="#1B4D35" />
               <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#1B4D35" }}>Account created. Sign in below.</span>
             </div>
           )}
-
           {error && (
             <div style={{ background: "#FDECEA", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "4px", padding: "10px 14px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "#C0392B", marginBottom: "16px" }}>
               {error}
             </div>
           )}
-
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: "14px" }}>
               <label style={{ display: "block", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(28,28,26,0.45)", marginBottom: "6px" }}>
@@ -122,7 +105,6 @@ export default function Login() {
               {loading ? "Signing in..." : "Sign In →"}
             </button>
           </form>
-
           <p style={{ textAlign: "center", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.825rem", color: "rgba(28,28,26,0.4)", margin: "16px 0 0" }}>
             No account?{" "}
             <Link to="/register" style={{ color: "#1B4D35", textDecoration: "none", fontWeight: 500 }}>Create one →</Link>
@@ -151,7 +133,6 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Footer note */}
         <p style={{ textAlign: "center", fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.25)", letterSpacing: "0.1em", margin: "16px 0 0" }}>
           Secure Ethiopian coffee export compliance
         </p>

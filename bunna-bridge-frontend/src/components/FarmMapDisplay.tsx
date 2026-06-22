@@ -31,8 +31,8 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
     }).addTo(map);
 
     const poly = L.polygon(latlngs, {
-      color: "#C9952A",
-      fillColor: "#C9952A",
+      color: "#8B5E3C",
+      fillColor: "#8B5E3C",
       fillOpacity: 0.18,
       weight: 2,
     }).addTo(map);
@@ -54,16 +54,16 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
   const areaHa = Math.round(Math.abs(area / 2) * 1230800000) / 100;
 
   return (
-    <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(201,149,42,0.25)" }}>
+    <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(28,28,26,0.12)" }}>
       {label && (
         <div style={{
-          background: "#2C1810", padding: "8px 14px",
+          background: "#FFFFFF", padding: "8px 14px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
-          <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 15, color: "#F5EDD8" }}>
+          <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 15, color: "#1C1C1A" }}>
             {label}
           </span>
-          <span style={{ fontFamily: "DM Mono, monospace", fontSize: 11, color: "#C9952A" }}>
+          <span style={{ fontFamily: "DM Mono, monospace", fontSize: 11, color: "#8B5E3C" }}>
             ~{areaHa} ha · {coords.length - 1} pts
           </span>
         </div>

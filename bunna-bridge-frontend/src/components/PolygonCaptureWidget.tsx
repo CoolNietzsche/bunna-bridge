@@ -90,7 +90,7 @@ export default function PolygonCaptureWidget({
     if (!map) return;
     markersLayer.current?.clearLayers();
     pts.forEach(([lng, lat], i) => {
-      L.circleMarker([lat, lng], { radius: 6, color: "#C1440E", fillColor: "#D4824A", fillOpacity: 1 })
+      L.circleMarker([lat, lng], { radius: 6, color: "#1B4D35", fillColor: "#1B4D35", fillOpacity: 1 })
         .bindTooltip(`${i + 1}`, { permanent: true, className: "point-label" })
         .addTo(markersLayer.current!);
     });
@@ -106,7 +106,7 @@ export default function PolygonCaptureWidget({
     polyLayer.current?.remove();
     const latlngs = coords.map(([lng, lat]) => [lat, lng] as [number, number]);
     polyLayer.current = L.polygon(latlngs, {
-      color: "#C9952A", fillColor: "#C9952A", fillOpacity: 0.2, weight: 2,
+      color: "#8B5E3C", fillColor: "#8B5E3C", fillOpacity: 0.2, weight: 2,
     }).addTo(map);
     map.fitBounds(polyLayer.current.getBounds(), { padding: [20, 20] });
   };
@@ -247,7 +247,7 @@ export default function PolygonCaptureWidget({
   const areaHa = polygon ? calcAreaHa(polygon) : null;
 
   return (
-    <div style={{ background: "#2C1810", borderRadius: 12, padding: 20, color: "#F5EDD8" }}>
+    <div style={{ background: "#FFFFFF", borderRadius: 12, padding: 20, color: "#1C1C1A" }}>
       {/* Online indicator */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 18, fontWeight: 500 }}>
@@ -255,8 +255,8 @@ export default function PolygonCaptureWidget({
         </span>
         <span style={{
           fontSize: 11, fontFamily: "DM Mono, monospace",
-          background: online ? "#1E3A2F" : "#4A2515",
-          color: online ? "#A8C5A0" : "#D4824A",
+          background: online ? "#1B4D35" : "rgba(28,28,26,0.05)",
+          color: online ? "#A8D5BC" : "#1B4D35",
           padding: "3px 10px", borderRadius: 20,
         }}>
           {online ? "● ONLINE" : "● OFFLINE — local save"}
@@ -270,8 +270,8 @@ export default function PolygonCaptureWidget({
             style={{
               flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
               fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
-              background: tab === m ? "#C1440E" : "#4A2515",
-              color: tab === m ? "#fff" : "#EDE0C4",
+              background: tab === m ? "#1B4D35" : "rgba(28,28,26,0.05)",
+              color: tab === m ? "#fff" : "rgba(28,28,26,0.5)",
               fontWeight: tab === m ? 600 : 400,
             }}>
             {m === "pin" ? "📍 Pin Corners" : m === "walk" ? "🚶 Walk Boundary" : "📂 Import File"}
@@ -280,7 +280,7 @@ export default function PolygonCaptureWidget({
       </div>
 
       {/* Instructions */}
-      <div style={{ fontSize: 12, color: "#EDE0C4", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif", lineHeight: 1.5 }}>
+      <div style={{ fontSize: 12, color: "rgba(28,28,26,0.5)", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif", lineHeight: 1.5 }}>
         {tab === "pin" && "Tap the map at each corner of the farm. Minimum 3 points. Tap 'Clear' to start over."}
         {tab === "walk" && "Press Start, then walk along the farm boundary. Press Stop when you return to the start."}
         {tab === "import" && "Upload a GeoJSON or KML file exported from another GPS app or government records."}
@@ -295,7 +295,7 @@ export default function PolygonCaptureWidget({
           <button onClick={startWalk} disabled={walking}
             style={{
               flex: 1, padding: "10px 0", borderRadius: 8, border: "none",
-              background: walking ? "#4A2515" : "#1E3A2F", color: "#A8C5A0",
+              background: walking ? "rgba(28,28,26,0.05)" : "#1B4D35", color: "#A8D5BC",
               fontFamily: "Instrument Sans, sans-serif", fontSize: 14, cursor: walking ? "not-allowed" : "pointer",
             }}>
             {walking ? `Recording… (${points.length} pts)` : "▶ Start Walking"}
@@ -303,7 +303,7 @@ export default function PolygonCaptureWidget({
           <button onClick={stopWalk} disabled={!walking}
             style={{
               flex: 1, padding: "10px 0", borderRadius: 8, border: "none",
-              background: !walking ? "#4A2515" : "#C1440E", color: "#fff",
+              background: !walking ? "rgba(28,28,26,0.05)" : "#1B4D35", color: "#fff",
               fontFamily: "Instrument Sans, sans-serif", fontSize: 14, cursor: !walking ? "not-allowed" : "pointer",
             }}>
             ■ Stop & Close
@@ -316,15 +316,15 @@ export default function PolygonCaptureWidget({
         <div style={{ marginBottom: 12 }}>
           <input type="file" accept=".geojson,.json,.kml"
             onChange={handleFileImport}
-            style={{ color: "#F5EDD8", fontFamily: "Instrument Sans, sans-serif", fontSize: 13 }} />
+            style={{ color: "#1C1C1A", fontFamily: "Instrument Sans, sans-serif", fontSize: 13 }} />
         </div>
       )}
 
       {/* Stats */}
       {areaHa !== null && (
         <div style={{
-          background: "#1E3A2F", borderRadius: 8, padding: "8px 14px",
-          marginBottom: 12, fontFamily: "DM Mono, monospace", fontSize: 13, color: "#A8C5A0",
+          background: "#1B4D35", borderRadius: 8, padding: "8px 14px",
+          marginBottom: 12, fontFamily: "DM Mono, monospace", fontSize: 13, color: "#A8D5BC",
         }}>
           Area: ~{areaHa} ha · {points.length} boundary points
         </div>
@@ -332,7 +332,7 @@ export default function PolygonCaptureWidget({
 
       {/* Status message */}
       {status && (
-        <div style={{ fontSize: 12, color: "#D4824A", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif" }}>
+        <div style={{ fontSize: 12, color: "#1B4D35", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif" }}>
           {status}
         </div>
       )}
@@ -343,7 +343,7 @@ export default function PolygonCaptureWidget({
           <button onClick={handleSave} disabled={saving}
             style={{
               flex: 2, padding: "12px 0", borderRadius: 8, border: "none",
-              background: "#C1440E", color: "#fff", fontWeight: 600,
+              background: "#1B4D35", color: "#fff", fontWeight: 600,
               fontFamily: "Instrument Sans, sans-serif", fontSize: 14,
               cursor: saving ? "not-allowed" : "pointer",
             }}>
@@ -354,7 +354,7 @@ export default function PolygonCaptureWidget({
           <button onClick={handleInherit} disabled={saving}
             style={{
               flex: 1, padding: "12px 0", borderRadius: 8, border: "1px solid #4A7C59",
-              background: "transparent", color: "#4A7C59",
+              background: "transparent", color: "#2D7A52",
               fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
             }}>
             ↙ From Farm
@@ -364,7 +364,7 @@ export default function PolygonCaptureWidget({
           <button onClick={clearPoints}
             style={{
               flex: 1, padding: "12px 0", borderRadius: 8, border: "1px solid #4A2515",
-              background: "transparent", color: "#EDE0C4",
+              background: "transparent", color: "rgba(28,28,26,0.5)",
               fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
             }}>
             Clear

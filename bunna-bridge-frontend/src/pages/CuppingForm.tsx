@@ -91,32 +91,32 @@ export default function CuppingForm() {
 
   const s = {
     page:      { padding: "2rem 2.5rem", maxWidth: "900px" },
-    back:      { background: "none", border: "none", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", cursor: "pointer", marginBottom: "1.5rem", padding: 0 },
-    title:     { fontSize: "1.8rem", fontWeight: 300, color: "#F5EDD8", margin: "0 0 0.25rem" },
-    sub:       { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#D4824A", textTransform: "uppercase" as const, marginBottom: "2rem" },
-    card:      { background: "#2C1810", border: "1px solid rgba(245,237,216,0.06)", borderRadius: "4px", padding: "1.5rem", marginBottom: "1.5rem" },
-    cardTitle: { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#D4824A", margin: "0 0 1.2rem" },
+    back:      { background: "none", border: "none", fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(28,28,26,0.4)", cursor: "pointer", marginBottom: "1.5rem", padding: 0 },
+    title:     { fontSize: "1.8rem", fontWeight: 300, color: "#1C1C1A", margin: "0 0 0.25rem" },
+    sub:       { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#1B4D35", textTransform: "uppercase" as const, marginBottom: "2rem" },
+    card:      { background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "4px", padding: "1.5rem", marginBottom: "1.5rem" },
+    cardTitle: { fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "#1B4D35", margin: "0 0 1.2rem" },
     grid:      { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "1rem" },
-    attr:      { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid rgba(245,237,216,0.05)" },
+    attr:      { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.75rem 0", borderBottom: "1px solid rgba(28,28,26,0.04)" },
     attrLeft:  { flex: 1 },
-    attrLabel: { fontSize: "0.9rem", color: "#F5EDD8", marginBottom: "0.15rem" },
-    attrDesc:  { fontFamily: "monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.3)" },
+    attrLabel: { fontSize: "0.9rem", color: "#1C1C1A", marginBottom: "0.15rem" },
+    attrDesc:  { fontFamily: "monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.3)" },
     attrRight: { display: "flex", alignItems: "center", gap: "0.75rem" },
-    slider:    { width: "140px", accentColor: "#C1440E", cursor: "pointer" },
+    slider:    { width: "140px", accentColor: "#1B4D35", cursor: "pointer" },
     scoreVal:  (val: number) => ({
       fontFamily: "monospace", fontSize: "1rem", fontWeight: 500, minWidth: "3rem", textAlign: "right" as const,
-      color: val >= 9 ? "#A8C5A0" : val >= 8 ? "#C9952A" : val >= 7 ? "#D4824A" : "#C1440E",
+      color: val >= 9 ? "#A8D5BC" : val >= 8 ? "#8B5E3C" : val >= 7 ? "#1B4D35" : "#1B4D35",
     }),
-    total:     { background: "rgba(201,149,42,0.08)", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "3px", padding: "1.2rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" },
-    totalLbl:  { fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)" },
-    totalNum:  { fontFamily: "serif", fontSize: "3rem", fontWeight: 300, color: "#C9952A", lineHeight: 1 },
-    totalSub:  { fontFamily: "monospace", fontSize: "0.62rem", color: "rgba(245,237,216,0.3)", marginTop: "0.25rem" },
-    label:     { display: "block", fontFamily: "monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(245,237,216,0.4)", marginBottom: "0.4rem" },
-    input:     { width: "100%", background: "#1A0F07", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.65rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const },
-    textarea:  { width: "100%", background: "#1A0F07", border: "1px solid rgba(245,237,216,0.12)", borderRadius: "2px", padding: "0.65rem 0.9rem", color: "#F5EDD8", fontFamily: "monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const, resize: "vertical" as const, minHeight: "80px" },
-    btn:       { background: "#C1440E", border: "none", borderRadius: "2px", padding: "0.875rem 2.5rem", color: "white", fontFamily: "monospace", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, cursor: "pointer" },
-    btnGreen:  { background: "#1E3A2F", border: "1px solid rgba(74,124,89,0.5)", borderRadius: "2px", padding: "0.875rem 2.5rem", color: "#A8C5A0", fontFamily: "monospace", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, cursor: "pointer" },
-    err:       { background: "rgba(193,68,14,0.15)", border: "1px solid rgba(193,68,14,0.3)", borderRadius: "2px", padding: "0.75rem", fontFamily: "monospace", fontSize: "0.7rem", color: "#C1440E", marginBottom: "1rem" },
+    total:     { background: "rgba(201,149,42,0.08)", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "3px", padding: "1.2rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" },
+    totalLbl:  { fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, color: "rgba(28,28,26,0.4)" },
+    totalNum:  { fontFamily: "serif", fontSize: "3rem", fontWeight: 300, color: "#8B5E3C", lineHeight: 1 },
+    totalSub:  { fontFamily: "monospace", fontSize: "0.62rem", color: "rgba(28,28,26,0.3)", marginTop: "0.25rem" },
+    label:     { display: "block", fontFamily: "monospace", fontSize: "0.58rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(28,28,26,0.4)", marginBottom: "0.4rem" },
+    input:     { width: "100%", background: "#F7F5F0", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", padding: "0.65rem 0.9rem", color: "#1C1C1A", fontFamily: "monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const },
+    textarea:  { width: "100%", background: "#F7F5F0", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", padding: "0.65rem 0.9rem", color: "#1C1C1A", fontFamily: "monospace", fontSize: "0.8rem", outline: "none", boxSizing: "border-box" as const, resize: "vertical" as const, minHeight: "80px" },
+    btn:       { background: "#1B4D35", border: "none", borderRadius: "2px", padding: "0.875rem 2.5rem", color: "white", fontFamily: "monospace", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, cursor: "pointer" },
+    btnGreen:  { background: "#1B4D35", border: "1px solid rgba(74,124,89,0.5)", borderRadius: "2px", padding: "0.875rem 2.5rem", color: "#A8D5BC", fontFamily: "monospace", fontSize: "0.7rem", letterSpacing: "0.15em", textTransform: "uppercase" as const, cursor: "pointer" },
+    err:       { background: "rgba(192,57,43,0.12)", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "2px", padding: "0.75rem", fontFamily: "monospace", fontSize: "0.7rem", color: "#1B4D35", marginBottom: "1rem" },
     success:   { background: "rgba(74,124,89,0.15)", border: "1px solid rgba(74,124,89,0.3)", borderRadius: "4px", padding: "1.5rem", marginBottom: "1.5rem" },
   };
 
@@ -137,13 +137,13 @@ export default function CuppingForm() {
         {/* Submitted confirmation */}
         {submitted && (
           <div style={s.success}>
-            <p style={{ fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.15em", color: "#A8C5A0", textTransform: "uppercase", margin: "0 0 0.5rem" }}>
+            <p style={{ fontFamily: "monospace", fontSize: "0.65rem", letterSpacing: "0.15em", color: "#A8D5BC", textTransform: "uppercase", margin: "0 0 0.5rem" }}>
               ✓ Score Submitted — Pending Confirmation
             </p>
-            <p style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "#F5EDD8", margin: "0 0 1rem" }}>
+            <p style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "#1C1C1A", margin: "0 0 1rem" }}>
               Total Score: <strong>{totalScore()} pts</strong>
             </p>
-            <p style={{ fontFamily: "monospace", fontSize: "0.65rem", color: "rgba(245,237,216,0.5)", margin: "0 0 1rem" }}>
+            <p style={{ fontFamily: "monospace", fontSize: "0.65rem", color: "rgba(28,28,26,0.5)", margin: "0 0 1rem" }}>
               Review your score below, then confirm to lock it permanently and update the lot quality record.
               Confirmed scores cannot be edited.
             </p>
@@ -161,7 +161,7 @@ export default function CuppingForm() {
             <div style={s.total}>
               <div>
                 <p style={s.totalLbl}>Live Total Score</p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(245,237,216,0.25)", margin: "0.25rem 0 0" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.25)", margin: "0.25rem 0 0" }}>
                   {score >= 90 ? "Outstanding" :
                    score >= 85 ? "Excellent" :
                    score >= 80 ? "Specialty" :
@@ -201,7 +201,7 @@ export default function CuppingForm() {
               {/* Defects */}
               <div style={{ ...s.attr, borderBottom: "none" }}>
                 <div style={s.attrLeft}>
-                  <p style={{ ...s.attrLabel, margin: 0, color: "#C1440E" }}>Defects (penalty)</p>
+                  <p style={{ ...s.attrLabel, margin: 0, color: "#1B4D35" }}>Defects (penalty)</p>
                   <p style={{ ...s.attrDesc, margin: 0 }}>Subtract from total</p>
                 </div>
                 <div style={s.attrRight}>
@@ -210,9 +210,9 @@ export default function CuppingForm() {
                     min="0" max="8" step="2"
                     value={defects}
                     onChange={e => setDefects(e.target.value)}
-                    style={{ ...s.slider, accentColor: "#C1440E" }}
+                    style={{ ...s.slider, accentColor: "#1B4D35" }}
                   />
-                  <span style={{ ...s.scoreVal(0), color: "#C1440E" }}>
+                  <span style={{ ...s.scoreVal(0), color: "#1B4D35" }}>
                     -{parseFloat(defects).toFixed(2)}
                   </span>
                 </div>
@@ -246,7 +246,7 @@ export default function CuppingForm() {
                 {flavorNotes && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.6rem" }}>
                     {flavorNotes.split(",").map(f => f.trim()).filter(Boolean).map(f => (
-                      <span key={f} style={{ padding: "0.2rem 0.6rem", background: "rgba(201,149,42,0.1)", border: "1px solid rgba(201,149,42,0.2)", borderRadius: "2px", fontFamily: "monospace", fontSize: "0.58rem", color: "#C9952A" }}>{f}</span>
+                      <span key={f} style={{ padding: "0.2rem 0.6rem", background: "rgba(201,149,42,0.1)", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "2px", fontFamily: "monospace", fontSize: "0.58rem", color: "#8B5E3C" }}>{f}</span>
                     ))}
                   </div>
                 )}
@@ -268,7 +268,7 @@ export default function CuppingForm() {
                 disabled={submitMutation.isPending}>
                 {submitMutation.isPending ? "Submitting..." : "Submit Score →"}
               </button>
-              <span style={{ fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(245,237,216,0.25)" }}>
+              <span style={{ fontFamily: "monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.25)" }}>
                 You will confirm before the score is locked
               </span>
             </div>

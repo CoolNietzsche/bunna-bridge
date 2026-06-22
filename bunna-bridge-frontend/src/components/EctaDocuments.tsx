@@ -23,14 +23,14 @@ export default function EctaDocuments() {
 
   const inputStyle: React.CSSProperties = {
     width: "100%", padding: "8px 10px", borderRadius: "3px",
-    background: "rgba(245,237,216,0.05)", border: "1px solid rgba(245,237,216,0.12)",
-    color: "#F5EDD8", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem",
+    background: "rgba(28,28,26,0.04)", border: "1px solid rgba(28,28,26,0.1)",
+    color: "#1C1C1A", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem",
     outline: "none", boxSizing: "border-box",
   };
   const labelStyle: React.CSSProperties = {
     fontFamily: "DM Mono, monospace", fontSize: "0.56rem",
     letterSpacing: "0.1em", textTransform: "uppercase",
-    color: "rgba(245,237,216,0.35)", display: "block", marginBottom: "4px",
+    color: "rgba(28,28,26,0.35)", display: "block", marginBottom: "4px",
   };
 
   async function handleSubmit() {
@@ -50,13 +50,13 @@ export default function EctaDocuments() {
 
   return (
     <div style={{
-      background: "#2C1810", border: "1px solid rgba(245,237,216,0.07)",
+      background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.06)",
       borderRadius: "6px", padding: "20px 24px",
     }}>
       <p style={{
         fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
         letterSpacing: "0.2em", textTransform: "uppercase",
-        color: "rgba(245,237,216,0.3)", margin: "0 0 14px",
+        color: "rgba(28,28,26,0.3)", margin: "0 0 14px",
       }}>
         ECTA Export License
       </p>
@@ -64,13 +64,13 @@ export default function EctaDocuments() {
       <div style={{
         padding: "14px 16px", borderRadius: "4px",
         background: hasLicense ? "rgba(30,58,47,0.15)" : "rgba(245,237,216,0.03)",
-        border: `1px solid ${hasLicense ? "rgba(74,124,89,0.25)" : "rgba(245,237,216,0.08)"}`,
+        border: `1px solid ${hasLicense ? "rgba(74,124,89,0.25)" : "rgba(28,28,26,0.07)"}`,
         marginBottom: "12px",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <ShieldCheck size={13} color={hasLicense ? "#4A7C59" : "rgba(245,237,216,0.2)"} />
-            <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem", color: hasLicense ? "#F5EDD8" : "rgba(245,237,216,0.4)" }}>
+            <ShieldCheck size={13} color={hasLicense ? "#2D7A52" : "rgba(28,28,26,0.15)"} />
+            <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem", color: hasLicense ? "#1C1C1A" : "rgba(28,28,26,0.4)" }}>
               {hasLicense ? "ECTA License on file" : "No ECTA license uploaded"}
             </span>
             {me?.ecta_license_expiry && (
@@ -84,7 +84,7 @@ export default function EctaDocuments() {
               <a
                 href={getMediaUrl(me.ecta_license_file) ?? "#"}
                 target="_blank" rel="noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8C5A0", textDecoration: "none" }}
+                style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8D5BC", textDecoration: "none" }}
               >
                 <ExternalLink size={11} /> VIEW
               </a>
@@ -94,7 +94,7 @@ export default function EctaDocuments() {
               style={{
                 display: "flex", alignItems: "center", gap: "4px",
                 padding: "4px 10px", borderRadius: "3px", border: "none",
-                background: "rgba(212,130,74,0.12)", color: "#D4824A",
+                background: "rgba(212,130,74,0.12)", color: "#1B4D35",
                 fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
                 letterSpacing: "0.06em", cursor: "pointer",
               }}
@@ -104,7 +104,7 @@ export default function EctaDocuments() {
           </div>
         </div>
         {me?.ecta_license_number && (
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(245,237,216,0.35)", margin: "6px 0 0" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", margin: "6px 0 0" }}>
             # {me.ecta_license_number}
           </p>
         )}
@@ -120,10 +120,10 @@ export default function EctaDocuments() {
           onClick={e => { if (e.target === e.currentTarget) setOpen(false); }}
         >
           <div style={{
-            background: "#2C1810", border: "1px solid rgba(245,237,216,0.1)",
+            background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.09)",
             borderRadius: "6px", padding: "28px", width: "100%", maxWidth: "420px",
           }}>
-            <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.3rem", color: "#F5EDD8", margin: "0 0 20px" }}>
+            <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.3rem", color: "#1C1C1A", margin: "0 0 20px" }}>
               ECTA Export License
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
@@ -136,7 +136,7 @@ export default function EctaDocuments() {
                 <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => setFile(e.target.files?.[0] ?? null)} />
                 <button
                   onClick={() => fileRef.current?.click()}
-                  style={{ ...inputStyle, cursor: "pointer", textAlign: "left", color: file ? "#F5EDD8" : "rgba(245,237,216,0.3)", display: "flex", alignItems: "center", gap: "8px" }}
+                  style={{ ...inputStyle, cursor: "pointer", textAlign: "left", color: file ? "#1C1C1A" : "rgba(28,28,26,0.3)", display: "flex", alignItems: "center", gap: "8px" }}
                 >
                   <FileText size={13} />
                   {file ? file.name : "Choose PDF, JPG or PNG"}
@@ -146,18 +146,18 @@ export default function EctaDocuments() {
                 <label style={labelStyle}>Expiry Date (optional)</label>
                 <input type="date" style={inputStyle} value={expiry} onChange={e => setExpiry(e.target.value)} />
               </div>
-              {error && <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#C1440E", margin: 0 }}>{error}</p>}
+              {error && <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#1B4D35", margin: 0 }}>{error}</p>}
               <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
                 <button
                   onClick={() => { setOpen(false); setFile(null); setError(""); }}
-                  style={{ flex: 1, padding: "10px", borderRadius: "3px", background: "transparent", border: "1px solid rgba(245,237,216,0.1)", color: "rgba(245,237,216,0.4)", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: "pointer" }}
+                  style={{ flex: 1, padding: "10px", borderRadius: "3px", background: "transparent", border: "1px solid rgba(28,28,26,0.09)", color: "rgba(28,28,26,0.4)", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: "pointer" }}
                 >
                   CANCEL
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  style={{ flex: 2, padding: "10px", borderRadius: "3px", border: "none", background: loading ? "rgba(212,130,74,0.2)" : "#D4824A", color: loading ? "rgba(255,255,255,0.4)" : "#1A0F07", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                  style={{ flex: 2, padding: "10px", borderRadius: "3px", border: "none", background: loading ? "rgba(212,130,74,0.2)" : "#1B4D35", color: loading ? "rgba(255,255,255,0.4)" : "#F7F5F0", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
                   {loading ? <><Loader size={12} /> SAVING...</> : <><Upload size={12} /> SAVE</>}
                 </button>
