@@ -6,8 +6,84 @@ import PageWrapper from "../components/PageWrapper";
 import RoleBadge from "../components/RoleBadge";
 import {
   Package, ShieldCheck, TrendingUp, AlertTriangle,
-  ArrowRight, Plus, Leaf
+  ArrowRight, Plus, Leaf, Mountain, FlaskConical
 } from "lucide-react";
+
+// ── Micro components ──────────────────────────────────────────────
+
+function GateDots({ passed, total = 7 }: { passed: number; total?: number }) {
+  return (
+    <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} style={{
+          width: "5px", height: "5px", borderRadius: "50%",
+          background: i < passed ? "#1B4D35" : "rgba(28,28,26,0.1)",
+          transition: "background 0.2s",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function ActivityPill({ label, value, unit }: { label: string; value: string | number; unit?: string }) {
+  return (
+    <div style={{
+      display: "flex", flexDirection: "column", alignItems: "center",
+      padding: "10px 20px",
+      borderRight: "1px solid rgba(28,28,26,0.07)",
+    }}>
+      <span style={{
+        fontFamily: "Cormorant Garamond, serif", fontSize: "1.5rem",
+        fontWeight: 300, color: "#1C1C1A", lineHeight: 1,
+      }}>
+        {value}<span style={{ fontSize: "0.75rem", color: "rgba(28,28,26,0.4)", marginLeft: "2px" }}>{unit}</span>
+      </span>
+      <span style={{
+        fontFamily: "DM Mono, monospace", fontSize: "0.5rem",
+        letterSpacing: "0.18em", textTransform: "uppercase",
+        color: "rgba(28,28,26,0.35)", marginTop: "3px",
+      }}>{label}</span>
+    </div>
+  );
+}
+
+function PipelineBar({ draft, listed, contracted, exported }: {
+  draft: number; listed: number; contracted: number; exported: number;
+}) {
+  const total = draft + listed + contracted + exported || 1;
+  const segments = [
+    { label: "Draft",      value: draft,      color: "rgba(28,28,26,0.12)" },
+    { label: "Listed",     value: listed,      color: "#8B5E3C" },
+    { label: "Contracted", value: contracted,  color: "#2D7A52" },
+    { label: "Exported",   value: exported,    color: "#1B4D35" },
+  ];
+  return (
+    <div>
+      <div style={{ display: "flex", height: "6px", borderRadius: "3px", overflow: "hidden", gap: "2px", marginBottom: "12px" }}>
+        {segments.map(s => s.value > 0 && (
+          <div key={s.label} style={{
+            flex: s.value / total,
+            background: s.color,
+            borderRadius: "3px",
+            transition: "flex 0.4s ease",
+          }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+        {segments.map(s => (
+          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: s.color, flexShrink: 0 }} />
+            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.5)", letterSpacing: "0.05em" }}>
+              {s.value} {s.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────
 
 export default function Dashboard() {
   const { user }  = useAuth();
@@ -19,10 +95,26 @@ export default function Dashboard() {
     queryFn:  () => getLots(),
   });
 
+  // ── Derived stats ─────────────────────────────────────────────
   const total       = data?.count ?? 0;
-  const eudrReady   = data?.results.filter(l => l.eudr_dds_ready).length  ?? 0;
-  const exportReady = data?.results.filter(l => l.export_ready).length    ?? 0;
-  const pending     = data?.results.filter(l => !l.export_ready).length   ?? 0;
+  const results     = data?.results ?? [];
+  const eudrReady   = results.filter(l => l.eudr_dds_ready).length;
+  const exportReady = results.filter(l => l.export_ready).length;
+  const pending     = results.filter(l => !l.export_ready).length;
+
+  const totalVolume = results.reduce((s, l) => s + (Number(l.volume_kg) || 0), 0);
+  const scaScores   = results.filter(l => l.sca_score).map(l => Number(l.sca_score));
+  const avgSca      = scaScores.length ? (scaScores.reduce((a, b) => a + b, 0) / scaScores.length).toFixed(1) : "—";
+  const regions     = new Set(results.map(l => l.region).filter(Boolean)).size;
+
+  const draftCount      = results.filter(l => l.status === "draft").length;
+  const listedCount     = results.filter(l => l.status === "listed").length;
+  const contractedCount = results.filter(l => l.status === "contracted").length;
+  const exportedCount   = results.filter(l => l.status === "exported").length;
+
+  const avgGates = results.length
+    ? Math.round(results.reduce((s, l) => s + (l.compliance_score ?? 0), 0) / results.length)
+    : 0;
 
   const greeting = () => {
     const name = user?.first_name || user?.email?.split("@")[0] || "there";
@@ -32,10 +124,10 @@ export default function Dashboard() {
 
   const stats = role === "buyer"
     ? [
-        { label: "Available Lots",   value: total,     icon: <Package size={16} />,     positive: true,  path: "/marketplace" },
-        { label: "EUDR Verified",    value: eudrReady, icon: <ShieldCheck size={16} />, positive: true,  path: "/marketplace?eudr_dds_ready=true" },
-        { label: "Green Passport",   value: eudrReady, icon: <Leaf size={16} />,        positive: true,  path: "/marketplace" },
-        { label: "Regions",          value: 7,         icon: <TrendingUp size={16} />,  positive: true,  path: "/marketplace" },
+        { label: "Available Lots",  value: total,     icon: <Package size={16} />,     positive: true,  path: "/marketplace" },
+        { label: "EUDR Verified",   value: eudrReady, icon: <ShieldCheck size={16} />, positive: true,  path: "/marketplace?eudr_dds_ready=true" },
+        { label: "Green Passport",  value: eudrReady, icon: <Leaf size={16} />,        positive: true,  path: "/marketplace" },
+        { label: "Regions Active",  value: regions || 7, icon: <Mountain size={16} />, positive: true,  path: "/marketplace" },
       ]
     : [
         { label: "Total Lots",         value: total,       icon: <Package size={16} />,       positive: true,  path: "/lots" },
@@ -46,22 +138,26 @@ export default function Dashboard() {
 
   const quickActions: Record<string, { label: string; path: string; icon: React.ReactNode; primary?: boolean }[]> = {
     admin:    [
-      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,      primary: true },
-      { label: "Browse All Lots",    path: "/lots",         icon: <Package size={14} />    },
-      { label: "View Marketplace",   path: "/marketplace",  icon: <Leaf size={14} />       },
+      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,         primary: true },
+      { label: "Browse All Lots",    path: "/lots",         icon: <Package size={14} />       },
+      { label: "View Marketplace",   path: "/marketplace",  icon: <Leaf size={14} />          },
+      { label: "Sample Requests",    path: "/samples",      icon: <FlaskConical size={14} />  },
     ],
     exporter: [
-      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,      primary: true },
-      { label: "View My Lots",       path: "/lots",         icon: <Package size={14} />    },
+      { label: "Register New Lot",   path: "/lots/new",    icon: <Plus size={14} />,         primary: true },
+      { label: "View My Lots",       path: "/lots",         icon: <Package size={14} />       },
+      { label: "Sample Requests",    path: "/samples",      icon: <FlaskConical size={14} />  },
     ],
     buyer:    [
-      { label: "Browse Marketplace", path: "/marketplace",  icon: <Leaf size={14} />,      primary: true },
+      { label: "Browse Marketplace", path: "/marketplace",  icon: <Leaf size={14} />,         primary: true },
+      { label: "My Watchlist",       path: "/watchlist",    icon: <Package size={14} />       },
+      { label: "Sample Requests",    path: "/samples",      icon: <FlaskConical size={14} />  },
     ],
     farmer:   [
-      { label: "My Farm Profile",    path: "/farm",         icon: <Leaf size={14} />,      primary: true },
+      { label: "My Farm Profile",    path: "/farm",         icon: <Leaf size={14} />,         primary: true },
     ],
     qgrader:  [
-      { label: "Lots to Cup",        path: "/lots",         icon: <Package size={14} />,   primary: true },
+      { label: "Lots to Cup",        path: "/lots",         icon: <Package size={14} />,      primary: true },
     ],
   };
 
@@ -69,32 +165,89 @@ export default function Dashboard() {
 
   return (
     <PageWrapper>
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "6px" }}>
         <div>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.85rem", fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px", lineHeight: 1.2 }}>
+          <h1 style={{
+            fontFamily: "Cormorant Garamond, serif", fontSize: "1.85rem",
+            fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px", lineHeight: 1.2,
+          }}>
             {greeting()}
           </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.35)", margin: 0 }}>
+          <p style={{
+            fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
+            letterSpacing: "0.2em", textTransform: "uppercase",
+            color: "rgba(28,28,26,0.35)", margin: 0,
+          }}>
             Beersheba Operations · {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
         <RoleBadge role={role} />
       </div>
 
-      {/* Stat cards */}
+      {/* ── Harvest context banner ──────────────────────────────── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: "8px",
+        marginBottom: "24px", paddingTop: "10px",
+        borderTop: "1px solid rgba(28,28,26,0.06)",
+      }}>
+        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2D7A52", flexShrink: 0 }} />
+        <span style={{
+          fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+          letterSpacing: "0.14em", textTransform: "uppercase",
+          color: "rgba(28,28,26,0.35)",
+        }}>
+          2025 Main Crop · Yirgacheffe · Sidama · Guji now in peak yield · EUDR 2026 deadline active
+        </span>
+      </div>
+
+      {/* ── Activity strip ──────────────────────────────────────── */}
+      {role !== "farmer" && total > 0 && (
+        <div style={{
+          display: "flex", alignItems: "stretch",
+          background: "#FFFFFF",
+          border: "1px solid rgba(28,28,26,0.07)",
+          borderRadius: "6px",
+          marginBottom: "20px",
+          overflow: "hidden",
+        }}>
+          <ActivityPill label="Total Volume" value={totalVolume > 0 ? totalVolume.toLocaleString() : "—"} unit={totalVolume > 0 ? "kg" : ""} />
+          <ActivityPill label="Avg SCA Score" value={avgSca} />
+          <ActivityPill label="Regions Active" value={regions || "—"} />
+          <ActivityPill label="Avg Gates Passed" value={avgGates > 0 ? `${avgGates}/7` : "—"} />
+          <div style={{ flex: 1 }} />
+          <div style={{
+            display: "flex", alignItems: "center", padding: "0 20px",
+            gap: "6px",
+          }}>
+            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2D7A52" }} />
+            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.35)", letterSpacing: "0.1em" }}>
+              LIVE REGISTRY
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Stat cards ─────────────────────────────────────────── */}
       {role !== "farmer" && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {stats.map(stat => (
             <button
               key={stat.label}
               onClick={() => navigate(stat.path)}
-              className="card p-5 text-left transition-all duration-200 group"
-              style={{ cursor: "pointer", border: "1px solid rgba(28,28,26,0.08)" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(28,28,26,0.1)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.14)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(28,28,26,0.06)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.08)"; }}
+              className="card p-5 text-left"
+              style={{ cursor: "pointer", border: "1px solid rgba(28,28,26,0.08)", transition: "all 0.2s" }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(28,28,26,0.1)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.14)";
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(28,28,26,0.06)";
+                (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.08)";
+              }}
             >
-              <div className="flex items-center justify-between mb-4">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
                 <div style={{
                   width: "32px", height: "32px", borderRadius: "4px", flexShrink: 0,
                   background: stat.positive ? "#E8F2EC" : "#FDECEA",
@@ -102,25 +255,38 @@ export default function Dashboard() {
                 }}>
                   <span style={{ color: stat.positive ? "#1B4D35" : "#C0392B" }}>{stat.icon}</span>
                 </div>
-                <ArrowRight size={12} style={{ color: "rgba(28,28,26,0.2)", transition: "all 0.15s" }} />
+                <ArrowRight size={12} style={{ color: "rgba(28,28,26,0.2)" }} />
               </div>
-              <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.5rem", fontWeight: 300, color: stat.positive ? "#1B4D35" : "#C0392B", margin: "0 0 4px", lineHeight: 1 }}>
+              <p style={{
+                fontFamily: "Cormorant Garamond, serif", fontSize: "2.5rem",
+                fontWeight: 300, color: stat.positive ? "#1B4D35" : "#C0392B",
+                margin: "0 0 4px", lineHeight: 1,
+              }}>
                 {stat.value}
               </p>
-              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.15em", textTransform: "uppercase", color: "rgba(28,28,26,0.4)", margin: 0 }}>
+              <p style={{
+                fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
+                letterSpacing: "0.15em", textTransform: "uppercase",
+                color: "rgba(28,28,26,0.4)", margin: "0 0 10px",
+              }}>
                 {stat.label}
               </p>
+              {/* EUDR gate progress dots on relevant cards */}
+              {(stat.label === "EUDR Ready" || stat.label === "EUDR Verified") && (
+                <GateDots passed={eudrReady > 0 ? Math.min(7, Math.round((eudrReady / Math.max(total, 1)) * 7)) : 0} />
+              )}
             </button>
           ))}
         </div>
       )}
 
-      {/* Quick actions + Recent lots */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* ── Main content grid ───────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
         {/* Quick actions */}
         <div className="card p-5">
           <p className="card-title">Quick Actions</p>
-          <div className="space-y-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
             {actions.map(action => (
               <button
                 key={action.path}
@@ -145,58 +311,100 @@ export default function Dashboard() {
               >
                 <span>{action.icon}</span>
                 <span>{action.label}</span>
-                <ArrowRight size={11} style={{ marginLeft: "auto", opacity: 0.5 }} />
+                <ArrowRight size={11} style={{ marginLeft: "auto", opacity: 0.4 }} />
               </button>
             ))}
+          </div>
+
+          {/* Divider + compliance badge */}
+          <div style={{ margin: "16px 0 0", paddingTop: "14px", borderTop: "1px solid rgba(28,28,26,0.06)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <ShieldCheck size={11} style={{ color: "#1B4D35" }} />
+              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.4)", letterSpacing: "0.1em" }}>
+                EUDR 2026 COMPLIANCE ENGINE ACTIVE
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Recent lots */}
         <div className="card p-5 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <p className="card-title mb-0">Recent Lots</p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <p className="card-title" style={{ margin: 0 }}>Recent Lots</p>
             <button
               onClick={() => navigate("/lots")}
-              style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#7B4B2A", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.05em" }}
+              style={{
+                fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
+                color: "#8B5E3C", background: "none", border: "none",
+                cursor: "pointer", letterSpacing: "0.05em",
+              }}
             >
-              View all →
+              View registry →
             </button>
           </div>
-          {data && data.results.length > 0 ? (
-            <div className="space-y-1">
-              {data.results.slice(0, 5).map(lot => (
+
+          {results.length > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              {results.slice(0, 6).map(lot => (
                 <div
                   key={lot.id}
                   onClick={() => navigate(`/lots/${lot.id}`)}
                   style={{
-                    display: "flex", alignItems: "center", gap: "12px",
-                    padding: "10px 12px", borderRadius: "4px",
+                    display: "flex", alignItems: "center", gap: "10px",
+                    padding: "9px 10px", borderRadius: "4px",
                     border: "1px solid transparent", cursor: "pointer",
                     transition: "all 0.12s",
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#F7F5F0"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.08)"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.borderColor = "transparent"; }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = "#F7F5F0";
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.07)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = "transparent";
+                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                  }}
                 >
-                  <div style={{
-                    width: "24px", height: "24px", borderRadius: "4px", flexShrink: 0,
-                    background: "#E8F2EC", display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <Leaf size={10} style={{ color: "#1B4D35" }} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "#1C1C1A", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{lot.name}</p>
-                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", margin: 0 }}>{lot.lot_id} · {lot.region}</p>
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0 }}>
-                    {lot.sca_score && (
-                      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "#7B4B2A", margin: 0 }}>{lot.sca_score} pts</p>
-                    )}
-                    <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", margin: 0 }}>{lot.grade}</p>
-                  </div>
+                  {/* Status dot */}
                   <div style={{
                     width: "6px", height: "6px", borderRadius: "50%", flexShrink: 0,
-                    background: lot.export_ready ? "#1B4D35" : lot.eudr_dds_ready ? "#7B4B2A" : "#C0392B",
+                    background: lot.export_ready ? "#1B4D35" : lot.eudr_dds_ready ? "#8B5E3C" : "rgba(28,28,26,0.15)",
                   }} />
+
+                  {/* Lot info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#8B5E3C", flexShrink: 0 }}>
+                        {lot.lot_id}
+                      </span>
+                      <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "#1C1C1A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {lot.name}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "3px" }}>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.35)", textTransform: "capitalize" }}>
+                        {lot.region}
+                      </span>
+                      <GateDots passed={lot.compliance_score ?? 0} />
+                    </div>
+                  </div>
+
+                  {/* SCA score */}
+                  {lot.sca_score && (
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <span style={{
+                        fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem",
+                        fontWeight: 300, lineHeight: 1,
+                        color: Number(lot.sca_score) >= 85 ? "#8B5E3C" : Number(lot.sca_score) >= 80 ? "#1B4D35" : "rgba(28,28,26,0.4)",
+                      }}>
+                        {Number(lot.sca_score).toFixed(1)}
+                      </span>
+                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.45rem", color: "rgba(28,28,26,0.3)", display: "block" }}>
+                        SCA
+                      </span>
+                    </div>
+                  )}
+
+                  <ArrowRight size={10} style={{ color: "rgba(28,28,26,0.15)", flexShrink: 0 }} />
                 </div>
               ))}
             </div>
@@ -215,13 +423,36 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Farmer stub */}
-      {role === "farmer" && (
-        <div className="card p-5" style={{ borderColor: "rgba(27,77,53,0.15)" }}>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B4D35", margin: "0 0 8px" }}>Farm Status</p>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(28,28,26,0.35)", margin: 0 }}>Farm profile and lot history — coming soon.</p>
+      {/* ── Lot pipeline card ───────────────────────────────────── */}
+      {role !== "farmer" && total > 0 && (
+        <div className="card p-5">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <p className="card-title" style={{ margin: 0 }}>Lot Pipeline</p>
+            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.08em" }}>
+              {total} total
+            </span>
+          </div>
+          <PipelineBar
+            draft={draftCount}
+            listed={listedCount}
+            contracted={contractedCount}
+            exported={exportedCount}
+          />
         </div>
       )}
+
+      {/* ── Farmer stub ─────────────────────────────────────────── */}
+      {role === "farmer" && (
+        <div className="card p-5" style={{ borderColor: "rgba(27,77,53,0.15)" }}>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B4D35", margin: "0 0 8px" }}>
+            Farm Status
+          </p>
+          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(28,28,26,0.35)", margin: 0 }}>
+            Farm profile and lot history — coming soon.
+          </p>
+        </div>
+      )}
+
     </PageWrapper>
   );
 }
