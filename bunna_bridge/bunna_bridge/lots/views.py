@@ -162,18 +162,20 @@ class SettlementView(viewsets.ViewSet):
     """
     Calculate settlement breakdown for a lot contract.
     POST /api/v1/lots/{id}/settlement/
-    Body: { "nbe_rate": 59.85 }  (optional — defaults to 59.85)
+    Body: { "nbe_rate": 59.85 }  (optional — defaults to settings.NBE_DEFAULT_FX_RATE)
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, lot_pk=None):
+        from django.conf import settings
+
         try:
             lot = CoffeeLot.objects.get(pk=lot_pk)
         except CoffeeLot.DoesNotExist:
             return Response({"detail": "Lot not found."}, status=404)
 
         try:
-            nbe_rate = Decimal(str(request.data.get("nbe_rate", "59.85")))
+            nbe_rate = Decimal(str(request.data.get("nbe_rate", settings.NBE_DEFAULT_FX_RATE)))
         except InvalidOperation:
             return Response({"detail": "Invalid nbe_rate."}, status=400)
 
