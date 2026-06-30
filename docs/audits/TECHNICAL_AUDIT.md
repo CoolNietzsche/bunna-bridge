@@ -41,10 +41,11 @@ The 7-Gate EUDR Compliance Engine is integrated into the `CoffeeLot` model and r
 *   **Integrity Gap**: `CoffeeLotViewSet` lacks explicit `parser_classes`, potentially causing `415 Unsupported Media Type` errors during `multipart/form-data` uploads when combined with JSON data [1]. This needs to be addressed by explicitly adding `MultiPartParser` and `JSONParser`.
 
 ### 2.4. Identified Technical Debt (Backend)
-
-*   **Stale Code Paths**: `EudrDdsView` references the obsolete `lot.farm_polygon`. `LotBoundaryInheritView` attempts to import a non-existent `FarmerProfile` model. These require refactoring [1].
-*   **Hardcoded Values**: The NBE exchange rate in `settlement.py` is hardcoded and should be externalized [1].
-*   **Monolithic ViewSet**: The `CoffeeLotViewSet` is growing in complexity; consider breaking it down [1].
+*   **Stale Code Paths**: ✅ RESOLVED 2026-06-30. See `docs/architecture/DATA_MODEL_GOTCHAS.md` §9 for full detail and verification steps.
+*   **Hardcoded Values**: ✅ RESOLVED 2026-06-30. NBE rate externalized to `settings.NBE_DEFAULT_FX_RATE` (env-overridable). Note: the actual hardcoded value was in `lots/views.py`, not `settlement.py` as originally audited — see `docs/architecture/DATA_MODEL_GOTCHAS.md` §8.
+*   **Integrity Gap re: parser_classes**: ❌ AUDIT WAS STALE/INCORRECT. `CoffeeLotViewSet` already had `parser_classes = [MultiPartParser, FormParser, JSONParser]` declared (line 30) at time of this verification (2026-06-30). Live-tested via curl: multipart form-data lot creation with required fields returns `201 Created` correctly. No fix was needed. Lesson: this audit document had drifted from actual code state — verify against source before acting on audit claims.
+*   **Monolithic ViewSet**: Still open. `CoffeeLotViewSet` is growing in complexity; consider breaking it down [1].
+*   **Settlement Logic Duplication** (new, found 2026-06-30): `SettlementView` in `views.py` reimplements settlement math inline instead of calling the shared `calculate_settlement()` in `settlement.py`. Risk of the two drifting out of sync. Not yet fixed — flagged for a future session.
 
 ## 3. Frontend Audit
 

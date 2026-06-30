@@ -58,23 +58,20 @@ This document highlights critical data model design decisions, potential pitfall
 
 **Implication:** Always use `uv` commands (e.g., `uv add`, `uv sync`) for managing Python dependencies. Using `pip` can lead to inconsistencies and build failures.
 
-## 8. Hardcoded NBE Exchange Rate
+## 8. Hardcoded NBE Exchange Rate — RESOLVED (2026-06-30)
+**Status:** ✅ FIXED and verified live.
+**Correction to original gotcha:** The hardcoded value was NOT in `settlement.py` (that module always took `nbe_rate` as a required parameter). The actual hardcoded default (`"59.85"`) was in `lots/views.py`, in `SettlementView.create()`, as the fallback for `request.data.get("nbe_rate", "59.85")`.
+**What was fixed:** Added `NBE_DEFAULT_FX_RATE` setting in `config/settings/base.py` via `env("NBE_DEFAULT_FX_RATE", default="59.85")`, following the project's existing `django-environ` convention. Updated `SettlementView` to use `settings.NBE_DEFAULT_FX_RATE` instead of the inline literal.
+**Verified:** Live curl test against `/api/v1/lots/<id>/settlement/` — confirms default pulls `59.85` from env, and explicit override (`{"nbe_rate": "65.00"}`) still works correctly and flows through the full calculation.
+**Remaining tech debt (not in original scope, flagged for future session):** `SettlementView` in `views.py` duplicates settlement math inline (platform fee %, 50/50 split) instead of calling `calculate_settlement()` from `settlement.py`. The two implementations could drift out of sync if either is updated independently. Recommend consolidating onto the shared `settlement.py` function in a future session.
 
-**Gotcha:** The NBE (National Bank of Ethiopia) exchange rate is hardcoded in `settlement.py` [1].
-
-**Detail:** The `settlement.py` module, responsible for calculating the 50/50 USD/ETB split, contains a hardcoded exchange rate (e.g., `59.85 ETB/USD`).
-
-**Implication:** This value needs to be updated manually if the exchange rate changes. For a production system, consider externalizing this value to a configuration setting or fetching it from an external API to ensure accuracy and reduce maintenance overhead.
-
-## 9. Stale Code Paths Identified
-
-**Gotcha:** Some code paths reference superseded models or fields, indicating potential for bugs or outdated logic.
-
-**Detail:**
-*   `EudrDdsView` in `lots/views.py` (lines 345-350) still references `lot.farm_polygon`, which no longer exists [7].
-*   `LotBoundaryInheritView` in `lots/views.py` (lines 551-563) attempts to import/use a `FarmerProfile` model, which is not present in the current `users/models.py` [7].
-
-**Implication:** These instances represent technical debt and potential sources of error. They should be refactored to use the correct `boundary` field and to interact directly with the `User` model for farmer data. This also highlights the importance of keeping documentation synchronized with the codebase.
+## 9. Stale Code Paths — RESOLVED (2026-06-30)
+**Status:** ✅ FIXED and verified live. Previously: some code paths referenced superseded models or fields.
+**What was fixed:**
+*   `EudrDdsView` in `lots/views.py`: `lot.farm_polygon` (nonexistent field) replaced with `lot.boundary`. Verified via Django shell against a real polygon-only lot (`SDM-2025-0298`, 7 vertices) — branch now executes without AttributeError. Also verified live via curl against a point-based lot (200, valid 2-page PDF).
+*   `LotBoundaryInheritView` in `lots/views.py`: dead `FarmerProfile` import (silently swallowed by a bare `except Exception`, causing the endpoint to ALWAYS return 404) replaced with a direct `User.objects.filter(role="farmer", boundary__isnull=False)` query. Verified against real data (`abebe@kochere.et`, 9-vertex boundary) for both the farmer-self-service and admin-fallback paths.
+**Known limitation (not fixed, by design):** `CoffeeLot` has no FK to a farmer, only to `exporter`. `LotBoundaryInheritView` therefore cannot reliably determine "the" farmer for a specific lot — it uses a best-effort heuristic (self if requester is a farmer, otherwise any farmer with a boundary if requester is admin). A proper fix would require adding a `farmer` FK to `CoffeeLot`. Flagged as a TODO comment in the code.
+**Commit:** `4432318` — "Fix stale code paths: EudrDdsView used nonexistent farm_polygon, LotBoundaryInheritView imported nonexistent FarmerProfile model".
 
 ## References
 
