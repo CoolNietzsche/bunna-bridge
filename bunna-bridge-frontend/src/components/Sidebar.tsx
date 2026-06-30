@@ -7,6 +7,8 @@ import {
   Map as MapIcon, TrendingUp, Inbox, Heart
 } from "lucide-react";
 import RoleBadge from "./RoleBadge";
+import logoIcon from "../assets/logo-icon.png";
+import logoFull from "../assets/logo-full.png";
 
 const NAV_ITEMS = [
   { label: "Dashboard",   path: "/dashboard",   icon: <LayoutDashboard size={15} />, roles: ["admin","exporter","buyer","farmer","qgrader"] },
@@ -86,37 +88,25 @@ export default function Sidebar({ collapsed, onCollapse, mobileOpen, onMobileClo
 
       <aside className={`bb-sidebar${mobileOpen ? " open" : ""}`}>
 
-        {/* Logo */}
+        {/* Logo — image-only, never paired with hardcoded brand text */}
         <div style={{
           display: "flex", alignItems: "center", height: "60px", flexShrink: 0,
-          padding: collapsed ? "0 16px" : "0 14px", gap: "10px",
+          padding: collapsed ? "0 16px" : "0 14px",
           borderBottom: "1px solid rgba(255,255,255,0.1)",
           justifyContent: collapsed ? "center" : "flex-start",
         }}>
-          {/* B-leaf mark — always visible */}
-          <div style={{ flexShrink: 0, width: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* B letterform */}
-              <rect x="6" y="6" width="4" height="20" rx="1.5" fill="white"/>
-              <rect x="10" y="6" width="8" height="4" rx="1.5" fill="white"/>
-              <rect x="10" y="14" width="7" height="4" rx="1.5" fill="white"/>
-              <rect x="10" y="22" width="9" height="4" rx="1.5" fill="white"/>
-              <rect x="18" y="10" width="4" height="4" rx="1.5" fill="white"/>
-              <rect x="19" y="18" width="4" height="4" rx="1.5" fill="white"/>
-              {/* leaf */}
-              <path d="M22 8 C24 6, 27 7, 27 10 C27 13, 24 14, 22 12 C20 10, 20 8, 22 8Z" fill="#A8D5BC"/>
-              <line x1="22" y1="12" x2="25" y2="8" stroke="#1B4D35" strokeWidth="0.8"/>
-            </svg>
-          </div>
-
-          {!collapsed && (
-            <span style={{
-              fontFamily: "Playfair Display, serif",
-              fontSize: "1.1rem", fontWeight: 500,
-              color: "#FFFFFF", letterSpacing: "0.01em",
-            }}>
-              Beersheba
-            </span>
+          {collapsed ? (
+            <img
+              src={logoIcon}
+              alt="Beersheba"
+              style={{ width: "32px", height: "32px", flexShrink: 0, objectFit: "contain" }}
+            />
+          ) : (
+            <img
+              src={logoFull}
+              alt="Beersheba"
+              style={{ height: "28px", width: "auto", flexShrink: 0, objectFit: "contain" }}
+            />
           )}
 
           <button className="bb-close-btn" onClick={onMobileClose} style={{

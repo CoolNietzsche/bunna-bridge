@@ -11,6 +11,7 @@ import {
   getNotifications, getUnreadCount, markRead, markAllRead,
 } from '../api/notifications';
 import type { NotificationItem } from '../api/notifications';
+import logoIcon from '../assets/logo-icon.png';
 
 interface TopBarProps {
   onMenuToggle: () => void;
@@ -106,17 +107,17 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
       style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(28,28,26,0.08)', boxShadow: '0 1px 0 rgba(28,28,26,0.06)' }}
       className="h-14 flex items-center justify-between px-4 sticky top-0 z-40"
     >
-      {/* Left — hamburger + brand */}
+      {/* Left — hamburger + brand (mobile only; sidebar carries the full wordmark on desktop) */}
       <div className="flex items-center gap-3">
         <button onClick={onMenuToggle} className="md:hidden" style={{ color: '#4A4A45', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
           <Menu className="w-5 h-5" />
         </button>
-        <span
-          style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.1rem', fontWeight: 500, color: '#1B4D35', letterSpacing: '0.01em' }}
-          className="hidden md:block"
-        >
-          Beersheba
-        </span>
+        <img
+          src={logoIcon}
+          alt="Beersheba"
+          className="md:hidden"
+          style={{ width: '26px', height: '26px', objectFit: 'contain' }}
+        />
       </div>
 
       {/* Right — notifications + profile */}
