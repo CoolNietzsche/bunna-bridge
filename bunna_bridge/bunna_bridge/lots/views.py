@@ -345,8 +345,8 @@ class EudrDdsView(viewsets.ViewSet):
         if lot.farm_location:
             coords_str = f"{lot.farm_location.y:.6f} N, {lot.farm_location.x:.6f} E"
             geo_type   = "Point"
-        elif lot.farm_polygon:
-            coords_str = f"Polygon — {lot.farm_polygon.num_coords} vertices"
+        elif lot.boundary:
+            coords_str = f"Polygon — {len(lot.boundary.coords[0])} vertices"
             geo_type   = "Polygon"
         else:
             return Response({"detail": "No GPS coordinates found."}, status=400)
@@ -545,29 +545,26 @@ class LotBoundaryInheritView(APIView):
         if request.user.role not in ("admin",) and lot.exporter != request.user:
             return Response({"detail": "Not allowed."}, status=403)
 
-        # Find farmer profile — try current user first, then any farmer
-        # CoffeeLot has no direct farmer FK, so we use the requesting user
-        # if they are a farmer, otherwise find any farmer with a boundary
+        # NOTE: CoffeeLot has no direct FK to a farmer, so there is no way to
+        # find "the" farmer for this specific lot. Best-effort behavior:
+        # use the requesting user's own boundary if they are a farmer,
+        # otherwise (admin only) fall back to any farmer with a boundary set.
+        # TODO: Add a proper `farmer` FK on CoffeeLot for a correct, non-heuristic
+        # implementation of this endpoint.
         from bunna_bridge.users.models import User
-        profile = None
-        try:
-            from bunna_bridge.users.models import FarmerProfile
-            # Try current user's farm profile first
-            profile = FarmerProfile.objects.filter(
-                user=request.user, boundary__isnull=False
-            ).first()
-            # If admin, find any farmer with a boundary near the lot
-            if not profile and request.user.role == "admin":
-                profile = FarmerProfile.objects.filter(
-                    boundary__isnull=False
-                ).first()
-        except Exception:
-            profile = None
+        source_user = None
 
-        if not profile or not profile.boundary:
+        if request.user.role == "farmer" and request.user.boundary:
+            source_user = request.user
+        elif request.user.role == "admin":
+            source_user = User.objects.filter(
+                role="farmer", boundary__isnull=False
+            ).first()
+
+        if not source_user or not source_user.boundary:
             return Response({"detail": "No farm boundary found to inherit."}, status=404)
 
-        lot.boundary = profile.boundary
+        lot.boundary = source_user.boundary
         lot.save(update_fields=["boundary"])
         # Auto-run deforestation check after inheriting boundary
         defor_result = run_deforestation_check_for_lot(lot)
