@@ -162,12 +162,16 @@ class SettlementView(viewsets.ViewSet):
     """
     Calculate settlement breakdown for a lot contract.
     POST /api/v1/lots/{id}/settlement/
-    Body: { "nbe_rate": 59.85 }  (optional — defaults to settings.NBE_DEFAULT_FX_RATE)
+    Body: { "nbe_rate": 59.85 }   (optional — defaults to settings.NBE_DEFAULT_FX_RATE)
+          { "total_usd": 12000 }  (optional — overrides lot.volume_kg * lot.price_per_kg)
+    Delegates all math to lots.settlement.calculate_settlement() — single source of truth,
+    shared with any other caller of that function.
     """
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, lot_pk=None):
         from django.conf import settings
+        from .settlement import calculate_settlement
 
         try:
             lot = CoffeeLot.objects.get(pk=lot_pk)
@@ -179,51 +183,53 @@ class SettlementView(viewsets.ViewSet):
         except InvalidOperation:
             return Response({"detail": "Invalid nbe_rate."}, status=400)
 
-        # Use total_usd from request if provided,
-        # otherwise calculate from lot price * volume
         total_usd_input = request.data.get("total_usd")
-
         if total_usd_input:
             try:
                 total_usd = Decimal(str(total_usd_input))
-                volume_kg    = total_usd / nbe_rate if not lot.price_per_kg else Decimal(str(lot.volume_kg or 1))
-                price_per_kg = total_usd / volume_kg
-            except (InvalidOperation, ZeroDivisionError):
+            except InvalidOperation:
                 return Response({"detail": "Invalid total_usd."}, status=400)
+
+            if lot.volume_kg:
+                # Anchor to the lot's real volume; derive price_per_kg from the override.
+                volume_kg = Decimal(str(lot.volume_kg))
+                price_per_kg = (total_usd / volume_kg) if volume_kg else Decimal("0")
+            else:
+                # No lot volume to anchor to — treat as a nominal 1kg lot so the
+                # override amount is still the exact total used in the calculation.
+                volume_kg = Decimal("1")
+                price_per_kg = total_usd
         else:
             if not lot.price_per_kg or not lot.volume_kg:
                 return Response(
                     {"detail": "Lot must have price_per_kg and volume_kg, or provide total_usd."},
                     status=400
                 )
-            total_usd    = Decimal(str(lot.volume_kg)) * Decimal(str(lot.price_per_kg))
-            volume_kg    = Decimal(str(lot.volume_kg))
+            volume_kg = Decimal(str(lot.volume_kg))
             price_per_kg = Decimal(str(lot.price_per_kg))
 
-        # Calculate split
-        platform_fee_pct = Decimal("0.025")
-        platform_fee     = (total_usd * platform_fee_pct).quantize(Decimal("0.01"))
-        net_usd          = total_usd - platform_fee
-        usd_retained     = (net_usd * Decimal("0.50")).quantize(Decimal("0.01"))
-        etb_portion_usd  = net_usd - usd_retained
-        etb_converted    = (etb_portion_usd * nbe_rate).quantize(Decimal("0.00"))
+        result = calculate_settlement(
+            volume_kg=volume_kg,
+            price_per_kg=price_per_kg,
+            nbe_rate=nbe_rate,
+        )
 
         from datetime import datetime, timezone
         return Response({
             "lot_id":        str(lot.id),
             "lot_ref":       lot.lot_id,
-            "total_usd":     float(total_usd),
-            "platform_fee":  float(platform_fee),
-            "net_usd":       float(net_usd),
-            "usd_retained":  float(usd_retained),
-            "etb_converted": float(etb_converted),
-            "nbe_rate":      float(nbe_rate),
-            "split_percent": 50.0,
+            "total_usd":     result["gross_usd"],
+            "platform_fee":  result["platform_fee_usd"],
+            "net_usd":       result["net_usd"],
+            "usd_retained":  result["usd_retained"],
+            "etb_converted": result["etb_amount"],
+            "nbe_rate":      result["nbe_rate"],
+            "split_percent": result["nbe_split_pct"],
+            "milestones":    result["milestones"],
             "calculated_at": datetime.now(timezone.utc).isoformat(),
         })
 
 
-# ── Sample Request ViewSet ────────────────────────────────
 class SampleRequestViewSet(viewsets.ModelViewSet):
     serializer_class   = SampleRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
