@@ -149,9 +149,9 @@ export default function Lots() {
                 <tr style={{ borderBottom: "1px solid rgba(28,28,26,0.06)" }}>
                   {["Lot ID","Name","Region","Grade","SCA","Volume","Status","EUDR","Export"].map(h => (
                     <th key={h} style={{
-                      fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
-                      letterSpacing: "0.15em", textTransform: "uppercase",
-                      color: "rgba(28,28,26,0.3)", padding: "12px 16px",
+                      fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                      letterSpacing: "0.12em", textTransform: "uppercase",
+                      color: "rgba(28,28,26,0.5)", padding: "12px 16px",
                       textAlign: "left", whiteSpace: "nowrap",
                     }}>{h}</th>
                   ))}
@@ -171,7 +171,7 @@ export default function Lots() {
                     <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "#8B5E3C", whiteSpace: "nowrap" }}>
                       {lot.lot_id}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "#1C1C1A", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "13px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "#1C1C1A", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {lot.name}
                     </td>
                     <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "rgba(28,28,26,0.5)", whiteSpace: "nowrap", textTransform: "capitalize" }}>

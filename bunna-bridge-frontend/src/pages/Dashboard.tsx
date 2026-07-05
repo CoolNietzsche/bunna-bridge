@@ -13,13 +13,14 @@ import {
 
 function GateDots({ passed, total = 7 }: { passed: number; total?: number }) {
   return (
-    <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
+    <div className="flex items-center gap-[3px]">
       {Array.from({ length: total }).map((_, i) => (
-        <div key={i} style={{
-          width: "5px", height: "5px", borderRadius: "50%",
-          background: i < passed ? "#1B4D35" : "rgba(28,28,26,0.1)",
-          transition: "background 0.2s",
-        }} />
+        <div
+          key={i}
+          className={`w-[5px] h-[5px] rounded-full transition-colors duration-200 ${
+            i < passed ? "bg-forest" : "bg-ink/10"
+          }`}
+        />
       ))}
     </div>
   );
@@ -27,22 +28,14 @@ function GateDots({ passed, total = 7 }: { passed: number; total?: number }) {
 
 function ActivityPill({ label, value, unit }: { label: string; value: string | number; unit?: string }) {
   return (
-    <div style={{
-      display: "flex", flexDirection: "column", alignItems: "center",
-      padding: "10px 20px",
-      borderRight: "1px solid rgba(28,28,26,0.07)",
-    }}>
-      <span style={{
-        fontFamily: "Cormorant Garamond, serif", fontSize: "1.5rem",
-        fontWeight: 300, color: "#1C1C1A", lineHeight: 1,
-      }}>
-        {value}<span style={{ fontSize: "0.75rem", color: "rgba(28,28,26,0.4)", marginLeft: "2px" }}>{unit}</span>
+    <div className="flex flex-col items-center py-2.5 px-5 border-r border-ink/7 shrink-0 whitespace-nowrap">
+      <span className="font-display text-2xl font-light text-ink leading-none">
+        {value}
+        <span className="text-xs text-ink/40 ml-0.5">{unit}</span>
       </span>
-      <span style={{
-        fontFamily: "DM Mono, monospace", fontSize: "0.5rem",
-        letterSpacing: "0.18em", textTransform: "uppercase",
-        color: "rgba(28,28,26,0.35)", marginTop: "3px",
-      }}>{label}</span>
+      <span className="font-mono text-[0.62rem] tracking-[0.15em] uppercase text-ink/50 mt-[3px]">
+        {label}
+      </span>
     </div>
   );
 }
@@ -52,28 +45,27 @@ function PipelineBar({ draft, listed, contracted, exported }: {
 }) {
   const total = draft + listed + contracted + exported || 1;
   const segments = [
-    { label: "Draft",      value: draft,      color: "rgba(28,28,26,0.12)" },
-    { label: "Listed",     value: listed,      color: "#8B5E3C" },
-    { label: "Contracted", value: contracted,  color: "#2D7A52" },
-    { label: "Exported",   value: exported,    color: "#1B4D35" },
+    { label: "Draft",      value: draft,      className: "bg-ink/12" },
+    { label: "Listed",     value: listed,      className: "bg-coffee" },
+    { label: "Contracted", value: contracted,  className: "bg-sage" },
+    { label: "Exported",   value: exported,    className: "bg-forest" },
   ];
   return (
     <div>
-      <div style={{ display: "flex", height: "6px", borderRadius: "3px", overflow: "hidden", gap: "2px", marginBottom: "12px" }}>
+      <div className="flex h-1.5 rounded-[3px] overflow-hidden gap-0.5 mb-3">
         {segments.map(s => s.value > 0 && (
-          <div key={s.label} style={{
-            flex: s.value / total,
-            background: s.color,
-            borderRadius: "3px",
-            transition: "flex 0.4s ease",
-          }} />
+          <div
+            key={s.label}
+            className={`rounded-[3px] transition-[flex] duration-[0.4s] ease-in-out ${s.className}`}
+            style={{ flex: s.value / total }}
+          />
         ))}
       </div>
-      <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+      <div className="flex gap-4 flex-wrap">
         {segments.map(s => (
-          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: s.color, flexShrink: 0 }} />
-            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.5)", letterSpacing: "0.05em" }}>
+          <div key={s.label} className="flex items-center gap-[5px]">
+            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.className}`} />
+            <span className="font-mono text-[0.65rem] text-ink/60 tracking-[0.05em]">
               {s.value} {s.label}
             </span>
           </div>
@@ -101,7 +93,6 @@ export default function Dashboard() {
   const eudrReady   = results.filter(l => l.eudr_dds_ready).length;
   const exportReady = results.filter(l => l.export_ready).length;
   const pending     = results.filter(l => !l.export_ready).length;
-
   const totalVolume = results.reduce((s, l) => s + (Number(l.volume_kg) || 0), 0);
   const scaScores   = results.filter(l => l.sca_score).map(l => Number(l.sca_score));
   const avgSca      = scaScores.length ? (scaScores.reduce((a, b) => a + b, 0) / scaScores.length).toFixed(1) : "—";
@@ -160,69 +151,44 @@ export default function Dashboard() {
       { label: "Lots to Cup",        path: "/lots",         icon: <Package size={14} />,      primary: true },
     ],
   };
-
   const actions = quickActions[role] || quickActions.exporter;
 
   return (
     <PageWrapper>
-
       {/* ── Header ─────────────────────────────────────────────── */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "6px" }}>
+      <div className="flex items-start justify-between mb-1.5">
         <div>
-          <h1 style={{
-            fontFamily: "Cormorant Garamond, serif", fontSize: "1.85rem",
-            fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px", lineHeight: 1.2,
-          }}>
+          <h1 className="font-display text-[1.85rem] font-normal text-ink mb-1 leading-[1.2]">
             {greeting()}
           </h1>
-          <p style={{
-            fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
-            letterSpacing: "0.2em", textTransform: "uppercase",
-            color: "rgba(28,28,26,0.35)", margin: 0,
-          }}>
+          <p className="font-mono text-[0.58rem] tracking-[0.2em] uppercase text-ink/35 m-0">
             Beersheba Operations · {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
         <RoleBadge role={role} />
       </div>
 
-      {/* ── Harvest context banner ──────────────────────────────── */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: "8px",
-        marginBottom: "24px", paddingTop: "10px",
-        borderTop: "1px solid rgba(28,28,26,0.06)",
-      }}>
-        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2D7A52", flexShrink: 0 }} />
-        <span style={{
-          fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
-          letterSpacing: "0.14em", textTransform: "uppercase",
-          color: "rgba(28,28,26,0.35)",
-        }}>
+      {/* ── Harvest context banner ─────────────────────────────── */}
+      <div className="flex items-center gap-2 mb-6 pt-2.5 border-t border-ink/6">
+        <div className="w-1.5 h-1.5 rounded-full bg-sage shrink-0" />
+        <span className="font-mono text-[0.62rem] tracking-[0.12em] uppercase text-ink/45">
           2025 Main Crop · Yirgacheffe · Sidama · Guji now in peak yield · EUDR 2026 deadline active
         </span>
       </div>
 
-      {/* ── Activity strip ──────────────────────────────────────── */}
+      {/* ── Activity strip ─────────────────────────────────────────
+          Scrolls horizontally instead of clipping on narrow viewports.
+          "LIVE REGISTRY" label hides below sm; the dot indicator stays. */}
       {role !== "farmer" && total > 0 && (
-        <div style={{
-          display: "flex", alignItems: "stretch",
-          background: "#FFFFFF",
-          border: "1px solid rgba(28,28,26,0.07)",
-          borderRadius: "6px",
-          marginBottom: "20px",
-          overflow: "hidden",
-        }}>
+        <div className="flex items-stretch bg-white border border-ink/7 rounded-md mb-5 overflow-x-auto">
           <ActivityPill label="Total Volume" value={totalVolume > 0 ? totalVolume.toLocaleString() : "—"} unit={totalVolume > 0 ? "kg" : ""} />
           <ActivityPill label="Avg SCA Score" value={avgSca} />
           <ActivityPill label="Regions Active" value={regions || "—"} />
           <ActivityPill label="Avg Gates Passed" value={avgGates > 0 ? `${avgGates}/7` : "—"} />
-          <div style={{ flex: 1 }} />
-          <div style={{
-            display: "flex", alignItems: "center", padding: "0 20px",
-            gap: "6px",
-          }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#2D7A52" }} />
-            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.35)", letterSpacing: "0.1em" }}>
+          <div className="flex-1 min-w-[12px]" />
+          <div className="flex items-center px-5 gap-1.5 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-sage" />
+            <span className="font-mono text-[0.62rem] text-ink/45 tracking-[0.08em] hidden sm:inline whitespace-nowrap">
               LIVE REGISTRY
             </span>
           </div>
@@ -236,91 +202,62 @@ export default function Dashboard() {
             <button
               key={stat.label}
               onClick={() => navigate(stat.path)}
-              className="card p-5 text-left"
-              style={{ cursor: "pointer", border: "1px solid rgba(28,28,26,0.08)", transition: "all 0.2s" }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 12px rgba(28,28,26,0.1)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.14)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 1px 3px rgba(28,28,26,0.06)";
-                (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.08)";
-              }}
+              className="card overflow-hidden text-left cursor-pointer border border-ink/8 transition-all duration-200 hover:shadow-[0_4px_12px_rgba(28,28,26,0.1)] hover:border-ink/14"
             >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <div style={{
-                  width: "32px", height: "32px", borderRadius: "4px", flexShrink: 0,
-                  background: stat.positive ? "#E8F2EC" : "#FDECEA",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <span style={{ color: stat.positive ? "#1B4D35" : "#C0392B" }}>{stat.icon}</span>
+              {/* Status accent strip */}
+              <div className={`h-[3px] w-full ${stat.positive ? "bg-forest" : "bg-red-600"}`} />
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${
+                    stat.positive ? "bg-forest-light" : "bg-red-50"
+                  }`}>
+                    <span className={stat.positive ? "text-forest" : "text-red-600"}>{stat.icon}</span>
+                  </div>
+                  <ArrowRight size={12} className="text-ink/20" />
                 </div>
-                <ArrowRight size={12} style={{ color: "rgba(28,28,26,0.2)" }} />
+                <p className={`font-display text-[2.5rem] font-light mb-1 leading-none ${
+                  stat.positive ? "text-forest" : "text-red-600"
+                }`}>
+                  {stat.value}
+                </p>
+                <p className="font-mono text-[0.62rem] tracking-[0.12em] uppercase text-ink/50 mb-2.5">
+                  {stat.label}
+                </p>
+                {(stat.label === "EUDR Ready" || stat.label === "EUDR Verified") && (
+                  <GateDots passed={eudrReady > 0 ? Math.min(7, Math.round((eudrReady / Math.max(total, 1)) * 7)) : 0} />
+                )}
               </div>
-              <p style={{
-                fontFamily: "Cormorant Garamond, serif", fontSize: "2.5rem",
-                fontWeight: 300, color: stat.positive ? "#1B4D35" : "#C0392B",
-                margin: "0 0 4px", lineHeight: 1,
-              }}>
-                {stat.value}
-              </p>
-              <p style={{
-                fontFamily: "DM Mono, monospace", fontSize: "0.55rem",
-                letterSpacing: "0.15em", textTransform: "uppercase",
-                color: "rgba(28,28,26,0.4)", margin: "0 0 10px",
-              }}>
-                {stat.label}
-              </p>
-              {/* EUDR gate progress dots on relevant cards */}
-              {(stat.label === "EUDR Ready" || stat.label === "EUDR Verified") && (
-                <GateDots passed={eudrReady > 0 ? Math.min(7, Math.round((eudrReady / Math.max(total, 1)) * 7)) : 0} />
-              )}
             </button>
           ))}
         </div>
       )}
 
-      {/* ── Main content grid ───────────────────────────────────── */}
+      {/* ── Main content grid ─────────────────────────────────────*/}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-
         {/* Quick actions */}
         <div className="card p-5">
           <p className="card-title">Quick Actions</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div className="flex flex-col gap-1.5">
             {actions.map(action => (
               <button
                 key={action.path}
                 onClick={() => navigate(action.path)}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", gap: "10px",
-                  padding: "10px 12px", borderRadius: "4px", cursor: "pointer",
-                  fontFamily: "DM Mono, monospace", fontSize: "0.72rem", letterSpacing: "0.04em",
-                  transition: "all 0.12s",
-                  background: action.primary ? "#1B4D35" : "transparent",
-                  border: action.primary ? "1px solid #1B4D35" : "1px solid rgba(28,28,26,0.1)",
-                  color: action.primary ? "#FFFFFF" : "rgba(28,28,26,0.55)",
-                }}
-                onMouseEnter={e => {
-                  if (action.primary) { (e.currentTarget as HTMLElement).style.background = "#163D2A"; }
-                  else { (e.currentTarget as HTMLElement).style.color = "#1C1C1A"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.2)"; }
-                }}
-                onMouseLeave={e => {
-                  if (action.primary) { (e.currentTarget as HTMLElement).style.background = "#1B4D35"; }
-                  else { (e.currentTarget as HTMLElement).style.color = "rgba(28,28,26,0.55)"; (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.1)"; }
-                }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded cursor-pointer font-mono text-[0.72rem] tracking-[0.04em] transition-all duration-150 ${
+                  action.primary
+                    ? "bg-forest border border-forest text-white hover:bg-forest-dark hover:border-forest-dark"
+                    : "bg-transparent border border-ink/10 text-ink/55 hover:text-ink hover:border-ink/20"
+                }`}
               >
                 <span>{action.icon}</span>
                 <span>{action.label}</span>
-                <ArrowRight size={11} style={{ marginLeft: "auto", opacity: 0.4 }} />
+                <ArrowRight size={11} className="ml-auto opacity-40" />
               </button>
             ))}
           </div>
-
-          {/* Divider + compliance badge */}
-          <div style={{ margin: "16px 0 0", paddingTop: "14px", borderTop: "1px solid rgba(28,28,26,0.06)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <ShieldCheck size={11} style={{ color: "#1B4D35" }} />
-              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.4)", letterSpacing: "0.1em" }}>
+          <div className="mt-4 pt-3.5 border-t border-ink/6">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck size={11} className="text-forest" />
+              <span className="font-mono text-[0.62rem] text-ink/50 tracking-[0.08em]">
                 EUDR 2026 COMPLIANCE ENGINE ACTIVE
               </span>
             </div>
@@ -329,92 +266,65 @@ export default function Dashboard() {
 
         {/* Recent lots */}
         <div className="card p-5 lg:col-span-2">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-            <p className="card-title" style={{ margin: 0 }}>Recent Lots</p>
+          <div className="flex items-center justify-between mb-4">
+            <p className="card-title m-0">Recent Lots</p>
             <button
               onClick={() => navigate("/lots")}
-              style={{
-                fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
-                color: "#8B5E3C", background: "none", border: "none",
-                cursor: "pointer", letterSpacing: "0.05em",
-              }}
+              className="font-mono text-[0.58rem] text-coffee bg-transparent border-none cursor-pointer tracking-[0.05em]"
             >
               View registry →
             </button>
           </div>
-
           {results.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+            <div className="flex flex-col gap-0.5">
               {results.slice(0, 6).map(lot => (
                 <div
                   key={lot.id}
                   onClick={() => navigate(`/lots/${lot.id}`)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: "10px",
-                    padding: "9px 10px", borderRadius: "4px",
-                    border: "1px solid transparent", cursor: "pointer",
-                    transition: "all 0.12s",
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.background = "#F7F5F0";
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(28,28,26,0.07)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.background = "transparent";
-                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
-                  }}
+                  className="flex items-center gap-2.5 px-2.5 py-[9px] rounded border border-transparent cursor-pointer transition-all duration-150 hover:bg-linen hover:border-ink/7"
                 >
-                  {/* Status dot */}
-                  <div style={{
-                    width: "6px", height: "6px", borderRadius: "50%", flexShrink: 0,
-                    background: lot.export_ready ? "#1B4D35" : lot.eudr_dds_ready ? "#8B5E3C" : "rgba(28,28,26,0.15)",
-                  }} />
-
-                  {/* Lot info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
-                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "#8B5E3C", flexShrink: 0 }}>
+                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                    lot.export_ready ? "bg-forest" : lot.eudr_dds_ready ? "bg-coffee" : "bg-ink/15"
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-mono text-[0.62rem] text-coffee shrink-0">
                         {lot.lot_id}
                       </span>
-                      <span style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", color: "#1C1C1A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span className="font-sans text-[0.8rem] text-ink overflow-hidden text-ellipsis whitespace-nowrap">
                         {lot.name}
                       </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "3px" }}>
-                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.35)", textTransform: "capitalize" }}>
+                    <div className="flex items-center gap-2 mt-[3px]">
+                      <span className="font-mono text-[0.6rem] text-ink/45 capitalize">
                         {lot.region}
                       </span>
                       <GateDots passed={lot.compliance_score ?? 0} />
                     </div>
                   </div>
-
-                  {/* SCA score */}
                   {lot.sca_score && (
-                    <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <span style={{
-                        fontFamily: "Cormorant Garamond, serif", fontSize: "1.1rem",
-                        fontWeight: 300, lineHeight: 1,
-                        color: Number(lot.sca_score) >= 85 ? "#8B5E3C" : Number(lot.sca_score) >= 80 ? "#1B4D35" : "rgba(28,28,26,0.4)",
-                      }}>
+                    <div className="text-right shrink-0">
+                      <span className={`font-display text-[1.1rem] font-light leading-none ${
+                        Number(lot.sca_score) >= 85 ? "text-coffee" : Number(lot.sca_score) >= 80 ? "text-forest" : "text-ink/40"
+                      }`}>
                         {Number(lot.sca_score).toFixed(1)}
                       </span>
-                      <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.45rem", color: "rgba(28,28,26,0.3)", display: "block" }}>
+                      <span className="font-mono text-[0.55rem] text-ink/40 block">
                         SCA
                       </span>
                     </div>
                   )}
-
-                  <ArrowRight size={10} style={{ color: "rgba(28,28,26,0.15)", flexShrink: 0 }} />
+                  <ArrowRight size={10} className="text-ink/15 shrink-0" />
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px", textAlign: "center" }}>
-              <Package size={24} style={{ color: "rgba(28,28,26,0.15)", marginBottom: "8px" }} />
-              <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(28,28,26,0.3)", margin: "0 0 8px" }}>No lots yet</p>
+            <div className="flex flex-col items-center justify-center p-10 text-center">
+              <Package size={24} className="text-ink/15 mb-2" />
+              <p className="font-mono text-[0.72rem] text-ink/30 mb-2">No lots yet</p>
               <button
                 onClick={() => navigate("/lots/new")}
-                style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#1B4D35", background: "none", border: "none", cursor: "pointer" }}
+                className="font-mono text-[0.6rem] text-forest bg-transparent border-none cursor-pointer"
               >
                 Register first lot →
               </button>
@@ -423,12 +333,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Lot pipeline card ───────────────────────────────────── */}
+      {/* ── Lot pipeline card ─────────────────────────────────────*/}
       {role !== "farmer" && total > 0 && (
         <div className="card p-5">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-            <p className="card-title" style={{ margin: 0 }}>Lot Pipeline</p>
-            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.08em" }}>
+          <div className="flex items-center justify-between mb-4">
+            <p className="card-title m-0">Lot Pipeline</p>
+            <span className="font-mono text-[0.62rem] text-ink/40 tracking-[0.06em]">
               {total} total
             </span>
           </div>
@@ -441,18 +351,17 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Farmer stub ─────────────────────────────────────────── */}
+      {/* ── Farmer stub ───────────────────────────────────────────*/}
       {role === "farmer" && (
-        <div className="card p-5" style={{ borderColor: "rgba(27,77,53,0.15)" }}>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#1B4D35", margin: "0 0 8px" }}>
+        <div className="card p-5 border-forest/15">
+          <p className="font-mono text-[0.58rem] tracking-[0.2em] uppercase text-forest mb-2">
             Farm Status
           </p>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: "rgba(28,28,26,0.35)", margin: 0 }}>
+          <p className="font-mono text-[0.72rem] text-ink/35 m-0">
             Farm profile and lot history — coming soon.
           </p>
         </div>
       )}
-
     </PageWrapper>
   );
 }
