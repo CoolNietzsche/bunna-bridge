@@ -7,3 +7,5 @@ bunna-bridge-frontend/node_modules/
 bunna-bridge-frontend/dist/
 *.sqlite3
 .DS_Store
+outpt.txt
+output.txt
