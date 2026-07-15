@@ -68,4 +68,4 @@ Seven gate validator:
 - Always provide complete files.
 - Provide exact commands.
 - Run npm run build after frontend changes.
-- Run uv sync after every uv add.
+- Run `uv add`/`uv sync` only via the Docker Compose wrapper (`docker compose -f docker-compose.local.yml run --rm django uv add <pkg>` / `docker compose -f docker-compose.local.yml run --rm django uv sync`) — never on the host. Running `uv add`/`uv sync` on the host previously corrupted `.venv` with host-only paths and crash-looped Celery in production (session log 2026-06-30). Always run it inside the container via the Docker Compose wrapper instead.

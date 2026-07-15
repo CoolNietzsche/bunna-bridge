@@ -73,9 +73,9 @@ The project follows a monorepo-like structure with distinct backend and frontend
 ### 4.1. Python Package Management
 
 *   **ALWAYS use `uv` for Python dependencies; NEVER use `pip`** [2, 3].
-*   **Workflow:** `cd ~/bunna-bridge/bunna_bridge && /root/.local/bin/uv add <package>`.
+*   **Workflow:** `cd ~/bunna-bridge/bunna_bridge && docker compose -f docker-compose.local.yml run --rm django uv add <package>`.
 *   **Docker Rebuild:** After adding packages, rebuild the Docker container: `docker compose -f docker-compose.local.yml build django` [2].
-*   **`uv sync`:** Always run `uv sync` after every `uv add` [1].
+*   **`uv sync`:** Always run `uv add`/`uv sync` *inside* the Docker container via the Compose wrapper, never on the host. Running `uv add`/`uv sync` on the host previously corrupted `.venv` with host-only paths and crash-looped Celery in production (session log 2026-06-30). Always run it inside the container via the Docker Compose wrapper instead.
 
 ### 4.2. Django Backend Specifics
 

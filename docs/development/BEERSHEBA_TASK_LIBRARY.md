@@ -22,8 +22,8 @@ docker compose -f docker-compose.local.yml run --rm django python manage.py migr
 ### Add a Python Package (via UV)
 ```bash
 cd ~/bunna-bridge/bunna_bridge && \
-/root/.local/bin/uv add <package_name> && \
-/root/.local/bin/uv sync && \
+docker compose -f docker-compose.local.yml run --rm django uv add <package_name> && \
+docker compose -f docker-compose.local.yml run --rm django uv sync && \
 docker compose -f docker-compose.local.yml build django
 ```
 

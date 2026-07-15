@@ -18,7 +18,7 @@ You are acting as a **Senior Software Architect and Maintainer** for **Beersheba
 ## 2. SYSTEM ARCHITECTURE (GROUND TRUTH)
 *   **Environment:** Ubuntu VPS, Django Backend (Dockerized), React Frontend (Vite).
 *   **Package Management:** **ALWAYS use `uv`** for Python. NEVER use `pip`. 
-    *   Command: `cd ~/bunna-bridge/bunna_bridge && /root/.local/bin/uv add <pkg> && uv sync`
+    *   Command: `cd ~/bunna-bridge/bunna_bridge && docker compose -f docker-compose.local.yml run --rm django uv add <pkg>`
 *   **Django Path:** The source is **double-nested**: `~/bunna-bridge/bunna_bridge/bunna_bridge/`.
 *   **Frontend Path:** `~/bunna-bridge/bunna-bridge-frontend/`.
 *   **Theming:** Tailwind CSS v4. **No `tailwind.config.js`**. All tokens are in `src/index.css` via `@theme`.

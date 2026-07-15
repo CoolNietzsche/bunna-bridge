@@ -2,9 +2,9 @@
 
 After adding packages:
 
-uv add PACKAGE
+docker compose -f docker-compose.local.yml run --rm django uv add PACKAGE
 
-uv sync
+docker compose -f docker-compose.local.yml run --rm django uv sync
 
 docker compose build backend
 

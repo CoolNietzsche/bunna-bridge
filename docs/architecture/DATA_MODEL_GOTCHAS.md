@@ -54,7 +54,7 @@ This document highlights critical data model design decisions, potential pitfall
 
 **Gotcha:** The project exclusively uses `uv` for Python package management; `pip` is explicitly forbidden [1].
 
-**Detail:** The `pyproject.toml` and `uv.lock` files confirm the use of `uv`. The recommended workflow for adding packages is `uv add <package>` followed by a Docker rebuild.
+**Detail:** The `pyproject.toml` and `uv.lock` files confirm the use of `uv`. The recommended workflow for adding packages is to run `docker compose -f docker-compose.local.yml run --rm django uv add <package>` inside the Django container, then rebuild the image. Running `uv add`/`uv sync` on the host previously corrupted `.venv` with host-only paths and crash-looped Celery in production (session log 2026-06-30). Always run it inside the container via the Docker Compose wrapper instead.
 
 **Implication:** Always use `uv` commands (e.g., `uv add`, `uv sync`) for managing Python dependencies. Using `pip` can lead to inconsistencies and build failures.
 

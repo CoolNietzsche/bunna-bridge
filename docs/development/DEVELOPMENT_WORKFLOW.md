@@ -93,9 +93,11 @@ cd ~/bunna-bridge/bunna_bridge
 
 **Critical:** Always use `uv` for Python package management; **never use `pip`** [1, 2].
 
+**Critical:** Always run `uv` *inside* the Docker container via the Compose wrapper below — never directly on the host. Running `uv add`/`uv sync` on the host previously corrupted `.venv` with host-only paths and crash-looped Celery in production (session log 2026-06-30). Always run it inside the container via the Docker Compose wrapper instead.
+
 1.  **Add package using `uv`:**
     ```bash
-    cd ~/bunna-bridge/bunna_bridge && /root/.local/bin/uv add <package>
+    cd ~/bunna-bridge/bunna_bridge && docker compose -f docker-compose.local.yml run --rm django uv add <package>
     ```
 2.  **Rebuild Docker image:** After adding new Python packages, the Docker image for the Django service must be rebuilt to include them.
     ```bash
