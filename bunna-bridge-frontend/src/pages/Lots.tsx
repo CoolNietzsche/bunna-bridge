@@ -11,14 +11,17 @@ const REGIONS = ["","yirgacheffe","sidama","guji","jimma","harrar","limu","nekem
 const GRADES  = ["","G1","G2","G3"];
 const STATUS  = ["","draft","listed","contracted","exported"];
 
+const selectClass =
+  "flex-[1_1_130px] bg-white border border-ink/8 rounded-[3px] px-3 py-[7px] text-ink font-sans text-[0.8125rem] outline-none";
+
 export default function Lots() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isExporter = user?.role === "exporter" || user?.role === "admin";
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [search, setSearch]   = useState("");
-  const params = { ...filters, ...(search ? { search } : {}) };
 
+  const params = { ...filters, ...(search ? { search } : {}) };
   const { data, isLoading, isError } = useQuery({
     queryKey: ["lots", params],
     queryFn:  () => getLots(params),
@@ -30,71 +33,52 @@ export default function Lots() {
       : Object.fromEntries(Object.entries(f).filter(([k]) => k !== key))
     );
 
-  const sel = {
-    background: "#FFFFFF",
-    border: "1px solid rgba(28,28,26,0.08)",
-    borderRadius: "3px", padding: "7px 12px",
-    color: "#1C1C1A",
-    fontFamily: "Instrument Sans, sans-serif",
-    fontSize: "0.8125rem", outline: "none",
-    flex: "1 1 130px",
-  };
-
   return (
     <PageWrapper>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "24px", gap: "12px", flexWrap: "wrap" }}>
+      <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.75rem", fontWeight: 400, color: "#1C1C1A", margin: "0 0 4px" }}>
+          <h1 className="font-display text-[1.75rem] font-normal text-ink mb-1">
             Coffee Lots
           </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.3)", margin: 0 }}>
+          <p className="font-mono text-[0.58rem] tracking-[0.2em] uppercase text-ink/30 m-0">
             Digital Birth Certificate Registry
           </p>
         </div>
         {isExporter && (
-          <button onClick={() => navigate("/lots/new")} style={{
-            display: "flex", alignItems: "center", gap: "7px",
-            background: "#1B4D35", border: "none", borderRadius: "3px",
-            padding: "9px 18px", color: "white",
-            fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8125rem",
-            fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap",
-          }}>
+          <button
+            onClick={() => navigate("/lots/new")}
+            className="flex items-center gap-[7px] bg-forest border-none rounded-[3px] px-[18px] py-[9px] text-white font-sans text-[0.8125rem] font-medium cursor-pointer whitespace-nowrap transition-colors duration-150 hover:bg-forest-dark"
+          >
             <Plus size={14} /> New Lot
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: "8px",
-          background: "#FFFFFF",
-          border: "1px solid rgba(28,28,26,0.08)",
-          borderRadius: "3px", padding: "7px 12px",
-          flex: "2 1 200px",
-        }}>
-          <Search size={13} color="rgba(28,28,26,0.25)" />
+      <div className="flex gap-2 mb-4 flex-wrap">
+        <div className="flex items-center gap-2 bg-white border border-ink/8 rounded-[3px] px-3 py-[7px] flex-[2_1_200px]">
+          <Search size={13} className="text-ink/25" />
           <input
-            style={{ background: "transparent", border: "none", outline: "none", color: "#1C1C1A", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8125rem", width: "100%" }}
+            className="bg-transparent border-none outline-none text-ink font-sans text-[0.8125rem] w-full"
             placeholder="Search lot ID, name, region..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <select style={sel} onChange={e => setFilter("region", e.target.value)}>
+        <select className={selectClass} onChange={e => setFilter("region", e.target.value)}>
           <option value="">All Regions</option>
           {REGIONS.filter(Boolean).map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
         </select>
-        <select style={sel} onChange={e => setFilter("grade", e.target.value)}>
+        <select className={selectClass} onChange={e => setFilter("grade", e.target.value)}>
           <option value="">All Grades</option>
           {GRADES.filter(Boolean).map(g => <option key={g} value={g}>{g}</option>)}
         </select>
-        <select style={sel} onChange={e => setFilter("status", e.target.value)}>
+        <select className={selectClass} onChange={e => setFilter("status", e.target.value)}>
           <option value="">All Statuses</option>
           {STATUS.filter(Boolean).map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
         </select>
-        <select style={sel} onChange={e => setFilter("eudr_dds_ready", e.target.value)}>
+        <select className={selectClass} onChange={e => setFilter("eudr_dds_ready", e.target.value)}>
           <option value="">EUDR — All</option>
           <option value="true">EUDR Ready</option>
           <option value="false">Not Ready</option>
@@ -103,9 +87,9 @@ export default function Lots() {
 
       {/* Count */}
       {data && (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-          <SlidersHorizontal size={12} color="rgba(28,28,26,0.25)" />
-          <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.3)", letterSpacing: "0.08em" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <SlidersHorizontal size={12} className="text-ink/25" />
+          <span className="font-mono text-[0.6rem] text-ink/30 tracking-[0.08em]">
             {data.count} lot{data.count !== 1 ? "s" : ""} found
           </span>
         </div>
@@ -113,27 +97,26 @@ export default function Lots() {
 
       {/* States */}
       {isLoading && (
-        <div style={{ textAlign: "center", padding: "64px", fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(28,28,26,0.25)" }}>
+        <div className="text-center py-16 font-mono text-[0.75rem] text-ink/25">
           Loading lots...
         </div>
       )}
       {isError && (
-        <div style={{ textAlign: "center", padding: "64px", fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "#1B4D35" }}>
+        <div className="text-center py-16 font-mono text-[0.75rem] text-red-600">
           Failed to load lots. Check API connection.
         </div>
       )}
       {data && data.results.length === 0 && (
-        <div style={{ textAlign: "center", padding: "64px" }}>
-          <Package size={32} color="rgba(28,28,26,0.09)" style={{ marginBottom: "12px" }} />
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(28,28,26,0.25)" }}>
+        <div className="text-center py-16">
+          <Package size={32} className="text-ink/[0.09] mb-3 mx-auto" />
+          <p className="font-mono text-[0.75rem] text-ink/25">
             No lots found.
           </p>
           {isExporter && (
-            <button onClick={() => navigate("/lots/new")} style={{
-              marginTop: "12px", background: "none", border: "none",
-              fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
-              color: "#1B4D35", cursor: "pointer", letterSpacing: "0.08em",
-            }}>
+            <button
+              onClick={() => navigate("/lots/new")}
+              className="mt-3 bg-transparent border-none font-mono text-[0.65rem] text-forest cursor-pointer tracking-[0.08em]"
+            >
               Register your first lot →
             </button>
           )}
@@ -142,63 +125,61 @@ export default function Lots() {
 
       {/* Table */}
       {data && data.results.length > 0 && (
-        <div style={{ background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.06)", borderRadius: "6px", overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <div className="bg-white border border-ink/6 rounded-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(28,28,26,0.06)" }}>
+                <tr className="border-b border-ink/6">
                   {["Lot ID","Name","Region","Grade","SCA","Volume","Status","EUDR","Export"].map(h => (
-                    <th key={h} style={{
-                      fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
-                      letterSpacing: "0.12em", textTransform: "uppercase",
-                      color: "rgba(28,28,26,0.5)", padding: "12px 16px",
-                      textAlign: "left", whiteSpace: "nowrap",
-                    }}>{h}</th>
+                    <th
+                      key={h}
+                      className="font-mono text-[0.65rem] tracking-[0.12em] uppercase text-ink/50 px-4 py-3 text-left whitespace-nowrap"
+                    >{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {data.results.map((lot, i) => (
-                  <tr key={lot.id}
+                  <tr
+                    key={lot.id}
                     onClick={() => navigate(`/lots/${lot.id}`)}
-                    style={{
-                      borderBottom: i < data.results.length - 1 ? "1px solid #FFFFFF" : "none",
-                      cursor: "pointer", transition: "background 0.12s",
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(28,28,26,0.025)")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    className={`cursor-pointer transition-colors duration-150 hover:bg-ink/[0.025] ${
+                      i < data.results.length - 1 ? "border-b border-white" : ""
+                    }`}
                   >
-                    <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "#8B5E3C", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] font-mono text-[0.68rem] text-coffee whitespace-nowrap">
                       {lot.lot_id}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", color: "#1C1C1A", maxWidth: "220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] font-sans text-[0.875rem] text-ink max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap">
                       {lot.name}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "rgba(28,28,26,0.5)", whiteSpace: "nowrap", textTransform: "capitalize" }}>
+                    <td className="px-4 py-[13px] font-mono text-[0.68rem] text-ink/50 whitespace-nowrap capitalize">
                       {lot.region}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "rgba(28,28,26,0.5)", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] font-mono text-[0.68rem] text-ink/50 whitespace-nowrap">
                       {lot.grade}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.72rem", color: lot.sca_score && lot.sca_score >= 85 ? "#8B5E3C" : "rgba(28,28,26,0.6)", whiteSpace: "nowrap" }}>
+                    <td className={`px-4 py-[13px] font-mono text-[0.72rem] whitespace-nowrap ${
+                      lot.sca_score && lot.sca_score >= 85 ? "text-coffee" : "text-ink/60"
+                    }`}>
                       {lot.sca_score ? `${lot.sca_score}` : "—"}
                     </td>
-                    <td style={{ padding: "13px 16px", fontFamily: "DM Mono, monospace", fontSize: "0.68rem", color: "rgba(28,28,26,0.5)", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] font-mono text-[0.68rem] text-ink/50 whitespace-nowrap">
                       {lot.volume_kg} kg
                     </td>
-                    <td style={{ padding: "13px 16px", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] whitespace-nowrap">
                       <StatusPill status={lot.status} />
                     </td>
-                    <td style={{ padding: "13px 16px", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] whitespace-nowrap">
                       {lot.eudr_dds_ready
-                        ? <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8D5BC" }}><ShieldCheck size={11} /> Ready</span>
-                        : <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.15)" }}>—</span>
+                        ? <span className="flex items-center gap-1 font-mono text-[0.58rem] text-mint"><ShieldCheck size={11} /> Ready</span>
+                        : <span className="font-mono text-[0.58rem] text-ink/15">—</span>
                       }
                     </td>
-                    <td style={{ padding: "13px 16px", whiteSpace: "nowrap" }}>
+                    <td className="px-4 py-[13px] whitespace-nowrap">
                       {lot.export_ready
-                        ? <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#2D7A52" }}><TrendingUp size={11} /> Ready</span>
-                        : <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.15)" }}>—</span>
+                        ? <span className="flex items-center gap-1 font-mono text-[0.58rem] text-sage"><TrendingUp size={11} /> Ready</span>
+                        : <span className="font-mono text-[0.58rem] text-ink/15">—</span>
                       }
                     </td>
                   </tr>
@@ -206,22 +187,22 @@ export default function Lots() {
               </tbody>
             </table>
           </div>
-
           {/* Pagination */}
           {(data.next || data.previous) && (
-            <div style={{
-              padding: "12px 16px", borderTop: "1px solid rgba(28,28,26,0.05)",
-              display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center",
-            }}>
+            <div className="px-4 py-3 border-t border-ink/5 flex gap-2 justify-end items-center">
               {data.previous && (
-                <button onClick={() => setFilter("page", String((parseInt(filters.page || "1") - 1)))}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "1px solid rgba(28,28,26,0.09)", borderRadius: "3px", padding: "7px 14px", color: "rgba(28,28,26,0.5)", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: "pointer" }}>
+                <button
+                  onClick={() => setFilter("page", String((parseInt(filters.page || "1") - 1)))}
+                  className="flex items-center gap-1.5 bg-transparent border border-ink/9 rounded-[3px] px-3.5 py-[7px] text-ink/50 font-mono text-[0.65rem] cursor-pointer hover:border-ink/20 hover:text-ink transition-colors duration-150"
+                >
                   <ChevronLeft size={12} /> Previous
                 </button>
               )}
               {data.next && (
-                <button onClick={() => setFilter("page", String((parseInt(filters.page || "1") + 1)))}
-                  style={{ display: "flex", alignItems: "center", gap: "6px", background: "#1B4D35", border: "none", borderRadius: "3px", padding: "7px 14px", color: "white", fontFamily: "DM Mono, monospace", fontSize: "0.65rem", cursor: "pointer" }}>
+                <button
+                  onClick={() => setFilter("page", String((parseInt(filters.page || "1") + 1)))}
+                  className="flex items-center gap-1.5 bg-forest border-none rounded-[3px] px-3.5 py-[7px] text-white font-mono text-[0.65rem] cursor-pointer hover:bg-forest-dark transition-colors duration-150"
+                >
                   Next <ChevronRight size={12} />
                 </button>
               )}
