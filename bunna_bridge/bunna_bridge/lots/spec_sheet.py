@@ -18,17 +18,22 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-# ── Brand colours (approximate ReportLab RGB from hex) ──────────────────────
-ESPRESSO   = colors.HexColor("#1A0F07")
-ROAST      = colors.HexColor("#2C1810")
-TERRACOTTA = colors.HexColor("#C1440E")
-AMBER      = colors.HexColor("#D4824A")
-GOLD       = colors.HexColor("#C9952A")
-FOREST     = colors.HexColor("#1E3A2F")
-SAGE       = colors.HexColor("#4A7C59")
-CREAM      = colors.HexColor("#F5EDD8")
-PARCHMENT  = colors.HexColor("#EDE0C4")
-WHITE      = colors.white
+# ── Brand colours — mirrors src/index.css @theme tokens ─────────────────────
+FOREST_HEX = "1B4D35"
+SAGE_HEX   = "2D7A52"
+RED_HEX    = "DC2626"   # matches Tailwind red-600, used app-wide for reject/fail states
+COFFEE_HEX = "8B5E3C"
+
+FOREST  = colors.HexColor(f"#{FOREST_HEX}")
+LINEN   = colors.HexColor("#F7F5F0")
+STONE   = colors.HexColor("#F0EDE6")
+COFFEE  = colors.HexColor(f"#{COFFEE_HEX}")
+SAGE    = colors.HexColor(f"#{SAGE_HEX}")
+INK     = colors.HexColor("#1C1C1A")
+SLATE   = colors.HexColor("#4A4A45")
+BORDER  = colors.HexColor("#E4E1D9")   # rgba(28,28,26,0.08) flattened onto Linen
+RED     = colors.HexColor(f"#{RED_HEX}")
+WHITE   = colors.white
 
 PAGE_W, PAGE_H = A4
 MARGIN = 18 * mm
@@ -40,7 +45,7 @@ S_TITLE = ParagraphStyle(
     "BbTitle",
     fontName="Helvetica-Bold",
     fontSize=22,
-    textColor=CREAM,
+    textColor=INK,
     leading=28,
     spaceAfter=2,
 )
@@ -48,7 +53,7 @@ S_SUBTITLE = ParagraphStyle(
     "BbSubtitle",
     fontName="Helvetica",
     fontSize=11,
-    textColor=AMBER,
+    textColor=SLATE,
     leading=15,
     spaceAfter=0,
 )
@@ -56,7 +61,7 @@ S_SECTION = ParagraphStyle(
     "BbSection",
     fontName="Helvetica-Bold",
     fontSize=9,
-    textColor=AMBER,
+    textColor=FOREST,
     leading=13,
     spaceBefore=10,
     spaceAfter=4,
@@ -66,7 +71,7 @@ S_BODY = ParagraphStyle(
     "BbBody",
     fontName="Helvetica",
     fontSize=9,
-    textColor=PARCHMENT,
+    textColor=INK,
     leading=13,
     spaceAfter=3,
 )
@@ -74,14 +79,14 @@ S_MONO = ParagraphStyle(
     "BbMono",
     fontName="Courier",
     fontSize=8,
-    textColor=GOLD,
+    textColor=COFFEE,
     leading=12,
 )
 S_ITALIC = ParagraphStyle(
     "BbItalic",
     fontName="Helvetica-Oblique",
     fontSize=9,
-    textColor=PARCHMENT,
+    textColor=SLATE,
     leading=13,
     spaceAfter=3,
 )
@@ -89,23 +94,23 @@ S_SMALL = ParagraphStyle(
     "BbSmall",
     fontName="Helvetica",
     fontSize=7.5,
-    textColor=colors.HexColor("#A8C5A0"),
+    textColor=SLATE,
     leading=11,
 )
 S_WATERMARK = ParagraphStyle(
     "BbWatermark",
     fontName="Helvetica-Bold",
     fontSize=42,
-    textColor=colors.HexColor("#2C1810"),
+    textColor=STONE,
     leading=50,
 )
 
 
 def _gate_row(label, passed):
     icon = "✓" if passed else "✗"
-    icon_color = SAGE if passed else TERRACOTTA
+    icon_hex = SAGE_HEX if passed else RED_HEX
     return [
-        Paragraph(f'<font color="#{("4A7C59" if passed else "C1440E")}">{icon}</font>', S_BODY),
+        Paragraph(f'<font color="#{icon_hex}">{icon}</font>', S_BODY),
         Paragraph(label, S_BODY),
     ]
 
@@ -147,14 +152,14 @@ def generate_spec_sheet(lot) -> bytes:
     header_data = [[
         Paragraph("BUNNA BRIDGE", ParagraphStyle(
             "hdr", fontName="Helvetica-Bold", fontSize=10,
-            textColor=AMBER, leading=14)),
+            textColor=WHITE, leading=14)),
         Paragraph("LOT SPEC SHEET", ParagraphStyle(
             "hdr2", fontName="Helvetica", fontSize=9,
-            textColor=PARCHMENT, leading=14, alignment=2)),
+            textColor=WHITE, leading=14, alignment=2)),
     ]]
     header_table = Table(header_data, colWidths=[(PAGE_W - 2*MARGIN)/2]*2)
     header_table.setStyle(TableStyle([
-        ("BACKGROUND",   (0, 0), (-1, -1), ESPRESSO),
+        ("BACKGROUND",   (0, 0), (-1, -1), FOREST),
         ("TOPPADDING",   (0, 0), (-1, -1), 8),
         ("BOTTOMPADDING",(0, 0), (-1, -1), 8),
         ("LEFTPADDING",  (0, 0), (0, -1),  10),
@@ -168,7 +173,7 @@ def generate_spec_sheet(lot) -> bytes:
     story.append(Paragraph(lot.name, S_TITLE))
     story.append(Paragraph(lot.lot_id, S_MONO))
     story.append(Spacer(1, 3))
-    story.append(HRFlowable(width="100%", thickness=1, color=ROAST))
+    story.append(HRFlowable(width="100%", thickness=1, color=BORDER))
     story.append(Spacer(1, 8))
 
     # ── Two-column layout: Lot Details | Pricing & Exporter ─────────────────
@@ -269,13 +274,13 @@ def generate_spec_sheet(lot) -> bytes:
         ("VALIGN",      (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING",(0, 0), (-1, -1), 0),
-        ("LINEAFTER",   (0, 0), (0, -1),  0.5, colors.HexColor("#2C1810")),
+        ("LINEAFTER",   (0, 0), (0, -1),  0.5, BORDER),
         ("RIGHTPADDING",(0, 0), (0, -1),  8),
         ("LEFTPADDING", (1, 0), (1, -1),  8),
     ]))
     story.append(two_col)
     story.append(Spacer(1, 10))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=ROAST))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER))
 
     # ── SCA / Cupping ────────────────────────────────────────────────────────
     story.append(Spacer(1, 8))
@@ -325,7 +330,7 @@ def generate_spec_sheet(lot) -> bytes:
             Paragraph(f"<b>{label}</b>", S_SMALL),
             Paragraph(_sca_bar(val), ParagraphStyle(
                 "bar", fontName="Courier", fontSize=8,
-                textColor=GOLD, leading=11)),
+                textColor=COFFEE, leading=11)),
         ] for label, val in attrs if val is not None]
 
         if bar_data:
@@ -348,7 +353,7 @@ def generate_spec_sheet(lot) -> bytes:
         story.append(Paragraph(f'"{flavor_notes}"', S_ITALIC))
 
     story.append(Spacer(1, 8))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=ROAST))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER))
 
     # ── EUDR Compliance ──────────────────────────────────────────────────────
     story.append(Spacer(1, 8))
@@ -375,10 +380,9 @@ def generate_spec_sheet(lot) -> bytes:
     story.append(gate_table)
     story.append(Spacer(1, 4))
 
-    compliance_color = SAGE if passed_count == 7 else (GOLD if passed_count >= 5 else TERRACOTTA)
+    compliance_hex = SAGE_HEX if passed_count == 7 else (COFFEE_HEX if passed_count >= 5 else RED_HEX)
     story.append(Paragraph(
-        f'<font color="#{("1E3A2F" if passed_count==7 else ("C9952A" if passed_count>=5 else "C1440E"))}">'
-        f'<b>{passed_count}/7 gates passed</b></font>',
+        f'<font color="#{compliance_hex}"><b>{passed_count}/7 gates passed</b></font>',
         S_BODY,
     ))
 
@@ -389,14 +393,14 @@ def generate_spec_sheet(lot) -> bytes:
 
     if farm_story:
         story.append(Spacer(1, 8))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=ROAST))
+        story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER))
         story.append(Spacer(1, 8))
         story.append(Paragraph("FARM STORY", S_SECTION))
         story.append(Paragraph(farm_story, S_BODY))
 
     # ── Footer ───────────────────────────────────────────────────────────────
     story.append(Spacer(1, 12))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=ROAST))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=BORDER))
     story.append(Spacer(1, 4))
     story.append(Paragraph(
         "This document is for pre-contract evaluation only. "
@@ -408,7 +412,7 @@ def generate_spec_sheet(lot) -> bytes:
     # ── Build ────────────────────────────────────────────────────────────────
     def _bg(canvas, doc):
         canvas.saveState()
-        canvas.setFillColor(ESPRESSO)
+        canvas.setFillColor(LINEN)
         canvas.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
         canvas.restoreState()
 

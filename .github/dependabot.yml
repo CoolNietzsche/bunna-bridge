@@ -18,9 +18,9 @@ updates:
   - package-ecosystem: 'docker'
     # Look for a `Dockerfile` in the `compose/local/django` directory
     directories:
-      - 'compose/local/django/'
-      - 'compose/local/docs/'
-      - 'compose/production/django/'
+      - '/bunna_bridge/compose/local/django/'
+      - '/bunna_bridge/compose/local/docs/'
+      - '/bunna_bridge/compose/production/django/'
     # Every weekday
     schedule:
       interval: 'daily'
@@ -39,11 +39,11 @@ updates:
   - package-ecosystem: 'docker'
     # Look for a `Dockerfile` in the listed directories
     directories:
-      - 'compose/local/node/'
-      - 'compose/production/aws/'
-      - 'compose/production/postgres/'
-      - 'compose/production/traefik/'
-      - 'compose/production/nginx/'
+      - '/bunna_bridge/compose/local/node/'
+      - '/bunna_bridge/compose/production/aws/'
+      - '/bunna_bridge/compose/production/postgres/'
+      - '/bunna_bridge/compose/production/traefik/'
+      - '/bunna_bridge/compose/production/nginx/'
     # Every weekday
     schedule:
       interval: 'daily'
@@ -51,15 +51,15 @@ updates:
   # Enable version updates for Docker Compose files
   - package-ecosystem: 'docker-compose'
     directories:
-      - '/'
+      - '/bunna_bridge'
     # Every weekday
     schedule:
       interval: 'daily'
 
   # Enable version updates for Python/uv
   - package-ecosystem: 'uv'
-    # Look for a `pyproject.toml` in the `root` directory
-    directory: '/'
+    # Look for a `pyproject.toml` in the `bunna_bridge` directory
+    directory: '/bunna_bridge'
     # Every weekday
     schedule:
       interval: 'daily'

@@ -7,11 +7,11 @@ env:
 
 on:
   pull_request:
-    branches: ['main']
+    branches: ['master']
     paths-ignore: ['docs/**']
 
   push:
-    branches: ['main']
+    branches: ['master']
     paths-ignore: ['docs/**']
 
 concurrency:
@@ -28,10 +28,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version-file: '.python-version'
-      # Consider using pre-commit.ci for open source project
+          python-version-file: 'bunna_bridge/.python-version'
+
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+        working-directory: bunna_bridge
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure --color=always
 
   # With no caching at all the entire ci process takes 3m to complete!
   pytest:
@@ -49,7 +52,7 @@ jobs:
         with:
           push: false
           load: true
-          files: docker-compose.local.yml
+          files: bunna_bridge/docker-compose.local.yml
           targets: django
           set: |
             django.cache-from=type=gha,scope=django-cached-tests
@@ -62,19 +65,19 @@ jobs:
         with:
           push: false
           load: true
-          files: docker-compose.docs.yml
+          files: bunna_bridge/docker-compose.docs.yml
           set: |
             docs.cache-from=type=gha,scope=cached-docs
             docs.cache-to=type=gha,scope=cached-docs,mode=max
 
       - name: Check DB Migrations
-        run: docker compose -f docker-compose.local.yml run --rm django python manage.py makemigrations --check
+        run: docker compose -f bunna_bridge/docker-compose.local.yml run --rm django python manage.py makemigrations --check
 
       - name: Run DB Migrations
-        run: docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+        run: docker compose -f bunna_bridge/docker-compose.local.yml run --rm django python manage.py migrate
 
       - name: Run Django Tests
-        run: docker compose -f docker-compose.local.yml run django pytest
+        run: docker compose -f bunna_bridge/docker-compose.local.yml run django pytest
 
       - name: Tear down the Stack
-        run: docker compose -f docker-compose.local.yml down
+        run: docker compose -f bunna_bridge/docker-compose.local.yml down

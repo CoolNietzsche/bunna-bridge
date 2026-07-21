@@ -93,7 +93,6 @@ LOCAL_APPS = [
     "bunna_bridge.users",
      # Bunna Bridge apps
     "bunna_bridge.lots",
-    "bunna_bridge.compliance",
 
     # Your stuff: custom apps go here
 ]

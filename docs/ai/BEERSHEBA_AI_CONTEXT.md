@@ -10,7 +10,7 @@ https://bunnabridge.pro.et
 # Stack
 
 - Django 6 + GeoDjango + PostGIS
-- React 18 + Vite + TypeScript
+- React 19 + Vite + TypeScript
 - Tailwind v4
 - Celery + Redis
 - Docker Compose
@@ -36,7 +36,7 @@ EUDR 2026 compliance automation.
 Seven gate validator:
 
 1. GPS mapping
-2. ECEX permit validation
+2. ECTA export license validation
 3. Phytosanitary certificate
 4. Deforestation checks
 5. FX declaration validation
@@ -52,7 +52,7 @@ Seven gate validator:
 - Farmers are User(role="farmer").
 - farm_polygon has been removed.
 - Use boundary (PolygonField geography=True).
-- DeforstationZone lives in deforestation.py with app_label='lots'.
+- DeforestationZone lives in deforestation.py with app_label='lots'.
 - Tailwind v4 has no tailwind.config.js.
 - Theme tokens live inside index.css.
 - Relative /api/ URLs only.
