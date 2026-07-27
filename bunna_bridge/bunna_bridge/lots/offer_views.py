@@ -2,8 +2,21 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import Offer, CoffeeLot
+from .models import Offer, CoffeeLot, Notification
 from .serializers import OfferSerializer
+from .signals import create_lot_status_notification
+
+
+def _contract_lot(lot):
+    """Move a lot to 'contracted' when an offer on it is accepted.
+
+    No-op if the lot isn't currently 'listed' (e.g. it was already
+    contracted by another offer, or moved on manually).
+    """
+    if lot.status == "listed":
+        lot.status = "contracted"
+        lot.save(update_fields=["status"])
+        create_lot_status_notification(lot, "listed", "contracted")
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
@@ -53,9 +66,26 @@ class OfferRespondView(APIView):
 
         if action == "accept":
             offer.status = "accepted"
+            offer.save()
+            _contract_lot(offer.lot)
+            Notification.objects.create(
+                recipient=offer.buyer,
+                notification_type="offer",
+                title="Offer Accepted",
+                message=f"Your offer on lot {offer.lot.lot_id} ({offer.lot.name}) was accepted.",
+                link="/buyer/offers",
+            )
         elif action == "reject":
             offer.status = "rejected"
             offer.exporter_notes = request.data.get("exporter_notes", "")
+            offer.save()
+            Notification.objects.create(
+                recipient=offer.buyer,
+                notification_type="offer",
+                title="Offer Rejected",
+                message=f"Your offer on lot {offer.lot.lot_id} ({offer.lot.name}) was rejected.",
+                link="/buyer/offers",
+            )
         elif action == "counter":
             counter_price = request.data.get("counter_price")
             if not counter_price:
@@ -67,13 +97,23 @@ class OfferRespondView(APIView):
             offer.counter_price = counter_price
             offer.counter_qty = request.data.get("counter_qty") or offer.quantity_kg
             offer.exporter_notes = request.data.get("exporter_notes", "")
+            offer.save()
+            Notification.objects.create(
+                recipient=offer.buyer,
+                notification_type="offer",
+                title="Counter-Offer Received",
+                message=(
+                    f"The exporter countered your offer on lot {offer.lot.lot_id} "
+                    f"({offer.lot.name}) at {counter_price}."
+                ),
+                link="/buyer/offers",
+            )
         else:
             return Response(
                 {"detail": "action must be accept, reject, or counter."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        offer.save()
         return Response(OfferSerializer(offer).data)
 
 
@@ -90,6 +130,13 @@ class OfferWithdrawView(APIView):
             )
         offer.status = "withdrawn"
         offer.save()
+        Notification.objects.create(
+            recipient=offer.lot.exporter,
+            notification_type="offer",
+            title="Offer Withdrawn",
+            message=f"{offer.buyer.email} withdrew their offer on lot {offer.lot.lot_id} ({offer.lot.name}).",
+            link="/offers",
+        )
         return Response(OfferSerializer(offer).data)
 
 
@@ -106,4 +153,12 @@ class OfferAcceptCounterView(APIView):
             )
         offer.status = "accepted"
         offer.save()
+        _contract_lot(offer.lot)
+        Notification.objects.create(
+            recipient=offer.lot.exporter,
+            notification_type="offer",
+            title="Counter-Offer Accepted",
+            message=f"{offer.buyer.email} accepted your counter-offer on lot {offer.lot.lot_id} ({offer.lot.name}).",
+            link="/offers",
+        )
         return Response(OfferSerializer(offer).data)

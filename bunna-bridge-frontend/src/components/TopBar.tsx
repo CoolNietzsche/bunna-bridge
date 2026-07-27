@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Bell, Menu, Mail, AlertTriangle,
-  CheckSquare, ChevronDown, LogOut, Settings, User, Leaf
+  CheckSquare, ChevronDown, LogOut, Settings, User, Leaf, Handshake
 } from 'lucide-react';
 import RoleBadge from './RoleBadge';
 import {
@@ -92,6 +92,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onMenuToggle }) => {
       case 'sample_request': return <Mail      className="w-4 h-4" style={{ color: '#7B4B2A' }} />;
       case 'lot_status':     return <Leaf      className="w-4 h-4" style={{ color: '#1B4D35' }} />;
       case 'eudr_alert':     return <AlertTriangle className="w-4 h-4" style={{ color: '#C0392B' }} />;
+      case 'offer':          return <Handshake className="w-4 h-4" style={{ color: '#C9952A' }} />;
       default:               return <Bell      className="w-4 h-4" style={{ color: '#4A4A45' }} />;
     }
   };
