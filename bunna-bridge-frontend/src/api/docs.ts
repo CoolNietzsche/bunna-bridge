@@ -73,5 +73,5 @@ export async function uploadEctaLicense(
 export function getMediaUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   if (path.startsWith("http")) return path;
-  return `${window.location.protocol}//${window.location.hostname}:8001${path.startsWith("/") ? "" : "/"}${path}`;
+  return `${window.location.origin}${path.startsWith("/") ? "" : "/"}${path}`;
 }

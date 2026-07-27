@@ -247,8 +247,26 @@ export const acceptCounter = async (offerId: string) => {
   return data;
 };
 
+export async function uploadLotPhoto(lotId: string, photo: File): Promise<string[]> {
+  const fd = new FormData();
+  fd.append("photo", photo);
+  const { data } = await api.post<{ farm_photos: string[] }>(
+    `/v1/lots/${lotId}/photos/`,
+    fd,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data.farm_photos;
+}
+
+export async function deleteLotPhoto(lotId: string, url: string): Promise<string[]> {
+  const { data } = await api.delete<{ farm_photos: string[] }>(`/v1/lots/${lotId}/photos/`, {
+    data: { url },
+  });
+  return data.farm_photos;
+}
+
 export async function downloadSpecSheet(lotId: string, lotCode: string): Promise<void> {
-  const response = await api.get(`/lots/${lotId}/spec-sheet/`, {
+  const response = await api.get(`/v1/lots/${lotId}/spec-sheet/`, {
     responseType: "blob",
   });
   const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));

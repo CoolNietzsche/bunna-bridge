@@ -8,7 +8,7 @@ from .views import (
     LotBoundaryView, LotBoundaryInheritView,
     NotificationListView, notification_unread_count,
     notification_mark_read, notification_mark_all_read,
-    LotStoryPublicView,
+    LotStoryPublicView, LotPhotosView,
 )
 from .offer_views import (
     OfferListCreateView,
@@ -34,6 +34,8 @@ urlpatterns = router.urls + [
          LotBoundaryView.as_view(),                           name="lot-boundary"),
     path("lots/<uuid:lot_pk>/boundary/inherit/",
          LotBoundaryInheritView.as_view(),                    name="lot-boundary-inherit"),
+    path("lots/<uuid:lot_pk>/photos/",
+         LotPhotosView.as_view(),                             name="lot-photos"),
     path("notifications/",
          NotificationListView.as_view(),                      name="notification-list"),
     path("notifications/unread-count/",

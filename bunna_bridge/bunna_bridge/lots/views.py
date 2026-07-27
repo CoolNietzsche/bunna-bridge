@@ -1,7 +1,11 @@
+from urllib.parse import urlparse
+
 from rest_framework import viewsets, permissions, filters, status, generics
 from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
+from django.core.files.storage import default_storage
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -592,6 +596,69 @@ class LotBoundaryInheritView(APIView):
                 "deforestation_free": defor_result,
             }
         })
+
+
+# ── Lot Photos ───────────────────────────────────────────────────────────────
+ALLOWED_PHOTO_TYPES = {"image/jpeg", "image/png", "image/webp"}
+MAX_PHOTO_BYTES = 5 * 1024 * 1024
+MAX_PHOTOS_PER_LOT = 8
+
+
+class LotPhotosView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def _check_owner(self, request, lot):
+        if request.user.role not in ("admin",) and lot.exporter != request.user:
+            return Response({"detail": "Not allowed."}, status=403)
+        return None
+
+    def post(self, request, lot_pk):
+        """Upload a farm photo for a lot."""
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
+        denied = self._check_owner(request, lot)
+        if denied:
+            return denied
+
+        photo = request.FILES.get("photo")
+        if not photo:
+            return Response({"detail": "photo field is required."}, status=400)
+        if photo.content_type not in ALLOWED_PHOTO_TYPES:
+            return Response(
+                {"detail": "Only JPEG, PNG, or WEBP images are allowed."}, status=400,
+            )
+        if photo.size > MAX_PHOTO_BYTES:
+            return Response({"detail": "Photo must be under 5MB."}, status=400)
+        if len(lot.farm_photos) >= MAX_PHOTOS_PER_LOT:
+            return Response(
+                {"detail": f"A lot can have at most {MAX_PHOTOS_PER_LOT} photos."},
+                status=400,
+            )
+
+        path = default_storage.save(f"lots/photos/{lot.lot_id}/{photo.name}", photo)
+        url = default_storage.url(path)
+
+        lot.farm_photos = [*lot.farm_photos, url]
+        lot.save(update_fields=["farm_photos"])
+        return Response({"farm_photos": lot.farm_photos}, status=201)
+
+    def delete(self, request, lot_pk):
+        """Remove a farm photo from a lot."""
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
+        denied = self._check_owner(request, lot)
+        if denied:
+            return denied
+
+        url = request.data.get("url")
+        if not url or url not in lot.farm_photos:
+            return Response({"detail": "Photo not found on this lot."}, status=404)
+
+        path = urlparse(url).path.removeprefix(settings.MEDIA_URL).lstrip("/")
+        default_storage.delete(path)
+
+        lot.farm_photos = [p for p in lot.farm_photos if p != url]
+        lot.save(update_fields=["farm_photos"])
+        return Response({"farm_photos": lot.farm_photos})
 
 
 # ── Notification Views ──────────────────────────────────────────────────────

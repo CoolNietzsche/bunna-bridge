@@ -11,6 +11,7 @@ import CuppingHistory from '../components/CuppingHistory';
 import SampleRequestWidget from '../components/SampleRequestWidget';
 import SettlementWidget from '../components/SettlementWidget';
 import LotDocuments from '../components/LotDocuments';
+import LotPhotos from '../components/LotPhotos';
 import { useState } from "react";
 import {
   ArrowLeft, MapPin, Mountain, Layers, Award, Download,
@@ -221,8 +222,8 @@ export default function LotDetail() {
                 </p>
                 <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
                   {[
-                    { icon: <Mountain size={11} />, label: "Altitude", val: `${lot.altitude_m} masl` },
-                    { icon: <Package size={11} />,  label: "Volume",   val: `${lot.volume_kg} kg` },
+                    { icon: <Mountain size={11} />, label: "Altitude", val: `${Number(lot.altitude_m).toLocaleString()} masl` },
+                    { icon: <Package size={11} />,  label: "Volume",   val: `${Number(lot.volume_kg).toLocaleString()} kg` },
                     { icon: <MapPin size={11} />,   label: "Kebele",   val: lot.kebele || lot.region },
                   ].map(m => (
                     <div key={m.label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
@@ -280,19 +281,19 @@ export default function LotDetail() {
 
               <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
                 {lot.sca_score && (
-                  <div style={{ flex: 1, minWidth: "90px", background: "#F5EDE4", border: "1px solid rgba(123,75,42,0.15)", borderRadius: "6px", padding: "14px 16px", textAlign: "center" }}>
+                  <div style={{ flex: 1, minWidth: "90px", maxWidth: "100%", background: "#F5EDE4", border: "1px solid rgba(123,75,42,0.15)", borderRadius: "6px", padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
                     <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(123,75,42,0.6)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Q-Score</p>
-                    <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#7B4B2A", margin: 0, lineHeight: 1 }}>{lot.sca_score}</p>
+                    <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(1.3rem, 6vw, 2.4rem)", fontWeight: 300, color: "#7B4B2A", margin: 0, lineHeight: 1, overflowWrap: "anywhere" }}>{Number(lot.sca_score).toFixed(1)}</p>
                   </div>
                 )}
-                <div style={{ flex: 1, minWidth: "90px", background: "#E8F2EC", border: "1px solid rgba(27,77,53,0.12)", borderRadius: "6px", padding: "14px 16px", textAlign: "center" }}>
+                <div style={{ flex: 1, minWidth: "90px", maxWidth: "100%", background: "#E8F2EC", border: "1px solid rgba(27,77,53,0.12)", borderRadius: "6px", padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(27,77,53,0.5)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Altitude</p>
-                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#1B4D35", margin: 0, lineHeight: 1 }}>{lot.altitude_m}</p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(1.3rem, 6vw, 2.4rem)", fontWeight: 300, color: "#1B4D35", margin: 0, lineHeight: 1, overflowWrap: "anywhere" }}>{Number(lot.altitude_m).toLocaleString()}</p>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(27,77,53,0.45)", margin: "2px 0 0" }}>MASL</p>
                 </div>
-                <div style={{ flex: 1, minWidth: "90px", background: "#F0EDE6", border: "1px solid rgba(28,28,26,0.08)", borderRadius: "6px", padding: "14px 16px", textAlign: "center" }}>
+                <div style={{ flex: 1, minWidth: "90px", maxWidth: "100%", background: "#F0EDE6", border: "1px solid rgba(28,28,26,0.08)", borderRadius: "6px", padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.4)", margin: "0 0 4px", letterSpacing: "0.1em", textTransform: "uppercase" }}>Volume</p>
-                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2.4rem", fontWeight: 300, color: "#4A4A45", margin: 0, lineHeight: 1 }}>{lot.volume_kg}</p>
+                  <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "clamp(1.3rem, 6vw, 2.4rem)", fontWeight: 300, color: "#4A4A45", margin: 0, lineHeight: 1, overflowWrap: "anywhere" }}>{Number(lot.volume_kg).toLocaleString()}</p>
                   <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.5rem", color: "rgba(28,28,26,0.35)", margin: "2px 0 0" }}>KG</p>
                 </div>
               </div>
@@ -381,6 +382,10 @@ export default function LotDetail() {
 
             <div style={card}>
               <LotDocuments lot={lot} lotId={lot.id} />
+            </div>
+
+            <div style={card}>
+              <LotPhotos lotId={lot.id} photos={lot.farm_photos ?? []} />
             </div>
 
             {isExporter && (

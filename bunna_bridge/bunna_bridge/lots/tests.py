@@ -4,6 +4,8 @@ from http import HTTPStatus
 
 import pytest
 from django.contrib.gis.geos import Polygon
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -271,3 +273,92 @@ class TestFarmerLinkage:
         lot.refresh_from_db()
         assert lot.boundary is not None
         assert lot.farmer_id == linked_farmer.id
+
+
+def _make_photo(name="farm.jpg", content=b"fake-jpeg-bytes", content_type="image/jpeg"):
+    return SimpleUploadedFile(name, content, content_type=content_type)
+
+
+def _upload_photo(client, lot, photo=None):
+    return client.post(
+        reverse("lot-photos", args=[lot.pk]),
+        {"photo": photo or _make_photo()},
+        format="multipart",
+    )
+
+
+class TestLotPhotos:
+    def test_owner_can_upload_and_delete_a_photo(self, tmp_path):
+        with override_settings(MEDIA_ROOT=tmp_path):
+            exporter = _make_user("exporter")
+            lot = _make_lot(exporter, status="listed")
+
+            client = APIClient()
+            client.force_authenticate(exporter)
+            resp = _upload_photo(client, lot)
+
+            assert resp.status_code == HTTPStatus.CREATED
+            assert len(resp.data["farm_photos"]) == 1
+            lot.refresh_from_db()
+            assert lot.farm_photos == resp.data["farm_photos"]
+
+            resp = client.delete(
+                reverse("lot-photos", args=[lot.pk]),
+                {"url": lot.farm_photos[0]},
+                format="json",
+            )
+            assert resp.status_code == HTTPStatus.OK
+            assert resp.data["farm_photos"] == []
+
+    def test_non_owner_cannot_upload_photo(self, tmp_path):
+        with override_settings(MEDIA_ROOT=tmp_path):
+            exporter = _make_user("exporter")
+            other_exporter = _make_user("exporter")
+            lot = _make_lot(exporter, status="listed")
+
+            client = APIClient()
+            client.force_authenticate(other_exporter)
+            resp = _upload_photo(client, lot)
+
+            assert resp.status_code == HTTPStatus.FORBIDDEN
+
+    def test_rejects_non_image_content_type(self, tmp_path):
+        with override_settings(MEDIA_ROOT=tmp_path):
+            exporter = _make_user("exporter")
+            lot = _make_lot(exporter, status="listed")
+            bad_file = _make_photo("farm.pdf", b"%PDF-1.4", "application/pdf")
+
+            client = APIClient()
+            client.force_authenticate(exporter)
+            resp = _upload_photo(client, lot, bad_file)
+
+            assert resp.status_code == HTTPStatus.BAD_REQUEST
+            lot.refresh_from_db()
+            assert lot.farm_photos == []
+
+    def test_rejects_upload_past_the_per_lot_limit(self, tmp_path):
+        with override_settings(MEDIA_ROOT=tmp_path):
+            exporter = _make_user("exporter")
+            lot = _make_lot(
+                exporter, status="listed",
+                farm_photos=[f"/media/lots/photos/x{i}.jpg" for i in range(8)],
+            )
+
+            client = APIClient()
+            client.force_authenticate(exporter)
+            resp = _upload_photo(client, lot)
+
+            assert resp.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_upload_writes_a_real_file_to_storage(self, tmp_path):
+        with override_settings(MEDIA_ROOT=tmp_path):
+            exporter = _make_user("exporter")
+            lot = _make_lot(exporter, status="listed")
+
+            client = APIClient()
+            client.force_authenticate(exporter)
+            _upload_photo(client, lot)
+
+            written = list(tmp_path.rglob("*.jpg"))
+            assert len(written) == 1
+            assert written[0].read_bytes() == b"fake-jpeg-bytes"
