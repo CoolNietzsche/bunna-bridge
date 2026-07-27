@@ -70,6 +70,17 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "farmer", "farmer_name", "farmer_farm_id",
             "harvest_date", "created_at", "boundary",
         ]
+        # These 5 gates are not exporter-settable: deforestation_free and
+        # gps_verified are derived automatically (see eudr_spatial.py and
+        # CoffeeLot.save()), eudr_dds_ready is set on real DDS generation
+        # (EudrDdsView), and ecta_license_active / cta_floor_met have no
+        # automated check yet — admin-only via Django admin until they do.
+        # phyto_cert_uploaded / nbe_fx_declared aren't listed here because
+        # CoffeeLot.save() already overrides whatever's submitted for them.
+        read_only_fields = [
+            "deforestation_free", "gps_verified", "eudr_dds_ready",
+            "ecta_license_active", "cta_floor_met",
+        ]
 
     def get_farmer_name(self, obj):
         if not obj.farmer_id:
@@ -91,6 +102,15 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
 
 
 class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
+    # Restricted to the lot's own exporter and admins — see to_representation().
+    # Even with that check, these are only URLs; the actual files must also be
+    # gated at the serving layer (LotDocumentDownloadView), since anyone with
+    # a URL could otherwise fetch it directly regardless of what the API returns.
+    RESTRICTED_DOCUMENT_FIELDS = [
+        "phyto_cert_file", "ecex_permit_file", "nbe_fx_declaration_file",
+        "customs_declaration_file", "eudr_dds_file", "exporter_ecta_file",
+    ]
+
     green_passport_ready = serializers.ReadOnlyField()
     export_ready         = serializers.ReadOnlyField()
     compliance_score     = serializers.SerializerMethodField()
@@ -108,6 +128,28 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
         model     = CoffeeLot
         geo_field = "farm_location"
         fields    = "__all__"
+        # Same 5 gates as CoffeeLotListSerializer — this serializer is only
+        # wired to the read-only "retrieve" action today, but marking these
+        # read-only here too means that stays true even if that changes.
+        read_only_fields = [
+            "deforestation_free", "gps_verified", "eudr_dds_ready",
+            "ecta_license_active", "cta_floor_met",
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        is_owner_or_admin = bool(user) and bool(user.is_authenticated) and (
+            getattr(user, "role", None) == "admin"
+            or getattr(user, "is_staff", False)
+            or instance.exporter_id == getattr(user, "id", None)
+        )
+        if not is_owner_or_admin:
+            properties = data.get("properties", data)
+            for field in self.RESTRICTED_DOCUMENT_FIELDS:
+                properties.pop(field, None)
+        return data
 
     def get_compliance_score(self, obj):
         return obj.compliance_score()

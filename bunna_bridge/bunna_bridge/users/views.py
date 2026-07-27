@@ -95,3 +95,30 @@ class ExporterLotsView(generics.ListAPIView):
     def get_serializer_class(self):
         from bunna_bridge.lots.serializers import CoffeeLotListSerializer
         return CoffeeLotListSerializer
+
+
+class ExporterEctaLicenseDownloadView(generics.GenericAPIView):
+    """
+    Owner/admin-only download of an exporter's ECTA license file.
+    The storage path (users/ecta/) is blocked at the nginx layer — this is
+    the only way to fetch it.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        exporter = generics.get_object_or_404(User, id=pk, role="exporter")
+        is_owner_or_admin = (
+            request.user.role == "admin"
+            or request.user.is_staff
+            or request.user == exporter
+        )
+        if not is_owner_or_admin:
+            return Response({"detail": "Not allowed."}, status=403)
+        if not exporter.ecta_license_file:
+            return Response({"detail": "No license file uploaded."}, status=404)
+
+        from django.http import FileResponse
+        return FileResponse(
+            exporter.ecta_license_file.open("rb"),
+            filename=exporter.ecta_license_file.name.rsplit("/", 1)[-1],
+        )

@@ -68,6 +68,26 @@ export async function uploadEctaLicense(
   return res.data;
 }
 
+// ── Authenticated document viewing ──────────────────────────────────
+// Compliance documents are no longer served directly from /media/ — the
+// storage paths are blocked at the nginx layer. These fetch through the
+// authenticated download views (owner/admin only) and open the result as
+// a blob URL, replacing the old <a href={getMediaUrl(...)}> pattern.
+
+async function openAsBlob(url: string): Promise<void> {
+  const response = await apiClient.get(url, { responseType: "blob" });
+  const blobUrl = window.URL.createObjectURL(response.data as Blob);
+  window.open(blobUrl, "_blank", "noopener,noreferrer");
+}
+
+export function viewLotDocument(lotId: string, fieldName: string): Promise<void> {
+  return openAsBlob(`/v1/lots/${lotId}/documents/${fieldName}/`);
+}
+
+export function viewExporterEctaLicense(exporterId: string | number): Promise<void> {
+  return openAsBlob(`/v1/auth/exporters/${exporterId}/ecta-license/`);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────
 
 export function getMediaUrl(path: string | null | undefined): string | null {

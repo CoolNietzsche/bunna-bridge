@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     RegisterView, MeView, user_list, FarmerProfileView, farmer_lots, farmer_list,
-    ExporterProfileView, ExporterLotsView,
+    ExporterProfileView, ExporterLotsView, ExporterEctaLicenseDownloadView,
 )
 
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
     path("farmers/",                farmer_list,                 name="farmer-list"),
     path("exporters/<int:pk>/",     ExporterProfileView.as_view(), name="exporter-profile"),
     path("exporters/<int:pk>/lots/",ExporterLotsView.as_view(),    name="exporter-lots"),
+    path("exporters/<int:pk>/ecta-license/",
+         ExporterEctaLicenseDownloadView.as_view(),         name="exporter-ecta-license"),
 ]

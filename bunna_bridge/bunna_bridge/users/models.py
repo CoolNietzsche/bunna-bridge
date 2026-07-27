@@ -3,6 +3,9 @@ import re
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
 
+from bunna_bridge.lots.validators import document_extension_validator
+from bunna_bridge.lots.validators import validate_document_size
+
 
 def _region_code(text):
     letters = re.sub(r"[^A-Za-z]", "", text or "").upper()
@@ -49,7 +52,10 @@ class User(AbstractUser):
 
     # ECTA Export License (exporter profile)
     ecta_license_number = models.CharField(max_length=100, blank=True, default="")
-    ecta_license_file   = models.FileField(upload_to="users/ecta/", null=True, blank=True)
+    ecta_license_file   = models.FileField(
+        upload_to="users/ecta/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
     ecta_license_expiry = models.DateField(null=True, blank=True)
 
     def save(self, *args, **kwargs):

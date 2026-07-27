@@ -504,6 +504,11 @@ class EudrDdsView(viewsets.ViewSet):
 
         doc.build(story)
         buffer.seek(0)
+
+        if not lot.eudr_dds_ready:
+            lot.eudr_dds_ready = True
+            lot.save(update_fields=["eudr_dds_ready"])
+
         filename = f"EUDR-DDS-{lot.lot_id}-{date.today().strftime('%Y%m%d')}.pdf"
         return FileResponse(buffer, as_attachment=True, filename=filename, content_type="application/pdf")
 
@@ -535,7 +540,7 @@ class LotBoundaryView(APIView):
             if geom.geom_type != "Polygon":
                 return Response({"detail": "Must be a Polygon geometry."}, status=400)
             lot.boundary = geom
-            lot.save(update_fields=["boundary"])
+            lot.save(update_fields=["boundary", "gps_verified"])
             # Auto-run deforestation check after boundary is set
             defor_result = run_deforestation_check_for_lot(lot)
             return Response({
@@ -587,7 +592,7 @@ class LotBoundaryInheritView(APIView):
             return Response({"detail": "No farm boundary found to inherit."}, status=404)
 
         lot.boundary = source_user.boundary
-        lot.save(update_fields=["boundary", "farmer"])
+        lot.save(update_fields=["boundary", "farmer", "gps_verified"])
         # Auto-run deforestation check after inheriting boundary
         defor_result = run_deforestation_check_for_lot(lot)
         return Response({
@@ -596,6 +601,41 @@ class LotBoundaryInheritView(APIView):
                 "deforestation_free": defor_result,
             }
         })
+
+
+# ── Lot Document Downloads ─────────────────────────────────────────────────
+# These serve compliance/legal documents (phyto cert, ECTA license, NBE FX
+# declaration, customs declaration, EUDR DDS) — never public. The underlying
+# storage paths (lots/phyto/, lots/ecex/, lots/nbe/, lots/customs/, lots/dds/)
+# are blocked at the nginx layer; this view is the only way to fetch them.
+# Farm photos (lots/photos/) are a separate, intentionally public feature and
+# are not affected — they still serve directly through /media/.
+LOT_DOCUMENT_FIELDS = {
+    "phyto_cert_file", "ecex_permit_file", "nbe_fx_declaration_file",
+    "customs_declaration_file", "eudr_dds_file",
+}
+
+
+class LotDocumentDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, lot_pk, field_name):
+        if field_name not in LOT_DOCUMENT_FIELDS:
+            return Response({"detail": "Unknown document field."}, status=404)
+
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
+        if request.user.role != "admin" and not request.user.is_staff and lot.exporter != request.user:
+            return Response({"detail": "Not allowed."}, status=403)
+
+        file_field = getattr(lot, field_name)
+        if not file_field:
+            return Response({"detail": "No file uploaded for this field."}, status=404)
+
+        from django.http import FileResponse
+        return FileResponse(
+            file_field.open("rb"),
+            filename=file_field.name.rsplit("/", 1)[-1],
+        )
 
 
 # ── Lot Photos ───────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   uploadPhytoCert, uploadEcexPermit,
   uploadNbeFxDeclaration, saveCustomsDeclaration,
-  getMediaUrl,
+  viewLotDocument,
 } from "../api/docs";
 import { useAuth } from "../context/AuthContext";
 import { Upload, ExternalLink, CheckCircle, XCircle, Loader, FileText, Hash } from "lucide-react";
@@ -11,11 +11,32 @@ import { Upload, ExternalLink, CheckCircle, XCircle, Loader, FileText, Hash } fr
 interface Props { lot: Record<string, any>; lotId: string; }
 type DocKey = "phyto" | "ecex" | "nbe" | "customs";
 
-function DocRow({ label, fileUrl, expiry, extra, canUpload, onUpload, loading }: {
+const DOC_FIELD_NAMES: Record<DocKey, string> = {
+  phyto: "phyto_cert_file",
+  ecex: "ecex_permit_file",
+  nbe: "nbe_fx_declaration_file",
+  customs: "customs_declaration_file",
+};
+
+function DocRow({ label, fileUrl, expiry, extra, canUpload, onUpload, loading, lotId, docKey }: {
   label: string; fileUrl?: string | null; expiry?: string | null;
   extra?: React.ReactNode; canUpload: boolean; onUpload: () => void; loading: boolean;
+  lotId: string; docKey: DocKey;
 }) {
   const present = !!fileUrl;
+  const [viewing, setViewing] = useState(false);
+
+  const handleView = async () => {
+    setViewing(true);
+    try {
+      await viewLotDocument(lotId, DOC_FIELD_NAMES[docKey]);
+    } catch {
+      // silently ignored — the document just won't open
+    } finally {
+      setViewing(false);
+    }
+  };
+
   return (
     <div style={{
       padding: "12px 14px", borderRadius: "4px", marginBottom: "8px",
@@ -39,10 +60,10 @@ function DocRow({ label, fileUrl, expiry, extra, canUpload, onUpload, loading }:
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {fileUrl && (
-            <a href={getMediaUrl(fileUrl) ?? "#"} target="_blank" rel="noreferrer"
-              style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#1B4D35", letterSpacing: "0.06em", textDecoration: "none" }}>
-              <ExternalLink size={11} /> VIEW
-            </a>
+            <button onClick={handleView} disabled={viewing}
+              style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", padding: 0, fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#1B4D35", letterSpacing: "0.06em", cursor: viewing ? "not-allowed" : "pointer" }}>
+              {viewing ? <Loader size={11} /> : <ExternalLink size={11} />} VIEW
+            </button>
           )}
           {canUpload && (
             <button onClick={onUpload} disabled={loading} style={{
@@ -122,16 +143,16 @@ export default function LotDocuments({ lot, lotId }: Props) {
       <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.4)", margin: "0 0 14px" }}>
         Compliance Documents
       </p>
-      <DocRow label="Phytosanitary Certificate" fileUrl={lot.phyto_cert_file} expiry={lot.phyto_cert_expiry} canUpload={canUpload} onUpload={() => setModal("phyto")} loading={loading === "phyto"} />
-      <DocRow label="ECEX Export Permit" fileUrl={lot.ecex_permit_file} expiry={lot.ecex_permit_expiry} canUpload={canUpload} onUpload={() => setModal("ecex")} loading={loading === "ecex"}
+      <DocRow label="Phytosanitary Certificate" fileUrl={lot.phyto_cert_file} expiry={lot.phyto_cert_expiry} canUpload={canUpload} onUpload={() => setModal("phyto")} loading={loading === "phyto"} lotId={lotId} docKey="phyto" />
+      <DocRow label="ECEX Export Permit" fileUrl={lot.ecex_permit_file} expiry={lot.ecex_permit_expiry} canUpload={canUpload} onUpload={() => setModal("ecex")} loading={loading === "ecex"} lotId={lotId} docKey="ecex"
         extra={lot.ecex_permit_number ? (
           <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.4)", margin: "6px 0 0", letterSpacing: "0.06em" }}>
             <Hash size={10} style={{ display: "inline", marginRight: 4 }} />{lot.ecex_permit_number}
           </p>
         ) : null}
       />
-      <DocRow label="NBE FX Declaration" fileUrl={lot.nbe_fx_declaration_file} canUpload={canUpload} onUpload={() => setModal("nbe")} loading={loading === "nbe"} />
-      <DocRow label="Customs Declaration" fileUrl={lot.customs_declaration_file} canUpload={canUpload} onUpload={() => setModal("customs")} loading={loading === "customs"}
+      <DocRow label="NBE FX Declaration" fileUrl={lot.nbe_fx_declaration_file} canUpload={canUpload} onUpload={() => setModal("nbe")} loading={loading === "nbe"} lotId={lotId} docKey="nbe" />
+      <DocRow label="Customs Declaration" fileUrl={lot.customs_declaration_file} canUpload={canUpload} onUpload={() => setModal("customs")} loading={loading === "customs"} lotId={lotId} docKey="customs"
         extra={lot.customs_declaration_id ? (
           <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.4)", margin: "6px 0 0", letterSpacing: "0.06em" }}>
             <Hash size={10} style={{ display: "inline", marginRight: 4 }} />{lot.customs_declaration_id}

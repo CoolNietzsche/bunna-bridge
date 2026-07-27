@@ -2,6 +2,9 @@ from django.contrib.gis.db import models
 from django.conf import settings
 import uuid
 
+from .validators import document_extension_validator
+from .validators import validate_document_size
+
 
 class CoffeeLot(models.Model):
     PROCESSING_CHOICES = [
@@ -87,19 +90,34 @@ class CoffeeLot(models.Model):
     phyto_cert_uploaded     = models.BooleanField(default=False)
     ecta_license_active     = models.BooleanField(default=False)
     nbe_fx_declared         = models.BooleanField(default=False)
-    nbe_fx_declaration_file = models.FileField(upload_to="lots/nbe/", null=True, blank=True)
-    customs_declaration_file= models.FileField(upload_to="lots/customs/", null=True, blank=True)
+    nbe_fx_declaration_file = models.FileField(
+        upload_to="lots/nbe/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
+    customs_declaration_file= models.FileField(
+        upload_to="lots/customs/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
     cta_floor_met           = models.BooleanField(default=False)
     eudr_dds_ready          = models.BooleanField(default=False)
 
     # ── Documents ────────────────────────────────────────────────────────────
-    phyto_cert_file    = models.FileField(upload_to="lots/phyto/", null=True, blank=True)
+    phyto_cert_file    = models.FileField(
+        upload_to="lots/phyto/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
     phyto_cert_expiry  = models.DateField(null=True, blank=True)
-    ecex_permit_file   = models.FileField(upload_to="lots/ecex/", null=True, blank=True)
+    ecex_permit_file   = models.FileField(
+        upload_to="lots/ecex/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
     ecex_permit_number = models.CharField(max_length=100, blank=True, default="")
     ecex_permit_expiry = models.DateField(null=True, blank=True)
     customs_declaration_id = models.CharField(max_length=100, blank=True, default="")
-    eudr_dds_file      = models.FileField(upload_to="lots/dds/", null=True, blank=True)
+    eudr_dds_file      = models.FileField(
+        upload_to="lots/dds/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
 
     # ── Commercial ───────────────────────────────────────────────────────────
     volume_kg    = models.DecimalField(max_digits=10, decimal_places=2)
@@ -130,6 +148,7 @@ class CoffeeLot(models.Model):
     def save(self, *args, **kwargs):
         self.phyto_cert_uploaded = bool(self.phyto_cert_file)
         self.nbe_fx_declared = bool(self.nbe_fx_declaration_file)
+        self.gps_verified = bool(self.boundary or self.farm_location)
         super().save(*args, **kwargs)
 
     def __str__(self):

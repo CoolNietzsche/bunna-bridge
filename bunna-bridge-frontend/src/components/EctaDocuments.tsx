@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { uploadEctaLicense, getMediaUrl } from "../api/docs";
+import { uploadEctaLicense, viewExporterEctaLicense } from "../api/docs";
 import { getMe } from "../api/auth";
 import {
   Upload, ExternalLink,
@@ -16,8 +16,21 @@ export default function EctaDocuments() {
   const [number, setNumber]       = useState(me?.ecta_license_number ?? "");
   const [expiry, setExpiry]       = useState(me?.ecta_license_expiry ?? "");
   const [loading, setLoading]     = useState(false);
+  const [viewing, setViewing]     = useState(false);
   const [error, setError]         = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleView = async () => {
+    if (!me?.id) return;
+    setViewing(true);
+    try {
+      await viewExporterEctaLicense(me.id);
+    } catch {
+      // silently ignored — the document just won't open
+    } finally {
+      setViewing(false);
+    }
+  };
 
   const hasLicense = !!me?.ecta_license_file;
 
@@ -81,13 +94,12 @@ export default function EctaDocuments() {
           </div>
           <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             {me?.ecta_license_file && (
-              <a
-                href={getMediaUrl(me.ecta_license_file) ?? "#"}
-                target="_blank" rel="noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8D5BC", textDecoration: "none" }}
+              <button
+                onClick={handleView} disabled={viewing}
+                style={{ display: "flex", alignItems: "center", gap: "4px", background: "none", border: "none", padding: 0, fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "#A8D5BC", cursor: viewing ? "not-allowed" : "pointer" }}
               >
-                <ExternalLink size={11} /> VIEW
-              </a>
+                {viewing ? <Loader size={11} /> : <ExternalLink size={11} />} VIEW
+              </button>
             )}
             <button
               onClick={() => { setNumber(me?.ecta_license_number ?? ""); setExpiry(me?.ecta_license_expiry ?? ""); setOpen(true); }}
