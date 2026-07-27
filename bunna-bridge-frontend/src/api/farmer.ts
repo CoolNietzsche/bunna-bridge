@@ -4,6 +4,7 @@ import type { UserProfile } from "./auth";
 import type { CoffeeLot } from "./lots";
 
 export interface FarmerProfile extends UserProfile {
+  farm_id:         string | null;
   farm_name:       string;
   farm_region:     string;
   farm_kebele:     string;
@@ -16,6 +17,21 @@ export interface FarmerProfile extends UserProfile {
   phone?:          string;
   country?:        string;
 }
+
+export interface FarmerOption {
+  id: number;
+  full_name: string;
+  farm_id: string | null;
+  farm_name: string;
+  farm_region: string;
+  farm_kebele: string;
+  cooperative: string;
+}
+
+export const getFarmers = async (): Promise<FarmerOption[]> => {
+  const { data } = await api.get<FarmerOption[]>("/v1/auth/farmers/");
+  return data;
+};
 
 export const getFarmerProfile = async (): Promise<FarmerProfile> => {
   const { data } = await api.get<FarmerProfile>("/v1/auth/farmer/profile/");

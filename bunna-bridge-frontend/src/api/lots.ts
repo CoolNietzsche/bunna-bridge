@@ -53,6 +53,9 @@ export interface CoffeeLot {
   exporter?: number;
   exporter_name: string;
   exporter_company: string;
+  farmer?: number | null;
+  farmer_name?: string | null;
+  farmer_farm_id?: string | null;
   cupping_scores?: CuppingScore[];
   sample_requests_count?: number;
   offers_count?: number;

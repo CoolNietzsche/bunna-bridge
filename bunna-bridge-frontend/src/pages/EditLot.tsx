@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getLot } from "../api/lots";
+import { getFarmers } from "../api/farmer";
 import apiClient from "../api/client";
 import PageWrapper from "../components/PageWrapper";
 import {
@@ -23,7 +24,7 @@ const STEP_LABELS: Record<Step, string> = {
 };
 
 interface FormData {
-  lot_id: string; name: string; region: string; kebele: string;
+  lot_id: string; name: string; region: string; kebele: string; farmer_id: string;
   washing_station: string; altitude_m: string; processing: string;
   grade: string; varietal: string; harvest_date: string;
   volume_kg: string; price_per_kg: string; sca_score: string;
@@ -36,7 +37,7 @@ interface FormData {
 }
 
 const EMPTY: FormData = {
-  lot_id: "", name: "", region: "yirgacheffe", kebele: "",
+  lot_id: "", name: "", region: "yirgacheffe", kebele: "", farmer_id: "",
   washing_station: "", altitude_m: "", processing: "washed",
   grade: "G1", varietal: "Ethiopian Heirloom", harvest_date: "",
   volume_kg: "", price_per_kg: "", sca_score: "", flavor_notes: "",
@@ -72,6 +73,7 @@ export default function EditLot() {
     queryFn:  () => getLot(id!),
     enabled:  !!id,
   });
+  const { data: farmers } = useQuery({ queryKey: ["farmers"], queryFn: getFarmers });
 
   useEffect(() => {
     if (!lot) return;
@@ -80,6 +82,7 @@ export default function EditLot() {
       name:             lot.name,
       region:           lot.region,
       kebele:           lot.kebele || "",
+      farmer_id:        lot.farmer ? String(lot.farmer) : "",
       washing_station:  lot.washing_station || "",
       altitude_m:       String(lot.altitude_m || ""),
       processing:       lot.processing,
@@ -198,6 +201,7 @@ export default function EditLot() {
       if (form.price_per_kg) fields.price_per_kg = form.price_per_kg;
       if (form.sca_score)    fields.sca_score    = form.sca_score;
       if (form.cupping_date) fields.cupping_date  = form.cupping_date;
+      if (form.farmer_id)    fields.farmer        = form.farmer_id;
 
       Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
 
@@ -315,6 +319,17 @@ export default function EditLot() {
                 <Field label="Washing Station"   k="washing_station" placeholder="e.g. Kochere WS" />
                 <Field label="Altitude (masl) *" k="altitude_m"      type="number" />
                 <Field label="Harvest Date *"    k="harvest_date"    type="date" />
+              </div>
+              <div style={{ marginTop: "14px" }}>
+                <label style={lbl}>Farmer / Cooperative</label>
+                <select style={sel} value={form.farmer_id} onChange={e => set("farmer_id", e.target.value)}>
+                  <option value="">— Not linked —</option>
+                  {farmers?.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {(f.farm_name || f.full_name)}{f.farm_id ? ` · ${f.farm_id}` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div style={card}>

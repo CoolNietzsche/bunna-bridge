@@ -47,6 +47,14 @@ class CoffeeLot(models.Model):
         on_delete=models.PROTECT,
         related_name="lots",
     )
+    farmer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="lots_produced",
+        limit_choices_to={"role": "farmer"},
+        help_text="The farmer/cooperative that produced this lot.",
+    )
 
     # ── Origin ──────────────────────────────────────────────────────────────
     region          = models.CharField(max_length=50, choices=REGION_CHOICES)

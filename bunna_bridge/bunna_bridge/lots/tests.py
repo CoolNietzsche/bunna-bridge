@@ -3,6 +3,7 @@ from decimal import Decimal
 from http import HTTPStatus
 
 import pytest
+from django.contrib.gis.geos import Polygon
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -197,3 +198,76 @@ class TestPublicLotStory:
             "exporter_ecta_number", "exporter_ecta_file",
         }
         assert not (forbidden_keys & set(resp.data.keys()))
+
+
+class TestFarmId:
+    def test_farm_id_auto_generated_for_farmer_on_creation(self):
+        farmer = _make_user("farmer", farm_region="Yirgacheffe")
+
+        assert farmer.farm_id is not None
+        assert farmer.farm_id.startswith("BSB-ETH-YIR-")
+
+    def test_farm_id_is_not_regenerated_when_farm_region_changes_later(self):
+        farmer = _make_user("farmer", farm_region="Yirgacheffe")
+        original_farm_id = farmer.farm_id
+
+        farmer.farm_region = "Sidama"
+        farmer.save()
+
+        assert farmer.farm_id == original_farm_id
+
+    def test_non_farmer_users_do_not_get_a_farm_id(self):
+        exporter = _make_user("exporter")
+
+        assert exporter.farm_id is None
+
+
+class TestFarmerLinkage:
+    def test_farmer_role_only_sees_lots_linked_to_them(self):
+        exporter = _make_user("exporter")
+        farmer_a = _make_user("farmer")
+        farmer_b = _make_user("farmer")
+        _make_lot(exporter, lot_id="LOT-A", status="listed", farmer=farmer_a)
+        _make_lot(exporter, lot_id="LOT-B", status="listed", farmer=farmer_b)
+
+        client = APIClient()
+        client.force_authenticate(farmer_a)
+        resp = client.get(reverse("lot-list"))
+
+        assert resp.status_code == HTTPStatus.OK
+        lot_ids = {item["lot_id"] for item in resp.data["results"]}
+        assert lot_ids == {"LOT-A"}
+
+    def test_farmer_list_endpoint_allowed_for_exporter_denied_for_buyer(self):
+        exporter = _make_user("exporter")
+        buyer = _make_user("buyer")
+        _make_user("farmer", farm_name="Kochere Highland Farm")
+
+        client = APIClient()
+        client.force_authenticate(exporter)
+        resp = client.get(reverse("farmer-list"))
+        assert resp.status_code == HTTPStatus.OK
+        assert len(resp.data) == 1
+
+        client.force_authenticate(buyer)
+        resp = client.get(reverse("farmer-list"))
+        assert resp.status_code == HTTPStatus.FORBIDDEN
+
+    def test_boundary_inherit_uses_linked_farmer_not_heuristic(self):
+        boundary = Polygon(((38.0, 6.0), (38.0, 6.1), (38.1, 6.1), (38.0, 6.0)))
+        exporter = _make_user("exporter")
+        linked_farmer = _make_user("farmer", boundary=boundary)
+        # A decoy farmer that would win under the old kebele/region heuristic.
+        _make_user("farmer", farm_kebele="Kochere", boundary=boundary)
+        lot = _make_lot(
+            exporter, status="listed", farmer=linked_farmer, kebele="Kochere",
+        )
+
+        client = APIClient()
+        client.force_authenticate(exporter)
+        resp = client.post(reverse("lot-boundary-inherit", args=[lot.pk]))
+
+        assert resp.status_code == HTTPStatus.OK
+        lot.refresh_from_db()
+        assert lot.boundary is not None
+        assert lot.farmer_id == linked_farmer.id

@@ -29,7 +29,7 @@ class IsExporterOrReadOnly(permissions.BasePermission):
 
 class CoffeeLotViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    queryset           = CoffeeLot.objects.select_related("exporter").all()
+    queryset           = CoffeeLot.objects.select_related("exporter", "farmer").all()
     permission_classes = [IsExporterOrReadOnly]
     filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields   = ["region", "grade", "processing", "status",
@@ -39,7 +39,7 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        qs   = CoffeeLot.objects.select_related("exporter").all()
+        qs   = CoffeeLot.objects.select_related("exporter", "farmer").all()
         if user.is_staff or user.is_superuser:
             return qs
         role = getattr(user, "role", "exporter")
@@ -47,6 +47,8 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
             return qs.filter(exporter=user)
         if role == "buyer":
             return qs.filter(status__in=["listed", "contracted", "exported"])
+        if role == "farmer":
+            return qs.filter(farmer=user)
         return qs
 
     def get_serializer_class(self):
@@ -344,7 +346,7 @@ class EudrDdsView(viewsets.ViewSet):
         from reportlab.lib.enums import TA_CENTER
 
         try:
-            lot = CoffeeLot.objects.select_related("exporter").get(pk=lot_pk)
+            lot = CoffeeLot.objects.select_related("exporter", "farmer").get(pk=lot_pk)
         except CoffeeLot.DoesNotExist:
             return Response({"detail": "Lot not found."}, status=404)
 
@@ -510,9 +512,9 @@ import json
 class LotBoundaryView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request, pk):
+    def patch(self, request, lot_pk):
         """Set or update the boundary polygon for a lot."""
-        lot = get_object_or_404(CoffeeLot, pk=pk)
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
 
         # Only exporter (owner) or admin can set boundary
         if request.user.role not in ("admin",) and lot.exporter != request.user:
@@ -547,34 +549,41 @@ class LotBoundaryView(APIView):
 class LotBoundaryInheritView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
+    def post(self, request, lot_pk):
         """Copy the farm boundary from the linked farmer profile to this lot."""
-        lot = get_object_or_404(CoffeeLot, pk=pk)
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
 
         if request.user.role not in ("admin",) and lot.exporter != request.user:
             return Response({"detail": "Not allowed."}, status=403)
 
-        # NOTE: CoffeeLot has no direct FK to a farmer, so there is no way to
-        # find "the" farmer for this specific lot. Best-effort behavior:
-        # use the requesting user's own boundary if they are a farmer,
-        # otherwise (admin only) fall back to any farmer with a boundary set.
-        # TODO: Add a proper `farmer` FK on CoffeeLot for a correct, non-heuristic
-        # implementation of this endpoint.
-        from bunna_bridge.users.models import User
         source_user = None
 
-        if request.user.role == "farmer" and request.user.boundary:
+        if lot.farmer_id:
+            # Lot already has a real farmer link — use it directly, no guessing.
+            source_user = lot.farmer
+        elif request.user.role == "farmer" and request.user.boundary:
+            # Legacy/unlinked lot: the requesting farmer is inheriting onto
+            # their own lot, so link them as the lot's farmer going forward.
             source_user = request.user
+            lot.farmer = request.user
         elif request.user.role == "admin":
+            from bunna_bridge.users.models import User
             source_user = User.objects.filter(
-                role="farmer", boundary__isnull=False
-            ).first()
+                role="farmer", boundary__isnull=False,
+                farm_kebele__icontains=lot.kebele,
+            ).first() if lot.kebele else None
+            if not source_user:
+                source_user = User.objects.filter(
+                    role="farmer", boundary__isnull=False, farm_region=lot.region,
+                ).first()
+            if source_user:
+                lot.farmer = source_user
 
         if not source_user or not source_user.boundary:
             return Response({"detail": "No farm boundary found to inherit."}, status=404)
 
         lot.boundary = source_user.boundary
-        lot.save(update_fields=["boundary"])
+        lot.save(update_fields=["boundary", "farmer"])
         # Auto-run deforestation check after inheriting boundary
         defor_result = run_deforestation_check_for_lot(lot)
         return Response({
@@ -652,7 +661,9 @@ class LotStoryPublicView(APIView):
 
     def get(self, request, pk=None):
         lot = get_object_or_404(
-            CoffeeLot.objects.select_related("exporter").prefetch_related("cupping_scores"),
+            CoffeeLot.objects.select_related(
+                "exporter", "farmer",
+            ).prefetch_related("cupping_scores"),
             pk=pk,
             status__in=["listed", "contracted", "exported"],
         )
@@ -672,7 +683,9 @@ class LotSpecSheetView(APIView):
 
     def get(self, request, lot_pk=None):
         lot = get_object_or_404(
-            CoffeeLot.objects.select_related("exporter").prefetch_related("cupping_scores"),
+            CoffeeLot.objects.select_related(
+                "exporter", "farmer",
+            ).prefetch_related("cupping_scores"),
             pk=lot_pk,
         )
         pdf_bytes = generate_spec_sheet(lot)

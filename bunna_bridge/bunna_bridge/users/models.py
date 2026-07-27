@@ -1,5 +1,12 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
+
+
+def _region_code(text):
+    letters = re.sub(r"[^A-Za-z]", "", text or "").upper()
+    return (letters[:3] or "GEN").ljust(3, "X")
 
 
 class User(AbstractUser):
@@ -22,6 +29,10 @@ class User(AbstractUser):
     is_verified   = models.BooleanField(default=False)
 
     # Farmer-specific fields
+    farm_id = models.CharField(
+        max_length=30, unique=True, null=True, blank=True, db_index=True,
+        help_text="Permanent Beersheba Farm ID, auto-generated for farmer accounts.",
+    )
     farm_name       = models.CharField(max_length=200, blank=True)
     farm_region     = models.CharField(max_length=100, blank=True)
     farm_kebele     = models.CharField(max_length=200, blank=True)
@@ -40,6 +51,20 @@ class User(AbstractUser):
     ecta_license_number = models.CharField(max_length=100, blank=True, default="")
     ecta_license_file   = models.FileField(upload_to="users/ecta/", null=True, blank=True)
     ecta_license_expiry = models.DateField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.role == self.Role.FARMER and not self.farm_id:
+            self.farm_id = self._generate_farm_id()
+        super().save(*args, **kwargs)
+
+    def _generate_farm_id(self):
+        region_code = _region_code(self.farm_region)
+        seq = User.objects.filter(role=self.Role.FARMER).exclude(pk=self.pk).count() + 1
+        candidate = f"BSB-ETH-{region_code}-{seq:06d}"
+        while User.objects.filter(farm_id=candidate).exists():
+            seq += 1
+            candidate = f"BSB-ETH-{region_code}-{seq:06d}"
+        return candidate
 
     def __str__(self):
         return f"{self.email} ({self.role})"

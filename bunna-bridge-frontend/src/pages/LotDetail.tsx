@@ -596,6 +596,10 @@ export default function LotDetail() {
               <p style={cardTitle}>Traceability</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 {[
+                  ...(lot.farmer_name ? [{
+                    icon: <Users size={12} />, label: "Farmer",
+                    val: lot.farmer_farm_id ? `${lot.farmer_name} (${lot.farmer_farm_id})` : lot.farmer_name,
+                  }] : []),
                   { icon: <MapPin size={12} />,   label: "Washing Station", val: lot.washing_station || "—" },
                   { icon: <Layers size={12} />,   label: "Kebele",          val: lot.kebele || lot.region },
                   { icon: <Mountain size={12} />, label: "Region",          val: lot.region },

@@ -114,6 +114,17 @@ export default function MyFarm() {
           <p style={S.sub}>
             {p?.cooperative || "Farm Profile"} · {p?.farm_region || "Ethiopia"}
           </p>
+          {p?.farm_id && (
+            <span style={{
+              display: "inline-block", marginTop: "6px",
+              fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+              letterSpacing: "0.08em", color: "#1B4D35",
+              background: "#E8F2EC", border: "1px solid rgba(27,77,53,0.2)",
+              borderRadius: "3px", padding: "3px 8px",
+            }}>
+              {p.farm_id}
+            </span>
+          )}
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           {saved && (

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { createLot } from "../api/lots";
+import { getFarmers } from "../api/farmer";
 import PageWrapper from "../components/PageWrapper";
 import {
   MapPin, Leaf, FileCheck, Upload, ShieldCheck,
@@ -21,7 +23,7 @@ const STEP_LABELS: Record<Step, string> = {
 };
 
 interface FormData {
-  lot_id: string; name: string; region: string; kebele: string;
+  lot_id: string; name: string; region: string; kebele: string; farmer_id: string;
   washing_station: string; altitude_m: string; processing: string;
   grade: string; varietal: string; harvest_date: string;
   volume_kg: string; price_per_kg: string; sca_score: string;
@@ -33,7 +35,7 @@ interface FormData {
 }
 
 const EMPTY: FormData = {
-  lot_id: "", name: "", region: "yirgacheffe", kebele: "",
+  lot_id: "", name: "", region: "yirgacheffe", kebele: "", farmer_id: "",
   washing_station: "", altitude_m: "", processing: "washed",
   grade: "G1", varietal: "Ethiopian Heirloom", harvest_date: "",
   volume_kg: "", price_per_kg: "", sca_score: "", flavor_notes: "",
@@ -60,6 +62,7 @@ export default function CreateLot() {
   const [form, setForm]       = useState<FormData>(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
+  const { data: farmers } = useQuery({ queryKey: ["farmers"], queryFn: getFarmers });
 
   const set = (k: keyof FormData, v: string | boolean) =>
     setForm(f => ({ ...f, [k]: v }));
@@ -132,6 +135,7 @@ export default function CreateLot() {
         phyto_cert_uploaded: form.phyto_cert_uploaded, ecta_license_active: form.ecta_license_active,
         nbe_fx_declared: form.nbe_fx_declared, cta_floor_met: form.cta_floor_met,
         eudr_dds_ready: form.eudr_dds_ready, status: "draft",
+        farmer: form.farmer_id ? parseInt(form.farmer_id, 10) : null,
       };
       if (form.gps_lat && form.gps_lng) {
         payload.farm_location = { type: "Point", coordinates: [parseFloat(form.gps_lng), parseFloat(form.gps_lat)] };
@@ -238,6 +242,17 @@ export default function CreateLot() {
                 <Field label="Washing Station"   k="washing_station" placeholder="e.g. Kochere WS" />
                 <Field label="Altitude (masl) *" k="altitude_m"      type="number" placeholder="1950" />
                 <Field label="Harvest Date *"    k="harvest_date"    type="date" />
+              </div>
+              <div style={{ marginTop: "14px" }}>
+                <label style={lbl}>Farmer / Cooperative</label>
+                <select style={sel} value={form.farmer_id} onChange={e => set("farmer_id", e.target.value)}>
+                  <option value="">— Not linked —</option>
+                  {farmers?.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {(f.farm_name || f.full_name)}{f.farm_id ? ` · ${f.farm_id}` : ""}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

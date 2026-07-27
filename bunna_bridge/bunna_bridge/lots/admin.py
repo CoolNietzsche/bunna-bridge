@@ -14,10 +14,10 @@ class CuppingScoreInline(admin.TabularInline):
 @admin.register(CoffeeLot)
 class CoffeeLotAdmin(admin.GISModelAdmin):
     list_display    = ["lot_id", "name", "region", "grade", "sca_score",
-                       "volume_kg", "status", "created_at"]
+                       "volume_kg", "status", "farmer", "created_at"]
     list_filter     = ["region", "grade", "processing", "status",
                        "deforestation_free", "eudr_dds_ready"]
-    search_fields   = ["lot_id", "name", "washing_station"]
+    search_fields   = ["lot_id", "name", "washing_station", "farmer__farm_id", "farmer__email"]
     readonly_fields = ["id", "created_at", "updated_at"]
     inlines         = [CuppingScoreInline]
     def get_urls(self):
@@ -28,7 +28,7 @@ class CoffeeLotAdmin(admin.GISModelAdmin):
         return custom + urls
 
     fieldsets = (
-        ("Identity",          {"fields": ["id", "lot_id", "name", "status", "exporter"]}),
+        ("Identity",          {"fields": ["id", "lot_id", "name", "status", "exporter", "farmer"]}),
         ("Origin",            {"fields": ["region", "kebele", "washing_station",
                                           "altitude_m", "processing", "grade",
                                           "varietal", "harvest_date"]}),

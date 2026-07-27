@@ -11,12 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
             "id", "username", "email", "first_name", "last_name",
             "role", "company_name", "phone", "country", "bio",
             "is_verified", "date_joined",
-            "farm_name", "farm_region", "farm_kebele",
+            "farm_id", "farm_name", "farm_region", "farm_kebele",
             "farm_altitude_m", "farm_size_ha", "cooperative",
             "gps_lat", "gps_lng", "boundary",
             "ecta_license_number", "ecta_license_file", "ecta_license_expiry",
         ]
-        read_only_fields = ["id", "date_joined", "is_verified"]
+        read_only_fields = ["id", "date_joined", "is_verified", "farm_id"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -77,6 +77,20 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "is_verified":  user.is_verified,
             },
         }
+
+class FarmerSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = User
+        fields = [
+            "id", "full_name", "farm_id", "farm_name",
+            "farm_region", "farm_kebele", "cooperative",
+        ]
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.email
+
 
 class ExporterPublicSerializer(serializers.ModelSerializer):
     full_name    = serializers.SerializerMethodField()

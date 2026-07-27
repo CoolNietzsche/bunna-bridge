@@ -42,6 +42,10 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
     latest_sca_score     = serializers.SerializerMethodField()
     exporter_name        = serializers.CharField(source="exporter.get_full_name", read_only=True)
     exporter_company     = serializers.CharField(source="exporter.company_name", read_only=True)
+    farmer_name          = serializers.SerializerMethodField()
+    farmer_farm_id       = serializers.CharField(
+        source="farmer.farm_id", read_only=True,
+    )
 
     class Meta:
         model  = CoffeeLot
@@ -63,8 +67,14 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             # computed
             "latest_sca_score",
             "exporter_name", "exporter_company",
+            "farmer", "farmer_name", "farmer_farm_id",
             "harvest_date", "created_at", "boundary",
         ]
+
+    def get_farmer_name(self, obj):
+        if not obj.farmer_id:
+            return None
+        return f"{obj.farmer.first_name} {obj.farmer.last_name}".strip() or obj.farmer.email
 
     def get_compliance_score(self, obj):
         return obj.compliance_score()
