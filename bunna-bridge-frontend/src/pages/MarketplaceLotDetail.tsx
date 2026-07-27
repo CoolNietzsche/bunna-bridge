@@ -8,7 +8,7 @@ import PageWrapper from "../components/PageWrapper";
 import {
   ShieldCheck, Mountain, Leaf, FlaskConical, TrendingUp,
   ArrowLeft, Award, CheckCircle, XCircle, Download,
-  MapPin, Calendar, Package, X, FileText
+  MapPin, Calendar, Package, X, FileText, Share2
 } from "lucide-react";
 
 // ── Radar chart (pure SVG, no lib needed) ─────────────────────────────────────
@@ -381,6 +381,14 @@ export default function MarketplaceLotDetail() {
               >
                 <FileText size={14} /> Download Spec Sheet
               </button>
+              {(lot.status === "listed" || lot.status === "contracted" || lot.status === "exported") && (
+                <button
+                  onClick={() => window.open(`/story/${lot.id}`, "_blank", "noopener,noreferrer")}
+                  style={{ background: "transparent", border: "1px solid rgba(28,28,26,0.1)", borderRadius: "4px", padding: "10px", color: "#1B4D35", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px" }}
+                >
+                  <Share2 size={14} /> Public Lot Story
+                </button>
+              )}
             </div>
           </div>
         </div>

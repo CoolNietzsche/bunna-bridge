@@ -22,6 +22,7 @@ import BuyerWatchlist from "./pages/BuyerWatchlist";
 import ExporterStorefront from "./pages/ExporterStorefront";
 import ExporterOffers from "./pages/ExporterOffers";
 import MarketplaceLotDetail from "./pages/MarketplaceLotDetail";
+import LotStory from "./pages/LotStory";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/story/:id"   element={<LotStory />} />
             <Route path="/login"       element={<Login />} />
             <Route path="/register"    element={<Register />} />
             <Route path="/dashboard"   element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

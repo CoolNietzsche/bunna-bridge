@@ -58,6 +58,34 @@ export interface CoffeeLot {
   offers_count?: number;
 }
 
+export interface PublicLotStory {
+  id: string;
+  lot_id: string;
+  name: string;
+  region: string;
+  washing_station: string;
+  altitude_m: number;
+  processing: string;
+  grade: string;
+  varietal: string;
+  harvest_date: string;
+  flavor_notes: string;
+  tasting_notes: string;
+  farm_story: string;
+  flavor_tags: string[];
+  farm_photos: string[];
+  is_organic: boolean;
+  is_fair_trade: boolean;
+  is_rainforest_alliance: boolean;
+  latest_sca_score: number | null;
+  latest_q_grader: string | null;
+  compliance_score: number;
+  export_ready: boolean;
+  exporter_company: string;
+  boundary_geojson: GeoPolygon | null;
+  farm_location_geojson: { type: "Point"; coordinates: [number, number] } | null;
+}
+
 export interface CuppingScore {
   id: string;
   grader_name: string;
@@ -142,6 +170,11 @@ export const getLot = async (id: string): Promise<CoffeeLot> => {
     } as CoffeeLot;
   }
   return data as CoffeeLot;
+};
+
+export const getLotStory = async (id: string): Promise<PublicLotStory> => {
+  const { data } = await api.get<PublicLotStory>(`/v1/lots/${id}/story/`);
+  return data;
 };
 
 export const getComplianceCheck = async (id: string) => {

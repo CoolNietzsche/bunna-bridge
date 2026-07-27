@@ -9,7 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import CoffeeLot, CuppingScore, SampleRequest
 from .serializers import (
     CoffeeLotListSerializer, CoffeeLotDetailSerializer,
-    CuppingScoreSerializer, SampleRequestSerializer, LotStatusUpdateSerializer
+    CuppingScoreSerializer, SampleRequestSerializer, LotStatusUpdateSerializer,
+    PublicLotStorySerializer,
 )
 
 
@@ -637,6 +638,25 @@ def notification_mark_all_read(request):
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     return Response({'status': 'ok'})
 
+
+
+# ── Public Lot Story ─────────────────────────────────────────────────────────
+class LotStoryPublicView(APIView):
+    """
+    GET /api/v1/lots/<pk>/story/
+    Public, unauthenticated. Only listed/contracted/exported lots are
+    visible — draft lots 404 so nothing unfinished leaks.
+    """
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request, pk=None):
+        lot = get_object_or_404(
+            CoffeeLot.objects.select_related("exporter").prefetch_related("cupping_scores"),
+            pk=pk,
+            status__in=["listed", "contracted", "exported"],
+        )
+        return Response(PublicLotStorySerializer(lot).data)
 
 
 # ── Spec Sheet PDF ──────────────────────────────────────────────────────────

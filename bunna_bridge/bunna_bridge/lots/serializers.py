@@ -1,3 +1,5 @@
+import json
+
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
 from .models import CoffeeLot, CuppingScore, SampleRequest, Offer
@@ -108,6 +110,60 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
 
     def get_offers_count(self, obj):
         return obj.offers.count()
+
+
+class PublicLotStorySerializer(serializers.ModelSerializer):
+    """
+    Whitelisted fields only, for the public/unauthenticated Lot Story page.
+    Deliberately excludes: pricing/commercial terms, exporter contact info,
+    and all restricted document files (phyto cert, ECTA license, NBE FX
+    declaration, customs declaration, EUDR DDS) — those stay behind auth.
+    """
+
+    exporter_company = serializers.CharField(
+        source="exporter.company_name", read_only=True,
+    )
+    compliance_score = serializers.SerializerMethodField()
+    export_ready      = serializers.ReadOnlyField()
+    latest_sca_score  = serializers.SerializerMethodField()
+    latest_q_grader   = serializers.SerializerMethodField()
+    boundary_geojson      = serializers.SerializerMethodField()
+    farm_location_geojson = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = CoffeeLot
+        fields = [
+            "id", "lot_id", "name",
+            "region", "washing_station", "altitude_m",
+            "processing", "grade", "varietal", "harvest_date",
+            "flavor_notes", "tasting_notes", "farm_story", "flavor_tags", "farm_photos",
+            "is_organic", "is_fair_trade", "is_rainforest_alliance",
+            "latest_sca_score", "latest_q_grader",
+            "compliance_score", "export_ready",
+            "exporter_company",
+            "boundary_geojson", "farm_location_geojson",
+        ]
+
+    def get_compliance_score(self, obj):
+        return obj.compliance_score()
+
+    def get_latest_sca_score(self, obj):
+        score = obj.cupping_scores.filter(status="confirmed").first()
+        if score:
+            return score.total_score
+        return obj.sca_score
+
+    def get_latest_q_grader(self, obj):
+        score = obj.cupping_scores.filter(status="confirmed").first()
+        if score:
+            return score.grader.get_full_name() or score.grader.email
+        return obj.q_grader_name or None
+
+    def get_boundary_geojson(self, obj):
+        return json.loads(obj.boundary.geojson) if obj.boundary else None
+
+    def get_farm_location_geojson(self, obj):
+        return json.loads(obj.farm_location.geojson) if obj.farm_location else None
 
 
 class SampleRequestSerializer(serializers.ModelSerializer):

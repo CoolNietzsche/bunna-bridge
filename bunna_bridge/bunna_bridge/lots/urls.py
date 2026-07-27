@@ -8,6 +8,7 @@ from .views import (
     LotBoundaryView, LotBoundaryInheritView,
     NotificationListView, notification_unread_count,
     notification_mark_read, notification_mark_all_read,
+    LotStoryPublicView,
 )
 from .offer_views import (
     OfferListCreateView,
@@ -55,4 +56,7 @@ urlpatterns = router.urls + [
     # ── Spec Sheet ──────────────────────────────────────────────────────────
     path("lots/<uuid:lot_pk>/spec-sheet/",
          LotSpecSheetView.as_view(),                            name="lot-spec-sheet"),
+    # ── Public Lot Story ───────────────────────────────────────────────────
+    path("lots/<uuid:pk>/story/",
+         LotStoryPublicView.as_view(),                name="lot-story-public"),
 ]

@@ -17,7 +17,7 @@ import {
   ShieldCheck, ShieldAlert, ShieldOff, Clock, CheckCircle,
   XCircle, AlertTriangle, Leaf, FileCheck, Upload, Lock,
   Pencil, FlaskConical, TrendingUp, Package, Users,
-  Globe, BadgeCheck
+  Globe, BadgeCheck, Share2
 } from "lucide-react";
 
 function RadarChart({ scores }: { scores: Record<string, number> }) {
@@ -552,6 +552,23 @@ export default function LotDetail() {
                     }}
                   >
                     <Pencil size={12} /> Edit Lot
+                  </button>
+                )}
+
+                {(lot.status === "listed" || lot.status === "contracted" || lot.status === "exported") && (
+                  <button
+                    onClick={() => window.open(`/story/${lot.id}`, "_blank", "noopener,noreferrer")}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                      padding: "10px", borderRadius: "4px",
+                      background: "transparent", border: "1px solid rgba(28,28,26,0.12)",
+                      color: "rgba(28,28,26,0.55)",
+                      fontFamily: "DM Mono, monospace", fontSize: "0.65rem",
+                      letterSpacing: "0.12em", textTransform: "uppercase",
+                      cursor: "pointer", transition: "all 0.15s",
+                    }}
+                  >
+                    <Share2 size={12} /> Public Lot Story
                   </button>
                 )}
 
