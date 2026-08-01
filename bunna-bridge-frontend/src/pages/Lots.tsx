@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getLots } from "../api/lots";
 import { useAuth } from "../context/AuthContext";
 import PageWrapper from "../components/PageWrapper";
+import ContextRail from "../components/ContextRail";
 import StatusPill from "../components/StatusPill";
 import { Plus, Search, SlidersHorizontal, ShieldCheck, TrendingUp, Package, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -34,7 +35,7 @@ export default function Lots() {
     );
 
   return (
-    <PageWrapper>
+    <PageWrapper rail={<ContextRail />}>
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>

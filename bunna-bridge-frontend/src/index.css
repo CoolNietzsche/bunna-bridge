@@ -1,52 +1,139 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
-/* ── Brand token definitions ──────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────
+   BEERSHEBA — "Highland Editorial" design system
+   Palette: warm bone paper · deep evergreen · amber/saffron accent
+   Type:    Fraunces (display serif) · Space Grotesk (UI) · DM Mono (data)
+   All colors are CSS variables so light/dark work through tokens (T).
+   ───────────────────────────────────────────────────────────────── */
+
 :root {
-  --color-forest:      #1B4D35;
-  --color-forest-dark: #163D2A;
-  --color-forest-light:#E8F2EC;
-  --color-coffee:      #8B5E3C;
-  --color-coffee-light:#F5EDE4;
-  --color-sage:        #2D7A52;
-  --color-linen:       #F7F5F0;
-  --color-stone:       #F0EDE6;
-  --color-ink:         #1C1C1A;
-  --color-slate:       #4A4A45;
-  --color-border:      rgba(28,28,26,0.08);
-  --color-border-strong: rgba(28,28,26,0.14);
-  --sidebar-width: 260px;
-  --sidebar-collapsed-width: 64px;
-  --topbar-height: 56px;
+  /* Primary — evergreen */
+  --color-forest:        #123A2E;
+  --color-forest-dark:   #0C2A21;
+  --color-forest-light:  #E7EFEA;
+  --color-forest-hover:  #0C2A21;
+  --color-evergreen:     #123A2E;
+
+  /* Accent — amber / saffron */
+  --color-amber:         #D6892C;
+  --color-amber-light:   #FAF1E1;
+  --color-gold:          #D6892C;   /* alias kept for existing token consumers */
+  --color-gold-light:    #FAF1E1;
+
+  /* Accent 2 — clay (sensory warmth) */
+  --color-clay:          #B2532E;
+  --color-clay-light:    #F6EAE1;
+  --color-coffee:        #B2532E;   /* alias kept for existing token consumers */
+  --color-coffee-light:  #F6EAE1;
+
+  /* Fresh — matcha */
+  --color-matcha:        #6E9A4B;
+  --color-sage:          #6E9A4B;   /* alias */
+  --color-mint:          #CDE3BE;
+
+  /* Neutrals — warm bone paper */
+  --color-paper:         #F8F5EF;
+  --color-linen:         #F8F5EF;   /* alias */
+  --color-surface:       #FFFFFF;
+  --color-white:         #FFFFFF;   /* alias (inverts to dark surface below) */
+  --color-stone:         #EFEAE0;
+  --color-ink:           #1A1613;
+  --color-slate:         #6B6357;
+
+  /* Status */
+  --color-red:           #B23A2E;
+  --color-red-light:     #F7E9E5;
+  --color-error-border:  rgba(178,58,46,0.15);
+
+  /* Lines & text */
+  --color-border:        rgba(26,22,19,0.09);
+  --color-border-strong: rgba(26,22,19,0.16);
+  --color-border-hover:  rgba(26,22,19,0.26);
+  --color-text-muted:    rgba(26,22,19,0.56);
+  --color-text-faint:    rgba(26,22,19,0.40);
+  --color-text-ghost:    rgba(26,22,19,0.22);
+
+  /* Layout */
+  --header-height: 68px;
+  --content-max: 1200px;
+
   color-scheme: light;
 }
 
-/* ── Tailwind v4 theme tokens ─────────────────────────────────── */
-@theme {
-  --color-forest:      #1B4D35;
-  --color-forest-dark: #163D2A;
-  --color-forest-light:#E8F2EC;
-  --color-coffee:      #8B5E3C;
-  --color-coffee-light:#F5EDE4;
-  --color-sage:        #2D7A52;
-  --color-linen:       #F7F5F0;
-  --color-stone:       #F0EDE6;
-  --color-ink:         #1C1C1A;
-  --color-slate:       #4A4A45;
-  --color-border:      rgba(28,28,26,0.08);
-  --color-border-strong: rgba(28,28,26,0.14);
-  --color-mint:        #A8D5BC;
+.dark {
+  --color-forest:        #3E8C6E;
+  --color-forest-dark:   #163D2A;
+  --color-forest-light:  #17271F;
+  --color-forest-hover:  #4FA07F;
+  --color-evergreen:     #3E8C6E;
 
-  --font-display: "Cormorant Garamond", Georgia, serif;
+  --color-amber:         #E9A94A;
+  --color-amber-light:   #2A2013;
+  --color-gold:          #E9A94A;
+  --color-gold-light:    #2A2013;
+
+  --color-clay:          #D07E52;
+  --color-clay-light:    #2A1C14;
+  --color-coffee:        #D07E52;
+  --color-coffee-light:  #2A1C14;
+
+  --color-matcha:        #8FBE6B;
+  --color-sage:          #8FBE6B;
+  --color-mint:          #1E3A2B;
+
+  --color-paper:         #14120E;
+  --color-linen:         #14120E;
+  --color-surface:       #1C1A15;
+  --color-white:         #1C1A15;
+  --color-stone:         #201D17;
+  --color-ink:           #F4F0E8;
+  --color-slate:         #A8A296;
+
+  --color-red:           #E06A56;
+  --color-red-light:     #2A1613;
+  --color-error-border:  rgba(224,106,86,0.30);
+
+  --color-border:        rgba(244,240,232,0.12);
+  --color-border-strong: rgba(244,240,232,0.22);
+  --color-border-hover:  rgba(244,240,232,0.34);
+  --color-text-muted:    rgba(244,240,232,0.62);
+  --color-text-faint:    rgba(244,240,232,0.42);
+  --color-text-ghost:    rgba(244,240,232,0.26);
+
+  color-scheme: dark;
+}
+
+/* ── Tailwind v4 theme tokens (light values → utilities like bg-forest) ── */
+@theme {
+  --color-forest:        #123A2E;
+  --color-forest-dark:   #0C2A21;
+  --color-forest-light:  #E7EFEA;
+  --color-amber:         #D6892C;
+  --color-clay:          #B2532E;
+  --color-coffee:        #B2532E;
+  --color-matcha:        #6E9A4B;
+  --color-paper:         #F8F5EF;
+  --color-linen:         #F8F5EF;
+  --color-stone:         #EFEAE0;
+  --color-ink:           #1A1613;
+  --color-slate:         #6B6357;
+  --color-border:        rgba(26,22,19,0.09);
+  --color-border-strong: rgba(26,22,19,0.16);
+  --color-mint:          #CDE3BE;
+
+  --font-display: "Fraunces", Georgia, serif;
   --font-mono:    "DM Mono", monospace;
-  --font-sans:    "Instrument Sans", sans-serif;
+  --font-sans:    "Space Grotesk", "Instrument Sans", sans-serif;
 
   --text-2xs: 0.625rem;
   --text-2xs--line-height: 1rem;
 
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 
   --spacing-18: 4.5rem;
 }
@@ -54,224 +141,199 @@
 /* ── Reset ────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
+html { scroll-behavior: smooth; }
+
 body {
   margin: 0;
-  background: #F7F5F0;
-  color: #1C1C1A;
-  font-family: "Instrument Sans", sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: "Space Grotesk", "Instrument Sans", sans-serif;
+  font-feature-settings: "ss01";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+h1, h2, h3, h4 { font-family: "Fraunces", Georgia, serif; }
+
+::selection { background: var(--color-amber); color: #1A1613; }
+
 /* ── Scrollbar ────────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar       { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(28,28,26,0.15); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(28,28,26,0.25); }
+::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
 
 /* ── Focus ────────────────────────────────────────────────────── */
-*:focus-visible { outline: 1px solid #1B4D35; outline-offset: 2px; }
+*:focus-visible { outline: 2px solid var(--color-forest); outline-offset: 2px; }
 
-/* ── Component classes ────────────────────────────────────────── */
+/* ── Motion helpers (used by editorial pages) ─────────────────── */
+@keyframes bb-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bb-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.bb-rise { animation: bb-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.bb-fade { animation: bb-fade 0.9s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .bb-rise, .bb-fade { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ── Component classes (token-driven; respond to dark mode) ───── */
 @layer components {
+  .container-editorial {
+    width: 100%;
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding-inline: clamp(20px, 5vw, 40px);
+  }
 
-  /* Card — the main surface unit */
   .card {
-    background: #FFFFFF;
-    border: 1px solid rgba(28,28,26,0.08);
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(28,28,26,0.06);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px rgba(26,22,19,0.04), 0 2px 10px rgba(26,22,19,0.05);
   }
 
   .card-title {
     font-family: "DM Mono", monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: rgba(28,28,26,0.55);
+    color: var(--color-text-muted);
     margin: 0 0 16px;
   }
 
-  /* Subtle inner card */
   .card-inner {
-    background: #F7F5F0;
-    border: 1px solid rgba(28,28,26,0.07);
-    border-radius: 4px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
   }
 
-  /* Stat value */
   .stat-value {
-    font-family: "Cormorant Garamond", serif;
-    font-size: 2.5rem;
-    font-weight: 300;
+    font-family: "Fraunces", serif;
+    font-size: 2.75rem;
+    font-weight: 400;
     line-height: 1;
-    color: #1C1C1A;
+    color: var(--color-ink);
   }
 
-  /* Pill / badge */
   .pill {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 20px;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
     font-family: "DM Mono", monospace;
     font-size: 0.6rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     font-weight: 500;
   }
 
-  /* Primary action button */
   .btn-primary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 16px;
-    border-radius: 4px;
-    background: #1B4D35;
-    border: 1px solid #1B4D35;
+    padding: 11px 22px;
+    border-radius: 999px;
+    background: var(--color-forest);
+    border: 1px solid var(--color-forest);
     color: #FFFFFF;
-    font-family: "DM Mono", monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
   }
-  .btn-primary:hover {
-    background: #163D2A;
-    border-color: #163D2A;
-  }
+  .btn-primary:hover { background: var(--color-forest-hover); transform: translateY(-1px); box-shadow: 0 8px 22px rgba(18,58,46,0.22); }
 
-  /* Ghost button */
   .btn-ghost {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 11px 22px;
+    border-radius: 999px;
     background: transparent;
-    border: 1px solid rgba(28,28,26,0.12);
-    color: rgba(28,28,26,0.6);
-    font-family: "DM Mono", monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-ink);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s;
   }
-  .btn-ghost:hover {
-    border-color: rgba(28,28,26,0.25);
-    color: #1C1C1A;
-  }
+  .btn-ghost:hover { border-color: var(--color-border-hover); background: var(--color-stone); }
 
-  /* Table row */
   .table-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 12px;
-    border-radius: 4px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.15s;
   }
-  .table-row:hover {
-    background: #F7F5F0;
-    border-color: rgba(28,28,26,0.08);
-  }
+  .table-row:hover { background: var(--color-paper); border-color: var(--color-border); }
 
-  /* Section divider */
   .divider {
     border: none;
-    border-top: 1px solid rgba(28,28,26,0.08);
-    margin: 16px 0;
+    border-top: 1px solid var(--color-border);
+    margin: 18px 0;
   }
 
-  /* Input */
   .input {
     width: 100%;
-    background: #FFFFFF;
-    border: 1px solid rgba(28,28,26,0.15);
-    border-radius: 4px;
-    padding: 8px 12px;
-    color: #1C1C1A;
-    font-family: "Instrument Sans", sans-serif;
-    font-size: 0.875rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    padding: 11px 14px;
+    color: var(--color-ink);
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 0.9rem;
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
   }
-  .input:focus {
-    border-color: #1B4D35;
-    box-shadow: 0 0 0 3px rgba(27,77,53,0.08);
-  }
-  .input::placeholder {
-    color: rgba(28,28,26,0.3);
-  }
+  .input:focus { border-color: var(--color-forest); box-shadow: 0 0 0 3px rgba(18,58,46,0.10); }
+  .input::placeholder { color: var(--color-text-ghost); }
 
-  /* Label */
   .label {
     display: block;
     font-family: "DM Mono", monospace;
     font-size: 0.625rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: rgba(28,28,26,0.45);
-    margin-bottom: 6px;
+    color: var(--color-text-muted);
+    margin-bottom: 7px;
   }
 
-  /* Page header */
-  .page-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 2rem;
-  }
-
-  .page-title {
-    font-family: "Cormorant Garamond", serif;
-    font-size: 1.75rem;
-    font-weight: 400;
-    color: #1C1C1A;
-    margin: 0 0 4px;
-    line-height: 1.2;
-  }
-
-  .page-subtitle {
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-family: "DM Mono", monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: rgba(28,28,26,0.45);
-    margin: 0;
+    color: var(--color-clay);
   }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; gap: 1rem; }
+  .page-title { font-family: "Fraunces", serif; font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 400; color: var(--color-ink); margin: 0 0 6px; line-height: 1.08; letter-spacing: -0.01em; }
+  .page-subtitle { font-family: "DM Mono", monospace; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-faint); margin: 0; }
 }
 
 /* ── Utility extensions ───────────────────────────────────────── */
 @layer utilities {
-  .text-2xs {
-    font-size: 0.625rem;
-    line-height: 1rem;
-  }
-
-  .border-border {
-    border-color: rgba(28,28,26,0.08);
-  }
-
-  .border-border-strong {
-    border-color: rgba(28,28,26,0.14);
-  }
-
-  .bg-stone\/50 {
-    background-color: rgba(240,237,230,0.5);
-  }
-
-  .font-display {
-    font-family: "Cormorant Garamond", Georgia, serif;
-  }
-
-  .font-mono {
-    font-family: "DM Mono", monospace;
-  }
-
-  .tracking-widest {
-    letter-spacing: 0.2em;
-  }
+  .text-2xs { font-size: 0.625rem; line-height: 1rem; }
+  .border-border { border-color: var(--color-border); }
+  .border-border-strong { border-color: var(--color-border-strong); }
+  .font-display { font-family: "Fraunces", Georgia, serif; }
+  .font-mono { font-family: "DM Mono", monospace; }
+  .tracking-widest { letter-spacing: 0.2em; }
 }
