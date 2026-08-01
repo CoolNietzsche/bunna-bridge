@@ -5,6 +5,7 @@ import { getLots } from "../api/lots";
 import { updateLotStatus } from "../api/samples";
 import type { CoffeeLot } from "../api/lots";
 import PageWrapper from "../components/PageWrapper";
+import ContextRail from "../components/ContextRail";
 import { ArrowRight, Lock, ExternalLink, ShieldCheck, TrendingUp, X, Package } from "lucide-react";
 import { T } from "../styles/tokens";
 import { CS } from "../styles/components";
@@ -61,7 +62,7 @@ export default function LotPipeline() {
     data?.results.filter(l => l.status === status) ?? [];
 
   return (
-    <PageWrapper>
+    <PageWrapper rail={<ContextRail />}>
       {/* Header */}
       <div style={{ marginBottom: "24px" }}>
         <h1 style={CS.pageTitle}>Lot Pipeline</h1>

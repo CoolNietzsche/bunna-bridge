@@ -10,6 +10,8 @@ import {
 import { getLotStory } from "../api/lots";
 import FarmMapDisplay from "../components/FarmMapDisplay";
 import logoFull from "../assets/logo-full.png";
+import { originGradient, titleCase } from "../lib/utils";
+import { T } from "../styles/tokens";
 
 function PointMap({ lng, lat }: { lng: number; lat: number }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -22,7 +24,7 @@ function PointMap({ lng, lat }: { lng: number; lat: number }) {
     }).setView([lat, lng], 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
     L.circleMarker([lat, lng], {
-      radius: 10, color: "#8B5E3C", fillColor: "#8B5E3C", fillOpacity: 0.5, weight: 2,
+      radius: 10, color: T.color.clay, fillColor: T.color.clay, fillOpacity: 0.5, weight: 2,
     }).addTo(map);
     leafletMap.current = map;
     return () => { map.remove(); leafletMap.current = null; };
@@ -91,21 +93,29 @@ export default function LotStory() {
         </div>
       </div>
 
-      <div className="max-w-[720px] mx-auto px-5 py-8">
-        {/* Hero */}
-        <div className="mb-6">
-          <p className="font-mono text-[0.65rem] tracking-[0.15em] uppercase text-coffee mb-2">
+      {/* Hero — origin-gradient banner, no photography */}
+      <div className="relative overflow-hidden" style={{ background: originGradient(lot.region) }}>
+        <svg viewBox="0 0 400 300" aria-hidden className="absolute -right-10 -top-10 w-72 opacity-10">
+          <path d="M200 40c80-16 128 32 120 112-72 0-128-40-120-112Z" fill="#FFFFFF" />
+        </svg>
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,20,15,0.45), transparent 65%)" }} />
+        <div className="relative max-w-[720px] mx-auto px-5 pt-10 pb-8">
+          <p className="font-mono text-[0.65rem] tracking-[0.15em] uppercase mb-2" style={{ color: "rgba(255,255,255,0.85)" }}>
             {lot.lot_id} · {lot.exporter_company || "Ethiopian Exporter"}
           </p>
-          <h1 className="font-display text-[2.25rem] leading-tight font-normal text-ink mb-2">{lot.name}</h1>
-          <div className="flex items-center gap-1.5 text-slate">
+          <h1 className="font-display text-[2.6rem] leading-[1.02] font-normal text-white mb-3" style={{ letterSpacing: "-0.01em" }}>
+            {lot.name}
+          </h1>
+          <div className="flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.85)" }}>
             <MapPin size={14} />
-            <span className="font-sans text-sm capitalize">
-              {lot.region}{lot.washing_station ? ` · ${lot.washing_station}` : ""} · {lot.altitude_m}m
+            <span className="font-sans text-sm">
+              {titleCase(lot.region)}{lot.washing_station ? ` · ${lot.washing_station}` : ""} · {lot.altitude_m}m
             </span>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-[720px] mx-auto px-5 py-8">
         {/* Quality + compliance strip */}
         <div className="flex flex-wrap gap-2 mb-6">
           {lot.latest_sca_score != null && (
