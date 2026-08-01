@@ -6,6 +6,8 @@ import { getFarmerProfile, getFarmerLots } from "../api/farmer";
 import { getSampleRequests } from "../api/samples";
 import PageWrapper from "../components/PageWrapper";
 import RoleBadge from "../components/RoleBadge";
+import DonutChart from "../components/charts/DonutChart";
+import { T } from "../styles/tokens";
 import {
   Package, ShieldCheck, TrendingUp, AlertTriangle,
   ArrowRight, Plus, Leaf, Mountain, FlaskConical,
@@ -162,28 +164,43 @@ export default function Dashboard() {
     ? Math.round(results.reduce((s, l) => s + (l.compliance_score ?? 0), 0) / results.length)
     : 0;
 
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const newThisWeek = results.filter((l) => l.created_at && new Date(l.created_at).getTime() >= oneWeekAgo).length;
+
+  const gatesPassed = (l: (typeof results)[number]) =>
+    [l.deforestation_free, l.gps_verified, l.eudr_dds_ready, l.phyto_cert_uploaded,
+     l.ecta_license_active, l.nbe_fx_declared, l.cta_floor_met].filter(Boolean).length;
+  const complianceBuckets = [
+    { label: "Export ready (7/7)", value: results.filter((l) => gatesPassed(l) === 7).length, color: T.color.forest },
+    { label: "Near ready (5–6)",   value: results.filter((l) => { const g = gatesPassed(l); return g >= 5 && g <= 6; }).length, color: T.color.amber },
+    { label: "In progress (2–4)",  value: results.filter((l) => { const g = gatesPassed(l); return g >= 2 && g <= 4; }).length, color: T.color.clay },
+    { label: "Just started (0–1)", value: results.filter((l) => gatesPassed(l) <= 1).length, color: T.color.slate },
+  ];
+
   const greeting = () => {
     const name = user?.first_name || user?.email?.split("@")[0] || "there";
     const h    = new Date().getHours();
     return `${h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"}, ${name}.`;
   };
 
+  const newLotsSublabel = newThisWeek > 0 ? `+${newThisWeek} this week` : undefined;
+
   const stats = role === "buyer"
     ? [
-        { label: "Available Lots",  value: total,     icon: <Package size={16} />,     positive: true,  path: "/marketplace" },
+        { label: "Available Lots",  value: total,     icon: <Package size={16} />,     positive: true,  path: "/marketplace", sublabel: newLotsSublabel },
         { label: "EUDR Verified",   value: eudrReady, icon: <ShieldCheck size={16} />, positive: true,  path: "/marketplace?eudr_dds_ready=true" },
         { label: "Watchlist",       value: "—",       icon: <Leaf size={16} />,        positive: true,  path: "/buyer/watchlist" },
         { label: "Regions Active",  value: regions || 7, icon: <Mountain size={16} />, positive: true,  path: "/marketplace" },
       ]
     : isFarmer
     ? [
-        { label: "Linked Lots",   value: total,                                    icon: <Package size={16} />,     positive: true, path: "/farm" },
+        { label: "Linked Lots",   value: total,                                    icon: <Package size={16} />,     positive: true, path: "/farm", sublabel: newLotsSublabel },
         { label: "Export Ready",  value: exportReady,                              icon: <TrendingUp size={16} />,  positive: true, path: "/farm" },
         { label: "Avg Cup Score", value: avgSca,                                   icon: <ShieldCheck size={16} />, positive: true, path: "/farm" },
         { label: "Farm Size",     value: farmProfile?.farm_size_ha ? `${farmProfile.farm_size_ha}ha` : "—", icon: <Ruler size={16} />, positive: true, path: "/farm" },
       ]
     : [
-        { label: "Total Lots",         value: total,       icon: <Package size={16} />,       positive: true,  path: "/lots" },
+        { label: "Total Lots",         value: total,       icon: <Package size={16} />,       positive: true,  path: "/lots", sublabel: newLotsSublabel },
         { label: "EUDR Ready",         value: eudrReady,   icon: <ShieldCheck size={16} />,   positive: true,  path: "/lots" },
         { label: "Export Ready",       value: exportReady, icon: <TrendingUp size={16} />,    positive: true,  path: "/lots" },
         { label: "Pending Compliance", value: pending,     icon: <AlertTriangle size={16} />, positive: false, path: "/lots" },
@@ -314,9 +331,12 @@ export default function Dashboard() {
               }`}>
                 {stat.value}
               </p>
-              <p className="font-mono text-[0.62rem] tracking-[0.12em] uppercase text-ink/50 mb-2.5">
+              <p className="font-mono text-[0.62rem] tracking-[0.12em] uppercase text-ink/50 mb-1">
                 {stat.label}
               </p>
+              {"sublabel" in stat && stat.sublabel && (
+                <p className="font-mono text-[0.62rem] text-sage mb-1.5">{stat.sublabel}</p>
+              )}
               {(stat.label === "EUDR Ready" || stat.label === "EUDR Verified") && (
                 <GateDots passed={eudrReady > 0 ? Math.min(7, Math.round((eudrReady / Math.max(total, 1)) * 7)) : 0} />
               )}
@@ -464,21 +484,36 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Lot pipeline card ─────────────────────────────────────*/}
+      {/* ── Lot pipeline + compliance breakdown ────────────────────*/}
       {total > 0 && (
-        <div className="card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="card-title m-0">Lot Pipeline</p>
-            <span className="font-mono text-[0.62rem] text-ink/40 tracking-[0.06em]">
-              {total} total
-            </span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="card-title m-0">Lot Pipeline</p>
+              <span className="font-mono text-[0.62rem] text-ink/40 tracking-[0.06em]">
+                {total} total
+              </span>
+            </div>
+            <PipelineBar
+              draft={draftCount}
+              listed={listedCount}
+              contracted={contractedCount}
+              exported={exportedCount}
+            />
           </div>
-          <PipelineBar
-            draft={draftCount}
-            listed={listedCount}
-            contracted={contractedCount}
-            exported={exportedCount}
-          />
+          <div className="card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="card-title m-0">Compliance Breakdown</p>
+              <span className="font-mono text-[0.62rem] text-ink/40 tracking-[0.06em]">
+                by gates passed
+              </span>
+            </div>
+            <DonutChart
+              segments={complianceBuckets}
+              centerLabel={String(total)}
+              centerSublabel="lots"
+            />
+          </div>
         </div>
       )}
 
