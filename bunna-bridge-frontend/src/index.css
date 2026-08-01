@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap');
+/* Inter — scoped to the admin/back-office area (adminTokens.ts), matching the
+   real Gentelella typography. The public site keeps Space Grotesk/Fraunces. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────
