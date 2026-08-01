@@ -23,7 +23,7 @@ services:
     command: /start
 
   postgres:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:17-3.5
     container_name: bunna_bridge_local_postgres
     volumes:
       - bunna_bridge_local_postgres_data:/var/lib/postgresql/data
