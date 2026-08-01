@@ -13,7 +13,7 @@ import BrandMark from "../site/BrandMark";
 interface NavItem { label: string; path: string; icon: ReactNode; }
 interface NavGroup { title: string; items: NavItem[]; }
 
-/** Real, role-scoped back-office navigation (same routes as ContextRail, restyled). */
+/** Real, role-scoped back-office navigation. */
 function groupsFor(role: string | undefined): NavGroup[] {
   const s = 16;
   const operations: Record<string, NavItem[]> = {

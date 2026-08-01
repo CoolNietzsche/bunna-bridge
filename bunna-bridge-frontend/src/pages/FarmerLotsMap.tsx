@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getLots } from "../api/lots";
-import PageWrapper from "../components/PageWrapper";
+import AdminShell from "../components/admin/AdminShell";
+import { AT } from "../styles/adminTokens";
+import { AC } from "../styles/adminComponents";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -14,13 +16,13 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function FarmerLotsMap() {
-  const navigate  = useNavigate();
-  const mapRef    = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<L.Map | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["lots-map"],
-    queryFn:  () => getLots({}),
+    queryFn: () => getLots({}),
   });
 
   useEffect(() => {
@@ -41,9 +43,9 @@ export default function FarmerLotsMap() {
 
     const bounds: L.LatLngBounds[] = [];
 
-    data?.results.forEach(lot => {
-      const color = lot.export_ready ? "#A8D5BC" :
-                    lot.eudr_dds_ready ? "#8B5E3C" : "#1B4D35";
+    data?.results.forEach((lot) => {
+      const color = lot.export_ready ? AT.color.primary :
+        lot.eudr_dds_ready ? AT.color.blue : AT.color.yellow;
 
       if (lot.boundary) {
         const coords = lot.boundary.coordinates[0];
@@ -56,8 +58,8 @@ export default function FarmerLotsMap() {
         }).addTo(map);
 
         poly.bindPopup(`
-          <div style="font-family: DM Mono, monospace; font-size: 12px; min-width: 180px;">
-            <strong style="color: #8B5E3C">${lot.lot_id}</strong><br/>
+          <div style="font-family: ${AT.font.mono}; font-size: 12px; min-width: 180px;">
+            <strong style="color: ${AT.color.primaryDark}">${lot.lot_id}</strong><br/>
             ${lot.name}<br/>
             <span style="color: #888">${lot.region} · ${lot.grade}</span><br/>
             ${lot.sca_score ? `SCA: ${lot.sca_score} pts<br/>` : ""}
@@ -78,8 +80,8 @@ export default function FarmerLotsMap() {
         }).addTo(map);
 
         marker.bindPopup(`
-          <div style="font-family: DM Mono, monospace; font-size: 12px; min-width: 180px;">
-            <strong style="color: #8B5E3C">${lot.lot_id}</strong><br/>
+          <div style="font-family: ${AT.font.mono}; font-size: 12px; min-width: 180px;">
+            <strong style="color: ${AT.color.primaryDark}">${lot.lot_id}</strong><br/>
             ${lot.name}<br/>
             <span style="color: #888">${lot.region} · ${lot.grade}</span><br/>
             <span style="color: #888; font-size: 11px">GPS point only — no boundary</span>
@@ -98,76 +100,64 @@ export default function FarmerLotsMap() {
     return () => { map.remove(); leafletMap.current = null; };
   }, [data, isLoading]);
 
-  const total     = data?.results.length ?? 0;
-  const withBound = data?.results.filter(l => l.boundary).length ?? 0;
-  const withGps   = data?.results.filter(l => !l.boundary && l.gps_lat).length ?? 0;
-  const noBound   = total - withBound - withGps;
+  const total = data?.results.length ?? 0;
+  const withBound = data?.results.filter((l) => l.boundary).length ?? 0;
+  const withGps = data?.results.filter((l) => !l.boundary && l.gps_lat).length ?? 0;
+  const noBound = total - withBound - withGps;
 
   return (
-    <PageWrapper>
-      <div style={{ padding: "clamp(16px, 4vw, 2rem)" }}>
-        <div style={{ marginBottom: "20px" }}>
-          <h1 style={{ fontSize: "1.8rem", fontWeight: 300, color: "#1C1C1A", margin: "0 0 4px", fontFamily: "Cormorant Garamond, serif" }}>
-            Lot Boundary Map
-          </h1>
-          <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#1B4D35", textTransform: "uppercase", margin: 0 }}>
-            GPS & boundary overview · All lots
-          </p>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
-          {[
-            { label: "Total Lots",       val: total,     color: "#1C1C1A" },
-            { label: "With Boundary",    val: withBound, color: "#A8D5BC" },
-            { label: "GPS Point Only",   val: withGps,   color: "#8B5E3C" },
-            { label: "No Location",      val: noBound,   color: "#1B4D35" },
-          ].map(s => (
-            <div key={s.label} style={{
-              background: "#FFFFFF", border: "1px solid rgba(28,28,26,0.07)",
-              borderRadius: "4px", padding: "10px 16px",
-            }}>
-              <div style={{ fontFamily: "DM Mono, monospace", fontSize: "1.2rem", color: s.color, fontWeight: 600 }}>{s.val}</div>
-              <div style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.4)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: "2px" }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Legend */}
-        <div style={{ display: "flex", gap: "16px", marginBottom: "12px", flexWrap: "wrap" }}>
-          {[
-            { color: "#A8D5BC", label: "Export Ready" },
-            { color: "#8B5E3C", label: "EUDR Ready" },
-            { color: "#1B4D35", label: "Gates Pending" },
-          ].map(l => (
-            <div key={l.label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <div style={{ width: "12px", height: "12px", borderRadius: "2px", background: l.color }} />
-              <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(28,28,26,0.5)" }}>{l.label}</span>
-            </div>
-          ))}
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#8B5E3C", opacity: 0.7 }} />
-            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.62rem", color: "rgba(28,28,26,0.5)" }}>GPS Point Only</span>
-          </div>
-        </div>
-
-        {isLoading && (
-          <div style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "rgba(28,28,26,0.3)", padding: "48px", textAlign: "center" }}>
-            Loading lot data...
-          </div>
-        )}
-
-        {/* Map */}
-        <div ref={mapRef} style={{
-          height: "calc(100vh - 320px)", minHeight: "400px",
-          borderRadius: "4px", border: "1px solid rgba(28,28,26,0.07)",
-          background: "#F7F5F0",
-        }} />
-
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "rgba(28,28,26,0.25)", marginTop: "8px" }}>
-          Click any lot to view details · Polygons shown where boundary captured · Circles where GPS point only
-        </p>
+    <AdminShell>
+      <div style={{ marginBottom: "20px" }}>
+        <p style={AC.eyebrow}>GPS & boundary overview · All lots</p>
+        <h1 style={{ ...AC.pageTitle, marginTop: "4px" }}>Lot Boundary Map</h1>
       </div>
-    </PageWrapper>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px", marginBottom: "16px" }}>
+        {[
+          { label: "Total Lots", val: total, color: AT.color.text },
+          { label: "With Boundary", val: withBound, color: AT.color.primaryDark },
+          { label: "GPS Point Only", val: withGps, color: AT.color.blue },
+          { label: "No Location", val: noBound, color: AT.color.yellow },
+        ].map((s) => (
+          <div key={s.label} style={{ ...AC.card, ...AC.cardPad }}>
+            <div style={{ fontFamily: AT.font.sans, fontSize: "1.3rem", color: s.color, fontWeight: 700 }}>{s.val}</div>
+            <div style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.textMuted, textTransform: "uppercase", letterSpacing: "0.04em", marginTop: "2px" }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: "16px", marginBottom: "12px", flexWrap: "wrap" }}>
+        {[
+          { color: AT.color.primary, label: "Export Ready" },
+          { color: AT.color.blue, label: "EUDR Ready" },
+          { color: AT.color.yellow, label: "Gates Pending" },
+        ].map((l) => (
+          <div key={l.label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <div style={{ width: "12px", height: "12px", borderRadius: AT.radius.sm, background: l.color }} />
+            <span style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.textMuted }}>{l.label}</span>
+          </div>
+        ))}
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: AT.color.blue, opacity: 0.7 }} />
+          <span style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.textMuted }}>GPS Point Only</span>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.textMuted, padding: "48px", textAlign: "center" }}>
+          Loading lot data…
+        </div>
+      )}
+
+      <div ref={mapRef} style={{
+        height: "calc(100vh - 400px)", minHeight: "360px",
+        borderRadius: AT.radius.lg, border: `1px solid ${AT.color.border}`,
+        background: AT.color.surfaceSecondary,
+      }} />
+
+      <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.textDisabled, marginTop: "8px" }}>
+        Click any lot to view details · Polygons shown where boundary captured · Circles where GPS point only
+      </p>
+    </AdminShell>
   );
 }

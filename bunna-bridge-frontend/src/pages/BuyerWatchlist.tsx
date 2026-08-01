@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getLots } from "../api/lots";
 import { useWatchlist } from "../hooks/useWatchlist";
-import PageWrapper from "../components/PageWrapper";
+import AdminShell from "../components/admin/AdminShell";
 import {
   Heart, ShieldCheck, Mountain, TrendingUp, FlaskConical, Leaf, X
 } from "lucide-react";
+import { AT } from "../styles/adminTokens";
+import { AC } from "../styles/adminComponents";
 
 export default function BuyerWatchlist() {
   const navigate = useNavigate();
@@ -17,109 +19,106 @@ export default function BuyerWatchlist() {
     enabled: ids.length > 0,
   });
 
-  const watched = (data?.results ?? []).filter(lot => ids.includes(lot.id));
+  const watched = (data?.results ?? []).filter((lot) => ids.includes(lot.id));
 
   return (
-    <PageWrapper>
-      <div style={{ marginBottom: "28px" }}>
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.2em", color: "#8B5E3C", margin: "0 0 4px" }}>BUYER</p>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "2rem", fontWeight: 400, color: "#1C1C1A", margin: 0 }}>Watchlist</h1>
-          {ids.length > 0 && (
-            <span style={{ background: "rgba(192,57,43,0.1)", border: "1px solid rgba(192,57,43,0.2)", borderRadius: "20px", padding: "2px 10px", fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#1B4D35" }}>
-              {ids.length} saved
-            </span>
-          )}
+    <AdminShell>
+      <div style={{ marginBottom: "20px" }}>
+        <p style={AC.eyebrow}>Buyer</p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" }}>
+          <h1 style={AC.pageTitle}>Watchlist</h1>
+          {ids.length > 0 && <span style={{ ...AC.pill.base, ...AC.pill.red }}>{ids.length} saved</span>}
         </div>
-        <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.85rem", color: "rgba(28,28,26,0.35)", margin: "6px 0 0" }}>
-          Lots you've saved for quick access.
-        </p>
+        <p style={AC.pageSubtitle}>Lots you've saved for quick access.</p>
       </div>
 
       {ids.length === 0 && (
         <div style={{ textAlign: "center", padding: "80px 20px" }}>
-          <Heart size={32} color="rgba(28,28,26,0.09)" style={{ marginBottom: "16px" }} />
-          <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.3rem", color: "rgba(28,28,26,0.3)", margin: "0 0 8px" }}>No saved lots</p>
-          <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.82rem", color: "rgba(28,28,26,0.15)", margin: "0 0 20px" }}>
+          <Heart size={32} color={AT.color.textDisabled} style={{ marginBottom: "16px" }} />
+          <p style={{ fontFamily: AT.font.sans, fontSize: "1.1rem", fontWeight: 600, color: AT.color.textMuted, margin: "0 0 8px" }}>No saved lots</p>
+          <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textDisabled, margin: "0 0 20px" }}>
             Tap the heart icon on any lot card in the marketplace.
           </p>
-          <button onClick={() => navigate("/marketplace")}
-            style={{ background: "#1B4D35", border: "none", borderRadius: "4px", padding: "10px 24px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.875rem", cursor: "pointer" }}>
-            Browse Marketplace
-          </button>
+          <button onClick={() => navigate("/marketplace")} style={AC.btnPrimary}>Browse Marketplace</button>
         </div>
       )}
 
       {isLoading && ids.length > 0 && (
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "rgba(28,28,26,0.25)", textAlign: "center", padding: "60px" }}>Loading...</p>
+        <p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.textMuted, textAlign: "center", padding: "60px 0" }}>Loading…</p>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {watched.map(lot => (
-          <div key={lot.id}
-            style={{ background: "#1B4D35", border: "1px solid rgba(28,28,26,0.05)", borderRadius: "8px", padding: "18px 20px", cursor: "pointer" }}
-            onClick={() => navigate(`/marketplace/${lot.id}`)}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
+        {watched.map((lot) => (
+          <div
+            key={lot.id}
+            style={{ ...AC.card, ...AC.cardPad, cursor: "pointer" }}
+            onClick={() => navigate(`/marketplace/${lot.id}`)}
+          >
+            <div className="ab-watch" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "#8B5E3C", letterSpacing: "0.15em", margin: "0 0 2px" }}>
+                <p style={{ fontFamily: AT.font.mono, fontSize: "0.68rem", color: AT.color.textMuted, margin: "0 0 3px" }}>
                   {lot.lot_id} · {lot.region?.toUpperCase()}
                 </p>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.2rem", color: "#1C1C1A", margin: "0 0 6px", lineHeight: 1.2 }}>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "1.1rem", fontWeight: 600, color: AT.color.text, margin: "0 0 8px", lineHeight: 1.25 }}>
                   {lot.name}
                 </p>
                 <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)" }}>
-                    <Mountain size={9} /> {lot.altitude_m}m
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px", fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.textMuted }}>
+                    <Mountain size={11} /> {lot.altitude_m}m
                   </span>
-                  <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", color: "rgba(28,28,26,0.35)", textTransform: "capitalize" }}>
+                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.textMuted, textTransform: "capitalize" }}>
                     {lot.processing} · {lot.grade}
                   </span>
                   {lot.is_eudr_ready && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "#2D7A52" }}>
-                      <ShieldCheck size={9} /> EUDR
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 500, color: AT.color.primaryDark }}>
+                      <ShieldCheck size={11} /> EUDR
                     </span>
                   )}
                   {lot.is_organic && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: "DM Mono, monospace", fontSize: "0.55rem", color: "#2D7A52" }}>
-                      <Leaf size={9} /> Organic
+                    <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 500, color: AT.color.primaryDark }}>
+                      <Leaf size={11} /> Organic
                     </span>
                   )}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", flexShrink: 0 }}>
-                <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "1.5rem", fontWeight: 300, color: "#8B5E3C", margin: 0, lineHeight: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px", flexShrink: 0 }}>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "1.3rem", fontWeight: 700, color: AT.color.text, margin: 0, lineHeight: 1 }}>
                   {lot.fob_price_usd ? `$${parseFloat(lot.fob_price_usd).toFixed(2)}` : "POA"}
                 </p>
-                <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.52rem", color: "rgba(28,28,26,0.3)", margin: 0 }}>per kg FOB</p>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", color: AT.color.textDisabled, margin: 0 }}>per kg FOB</p>
               </div>
             </div>
 
             {lot.flavor_tags?.length > 0 && (
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginTop: "12px" }}>
-                {lot.flavor_tags.slice(0, 4).map(tag => (
-                  <span key={tag} style={{ padding: "3px 10px", background: "rgba(74,37,21,0.6)", border: "1px solid rgba(201,149,42,0.15)", borderRadius: "20px", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.72rem", color: "rgba(28,28,26,0.5)" }}>{tag}</span>
+                {lot.flavor_tags.slice(0, 4).map((tag) => (
+                  <span key={tag} style={{ padding: "3px 10px", background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.pill, fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.textSecondary }}>
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
 
-            <div style={{ display: "flex", gap: "8px", marginTop: "14px" }} onClick={e => e.stopPropagation()}>
-              <button onClick={() => navigate(`/marketplace/${lot.id}?offer=1`)}
-                style={{ display: "flex", alignItems: "center", gap: "6px", background: "#1B4D35", border: "none", borderRadius: "4px", padding: "8px 16px", color: "white", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
-                <TrendingUp size={12} /> Make Offer
+            <div style={{ display: "flex", gap: "8px", marginTop: "14px", flexWrap: "wrap" }} onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => navigate(`/marketplace/${lot.id}?offer=1`)} style={AC.btnPrimary}>
+                <TrendingUp size={13} /> Make Offer
               </button>
-              <button onClick={() => navigate(`/marketplace/${lot.id}?sample=1`)}
-                style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "1px solid rgba(192,57,43,0.25)", borderRadius: "4px", padding: "8px 14px", color: "#1B4D35", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer" }}>
-                <FlaskConical size={12} />
+              <button onClick={() => navigate(`/marketplace/${lot.id}?sample=1`)} style={AC.btnGhost}>
+                <FlaskConical size={13} /> Sample
               </button>
-              <button onClick={() => toggle(lot.id)}
+              <button
+                onClick={() => toggle(lot.id)}
                 title="Remove from watchlist"
-                style={{ display: "flex", alignItems: "center", gap: "6px", background: "transparent", border: "1px solid rgba(28,28,26,0.07)", borderRadius: "4px", padding: "8px 12px", color: "rgba(28,28,26,0.3)", fontFamily: "Instrument Sans, sans-serif", fontSize: "0.8rem", cursor: "pointer", marginLeft: "auto" }}>
-                <X size={12} /> Remove
+                style={{ ...AC.btnGhost, color: AT.color.red, borderColor: `${AT.color.red}44`, marginLeft: "auto" }}
+              >
+                <X size={13} /> Remove
               </button>
             </div>
           </div>
         ))}
       </div>
-    </PageWrapper>
+
+      <style>{`@media (max-width: 560px){ .ab-watch { flex-direction: column !important; } .ab-watch > div:last-child { align-items: flex-start !important; } }`}</style>
+    </AdminShell>
   );
 }
