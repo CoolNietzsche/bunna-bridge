@@ -10,8 +10,8 @@ import {
 import { getLotStory } from "../api/lots";
 import FarmMapDisplay from "../components/FarmMapDisplay";
 import logoFull from "../assets/logo-full.png";
-import { originGradient, titleCase } from "../lib/utils";
-import { T } from "../styles/tokens";
+import { titleCase } from "../lib/utils";
+import { AT } from "../styles/adminTokens";
 
 function PointMap({ lng, lat }: { lng: number; lat: number }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -24,22 +24,25 @@ function PointMap({ lng, lat }: { lng: number; lat: number }) {
     }).setView([lat, lng], 13);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
     L.circleMarker([lat, lng], {
-      radius: 10, color: T.color.clay, fillColor: T.color.clay, fillOpacity: 0.5, weight: 2,
+      radius: 10, color: AT.color.primary, fillColor: AT.color.primary, fillOpacity: 0.5, weight: 2,
     }).addTo(map);
     leafletMap.current = map;
     return () => { map.remove(); leafletMap.current = null; };
   }, [lat, lng]);
 
-  return <div ref={mapRef} style={{ height: 220, width: "100%", borderRadius: 6, overflow: "hidden" }} />;
+  return <div ref={mapRef} style={{ height: 220, width: "100%", borderRadius: AT.radius.md, overflow: "hidden" }} />;
 }
 
 function CertBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-forest-light border border-forest/15 rounded-[3px] px-2.5 py-1 text-[0.7rem] font-sans font-medium text-forest">
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.sm, padding: "4px 10px", fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 500, color: AT.color.primaryDark }}>
       {icon} {label}
     </span>
   );
 }
+
+const label: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 2px" };
+const card: React.CSSProperties = { background: AT.color.surface, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.lg, padding: "20px" };
 
 export default function LotStory() {
   const { id } = useParams<{ id: string }>();
@@ -53,24 +56,24 @@ export default function LotStory() {
   });
 
   useEffect(() => {
-    QRCode.toDataURL(window.location.href, { margin: 1, width: 240, color: { dark: "#1C1C1A", light: "#00000000" } })
+    QRCode.toDataURL(window.location.href, { margin: 1, width: 240, color: { dark: AT.color.text, light: "#00000000" } })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null));
   }, []);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linen flex items-center justify-center">
-        <p className="font-mono text-[0.7rem] tracking-[0.15em] uppercase text-ink/40">Loading lot story…</p>
+      <div style={{ minHeight: "100vh", background: AT.color.bodyBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textMuted }}>Loading lot story…</p>
       </div>
     );
   }
 
   if (isError || !lot) {
     return (
-      <div className="min-h-screen bg-linen flex flex-col items-center justify-center gap-3 px-4 text-center">
-        <img src={logoFull} alt="Beersheba" className="h-10 opacity-60" />
-        <p className="font-sans text-sm text-ink/60 max-w-sm">
+      <div style={{ minHeight: "100vh", background: AT.color.bodyBg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "0 16px", textAlign: "center" }}>
+        <img src={logoFull} alt="Beersheba" style={{ height: "40px", opacity: 0.6 }} />
+        <p style={{ fontFamily: AT.font.sans, fontSize: "0.9rem", color: AT.color.textMuted, maxWidth: "360px" }}>
           This lot's story isn't available — it may not be listed yet, or the link may be incorrect.
         </p>
       </div>
@@ -84,120 +87,107 @@ export default function LotStory() {
   ].filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-linen">
+    <div style={{ minHeight: "100vh", background: AT.color.bodyBg, fontFamily: AT.font.sans }}>
       {/* Top bar */}
-      <div className="border-b border-border bg-white">
-        <div className="max-w-[720px] mx-auto px-5 py-4 flex items-center justify-between">
-          <img src={logoFull} alt="Beersheba" className="h-8" />
-          <span className="font-mono text-[0.58rem] tracking-[0.2em] uppercase text-ink/35">Lot Story</span>
+      <div style={{ borderBottom: `1px solid ${AT.color.border}`, background: AT.color.surface }}>
+        <div style={{ maxWidth: "720px", margin: "0 auto", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <img src={logoFull} alt="Beersheba" style={{ height: "32px" }} />
+          <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.06em", textTransform: "uppercase", color: AT.color.textDisabled, fontWeight: 500 }}>Lot Story</span>
         </div>
       </div>
 
-      {/* Hero — origin-gradient banner, no photography */}
-      <div className="relative overflow-hidden" style={{ background: originGradient(lot.region) }}>
-        <svg viewBox="0 0 400 300" aria-hidden className="absolute -right-10 -top-10 w-72 opacity-10">
-          <path d="M200 40c80-16 128 32 120 112-72 0-128-40-120-112Z" fill="#FFFFFF" />
-        </svg>
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,20,15,0.45), transparent 65%)" }} />
-        <div className="relative max-w-[720px] mx-auto px-5 pt-10 pb-8">
-          <p className="font-mono text-[0.65rem] tracking-[0.15em] uppercase mb-2" style={{ color: "rgba(255,255,255,0.85)" }}>
+      {/* Header band — flat, teal-accented (Gentelella has no photographic gradients) */}
+      <div style={{ background: AT.color.sidebarBg, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "220px", height: "220px", borderRadius: "999px", background: `${AT.color.primary}14` }} />
+        <div style={{ maxWidth: "720px", margin: "0 auto", padding: "36px 20px 32px", position: "relative" }}>
+          <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", letterSpacing: "0.06em", color: AT.color.sidebarText, margin: "0 0 8px" }}>
             {lot.lot_id} · {lot.exporter_company || "Ethiopian Exporter"}
           </p>
-          <h1 className="font-display text-[2.6rem] leading-[1.02] font-normal text-white mb-3" style={{ letterSpacing: "-0.01em" }}>
+          <h1 style={{ fontFamily: AT.font.sans, fontSize: "2rem", fontWeight: 700, lineHeight: 1.15, color: "#ffffff", margin: "0 0 10px" }}>
             {lot.name}
           </h1>
-          <div className="flex items-center gap-1.5" style={{ color: "rgba(255,255,255,0.85)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: AT.color.sidebarTextHover }}>
             <MapPin size={14} />
-            <span className="font-sans text-sm">
+            <span style={{ fontSize: "0.85rem" }}>
               {titleCase(lot.region)}{lot.washing_station ? ` · ${lot.washing_station}` : ""} · {lot.altitude_m}m
             </span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-[720px] mx-auto px-5 py-8">
+      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "28px 20px" }}>
         {/* Quality + compliance strip */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "20px" }}>
           {lot.latest_sca_score != null && (
-            <span className="inline-flex items-center gap-1.5 bg-white border border-border-strong rounded-[3px] px-3 py-1.5 font-mono text-[0.75rem] text-ink">
-              <Coffee size={13} className="text-coffee" /> {Number(lot.latest_sca_score).toFixed(1)} pts
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: AT.color.surface, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.sm, padding: "6px 12px", fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.text }}>
+              <Coffee size={13} color={AT.color.primaryDark} /> {Number(lot.latest_sca_score).toFixed(1)} pts
               {lot.latest_q_grader ? ` · ${lot.latest_q_grader}` : ""}
             </span>
           )}
-          <span className={`inline-flex items-center gap-1.5 rounded-[3px] px-3 py-1.5 font-mono text-[0.75rem] border ${
-            lot.export_ready
-              ? "bg-forest-light border-forest/20 text-forest"
-              : "bg-white border-border-strong text-slate"
-          }`}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", borderRadius: AT.radius.sm, padding: "6px 12px", fontFamily: AT.font.sans, fontSize: "0.78rem", border: `1px solid ${lot.export_ready ? AT.color.primary + "33" : AT.color.border}`, background: lot.export_ready ? AT.color.primaryLight : AT.color.surface, color: lot.export_ready ? AT.color.primaryDark : AT.color.textSecondary }}>
             <ShieldCheck size={13} /> {lot.compliance_score}/7 EUDR Gates {lot.export_ready ? "— Export Ready" : "Passed"}
           </span>
           {certs}
         </div>
 
-        {/* Map */}
         {(lot.boundary_geojson || lot.farm_location_geojson) && (
-          <div className="mb-6 rounded-md overflow-hidden border border-border">
+          <div style={{ marginBottom: "20px", borderRadius: AT.radius.lg, overflow: "hidden", border: `1px solid ${AT.color.border}` }}>
             {lot.boundary_geojson ? (
               <FarmMapDisplay polygon={lot.boundary_geojson} height={240} />
             ) : lot.farm_location_geojson ? (
-              <PointMap
-                lng={lot.farm_location_geojson.coordinates[0]}
-                lat={lot.farm_location_geojson.coordinates[1]}
-              />
+              <PointMap lng={lot.farm_location_geojson.coordinates[0]} lat={lot.farm_location_geojson.coordinates[1]} />
             ) : null}
           </div>
         )}
 
-        {/* Details */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-6 bg-white border border-border rounded-md p-5">
+        <div style={{ ...card, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px", marginBottom: "20px" }}>
           {[
             ["Processing", lot.processing],
             ["Grade", lot.grade],
             ["Varietal", lot.varietal],
             ["Harvest Date", lot.harvest_date],
-          ].map(([label, val]) => (
-            <div key={label}>
-              <p className="font-mono text-[0.58rem] tracking-[0.12em] uppercase text-ink/35 mb-0.5">{label}</p>
-              <p className="font-sans text-sm text-ink capitalize">{val || "—"}</p>
+          ].map(([lbl, val]) => (
+            <div key={lbl}>
+              <p style={label}>{lbl}</p>
+              <p style={{ fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text, textTransform: "capitalize", margin: 0 }}>{val || "—"}</p>
             </div>
           ))}
         </div>
 
         {(lot.tasting_notes || lot.flavor_notes) && (
-          <blockquote className="border-l-2 border-coffee pl-4 mb-6 font-display text-lg italic text-ink/80">
+          <blockquote style={{ borderLeft: `3px solid ${AT.color.primary}`, paddingLeft: "16px", marginBottom: "20px", marginLeft: 0, fontFamily: AT.font.sans, fontSize: "1.05rem", fontStyle: "italic", color: AT.color.text, opacity: 0.85 }}>
             "{lot.tasting_notes || lot.flavor_notes}"
           </blockquote>
         )}
 
         {lot.farm_story && (
-          <div className="mb-6">
-            <p className="font-mono text-[0.58rem] tracking-[0.15em] uppercase text-ink/35 mb-2">Farm Story</p>
-            <p className="font-sans text-sm leading-relaxed text-slate">{lot.farm_story}</p>
+          <div style={{ marginBottom: "20px" }}>
+            <p style={label}>Farm Story</p>
+            <p style={{ fontFamily: AT.font.sans, fontSize: "0.88rem", lineHeight: 1.65, color: AT.color.textSecondary, margin: 0 }}>{lot.farm_story}</p>
           </div>
         )}
 
         {lot.farm_photos?.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-6">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "20px" }}>
             {lot.farm_photos.map((src, i) => (
-              <img key={i} src={src} alt={`${lot.name} farm ${i + 1}`} className="w-full h-24 object-cover rounded-[3px]" />
+              <img key={i} src={src} alt={`${lot.name} farm ${i + 1}`} style={{ width: "100%", height: "96px", objectFit: "cover", borderRadius: AT.radius.sm }} />
             ))}
           </div>
         )}
 
-        {/* QR / share */}
-        <div className="flex items-center gap-4 bg-white border border-border rounded-md p-5 mb-6">
+        <div style={{ ...card, display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
           {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this lot's story" width={88} height={88} />}
           <div>
-            <p className="flex items-center gap-1.5 font-mono text-[0.65rem] tracking-[0.1em] uppercase text-ink/50 mb-1">
+            <p style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: AT.font.sans, fontSize: "0.72rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textMuted, margin: "0 0 4px", fontWeight: 500 }}>
               <QrCode size={13} /> Scan to verify
             </p>
-            <p className="font-sans text-[0.8rem] text-slate">
+            <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textSecondary, margin: 0 }}>
               This page is this lot's permanent, publicly verifiable record on Beersheba.
             </p>
           </div>
         </div>
 
-        <p className="text-center font-mono text-[0.55rem] tracking-[0.12em] uppercase text-ink/25 pb-8">
+        <p style={{ textAlign: "center", fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, paddingBottom: "32px" }}>
           Verified by Beersheba — Ethiopian Coffee Export Platform
         </p>
       </div>

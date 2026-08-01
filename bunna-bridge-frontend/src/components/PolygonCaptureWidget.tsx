@@ -3,6 +3,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GeoPolygon } from "../api/boundary";
 import { setLotBoundary, setFarmBoundary, inheritLotBoundary, calcAreaHa, queueBoundarySync } from "../api/boundary";
+import { AT } from "../styles/adminTokens";
+import { AC } from "../styles/adminComponents";
 
 // Fix Leaflet default marker icons (broken in Vite)
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -90,7 +92,7 @@ export default function PolygonCaptureWidget({
     if (!map) return;
     markersLayer.current?.clearLayers();
     pts.forEach(([lng, lat], i) => {
-      L.circleMarker([lat, lng], { radius: 6, color: "#1B4D35", fillColor: "#1B4D35", fillOpacity: 1 })
+      L.circleMarker([lat, lng], { radius: 6, color: AT.color.primary, fillColor: AT.color.primary, fillOpacity: 1 })
         .bindTooltip(`${i + 1}`, { permanent: true, className: "point-label" })
         .addTo(markersLayer.current!);
     });
@@ -106,7 +108,7 @@ export default function PolygonCaptureWidget({
     polyLayer.current?.remove();
     const latlngs = coords.map(([lng, lat]) => [lat, lng] as [number, number]);
     polyLayer.current = L.polygon(latlngs, {
-      color: "#8B5E3C", fillColor: "#8B5E3C", fillOpacity: 0.2, weight: 2,
+      color: AT.color.primary, fillColor: AT.color.primary, fillOpacity: 0.2, weight: 2,
     }).addTo(map);
     map.fitBounds(polyLayer.current.getBounds(), { padding: [20, 20] });
   };
@@ -247,126 +249,109 @@ export default function PolygonCaptureWidget({
   const areaHa = polygon ? calcAreaHa(polygon) : null;
 
   return (
-    <div style={{ background: "#FFFFFF", borderRadius: 12, padding: 20, color: "#1C1C1A" }}>
-      {/* Online indicator */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 18, fontWeight: 500 }}>
-          Farm Boundary
-        </span>
-        <span style={{
-          fontSize: 11, fontFamily: "DM Mono, monospace",
-          background: online ? "#1B4D35" : "rgba(28,28,26,0.05)",
-          color: online ? "#A8D5BC" : "#1B4D35",
-          padding: "3px 10px", borderRadius: 20,
-        }}>
-          {online ? "● ONLINE" : "● OFFLINE — local save"}
+    <div style={{ ...AC.card, ...AC.cardPad }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: "8px" }}>
+        <span style={{ ...AC.cardTitle, margin: 0 }}>Farm Boundary</span>
+        <span style={{ ...AC.pill.base, ...(online ? AC.pill.green : AC.pill.muted) }}>
+          {online ? "Online" : "Offline — local save"}
         </span>
       </div>
 
-      {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {(["pin", "walk", "import"] as Mode[]).map(m => (
-          <button key={m} onClick={() => { setTab(m); clearPoints(); }}
+        {(["pin", "walk", "import"] as Mode[]).map((m) => (
+          <button
+            key={m}
+            onClick={() => { setTab(m); clearPoints(); }}
             style={{
-              flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
-              background: tab === m ? "#1B4D35" : "rgba(28,28,26,0.05)",
-              color: tab === m ? "#fff" : "rgba(28,28,26,0.5)",
+              flex: 1, padding: "8px 0", borderRadius: AT.radius.md, border: "none",
+              fontFamily: AT.font.sans, fontSize: 13, cursor: "pointer",
+              background: tab === m ? AT.color.primary : AT.color.surfaceSecondary,
+              color: tab === m ? "#fff" : AT.color.textMuted,
               fontWeight: tab === m ? 600 : 400,
-            }}>
-            {m === "pin" ? "📍 Pin Corners" : m === "walk" ? "🚶 Walk Boundary" : "📂 Import File"}
+            }}
+          >
+            {m === "pin" ? "Pin Corners" : m === "walk" ? "Walk Boundary" : "Import File"}
           </button>
         ))}
       </div>
 
-      {/* Instructions */}
-      <div style={{ fontSize: 12, color: "rgba(28,28,26,0.5)", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif", lineHeight: 1.5 }}>
+      <div style={{ fontSize: 12, color: AT.color.textMuted, marginBottom: 12, fontFamily: AT.font.sans, lineHeight: 1.5 }}>
         {tab === "pin" && "Tap the map at each corner of the farm. Minimum 3 points. Tap 'Clear' to start over."}
         {tab === "walk" && "Press Start, then walk along the farm boundary. Press Stop when you return to the start."}
         {tab === "import" && "Upload a GeoJSON or KML file exported from another GPS app or government records."}
       </div>
 
-      {/* Map */}
-      <div ref={mapRef} style={{ height: 300, borderRadius: 8, marginBottom: 12, border: "1px solid #4A2515" }} />
+      <div ref={mapRef} style={{ height: 300, borderRadius: AT.radius.md, marginBottom: 12, border: `1px solid ${AT.color.border}` }} />
 
-      {/* Walk controls */}
       {tab === "walk" && (
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-          <button onClick={startWalk} disabled={walking}
+          <button
+            onClick={startWalk} disabled={walking}
             style={{
-              flex: 1, padding: "10px 0", borderRadius: 8, border: "none",
-              background: walking ? "rgba(28,28,26,0.05)" : "#1B4D35", color: "#A8D5BC",
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 14, cursor: walking ? "not-allowed" : "pointer",
-            }}>
-            {walking ? `Recording… (${points.length} pts)` : "▶ Start Walking"}
+              flex: 1, padding: "10px 0", borderRadius: AT.radius.md, border: "none",
+              background: walking ? AT.color.surfaceSecondary : AT.color.primary, color: walking ? AT.color.textDisabled : "#fff",
+              fontFamily: AT.font.sans, fontSize: 14, cursor: walking ? "not-allowed" : "pointer",
+            }}
+          >
+            {walking ? `Recording… (${points.length} pts)` : "Start Walking"}
           </button>
-          <button onClick={stopWalk} disabled={!walking}
+          <button
+            onClick={stopWalk} disabled={!walking}
             style={{
-              flex: 1, padding: "10px 0", borderRadius: 8, border: "none",
-              background: !walking ? "rgba(28,28,26,0.05)" : "#1B4D35", color: "#fff",
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 14, cursor: !walking ? "not-allowed" : "pointer",
-            }}>
-            ■ Stop & Close
+              flex: 1, padding: "10px 0", borderRadius: AT.radius.md, border: "none",
+              background: !walking ? AT.color.surfaceSecondary : AT.color.red, color: !walking ? AT.color.textDisabled : "#fff",
+              fontFamily: AT.font.sans, fontSize: 14, cursor: !walking ? "not-allowed" : "pointer",
+            }}
+          >
+            Stop & Close
           </button>
         </div>
       )}
 
-      {/* Import file input */}
       {tab === "import" && (
         <div style={{ marginBottom: 12 }}>
-          <input type="file" accept=".geojson,.json,.kml"
+          <input
+            type="file" accept=".geojson,.json,.kml"
             onChange={handleFileImport}
-            style={{ color: "#1C1C1A", fontFamily: "Instrument Sans, sans-serif", fontSize: 13 }} />
+            style={{ color: AT.color.text, fontFamily: AT.font.sans, fontSize: 13 }}
+          />
         </div>
       )}
 
-      {/* Stats */}
       {areaHa !== null && (
         <div style={{
-          background: "#1B4D35", borderRadius: 8, padding: "8px 14px",
-          marginBottom: 12, fontFamily: "DM Mono, monospace", fontSize: 13, color: "#A8D5BC",
+          background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.md, padding: "8px 14px",
+          marginBottom: 12, fontFamily: AT.font.mono, fontSize: 13, color: AT.color.primaryDark,
         }}>
           Area: ~{areaHa} ha · {points.length} boundary points
         </div>
       )}
 
-      {/* Status message */}
       {status && (
-        <div style={{ fontSize: 12, color: "#1B4D35", marginBottom: 12, fontFamily: "Instrument Sans, sans-serif" }}>
+        <div style={{ fontSize: 12, color: AT.color.textSecondary, marginBottom: 12, fontFamily: AT.font.sans }}>
           {status}
         </div>
       )}
 
-      {/* Actions */}
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         {polygon && (
-          <button onClick={handleSave} disabled={saving}
-            style={{
-              flex: 2, padding: "12px 0", borderRadius: 8, border: "none",
-              background: "#1B4D35", color: "#fff", fontWeight: 600,
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 14,
-              cursor: saving ? "not-allowed" : "pointer",
-            }}>
-            {saving ? "Saving…" : online ? "💾 Save Boundary" : "📥 Save Locally"}
+          <button
+            onClick={handleSave} disabled={saving}
+            style={{ ...AC.btnPrimary, flex: 2, justifyContent: "center", opacity: saving ? 0.6 : 1, cursor: saving ? "not-allowed" : "pointer" }}
+          >
+            {saving ? "Saving…" : online ? "Save Boundary" : "Save Locally"}
           </button>
         )}
         {canInherit && mode === "lot" && (
-          <button onClick={handleInherit} disabled={saving}
-            style={{
-              flex: 1, padding: "12px 0", borderRadius: 8, border: "1px solid #4A7C59",
-              background: "transparent", color: "#2D7A52",
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
-            }}>
-            ↙ From Farm
+          <button
+            onClick={handleInherit} disabled={saving}
+            style={{ ...AC.btnGhost, flex: 1, justifyContent: "center", color: AT.color.primaryDark, borderColor: `${AT.color.primary}44` }}
+          >
+            From Farm
           </button>
         )}
         {points.length > 0 && (
-          <button onClick={clearPoints}
-            style={{
-              flex: 1, padding: "12px 0", borderRadius: 8, border: "1px solid #4A2515",
-              background: "transparent", color: "rgba(28,28,26,0.5)",
-              fontFamily: "Instrument Sans, sans-serif", fontSize: 13, cursor: "pointer",
-            }}>
+          <button onClick={clearPoints} style={{ ...AC.btnGhost, flex: 1, justifyContent: "center" }}>
             Clear
           </button>
         )}

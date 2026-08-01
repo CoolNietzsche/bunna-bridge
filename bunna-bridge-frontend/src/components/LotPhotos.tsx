@@ -4,6 +4,8 @@ import { uploadLotPhoto, deleteLotPhoto } from "../api/lots";
 import { getMediaUrl } from "../api/docs";
 import { useAuth } from "../context/AuthContext";
 import { ImagePlus, X, Loader } from "lucide-react";
+import { AT } from "../styles/adminTokens";
+import { AC } from "../styles/adminComponents";
 
 interface Props { lotId: string; photos: string[]; }
 
@@ -50,13 +52,11 @@ export default function LotPhotos({ lotId, photos }: Props) {
 
   return (
     <div>
-      <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(28,28,26,0.4)", margin: "0 0 14px" }}>
-        Farm Photos
-      </p>
+      <p style={{ ...AC.cardTitle, marginBottom: "14px" }}>Farm Photos</p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 96px), 1fr))", gap: "8px" }}>
-        {photos.map(url => (
-          <div key={url} style={{ position: "relative", aspectRatio: "1", borderRadius: "4px", overflow: "hidden", border: "1px solid rgba(28,28,26,0.08)" }}>
+        {photos.map((url) => (
+          <div key={url} style={{ position: "relative", aspectRatio: "1", borderRadius: AT.radius.sm, overflow: "hidden", border: `1px solid ${AT.color.border}` }}>
             <img src={getMediaUrl(url) ?? url} alt="Farm" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             {canUpload && (
               <button
@@ -65,7 +65,7 @@ export default function LotPhotos({ lotId, photos }: Props) {
                 style={{
                   position: "absolute", top: "4px", right: "4px",
                   width: "20px", height: "20px", borderRadius: "50%", border: "none",
-                  background: "rgba(28,28,26,0.6)", color: "#FFFFFF",
+                  background: "rgba(26,35,50,0.65)", color: "#ffffff",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: removing === url ? "not-allowed" : "pointer",
                 }}
@@ -82,15 +82,15 @@ export default function LotPhotos({ lotId, photos }: Props) {
             onClick={handlePick}
             disabled={uploading}
             style={{
-              aspectRatio: "1", borderRadius: "4px",
-              border: "1px dashed rgba(28,28,26,0.2)", background: "#F7F5F0",
+              aspectRatio: "1", borderRadius: AT.radius.sm,
+              border: `1px dashed ${AT.color.border}`, background: AT.color.surfaceSecondary,
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px",
-              color: "rgba(28,28,26,0.4)", cursor: uploading ? "not-allowed" : "pointer",
+              color: AT.color.textDisabled, cursor: uploading ? "not-allowed" : "pointer",
             }}
           >
             {uploading ? <Loader size={16} /> : <ImagePlus size={16} />}
-            <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.06em" }}>
-              {uploading ? "UPLOADING" : "ADD PHOTO"}
+            <span style={{ fontFamily: AT.font.sans, fontSize: "0.62rem" }}>
+              {uploading ? "Uploading" : "Add Photo"}
             </span>
           </button>
         )}
@@ -102,12 +102,12 @@ export default function LotPhotos({ lotId, photos }: Props) {
       />
 
       {error && (
-        <p style={{ fontFamily: "DM Mono, monospace", fontSize: "0.6rem", color: "#C0392B", margin: "8px 0 0" }}>
+        <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.red, margin: "8px 0 0" }}>
           {error}
         </p>
       )}
       {photos.length === 0 && !canUpload && (
-        <p style={{ fontFamily: "Instrument Sans, sans-serif", fontSize: "0.78rem", color: "rgba(28,28,26,0.3)", margin: 0 }}>
+        <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textMuted, margin: 0 }}>
           No photos yet.
         </p>
       )}

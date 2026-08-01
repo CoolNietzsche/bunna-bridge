@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GeoPolygon } from "../api/boundary";
+import { AT } from "../styles/adminTokens";
 
 interface Props {
   polygon: GeoPolygon;
@@ -31,8 +32,8 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
     }).addTo(map);
 
     const poly = L.polygon(latlngs, {
-      color: "#8B5E3C",
-      fillColor: "#8B5E3C",
+      color: AT.color.primary,
+      fillColor: AT.color.primary,
       fillOpacity: 0.18,
       weight: 2,
     }).addTo(map);
@@ -54,16 +55,16 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
   const areaHa = Math.round(Math.abs(area / 2) * 1230800000) / 100;
 
   return (
-    <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(28,28,26,0.12)" }}>
+    <div style={{ borderRadius: AT.radius.lg, overflow: "hidden", border: `1px solid ${AT.color.border}` }}>
       {label && (
         <div style={{
-          background: "#FFFFFF", padding: "8px 14px",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
+          background: AT.color.surface, padding: "8px 14px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px",
         }}>
-          <span style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 15, color: "#1C1C1A" }}>
+          <span style={{ fontFamily: AT.font.sans, fontSize: 14, fontWeight: 600, color: AT.color.text }}>
             {label}
           </span>
-          <span style={{ fontFamily: "DM Mono, monospace", fontSize: 11, color: "#8B5E3C" }}>
+          <span style={{ fontFamily: AT.font.mono, fontSize: 11, color: AT.color.primaryDark }}>
             ~{areaHa} ha · {coords.length - 1} pts
           </span>
         </div>
