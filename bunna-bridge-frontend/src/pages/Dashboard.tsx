@@ -415,7 +415,10 @@ export default function Dashboard() {
         </div>
       )}
 
-      <style>{`@media (max-width: 960px){ .ab-2col { grid-template-columns: 1fr !important; } }`}</style>
+      <style>{`
+        .ab-2col > * { min-width: 0; }
+        @media (max-width: 960px){ .ab-2col { grid-template-columns: 1fr !important; } }
+      `}</style>
     </AdminShell>
   );
 }
