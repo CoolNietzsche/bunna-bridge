@@ -11,11 +11,17 @@ import BarChart from "../components/charts/BarChart";
 import {
   Package, ShieldCheck, TrendingUp, AlertTriangle,
   ArrowRight, Plus, Leaf, Mountain, FlaskConical,
-  Award, Ruler, Users, Map, Handshake, Mail, ArrowUpRight,
+  Award, Ruler, Users, Map, Handshake, Mail,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 import { isBuyerRole } from "../lib/utils";
+import { WidgetStat, WidgetStatProgress, WidgetStatSimple, type WidgetTone } from "../components/admin/AdminWidgets";
+
+type StatDef =
+  | { kind: "trend"; label: string; value: string | number; icon: React.ReactNode; tone: WidgetTone; path: string; sublabel?: string; trend: number[] }
+  | { kind: "progress"; label: string; value: string | number; icon?: React.ReactNode; tone: WidgetTone; path: string; percent: number; footer?: string }
+  | { kind: "simple"; label: string; value: string | number; icon: React.ReactNode; tone: WidgetTone; path: string; footer?: string };
 
 // ── Small helpers ──────────────────────────────────────────────────
 
@@ -148,6 +154,8 @@ export default function Dashboard() {
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const newThisWeek = results.filter((l) => l.created_at && new Date(l.created_at).getTime() >= oneWeekAgo).length;
   const newLotsSublabel = newThisWeek > 0 ? `+${newThisWeek} this week` : undefined;
+  const registrationTrend = monthlyRegistrations.map((m) => m.value);
+  const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 
   const greeting = () => {
     const name = user?.first_name || user?.email?.split("@")[0] || "there";
@@ -155,25 +163,25 @@ export default function Dashboard() {
     return `${h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"}, ${name}.`;
   };
 
-  const stats = isBuyerLike
+  const stats: StatDef[] = isBuyerLike
     ? [
-        { label: "Available Lots", value: total, icon: <Package size={18} />, tone: "green" as const, path: "/marketplace", sublabel: newLotsSublabel },
-        { label: "EUDR Verified", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue" as const, path: "/marketplace?eudr_dds_ready=true" },
-        { label: "Watchlist", value: "—", icon: <Leaf size={18} />, tone: "green" as const, path: "/buyer/watchlist" },
-        { label: "Regions Active", value: regions || 7, icon: <Mountain size={18} />, tone: "yellow" as const, path: "/marketplace" },
+        { kind: "trend", label: "Available Lots", value: total, icon: <Package size={18} />, tone: "green", path: "/marketplace", sublabel: newLotsSublabel, trend: registrationTrend },
+        { kind: "progress", label: "EUDR Verified", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue", path: "/marketplace?eudr_dds_ready=true", percent: pct(eudrReady, total), footer: `${eudrReady} of ${total} lots` },
+        { kind: "simple", label: "Watchlist", value: "—", icon: <Leaf size={18} />, tone: "green", path: "/buyer/watchlist" },
+        { kind: "simple", label: "Regions Active", value: regions || 7, icon: <Mountain size={18} />, tone: "yellow", path: "/marketplace" },
       ]
     : isFarmer
     ? [
-        { label: "Linked Lots", value: total, icon: <Package size={18} />, tone: "green" as const, path: "/farm", sublabel: newLotsSublabel },
-        { label: "Export Ready", value: exportReady, icon: <TrendingUp size={18} />, tone: "blue" as const, path: "/farm" },
-        { label: "Avg Cup Score", value: avgSca, icon: <ShieldCheck size={18} />, tone: "yellow" as const, path: "/farm" },
-        { label: "Farm Size", value: farmProfile?.farm_size_ha ? `${farmProfile.farm_size_ha}ha` : "—", icon: <Ruler size={18} />, tone: "green" as const, path: "/farm" },
+        { kind: "trend", label: "Linked Lots", value: total, icon: <Package size={18} />, tone: "green", path: "/farm", sublabel: newLotsSublabel, trend: registrationTrend },
+        { kind: "progress", label: "Export Ready", value: exportReady, icon: <TrendingUp size={18} />, tone: "blue", path: "/farm", percent: pct(exportReady, total), footer: `${exportReady} of ${total} lots` },
+        { kind: "progress", label: "Avg Cup Score", value: avgSca, icon: <ShieldCheck size={18} />, tone: "yellow", path: "/farm", percent: avgSca === "—" ? 0 : Number(avgSca), footer: "Specialty threshold: 80" },
+        { kind: "simple", label: "Farm Size", value: farmProfile?.farm_size_ha ? `${farmProfile.farm_size_ha}ha` : "—", icon: <Ruler size={18} />, tone: "green", path: "/farm" },
       ]
     : [
-        { label: "Total Lots", value: total, icon: <Package size={18} />, tone: "green" as const, path: "/lots", sublabel: newLotsSublabel },
-        { label: "EUDR Ready", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue" as const, path: "/lots" },
-        { label: "Export Ready", value: exportReady, icon: <TrendingUp size={18} />, tone: "yellow" as const, path: "/lots" },
-        { label: "Pending Compliance", value: pending, icon: <AlertTriangle size={18} />, tone: "red" as const, path: "/lots" },
+        { kind: "trend", label: "Total Lots", value: total, icon: <Package size={18} />, tone: "green", path: "/lots", sublabel: newLotsSublabel, trend: registrationTrend },
+        { kind: "progress", label: "EUDR Ready", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue", path: "/lots", percent: pct(eudrReady, total), footer: `${eudrReady} of ${total} lots` },
+        { kind: "progress", label: "Export Ready", value: exportReady, icon: <TrendingUp size={18} />, tone: "yellow", path: "/lots", percent: pct(exportReady, total), footer: `${exportReady} of ${total} lots` },
+        { kind: "simple", label: "Pending Compliance", value: pending, icon: <AlertTriangle size={18} />, tone: "red", path: "/lots" },
       ];
 
   const quickActions: Record<string, { label: string; path: string; icon: React.ReactNode; primary?: boolean }[]> = {
@@ -275,23 +283,14 @@ export default function Dashboard() {
       {/* ── Stat cards ──────────────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "20px" }}>
         {stats.map((stat) => {
-          const toneColor = { green: AT.color.primary, blue: AT.color.blue, yellow: "#b45309", red: AT.color.red }[stat.tone];
-          const toneBg = { green: AT.color.greenLight, blue: AT.color.blueLight, yellow: AT.color.yellowLight, red: AT.color.redLight }[stat.tone];
-          return (
-            <button key={stat.label} onClick={() => navigate(stat.path)} style={{ ...AC.card, ...AC.cardPad, textAlign: "left", cursor: "pointer" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "12px" }}>
-                <span style={{ width: "36px", height: "36px", borderRadius: AT.radius.md, background: toneBg, color: toneColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {stat.icon}
-                </span>
-                <ArrowUpRight size={14} color={AT.color.textDisabled} />
-              </div>
-              <p style={AC.metricValue}>{stat.value}</p>
-              <p style={AC.metricLabel}>{stat.label}</p>
-              {"sublabel" in stat && stat.sublabel && (
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", color: AT.color.primaryDark, fontWeight: 600, margin: "4px 0 0" }}>{stat.sublabel}</p>
-              )}
-            </button>
-          );
+          const onClick = () => navigate(stat.path);
+          if (stat.kind === "trend") {
+            return <WidgetStat key={stat.label} icon={stat.icon} label={stat.label} value={stat.value} tone={stat.tone} trend={stat.trend} sublabel={stat.sublabel} onClick={onClick} />;
+          }
+          if (stat.kind === "progress") {
+            return <WidgetStatProgress key={stat.label} icon={stat.icon} label={stat.label} value={stat.value} tone={stat.tone} percent={stat.percent} footer={stat.footer} onClick={onClick} />;
+          }
+          return <WidgetStatSimple key={stat.label} icon={stat.icon} label={stat.label} value={stat.value} tone={stat.tone} footer={stat.footer} onClick={onClick} />;
         })}
       </div>
 
