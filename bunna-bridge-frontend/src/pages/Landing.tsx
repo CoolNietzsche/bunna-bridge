@@ -8,6 +8,20 @@ import OriginCard from "../components/market/OriginCard";
 import Reveal from "../components/Reveal";
 import { SELECTIONS, STATIC_ORIGINS } from "../lib/catalog";
 import { T } from "../styles/tokens";
+import heroImage from "../assets/landing/hero.webp";
+import ctaBandImage from "../assets/landing/cta-band.webp";
+import originYirgacheffe from "../assets/landing/origin-yirgacheffe.webp";
+import originGuji from "../assets/landing/origin-guji.webp";
+import originSidama from "../assets/landing/origin-sidama.webp";
+import originHarrar from "../assets/landing/origin-harrar.webp";
+import cuppingDetailImage from "../assets/landing/cupping-detail.webp";
+
+const ORIGIN_IMAGES: Record<string, string> = {
+  yirgacheffe: originYirgacheffe,
+  guji: originGuji,
+  sidama: originSidama,
+  harrar: originHarrar,
+};
 
 // The marketplace list requires auth on this deployment, and this page is
 // only ever shown to anonymous visitors (authenticated users are redirected
@@ -30,29 +44,41 @@ export default function Landing() {
           strokeB="var(--color-border)"
         />
         <div className="container-editorial" style={{ position: "relative", paddingTop: "clamp(72px, 11vw, 152px)", paddingBottom: "clamp(64px, 9vw, 108px)" }}>
-          <div style={{ maxWidth: "700px" }}>
-            <Reveal>
-              <span style={kicker}>Farm boundary → FOB, fully traceable</span>
-            </Reveal>
-            <Reveal delay={90}>
-              <h1 style={{ fontFamily: T.font.display, fontSize: "clamp(2.9rem, 6.4vw, 5.25rem)", fontWeight: 400, lineHeight: 0.98, letterSpacing: "-0.025em", color: T.color.ink, margin: "22px 0 0" }}>
-                Ethiopian specialty coffee,<br />
-                <em style={{ fontStyle: "italic", color: T.color.forest }}>traceable to the tree.</em>
-              </h1>
-            </Reveal>
-            <Reveal delay={170}>
-              <p style={{ fontFamily: T.font.sans, fontSize: "clamp(1.05rem, 1.6vw, 1.2rem)", lineHeight: 1.65, color: T.color.textMuted, margin: "26px 0 0", maxWidth: "50ch" }}>
-                Beersheba connects farmers, exporters and roasters through a single
-                compliance pipeline — EUDR, ECTA and NBE — so every micro-lot carries
-                its own verified origin story, from GPS boundary to bill of lading.
-              </p>
-            </Reveal>
-            <Reveal delay={250}>
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "14px", marginTop: "36px" }}>
-                <button className="bb-cta" onClick={() => navigate("/marketplace")} style={primaryBtn}>
-                  Explore the coffees <ArrowRight size={17} className="bb-cta-icon" />
-                </button>
-                <a href="#pipeline" style={ghostBtn}>How it works</a>
+          <div className="bb-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "48px", alignItems: "center" }}>
+            <div>
+              <Reveal>
+                <span style={kicker}>Farm boundary → FOB, fully traceable</span>
+              </Reveal>
+              <Reveal delay={90}>
+                <h1 style={{ fontFamily: T.font.display, fontSize: "clamp(2.9rem, 5.6vw, 4.6rem)", fontWeight: 400, lineHeight: 0.98, letterSpacing: "-0.025em", color: T.color.ink, margin: "22px 0 0" }}>
+                  Ethiopian specialty coffee,<br />
+                  <em style={{ fontStyle: "italic", color: T.color.forest }}>traceable to the tree.</em>
+                </h1>
+              </Reveal>
+              <Reveal delay={170}>
+                <p style={{ fontFamily: T.font.sans, fontSize: "clamp(1.05rem, 1.6vw, 1.2rem)", lineHeight: 1.65, color: T.color.textMuted, margin: "26px 0 0", maxWidth: "48ch" }}>
+                  Beersheba connects farmers, exporters and roasters through a single
+                  compliance pipeline — EUDR, ECTA and NBE — so every micro-lot carries
+                  its own verified origin story, from GPS boundary to bill of lading.
+                </p>
+              </Reveal>
+              <Reveal delay={250}>
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "14px", marginTop: "36px" }}>
+                  <button className="bb-cta" onClick={() => navigate("/marketplace")} style={primaryBtn}>
+                    Explore the coffees <ArrowRight size={17} className="bb-cta-icon" />
+                  </button>
+                  <a href="#pipeline" style={ghostBtn}>How it works</a>
+                </div>
+              </Reveal>
+            </div>
+
+            <Reveal delay={140} className="bb-hero-image" style={{ position: "relative" }}>
+              <div style={{ position: "relative", borderRadius: T.radius.xl, overflow: "hidden", boxShadow: T.shadow.hover, aspectRatio: "4 / 5" }}>
+                <img
+                  src={heroImage}
+                  alt="Terraced highland coffee farm in Yirgacheffe, Ethiopia, at dawn"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
               </div>
             </Reveal>
           </div>
@@ -74,9 +100,20 @@ export default function Landing() {
 
       {/* ── The pipeline ─────────────────────────────────────── */}
       <section id="pipeline" className="container-editorial" style={{ paddingTop: "96px", scrollMarginTop: "90px" }}>
-        <Reveal>
-          <SectionHead kicker="The pipeline" title="Seven gates to a Green Passport" sub="Every lot is scored against seven independent compliance checks before it can list. Pass all seven, and it earns a verifiable Green Passport." />
-        </Reveal>
+        <div className="bb-pipeline-head" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "32px" }}>
+          <Reveal style={{ flex: 1 }}>
+            <SectionHead kicker="The pipeline" title="Seven gates to a Green Passport" sub="Every lot is scored against seven independent compliance checks before it can list. Pass all seven, and it earns a verifiable Green Passport." />
+          </Reveal>
+          <Reveal delay={100} className="bb-pipeline-image" style={{ flexShrink: 0 }}>
+            <div style={{ width: "180px", borderRadius: T.radius.lg, overflow: "hidden", boxShadow: T.shadow.card, aspectRatio: "4 / 3" }}>
+              <img
+                src={cuppingDetailImage}
+                alt="A Q-grader arranging cupping bowls at a wooden cupping table"
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              />
+            </div>
+          </Reveal>
+        </div>
 
         <div style={{ position: "relative", marginTop: "56px" }}>
           <div aria-hidden className="bb-gates-line-h" />
@@ -113,7 +150,7 @@ export default function Landing() {
         <div className="bb-origins-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gridTemplateRows: "repeat(2, 210px)", gap: "16px", marginTop: "32px" }}>
           {STATIC_ORIGINS.map((o, i) => (
             <Reveal key={o.region} delay={i * 70} className={`bb-origin-slot bb-origin-slot-${i}`} style={{ height: "100%" }}>
-              <OriginCard origin={o} featured={i === 0} />
+              <OriginCard origin={o} featured={i === 0} image={ORIGIN_IMAGES[o.region]} />
             </Reveal>
           ))}
         </div>
@@ -141,7 +178,14 @@ export default function Landing() {
       {/* ── Values + CTA ─────────────────────────────────────── */}
       <section className="container-editorial" style={{ paddingTop: "104px" }}>
         <Reveal>
-          <div style={{ position: "relative", overflow: "hidden", borderRadius: T.radius.xl, background: "linear-gradient(160deg, #17402F 0%, #0E2A20 100%)", padding: "clamp(40px, 6vw, 76px)" }}>
+          <div style={{ position: "relative", overflow: "hidden", borderRadius: T.radius.xl, padding: "clamp(40px, 6vw, 76px)" }}>
+            <img
+              src={ctaBandImage}
+              alt=""
+              aria-hidden
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(23,64,47,0.90) 0%, rgba(14,42,32,0.94) 100%)" }} />
             <TopographicMark
               style={{ position: "absolute", top: "-28%", right: "-16%", width: "460px" }}
               strokeA="rgba(255,255,255,0.12)"
@@ -178,6 +222,8 @@ export default function Landing() {
       <style>{`
         @media (max-width: 960px){ .bb-hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }
         @media (max-width: 640px){ .bb-proof-strip { row-gap: 8px; } }
+        @media (max-width: 720px){ .bb-hero-image { max-width: 380px; margin: 0 auto; } }
+        @media (max-width: 700px){ .bb-pipeline-image { display: none; } .bb-pipeline-head { display: block; } }
 
         .bb-cta .bb-cta-icon { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1); }
         .bb-cta:hover .bb-cta-icon { transform: translateX(3px); }
