@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from .serializers import UserSerializer, RegisterSerializer, ExporterPublicSerializer
-from .serializers import FarmerSerializer
+from .serializers import FarmerSerializer, CertificationSerializer
+from .models import Certification
 User = get_user_model()
 
 
@@ -110,6 +111,27 @@ class ExporterLotsView(generics.ListAPIView):
     def get_serializer_class(self):
         from bunna_bridge.lots.serializers import CoffeeLotListSerializer
         return CoffeeLotListSerializer
+
+
+class CertificationListCreateView(generics.ListCreateAPIView):
+    serializer_class   = CertificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        return Certification.objects.filter(holder=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(holder=self.request.user)
+
+
+class CertificationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class   = CertificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        return Certification.objects.filter(holder=self.request.user)
 
 
 class ExporterEctaLicenseDownloadView(generics.GenericAPIView):

@@ -6,35 +6,76 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from django.core.files.storage import default_storage
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import CoffeeLot, CuppingScore, SampleRequest
+from .models import CoffeeLot, CuppingScore, SampleRequest, WashingStation
 from .serializers import (
     CoffeeLotListSerializer, CoffeeLotDetailSerializer,
     CuppingScoreSerializer, SampleRequestSerializer, LotStatusUpdateSerializer,
-    PublicLotStorySerializer,
+    PublicLotStorySerializer, WashingStationSerializer,
 )
 
 
-class IsExporterOrReadOnly(permissions.BasePermission):
+class CanManageLotOrReadOnly(permissions.BasePermission):
+    """
+    Exporters and roasters can create/manage lots they own (roasters often
+    run their own washing stations and export directly). Everyone else
+    (buyer, farmer, qgrader) gets read-only access via get_queryset.
+
+    has_object_permission is required here, not just has_permission: a
+    roaster's get_queryset includes other exporters' listed/contracted/
+    exported lots for marketplace browsing, so without an object-level
+    ownership check a roaster could PATCH/DELETE a lot they don't own.
+    """
+
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
         if request.method in permissions.SAFE_METHODS:
             return True
         return (
-            getattr(request.user, "role", None) in ("exporter", "admin")
+            getattr(request.user, "role", None) in ("exporter", "roaster", "admin")
+            or request.user.is_staff
+            or request.user.is_superuser
+        )
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return (
+            obj.exporter_id == request.user.id
+            or getattr(request.user, "role", None) == "admin"
             or request.user.is_staff
             or request.user.is_superuser
         )
 
 
+class WashingStationListCreateView(generics.ListCreateAPIView):
+    serializer_class   = WashingStationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return WashingStation.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class WashingStationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class   = WashingStationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return WashingStation.objects.filter(owner=self.request.user)
+
+
 class CoffeeLotViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     queryset           = CoffeeLot.objects.select_related("exporter", "farmer").all()
-    permission_classes = [IsExporterOrReadOnly]
+    permission_classes = [CanManageLotOrReadOnly]
     filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields   = ["region", "grade", "processing", "status",
                           "deforestation_free", "eudr_dds_ready"]
@@ -49,7 +90,12 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
         role = getattr(user, "role", "exporter")
         if role == "exporter":
             return qs.filter(exporter=user)
-        if role in ("buyer", "roaster"):
+        if role == "roaster":
+            # Roasters see lots they own/export themselves, plus the
+            # marketplace-visible lots from everyone else (they're still
+            # buyer-like for sourcing green coffee).
+            return qs.filter(Q(exporter=user) | Q(status__in=["listed", "contracted", "exported"]))
+        if role == "buyer":
             return qs.filter(status__in=["listed", "contracted", "exported"])
         if role == "farmer":
             return qs.filter(farmer=user)
@@ -246,7 +292,13 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
         role = getattr(user, "role", "buyer")
         if user.is_staff or role == "admin":
             return SampleRequest.objects.select_related("lot","buyer").all()
-        if role in ("buyer", "roaster"):
+        if role == "roaster":
+            # Dual-role: sees requests they made as a buyer, plus requests
+            # made on lots they own/export.
+            return SampleRequest.objects.filter(
+                Q(buyer=user) | Q(lot__exporter=user)
+            ).select_related("lot","buyer")
+        if role == "buyer":
             return SampleRequest.objects.filter(buyer=user).select_related("lot","buyer")
         if role == "exporter":
             return SampleRequest.objects.filter(
@@ -261,8 +313,9 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
     def respond(self, request, pk=None):
         sample = self.get_object()
         role   = getattr(request.user, "role", "")
-        if role not in ("exporter","admin") and not request.user.is_staff:
-            return Response({"detail": "Only exporters can respond."}, status=403)
+        is_lot_owner = sample.lot.exporter_id == request.user.id
+        if not (is_lot_owner or role == "admin" or request.user.is_staff):
+            return Response({"detail": "Only the lot's exporter can respond."}, status=403)
 
         new_status = request.data.get("status")
         response_msg = request.data.get("response", "")
@@ -290,10 +343,10 @@ class LotStatusUpdateView(viewsets.ViewSet):
             return Response({"detail": "Lot not found."}, status=404)
 
         role = getattr(request.user, "role", "")
-        if role not in ("exporter","admin") and not request.user.is_staff:
-            return Response({"detail": "Only exporters can update lot status."}, status=403)
+        if role not in ("exporter", "roaster", "admin") and not request.user.is_staff:
+            return Response({"detail": "Only exporters or roasters can update lot status."}, status=403)
 
-        if role == "exporter" and lot.exporter != request.user:
+        if role in ("exporter", "roaster") and lot.exporter != request.user:
             return Response({"detail": "Not your lot."}, status=403)
 
         serializer = LotStatusUpdateSerializer(data=request.data)

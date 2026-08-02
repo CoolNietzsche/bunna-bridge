@@ -16,7 +16,7 @@ const STATUS = ["", "draft", "listed", "contracted", "exported"];
 export default function Lots() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isExporter = user?.role === "exporter" || user?.role === "admin";
+  const canManageLots = user?.role === "exporter" || user?.role === "roaster" || user?.role === "admin";
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
 
@@ -34,7 +34,7 @@ export default function Lots() {
           <p style={AC.eyebrow}>Registry</p>
           <h1 style={{ ...AC.pageTitle, marginTop: "4px" }}>Coffee Lots</h1>
         </div>
-        {isExporter && (
+        {canManageLots && (
           <button onClick={() => navigate("/lots/new")} style={AC.btnPrimary}>
             <Plus size={15} /> New Lot
           </button>
@@ -87,7 +87,7 @@ export default function Lots() {
         <div style={{ textAlign: "center", padding: "64px 0" }}>
           <Package size={32} color={AT.color.textDisabled} style={{ marginBottom: "10px" }} />
           <p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.textMuted, margin: 0 }}>No lots found.</p>
-          {isExporter && (
+          {canManageLots && (
             <button onClick={() => navigate("/lots/new")} style={{ marginTop: "10px", background: "none", border: "none", cursor: "pointer", fontFamily: AT.font.sans, fontSize: "0.8rem", color: AT.color.primaryDark, fontWeight: 600 }}>
               Register your first lot →
             </button>

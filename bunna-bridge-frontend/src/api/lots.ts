@@ -13,6 +13,7 @@ export interface CoffeeLot {
   varietal: string;
   kebele: string;
   washing_station: string;
+  washing_station_facility: string | null;
   sca_score: number | null;
   flavor_notes: string;
   volume_kg: string;

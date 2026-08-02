@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from .models import Offer, CoffeeLot, Notification
 from .serializers import OfferSerializer
@@ -26,7 +27,13 @@ class OfferListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         role = getattr(user, "role", None)
-        if role in ("buyer", "roaster"):
+        if role == "roaster":
+            # Dual-role: offers they made as a buyer, plus offers received
+            # on lots they own/export.
+            return Offer.objects.filter(
+                Q(buyer=user) | Q(lot__exporter=user)
+            ).select_related("lot", "buyer")
+        if role == "buyer":
             return Offer.objects.filter(buyer=user).select_related("lot", "buyer")
         if role in ("exporter", "admin"):
             return Offer.objects.filter(lot__exporter=user).select_related("lot", "buyer")

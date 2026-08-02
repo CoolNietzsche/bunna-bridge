@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { getLots, getOffers } from "../api/lots";
 import { getFarmerProfile, getFarmerLots } from "../api/farmer";
 import { getSampleRequests } from "../api/samples";
+import { getRoastBatches, getAvailableLots } from "../api/roasting";
+import { getCertifications } from "../api/certifications";
 import AdminShell from "../components/admin/AdminShell";
 import { LotStatusBadge, ComplianceBadge } from "../components/admin/AdminStatusBadge";
 import DonutChart from "../components/charts/DonutChart";
@@ -11,7 +13,7 @@ import BarChart from "../components/charts/BarChart";
 import {
   Package, ShieldCheck, TrendingUp, AlertTriangle,
   ArrowRight, Plus, Leaf, Mountain, FlaskConical,
-  Award, Ruler, Users, Map, Handshake, Mail,
+  Award, Ruler, Users, Map, Handshake, Mail, Flame,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
@@ -54,6 +56,35 @@ function PipelineBar({ draft, listed, contracted, exported }: {
   );
 }
 
+function RoastBatchPipelineBar({ counts }: { counts: Record<string, number> }) {
+  const stages = [
+    { key: "queued", label: "Queued", color: AT.color.textDisabled },
+    { key: "roasting", label: "Roasting", color: "#b45309" },
+    { key: "resting", label: "Resting", color: AT.color.blue },
+    { key: "qc", label: "QC", color: AT.color.blue },
+    { key: "packaged", label: "Packaged", color: AT.color.primary },
+    { key: "shipped", label: "Shipped", color: AT.color.primaryDark },
+  ];
+  const total = stages.reduce((sum, s) => sum + (counts[s.key] || 0), 0) || 1;
+  return (
+    <div>
+      <div style={{ display: "flex", height: "8px", borderRadius: AT.radius.sm, overflow: "hidden", gap: "2px", marginBottom: "12px" }}>
+        {stages.map((s) => (counts[s.key] || 0) > 0 && (
+          <div key={s.key} style={{ background: s.color, flex: (counts[s.key] || 0) / total, transition: "flex 0.4s ease" }} />
+        ))}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
+        {stages.map((s) => (
+          <div key={s.key} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "999px", background: s.color, flexShrink: 0 }} />
+            <span style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.textSecondary }}>{counts[s.key] || 0} {s.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface ActivityEvent { id: string; icon: React.ReactNode; title: string; subtitle: string; date: string; onClick: () => void; }
 
 function ActivityFeed({ events }: { events: ActivityEvent[] }) {
@@ -82,6 +113,13 @@ function ActivityFeed({ events }: { events: ActivityEvent[] }) {
   );
 }
 
+function certExpiryLabel(expiryDate: string | null, isExpired: boolean): string {
+  if (!expiryDate) return "";
+  const days = Math.ceil((new Date(expiryDate).getTime() - Date.now()) / 86_400_000);
+  if (isExpired) return `expired ${Math.abs(days)}d ago`;
+  return days <= 0 ? "expires today" : `expires in ${days}d`;
+}
+
 function relativeTime(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -100,6 +138,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const role = user?.role ?? "exporter";
   const isFarmer = role === "farmer";
+  const isRoaster = role === "roaster";
   const isBuyerLike = isBuyerRole(role);
   const canTrack = role === "exporter" || isBuyerLike || role === "admin";
 
@@ -108,6 +147,9 @@ export default function Dashboard() {
   const { data: farmProfile } = useQuery({ queryKey: ["farmer-profile-dashboard"], queryFn: getFarmerProfile, enabled: isFarmer });
   const { data: offers } = useQuery({ queryKey: ["offers-dashboard"], queryFn: getOffers, enabled: canTrack });
   const { data: samples } = useQuery({ queryKey: ["samples-dashboard"], queryFn: getSampleRequests, enabled: canTrack });
+  const { data: roastBatches } = useQuery({ queryKey: ["roast-batches-dashboard"], queryFn: getRoastBatches, enabled: isRoaster });
+  const { data: availableLots } = useQuery({ queryKey: ["available-lots-dashboard"], queryFn: getAvailableLots, enabled: isRoaster });
+  const { data: certifications } = useQuery({ queryKey: ["certifications-dashboard"], queryFn: getCertifications, enabled: isRoaster });
 
   // ── Derived stats ─────────────────────────────────────────────
   const results = isFarmer ? (farmerLots ?? []) : (data?.results ?? []);
@@ -123,6 +165,22 @@ export default function Dashboard() {
   const listedCount = results.filter((l) => l.status === "listed").length;
   const contractedCount = results.filter((l) => l.status === "contracted").length;
   const exportedCount = results.filter((l) => l.status === "exported").length;
+
+  // ── Roaster-specific derived stats ────────────────────────────
+  const activeBatchCount = (roastBatches ?? []).filter((b) => b.status !== "shipped").length;
+  const roastBatchCounts = (roastBatches ?? []).reduce<Record<string, number>>((acc, b) => {
+    acc[b.status] = (acc[b.status] || 0) + 1;
+    return acc;
+  }, {});
+  const greenInventoryKg = (availableLots ?? []).reduce((sum, l) => sum + Number(l.volume_kg || 0), 0);
+  const now = new Date();
+  const expiredCertCount = (certifications ?? []).filter((c) => c.is_expired).length;
+  const expiringSoonCerts = (certifications ?? []).filter((c) => {
+    if (!c.expiry_date || c.is_expired) return false;
+    const days = (new Date(c.expiry_date).getTime() - now.getTime()) / 86_400_000;
+    return days <= 60;
+  });
+  const certAlertCount = expiredCertCount + expiringSoonCerts.length;
 
   const gatesPassed = (l: (typeof results)[number]) =>
     [l.deforestation_free, l.gps_verified, l.eudr_dds_ready, l.phyto_cert_uploaded,
@@ -163,7 +221,14 @@ export default function Dashboard() {
     return `${h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"}, ${name}.`;
   };
 
-  const stats: StatDef[] = isBuyerLike
+  const stats: StatDef[] = isRoaster
+    ? [
+        { kind: "simple", label: "Active Roast Batches", value: activeBatchCount, icon: <Flame size={18} />, tone: "yellow", path: "/roast-batches" },
+        { kind: "simple", label: "Green Inventory", value: `${greenInventoryKg}kg`, icon: <Package size={18} />, tone: "green", path: "/roast-batches" },
+        { kind: "simple", label: "Certifications", value: (certifications ?? []).length, icon: <Award size={18} />, tone: certAlertCount > 0 ? "red" : "green", path: "/certifications", footer: certAlertCount > 0 ? `${certAlertCount} need attention` : "All valid" },
+        { kind: "simple", label: "Draft Lots", value: draftCount, icon: <Package size={18} />, tone: "blue", path: "/lots" },
+      ]
+    : isBuyerLike
     ? [
         { kind: "trend", label: "Available Lots", value: total, icon: <Package size={18} />, tone: "green", path: "/marketplace", sublabel: newLotsSublabel, trend: registrationTrend },
         { kind: "progress", label: "EUDR Verified", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue", path: "/marketplace?eudr_dds_ready=true", percent: pct(eudrReady, total), footer: `${eudrReady} of ${total} lots` },
@@ -206,6 +271,9 @@ export default function Dashboard() {
     ],
     roaster: [
       { label: "Browse Marketplace", path: "/marketplace", icon: <Leaf size={14} />, primary: true },
+      { label: "Roast Batches", path: "/roast-batches", icon: <Package size={14} /> },
+      { label: "Register New Lot", path: "/lots/new", icon: <Plus size={14} /> },
+      { label: "My Lots", path: "/lots", icon: <Package size={14} /> },
       { label: "My Roastery Profile", path: "/roastery", icon: <Package size={14} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <Handshake size={14} /> },
       { label: "My Watchlist", path: "/buyer/watchlist", icon: <Package size={14} /> },
@@ -222,7 +290,7 @@ export default function Dashboard() {
   // Merge real offers + samples into one activity feed, sorted by date.
   const actionableOffers = (offers ?? []).filter((o) => (isBuyerLike ? o.status === "countered" : o.status === "pending"));
   const actionableSamples = isBuyerLike ? [] : (samples ?? []).filter((s) => s.status === "pending");
-  const attentionCount = actionableOffers.length + actionableSamples.length;
+  const attentionCount = actionableOffers.length + actionableSamples.length + certAlertCount;
 
   const activityEvents: ActivityEvent[] = [
     ...actionableOffers.map((o) => ({
@@ -241,6 +309,14 @@ export default function Dashboard() {
       date: relativeTime(s.created_at),
       onClick: () => navigate("/samples"),
     })),
+    ...(isRoaster ? (certifications ?? []).filter((c) => c.is_expired || expiringSoonCerts.includes(c)).map((c) => ({
+      id: `cert-${c.id}`,
+      icon: <Award size={14} />,
+      title: `${c.cert_type.replace("_", " ")} certification ${c.is_expired ? "expired" : "expiring soon"}`,
+      subtitle: c.issuing_body || "No issuing body recorded",
+      date: certExpiryLabel(c.expiry_date, c.is_expired),
+      onClick: () => navigate("/certifications"),
+    })) : []),
   ].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 6);
 
   return (
@@ -403,13 +479,26 @@ export default function Dashboard() {
 
       {/* ── Lot pipeline ────────────────────────────────────────── */}
       {total > 0 && (
-        <div style={AC.card}>
+        <div style={{ ...AC.card, marginBottom: isRoaster && roastBatches?.length ? "16px" : 0 }}>
           <div style={AC.cardHeader}>
             <p style={AC.cardTitle}>Lot Pipeline</p>
             <span style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.textMuted }}>{total} total</span>
           </div>
           <div style={AC.cardPad}>
             <PipelineBar draft={draftCount} listed={listedCount} contracted={contractedCount} exported={exportedCount} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Roast batch pipeline ────────────────────────────────── */}
+      {isRoaster && !!roastBatches?.length && (
+        <div style={AC.card}>
+          <div style={AC.cardHeader}>
+            <p style={AC.cardTitle}>Roast Batch Pipeline</p>
+            <span style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.textMuted }}>{roastBatches.length} total</span>
+          </div>
+          <div style={AC.cardPad}>
+            <RoastBatchPipelineBar counts={roastBatchCounts} />
           </div>
         </div>
       )}

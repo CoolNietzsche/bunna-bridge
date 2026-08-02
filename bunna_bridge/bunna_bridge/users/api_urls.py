@@ -3,6 +3,7 @@ from .views import (
     RegisterView, MeView, user_list, FarmerProfileView, farmer_lots, farmer_list,
     RoasterProfileView,
     ExporterProfileView, ExporterLotsView, ExporterEctaLicenseDownloadView,
+    CertificationListCreateView, CertificationDetailView,
 )
 
 urlpatterns = [
@@ -17,4 +18,6 @@ urlpatterns = [
     path("exporters/<int:pk>/lots/",ExporterLotsView.as_view(),    name="exporter-lots"),
     path("exporters/<int:pk>/ecta-license/",
          ExporterEctaLicenseDownloadView.as_view(),         name="exporter-ecta-license"),
+    path("certifications/",         CertificationListCreateView.as_view(), name="certification-list"),
+    path("certifications/<uuid:pk>/", CertificationDetailView.as_view(),   name="certification-detail"),
 ]
