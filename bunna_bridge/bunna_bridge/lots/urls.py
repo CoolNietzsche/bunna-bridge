@@ -10,6 +10,7 @@ from .views import (
     notification_mark_read, notification_mark_all_read,
     LotStoryPublicView, LotPhotosView,
     LotDocumentDownloadView,
+    WashingStationListCreateView, WashingStationDetailView,
 )
 from .offer_views import (
     OfferListCreateView,
@@ -64,4 +65,9 @@ urlpatterns = router.urls + [
     # ── Public Lot Story ───────────────────────────────────────────────────
     path("lots/<uuid:pk>/story/",
          LotStoryPublicView.as_view(),                name="lot-story-public"),
+    # ── Washing Stations ───────────────────────────────────────────────────
+    path("washing-stations/",
+         WashingStationListCreateView.as_view(),      name="washing-station-list"),
+    path("washing-stations/<uuid:pk>/",
+         WashingStationDetailView.as_view(),          name="washing-station-detail"),
 ]

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee,
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
@@ -29,8 +29,10 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
+      { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
+      { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
     ],
     buyer: [
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
@@ -40,10 +42,17 @@ function groupsFor(role: string | undefined): NavGroup[] {
     ],
     roaster: [
       { label: "My Roastery", path: "/roastery", icon: <Coffee size={s} /> },
+      { label: "Roast Batches", path: "/roast-batches", icon: <Flame size={s} /> },
+      { label: "Roast Equipment", path: "/roast-equipment", icon: <Wrench size={s} /> },
+      { label: "My Lots", path: "/lots", icon: <Package size={s} /> },
+      { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
+      { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
+      { label: "Offers Received", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
+      { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
     ],
     farmer: [
       { label: "My Farm", path: "/farm", icon: <Sprout size={s} /> },

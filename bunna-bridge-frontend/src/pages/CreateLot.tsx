@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createLot } from "../api/lots";
 import { getFarmers } from "../api/farmer";
+import { getWashingStations } from "../api/washingStations";
 import AdminShell from "../components/admin/AdminShell";
 import {
   MapPin, Leaf, FileCheck, Upload, ShieldCheck,
@@ -26,7 +27,7 @@ const STEP_LABELS: Record<Step, string> = {
 
 interface FormData {
   lot_id: string; name: string; region: string; kebele: string; farmer_id: string;
-  washing_station: string; altitude_m: string; processing: string;
+  washing_station: string; washing_station_facility_id: string; altitude_m: string; processing: string;
   grade: string; varietal: string; harvest_date: string;
   volume_kg: string; price_per_kg: string; sca_score: string;
   flavor_notes: string; q_grader_name: string; q_grader_cert_id: string;
@@ -38,7 +39,7 @@ interface FormData {
 
 const EMPTY: FormData = {
   lot_id: "", name: "", region: "yirgacheffe", kebele: "", farmer_id: "",
-  washing_station: "", altitude_m: "", processing: "washed",
+  washing_station: "", washing_station_facility_id: "", altitude_m: "", processing: "washed",
   grade: "G1", varietal: "Ethiopian Heirloom", harvest_date: "",
   volume_kg: "", price_per_kg: "", sca_score: "", flavor_notes: "",
   q_grader_name: "", q_grader_cert_id: "", cupping_date: "",
@@ -69,6 +70,7 @@ export default function CreateLot() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { data: farmers } = useQuery({ queryKey: ["farmers"], queryFn: getFarmers });
+  const { data: washingStations } = useQuery({ queryKey: ["washing-stations"], queryFn: getWashingStations });
 
   const set = (k: keyof FormData, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -96,6 +98,7 @@ export default function CreateLot() {
       const payload: Record<string, unknown> = {
         lot_id: form.lot_id, name: form.name, region: form.region,
         kebele: form.kebele, washing_station: form.washing_station,
+        washing_station_facility: form.washing_station_facility_id || null,
         altitude_m: parseInt(form.altitude_m), processing: form.processing,
         grade: form.grade, varietal: form.varietal || "Ethiopian Heirloom",
         harvest_date: form.harvest_date,
@@ -206,9 +209,33 @@ export default function CreateLot() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "14px" }}>
                 <Field label="Kebele" k="kebele" placeholder="e.g. Kochere" />
-                <Field label="Washing Station" k="washing_station" placeholder="e.g. Kochere WS" />
                 <Field label="Altitude (masl) *" k="altitude_m" type="number" placeholder="1950" />
                 <Field label="Harvest Date *" k="harvest_date" type="date" />
+              </div>
+              <div style={{ marginTop: "14px" }}>
+                <label style={lbl}>Washing Station</label>
+                {washingStations && washingStations.length > 0 ? (
+                  <select
+                    style={AC.input}
+                    value={form.washing_station_facility_id}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      const picked = washingStations.find((s) => s.id === id);
+                      setForm((f) => ({ ...f, washing_station_facility_id: id, washing_station: picked ? picked.name : f.washing_station }));
+                    }}
+                  >
+                    <option value="">Type manually below…</option>
+                    {washingStations.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                ) : null}
+                {!form.washing_station_facility_id && (
+                  <input
+                    style={{ ...AC.input, marginTop: washingStations && washingStations.length > 0 ? "8px" : 0 }}
+                    placeholder="e.g. Kochere WS"
+                    value={form.washing_station}
+                    onChange={(e) => set("washing_station", e.target.value)}
+                  />
+                )}
               </div>
               <div style={{ marginTop: "14px" }}>
                 <label style={lbl}>Farmer / Cooperative</label>

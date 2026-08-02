@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate, get_user_model
+from .models import Certification
 User = get_user_model()
 
 
@@ -127,3 +128,16 @@ class ExporterPublicSerializer(serializers.ModelSerializer):
         result = CoffeeLot.objects.filter(exporter=obj, sca_score__isnull=False).aggregate(avg=Avg("sca_score"))
         avg = result.get("avg")
         return round(float(avg), 2) if avg else None
+
+
+class CertificationSerializer(serializers.ModelSerializer):
+    is_expired = serializers.ReadOnlyField()
+
+    class Meta:
+        model  = Certification
+        fields = [
+            "id", "cert_type", "issuing_body", "cert_number",
+            "issue_date", "expiry_date", "file", "is_expired",
+            "created_at", "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]

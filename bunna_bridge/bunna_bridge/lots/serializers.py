@@ -2,7 +2,16 @@ import json
 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
-from .models import CoffeeLot, CuppingScore, SampleRequest, Offer
+from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation
+
+
+class WashingStationSerializer(serializers.ModelSerializer):
+    lots_count = serializers.IntegerField(source="lots.count", read_only=True)
+
+    class Meta:
+        model  = WashingStation
+        fields = ["id", "name", "region", "location", "capacity_kg_per_day", "lots_count", "created_at", "updated_at"]
+        read_only_fields = ["id", "created_at", "updated_at"]
 
 
 class CuppingScoreSerializer(serializers.ModelSerializer):
@@ -51,6 +60,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         model  = CoffeeLot
         fields = [
             "id", "lot_id", "name", "status", "region",
+            "kebele", "washing_station", "washing_station_facility",
             "altitude_m", "processing", "grade", "varietal",
             "sca_score", "flavor_notes", "volume_kg", "price_per_kg",
             # marketplace
@@ -70,16 +80,20 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "farmer", "farmer_name", "farmer_farm_id",
             "harvest_date", "created_at", "boundary",
         ]
-        # These 5 gates are not exporter-settable: deforestation_free and
+        # These gates are not exporter-settable: deforestation_free and
         # gps_verified are derived automatically (see eudr_spatial.py and
         # CoffeeLot.save()), eudr_dds_ready is set on real DDS generation
         # (EudrDdsView), and ecta_license_active / cta_floor_met have no
         # automated check yet — admin-only via Django admin until they do.
         # phyto_cert_uploaded / nbe_fx_declared aren't listed here because
         # CoffeeLot.save() already overrides whatever's submitted for them.
+        # is_organic / is_fair_trade / is_rainforest_alliance are derived from
+        # the holder's Certification records (see users/signals.py) rather
+        # than settable per lot.
         read_only_fields = [
             "deforestation_free", "gps_verified", "eudr_dds_ready",
             "ecta_license_active", "cta_floor_met",
+            "is_organic", "is_fair_trade", "is_rainforest_alliance",
         ]
 
     def get_farmer_name(self, obj):

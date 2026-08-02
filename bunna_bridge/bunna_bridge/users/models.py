@@ -1,7 +1,10 @@
 import re
+import uuid
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models
+from django.utils import timezone
 
 from bunna_bridge.lots.validators import document_extension_validator
 from bunna_bridge.lots.validators import validate_document_size
@@ -115,3 +118,52 @@ class User(AbstractUser):
     @property
     def is_roaster(self):
         return self.role == self.Role.ROASTER
+
+
+class Certification(models.Model):
+    """
+    A cert record (organic, fair trade, ISO, etc.) held by an exporter,
+    roaster, or washing station. Replaces the free-standing is_organic /
+    is_fair_trade / is_rainforest_alliance booleans on CoffeeLot — those are
+    now derived from these records (see users/signals.py) rather than set
+    per-lot, since a certification belongs to the holder, not one lot.
+    """
+
+    class CertType(models.TextChoices):
+        ORGANIC              = "organic",              "Organic"
+        FAIR_TRADE           = "fair_trade",            "Fair Trade"
+        RAINFOREST_ALLIANCE  = "rainforest_alliance",   "Rainforest Alliance"
+        UTZ                  = "utz",                   "UTZ"
+        Q_ARABICA            = "q_arabica",              "Q Arabica"
+        ISO                  = "iso",                    "ISO"
+        HACCP                = "haccp",                  "HACCP"
+        OTHER                = "other",                  "Other"
+
+    id      = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    holder  = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="certifications",
+    )
+    cert_type     = models.CharField(max_length=30, choices=CertType.choices)
+    issuing_body  = models.CharField(max_length=200, blank=True)
+    cert_number   = models.CharField(max_length=100, blank=True)
+    issue_date    = models.DateField(null=True, blank=True)
+    expiry_date   = models.DateField(null=True, blank=True)
+    file = models.FileField(
+        upload_to="certifications/", null=True, blank=True,
+        validators=[document_extension_validator, validate_document_size],
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering     = ["-created_at"]
+        verbose_name = "Certification"
+
+    def __str__(self):
+        return f"{self.get_cert_type_display()} — {self.holder}"
+
+    @property
+    def is_expired(self):
+        return bool(self.expiry_date and self.expiry_date < timezone.localdate())

@@ -14,6 +14,10 @@ import CreateLot from "./pages/CreateLot";
 import Marketplace from "./pages/Marketplace";
 import MyFarm from "./pages/MyFarm";
 import MyRoastery from "./pages/MyRoastery";
+import Certifications from "./pages/Certifications";
+import WashingStations from "./pages/WashingStations";
+import RoastEquipmentPage from "./pages/RoastEquipment";
+import RoastBatches from "./pages/RoastBatches";
 import LotPipeline from "./pages/LotPipeline";
 import EditLot from "./pages/EditLot";
 import FarmerLotsMap from "./pages/FarmerLotsMap";
@@ -59,6 +63,10 @@ export default function App() {
             <Route path="/samples"       element={<ProtectedRoute><SampleRequests /></ProtectedRoute>} />
             <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
             <Route path="/roastery" element={<ProtectedRoute><MyRoastery /></ProtectedRoute>} />
+            <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
+            <Route path="/washing-stations" element={<ProtectedRoute><WashingStations /></ProtectedRoute>} />
+            <Route path="/roast-equipment" element={<ProtectedRoute><RoastEquipmentPage /></ProtectedRoute>} />
+            <Route path="/roast-batches" element={<ProtectedRoute><RoastBatches /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/marketplace/:id" element={<ProtectedRoute><MarketplaceLotDetail /></ProtectedRoute>} />
             <Route path="/buyer/offers"     element={<ProtectedRoute><BuyerOffers /></ProtectedRoute>} />

@@ -1,6 +1,6 @@
 from django.contrib.gis import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User
+from .models import User, Certification
 
 
 @admin.register(User)
@@ -32,3 +32,11 @@ class CustomUserAdmin(admin.GISModelAdmin, UserAdmin):
             "role", "company_name", "phone", "country",
         ]}),
     )
+
+
+@admin.register(Certification)
+class CertificationAdmin(admin.ModelAdmin):
+    list_display  = ["holder", "cert_type", "issuing_body", "expiry_date", "is_expired"]
+    list_filter   = ["cert_type"]
+    search_fields = ["holder__email", "holder__company_name", "cert_number", "issuing_body"]
+    ordering      = ["-created_at"]

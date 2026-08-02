@@ -5,6 +5,47 @@ import uuid
 from .validators import document_extension_validator
 from .validators import validate_document_size
 
+REGION_CHOICES = [
+    ("yirgacheffe", "Yirgacheffe"),
+    ("sidama", "Sidama"),
+    ("guji", "Guji"),
+    ("jimma", "Jimma"),
+    ("harrar", "Harrar"),
+    ("limu", "Limu"),
+    ("nekemte", "Nekemte"),
+    ("other", "Other"),
+]
+
+
+class WashingStation(models.Model):
+    """
+    A wet mill / washing station, structured so an exporter or roaster who
+    operates their own can manage it and link lots to it, replacing the
+    old free-text CoffeeLot.washing_station field (kept as a synced legacy
+    display field — see CoffeeLot.save()).
+    """
+
+    id    = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="washing_stations",
+        limit_choices_to={"role__in": ["exporter", "roaster"]},
+    )
+    name     = models.CharField(max_length=200)
+    region   = models.CharField(max_length=50, choices=REGION_CHOICES, blank=True)
+    location = models.CharField(max_length=200, blank=True, help_text="Kebele / village detail.")
+    capacity_kg_per_day = models.PositiveIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering     = ["name"]
+        verbose_name = "Washing Station"
+
+    def __str__(self):
+        return self.name
+
 
 class CoffeeLot(models.Model):
     PROCESSING_CHOICES = [
@@ -18,16 +59,6 @@ class CoffeeLot(models.Model):
         ("G1", "Grade 1"),
         ("G2", "Grade 2"),
         ("G3", "Grade 3"),
-    ]
-    REGION_CHOICES = [
-        ("yirgacheffe", "Yirgacheffe"),
-        ("sidama", "Sidama"),
-        ("guji", "Guji"),
-        ("jimma", "Jimma"),
-        ("harrar", "Harrar"),
-        ("limu", "Limu"),
-        ("nekemte", "Nekemte"),
-        ("other", "Other"),
     ]
     STATUS_CHOICES = [
         ("draft", "Draft"),
@@ -63,6 +94,13 @@ class CoffeeLot(models.Model):
     region          = models.CharField(max_length=50, choices=REGION_CHOICES)
     kebele          = models.CharField(max_length=200, blank=True)
     washing_station = models.CharField(max_length=200, blank=True)
+    washing_station_facility = models.ForeignKey(
+        WashingStation,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="lots",
+        help_text="Structured washing station. When set, its name overwrites washing_station on save.",
+    )
     altitude_m      = models.IntegerField()
     processing      = models.CharField(max_length=20, choices=PROCESSING_CHOICES)
     grade           = models.CharField(max_length=5, choices=GRADE_CHOICES)
@@ -149,6 +187,8 @@ class CoffeeLot(models.Model):
         self.phyto_cert_uploaded = bool(self.phyto_cert_file)
         self.nbe_fx_declared = bool(self.nbe_fx_declaration_file)
         self.gps_verified = bool(self.boundary or self.farm_location)
+        if self.washing_station_facility_id:
+            self.washing_station = self.washing_station_facility.name
         super().save(*args, **kwargs)
 
     def __str__(self):

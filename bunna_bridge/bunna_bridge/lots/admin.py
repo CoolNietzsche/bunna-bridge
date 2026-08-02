@@ -1,7 +1,7 @@
 from django.urls import path
 from bunna_bridge.lots.admin_views import FarmBoundaryMapView
 from django.contrib.gis import admin
-from .models import CoffeeLot, CuppingScore, SampleRequest
+from .models import CoffeeLot, CuppingScore, SampleRequest, WashingStation
 
 
 class CuppingScoreInline(admin.TabularInline):
@@ -29,7 +29,7 @@ class CoffeeLotAdmin(admin.GISModelAdmin):
 
     fieldsets = (
         ("Identity",          {"fields": ["id", "lot_id", "name", "status", "exporter", "farmer"]}),
-        ("Origin",            {"fields": ["region", "kebele", "washing_station",
+        ("Origin",            {"fields": ["region", "kebele", "washing_station", "washing_station_facility",
                                           "altitude_m", "processing", "grade",
                                           "varietal", "harvest_date"]}),
         ("Geospatial / EUDR", {"fields": ["farm_location", "boundary", "gps_verified"]}),
@@ -58,6 +58,14 @@ class SampleRequestAdmin(admin.ModelAdmin):
     list_filter   = ["status"]
     search_fields = ["lot__lot_id", "buyer__email"]
     readonly_fields = ["id", "created_at", "updated_at"]
+
+@admin.register(WashingStation)
+class WashingStationAdmin(admin.ModelAdmin):
+    list_display  = ["name", "owner", "region", "capacity_kg_per_day", "created_at"]
+    list_filter   = ["region"]
+    search_fields = ["name", "owner__email", "owner__company_name"]
+    readonly_fields = ["id", "created_at", "updated_at"]
+
 
 from bunna_bridge.lots.deforestation import DeforestationZone
 
