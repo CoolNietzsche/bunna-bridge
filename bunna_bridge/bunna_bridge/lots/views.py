@@ -49,7 +49,7 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
         role = getattr(user, "role", "exporter")
         if role == "exporter":
             return qs.filter(exporter=user)
-        if role == "buyer":
+        if role in ("buyer", "roaster"):
             return qs.filter(status__in=["listed", "contracted", "exported"])
         if role == "farmer":
             return qs.filter(farmer=user)
@@ -246,7 +246,7 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
         role = getattr(user, "role", "buyer")
         if user.is_staff or role == "admin":
             return SampleRequest.objects.select_related("lot","buyer").all()
-        if role == "buyer":
+        if role in ("buyer", "roaster"):
             return SampleRequest.objects.filter(buyer=user).select_related("lot","buyer")
         if role == "exporter":
             return SampleRequest.objects.filter(

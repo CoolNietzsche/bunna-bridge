@@ -10,6 +10,7 @@ const DEMO = [
   { role: "Admin", email: "admin@bunnabridge.com", pw: "BunnaAdmin2026!" },
   { role: "Exporter", email: "dawit@addiscoffee.et", pw: "Bunna2026!" },
   { role: "Buyer", email: "sarah@nordicros.de", pw: "Bunna2026!" },
+  { role: "Roaster", email: "james@brooklynroastery.com", pw: "Bunna2026!" },
   { role: "Farmer", email: "abebe@kochere.et", pw: "Bunna2026!" },
   { role: "Q-Grader", email: "tigist@scaethiopia.et", pw: "Bunna2026!" },
 ];

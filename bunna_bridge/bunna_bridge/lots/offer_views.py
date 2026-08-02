@@ -26,7 +26,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         role = getattr(user, "role", None)
-        if role == "buyer":
+        if role in ("buyer", "roaster"):
             return Offer.objects.filter(buyer=user).select_related("lot", "buyer")
         if role in ("exporter", "admin"):
             return Offer.objects.filter(lot__exporter=user).select_related("lot", "buyer")
