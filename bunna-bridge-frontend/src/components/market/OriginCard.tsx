@@ -23,6 +23,8 @@ export default function OriginCard({ origin, featured = false, image }: { origin
         <img
           src={image}
           alt={`${origin.label} coffee origin`}
+          loading="lazy"
+          decoding="async"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
         />
       )}
