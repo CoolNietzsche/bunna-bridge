@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { Upload, ExternalLink, CheckCircle, XCircle, Loader, FileText, Hash } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { isBuyerRole } from "../lib/utils";
 
 interface Props { lot: Record<string, any>; lotId: string; }
 type DocKey = "phyto" | "ecex" | "nbe" | "customs";
@@ -80,7 +81,7 @@ export default function LotDocuments({ lot, lotId }: Props) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const canUpload = user?.role === "exporter" || user?.role === "admin";
-  const canView = ["exporter", "admin", "buyer"].includes(user?.role ?? "");
+  const canView = user?.role === "exporter" || user?.role === "admin" || isBuyerRole(user?.role);
   const [loading, setLoading] = useState<DocKey | null>(null);
   const [error, setError] = useState("");
   const [modal, setModal] = useState<DocKey | null>(null);

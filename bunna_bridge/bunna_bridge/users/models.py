@@ -19,6 +19,13 @@ class User(AbstractUser):
         BUYER    = "buyer",    "Buyer"
         FARMER   = "farmer",   "Farmer"
         QGRADER  = "qgrader",  "Q-Grader"
+        ROASTER  = "roaster",  "Roaster"
+
+    class RoasteryType(models.TextChoices):
+        MICRO      = "micro",      "Micro-roastery (under 500kg/month)"
+        COMMERCIAL = "commercial", "Commercial roastery"
+        CAFE       = "cafe",       "Café with in-house roasting"
+        OTHER      = "other",      "Other"
 
     role = models.CharField(
         max_length=20,
@@ -58,6 +65,20 @@ class User(AbstractUser):
     )
     ecta_license_expiry = models.DateField(null=True, blank=True)
 
+    # Roaster-specific fields
+    roastery_type = models.CharField(max_length=20, choices=RoasteryType.choices, blank=True)
+    roastery_monthly_capacity_kg = models.PositiveIntegerField(null=True, blank=True)
+    roastery_roast_styles = models.CharField(
+        max_length=200, blank=True,
+        help_text="Comma-separated, e.g. 'light, medium, dark'.",
+    )
+    roastery_preferred_origins = models.CharField(
+        max_length=300, blank=True,
+        help_text="Comma-separated regions of sourcing interest, e.g. 'Yirgacheffe, Guji'.",
+    )
+    roastery_established_year = models.PositiveIntegerField(null=True, blank=True)
+    roastery_website = models.URLField(blank=True)
+
     def save(self, *args, **kwargs):
         if self.role == self.Role.FARMER and not self.farm_id:
             self.farm_id = self._generate_farm_id()
@@ -90,3 +111,7 @@ class User(AbstractUser):
     @property
     def is_qgrader(self):
         return self.role == self.Role.QGRADER
+
+    @property
+    def is_roaster(self):
+        return self.role == self.Role.ROASTER

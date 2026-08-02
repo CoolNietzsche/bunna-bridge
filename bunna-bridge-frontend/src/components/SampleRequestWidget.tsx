@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { Package, CheckCircle2 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { isBuyerRole } from "../lib/utils";
 
 interface Props { lotId: string; lotRef: string; onSuccess?: () => void; }
 
@@ -30,7 +31,7 @@ export default function SampleRequestWidget({ lotId, lotRef, onSuccess }: Props)
     },
   });
 
-  if (user?.role !== "buyer" && user?.role !== "admin") return null;
+  if (!isBuyerRole(user?.role) && user?.role !== "admin") return null;
 
   const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
 

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { isBuyerRole } from "../lib/utils";
 
 // ── Small helpers ──────────────────────────────────────────────────
 
@@ -93,7 +94,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const role = user?.role ?? "exporter";
   const isFarmer = role === "farmer";
-  const canTrack = role === "exporter" || role === "buyer" || role === "admin";
+  const isBuyerLike = isBuyerRole(role);
+  const canTrack = role === "exporter" || isBuyerLike || role === "admin";
 
   const { data } = useQuery({ queryKey: ["lots-dashboard", role], queryFn: () => getLots(), enabled: !isFarmer });
   const { data: farmerLots } = useQuery({ queryKey: ["farmer-lots-dashboard"], queryFn: getFarmerLots, enabled: isFarmer });
@@ -153,7 +155,7 @@ export default function Dashboard() {
     return `${h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"}, ${name}.`;
   };
 
-  const stats = role === "buyer"
+  const stats = isBuyerLike
     ? [
         { label: "Available Lots", value: total, icon: <Package size={18} />, tone: "green" as const, path: "/marketplace", sublabel: newLotsSublabel },
         { label: "EUDR Verified", value: eudrReady, icon: <ShieldCheck size={18} />, tone: "blue" as const, path: "/marketplace?eudr_dds_ready=true" },
@@ -194,6 +196,13 @@ export default function Dashboard() {
       { label: "My Watchlist", path: "/buyer/watchlist", icon: <Package size={14} /> },
       { label: "Sample Requests", path: "/samples", icon: <FlaskConical size={14} /> },
     ],
+    roaster: [
+      { label: "Browse Marketplace", path: "/marketplace", icon: <Leaf size={14} />, primary: true },
+      { label: "My Roastery Profile", path: "/roastery", icon: <Package size={14} /> },
+      { label: "My Offers", path: "/buyer/offers", icon: <Handshake size={14} /> },
+      { label: "My Watchlist", path: "/buyer/watchlist", icon: <Package size={14} /> },
+      { label: "Sample Requests", path: "/samples", icon: <FlaskConical size={14} /> },
+    ],
     farmer: [
       { label: "My Farm Profile", path: "/farm", icon: <Leaf size={14} />, primary: true },
       { label: "Farm Map", path: "/map", icon: <Map size={14} /> },
@@ -203,18 +212,18 @@ export default function Dashboard() {
   const actions = quickActions[role] || quickActions.exporter;
 
   // Merge real offers + samples into one activity feed, sorted by date.
-  const actionableOffers = (offers ?? []).filter((o) => (role === "buyer" ? o.status === "countered" : o.status === "pending"));
-  const actionableSamples = role === "buyer" ? [] : (samples ?? []).filter((s) => s.status === "pending");
+  const actionableOffers = (offers ?? []).filter((o) => (isBuyerLike ? o.status === "countered" : o.status === "pending"));
+  const actionableSamples = isBuyerLike ? [] : (samples ?? []).filter((s) => s.status === "pending");
   const attentionCount = actionableOffers.length + actionableSamples.length;
 
   const activityEvents: ActivityEvent[] = [
     ...actionableOffers.map((o) => ({
       id: `offer-${o.id}`,
       icon: <Handshake size={14} />,
-      title: `${role === "buyer" ? "Counter-offer" : "Offer"} on ${o.lot_name}`,
-      subtitle: role === "buyer" ? `Exporter countered at $${o.counter_price}/kg` : `${o.buyer_company || o.buyer_name} · $${o.price_per_kg_usd}/kg`,
+      title: `${isBuyerLike ? "Counter-offer" : "Offer"} on ${o.lot_name}`,
+      subtitle: isBuyerLike ? `Exporter countered at $${o.counter_price}/kg` : `${o.buyer_company || o.buyer_name} · $${o.price_per_kg_usd}/kg`,
       date: relativeTime(o.updated_at || o.created_at),
-      onClick: () => navigate(role === "buyer" ? "/buyer/offers" : "/offers"),
+      onClick: () => navigate(isBuyerLike ? "/buyer/offers" : "/offers"),
     })),
     ...actionableSamples.map((s) => ({
       id: `sample-${s.id}`,

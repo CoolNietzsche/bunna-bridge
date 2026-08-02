@@ -6,6 +6,7 @@ import AdminShell from "../components/admin/AdminShell";
 import { CheckCircle, XCircle, Truck, Clock, Package, MessageSquare } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { isBuyerRole } from "../lib/utils";
 
 const STATUS_CONFIG: Record<string, { tone: keyof typeof AC.pill; icon: React.ReactNode }> = {
   pending: { tone: "yellow", icon: <Clock size={11} /> },
@@ -43,10 +44,10 @@ export default function SampleRequests() {
   return (
     <AdminShell>
       <div style={{ marginBottom: "20px" }}>
-        <p style={AC.eyebrow}>{role === "exporter" ? "Exporter" : "Buyer"}</p>
+        <p style={AC.eyebrow}>{role === "exporter" ? "Exporter" : role === "roaster" ? "Roaster" : "Buyer"}</p>
         <h1 style={{ ...AC.pageTitle, marginTop: "4px" }}>Sample Requests</h1>
         <p style={AC.pageSubtitle}>
-          {role === "buyer" ? "Your sample requests." : "Incoming requests from buyers."}
+          {isBuyerRole(role) ? "Your sample requests." : "Incoming requests from buyers."}
         </p>
       </div>
 

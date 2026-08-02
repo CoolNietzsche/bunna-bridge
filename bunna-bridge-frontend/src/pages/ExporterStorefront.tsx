@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { isBuyerRole } from "../lib/utils";
 
 interface ExporterProfile {
   id: number;
@@ -32,7 +33,7 @@ export default function ExporterStorefront() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toggle, isWatched } = useWatchlist();
-  const isBuyer = user?.role === "buyer" || user?.role === "admin";
+  const isBuyer = isBuyerRole(user?.role) || user?.role === "admin";
 
   const { data: profile, isLoading: profileLoading } = useQuery<ExporterProfile>({
     queryKey: ["exporter", id],

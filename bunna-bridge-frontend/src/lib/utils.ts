@@ -57,6 +57,15 @@ export function formatKg(value?: string | number | null): string {
   return `${(n as number).toLocaleString("en-US")} kg`;
 }
 
+/**
+ * Roasters transact on the marketplace the same way buyers do (offers,
+ * samples, watchlist) — this is the single place that defines "buyer-like"
+ * so the two roles don't drift out of sync across the many gated actions.
+ */
+export function isBuyerRole(role?: string | null): boolean {
+  return role === "buyer" || role === "roaster";
+}
+
 /** Initials for avatars. */
 export function initials(first?: string | null, last?: string | null, fallback = "?"): string {
   const a = first?.trim()?.[0] ?? "";

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
-import { titleCase, formatUsd, formatKg } from "../lib/utils";
+import { titleCase, formatUsd, formatKg, isBuyerRole } from "../lib/utils";
 
 // ── Radar chart (pure SVG) ────────────────────────────────────────────────────
 function RadarChart({ scores }: { scores: Record<string, number> }) {
@@ -143,7 +143,7 @@ export default function MarketplaceLotDetail() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["samples"] }); setSampleDone(true); },
   });
 
-  const canTransact = isAuthenticated && (user?.role === "buyer" || user?.role === "admin");
+  const canTransact = isAuthenticated && (isBuyerRole(user?.role) || user?.role === "admin");
 
   useEffect(() => {
     if (!canTransact) return;

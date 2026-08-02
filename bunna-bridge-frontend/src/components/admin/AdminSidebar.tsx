@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X,
+  ChevronLeft, ChevronRight, X, Coffee,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
@@ -33,6 +33,13 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
     buyer: [
+      { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
+      { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
+      { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
+      { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
+    ],
+    roaster: [
+      { label: "My Roastery", path: "/roastery", icon: <Coffee size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },

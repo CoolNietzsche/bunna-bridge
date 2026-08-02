@@ -15,6 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
             "farm_altitude_m", "farm_size_ha", "cooperative",
             "gps_lat", "gps_lng", "boundary",
             "ecta_license_number", "ecta_license_file", "ecta_license_expiry",
+            "roastery_type", "roastery_monthly_capacity_kg",
+            "roastery_roast_styles", "roastery_preferred_origins",
+            "roastery_established_year", "roastery_website",
         ]
         read_only_fields = ["id", "date_joined", "is_verified", "farm_id"]
 

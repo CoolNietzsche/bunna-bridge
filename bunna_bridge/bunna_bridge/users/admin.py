@@ -21,6 +21,11 @@ class CustomUserAdmin(admin.GISModelAdmin, UserAdmin):
             "farm_id", "farm_name", "farm_region", "farm_kebele",
             "farm_altitude_m", "farm_size_ha", "cooperative",
         ]}),
+        ("Roastery Profile", {"fields": [
+            "roastery_type", "roastery_monthly_capacity_kg",
+            "roastery_roast_styles", "roastery_preferred_origins",
+            "roastery_established_year", "roastery_website",
+        ]}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
         ("Bunna Bridge Profile", {"fields": [

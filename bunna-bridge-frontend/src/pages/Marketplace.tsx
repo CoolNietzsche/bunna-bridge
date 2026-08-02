@@ -9,6 +9,7 @@ import AdminShell from "../components/admin/AdminShell";
 import AdminLotCard from "../components/admin/AdminLotCard";
 import AdminFilterBar from "../components/admin/AdminFilterBar";
 import { computeOrigins, applyLotFilters, filtersFromParams, type LotFilters } from "../lib/catalog";
+import { isBuyerRole } from "../lib/utils";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 
@@ -17,7 +18,7 @@ export default function Marketplace() {
   const searchKey = params.toString();
   const { user } = useAuth();
   const { toggle, isWatched } = useWatchlist();
-  const isBuyer = user?.role === "buyer" || user?.role === "admin";
+  const isBuyer = isBuyerRole(user?.role) || user?.role === "admin";
 
   const { data, isLoading } = useQuery({ queryKey: ["marketplace-lots"], queryFn: () => getLots() });
   const lots = data?.results ?? [];
