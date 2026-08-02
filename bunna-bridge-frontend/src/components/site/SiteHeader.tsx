@@ -44,6 +44,15 @@ function navLinksFor(role: string | undefined, authed: boolean): NavLink[] {
         { label: "Watchlist", path: "/buyer/watchlist" },
         { label: "Samples", path: "/samples" },
       ];
+    case "roaster":
+      return [
+        { label: "Dashboard", path: "/dashboard" },
+        { label: "Marketplace", path: "/marketplace" },
+        { label: "My Roastery", path: "/roastery" },
+        { label: "My Offers", path: "/buyer/offers" },
+        { label: "Watchlist", path: "/buyer/watchlist" },
+        { label: "Samples", path: "/samples" },
+      ];
     case "farmer":
       return [
         { label: "Dashboard", path: "/dashboard" },

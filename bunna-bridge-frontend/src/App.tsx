@@ -13,6 +13,7 @@ import LotDetail from "./pages/LotDetail";
 import CreateLot from "./pages/CreateLot";
 import Marketplace from "./pages/Marketplace";
 import MyFarm from "./pages/MyFarm";
+import MyRoastery from "./pages/MyRoastery";
 import LotPipeline from "./pages/LotPipeline";
 import EditLot from "./pages/EditLot";
 import FarmerLotsMap from "./pages/FarmerLotsMap";
@@ -57,6 +58,7 @@ export default function App() {
             <Route path="/pipeline"      element={<ProtectedRoute><LotPipeline /></ProtectedRoute>} />
             <Route path="/samples"       element={<ProtectedRoute><SampleRequests /></ProtectedRoute>} />
             <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
+            <Route path="/roastery" element={<ProtectedRoute><MyRoastery /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
             <Route path="/marketplace/:id" element={<ProtectedRoute><MarketplaceLotDetail /></ProtectedRoute>} />
             <Route path="/buyer/offers"     element={<ProtectedRoute><BuyerOffers /></ProtectedRoute>} />

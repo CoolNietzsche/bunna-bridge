@@ -8,7 +8,8 @@ import { CS } from "../styles/components";
 
 const ROLES = [
   { value: "exporter", label: "Exporter", desc: "I export Ethiopian coffee internationally" },
-  { value: "buyer", label: "Buyer", desc: "I source and roast specialty coffee" },
+  { value: "buyer", label: "Buyer", desc: "I source green coffee for trade or resale" },
+  { value: "roaster", label: "Roaster", desc: "I roast and sell specialty coffee" },
   { value: "farmer", label: "Farmer", desc: "I grow coffee in Ethiopia" },
   { value: "qgrader", label: "Q-Grader", desc: "I cup and grade coffee professionally" },
 ];
@@ -43,7 +44,8 @@ export default function Register() {
     }
   };
 
-  const companyLabel = form.role === "buyer" ? "Company / roastery name"
+  const companyLabel = form.role === "roaster" ? "Roastery name"
+    : form.role === "buyer" ? "Company name"
     : form.role === "exporter" ? "Export company name"
     : form.role === "farmer" ? "Cooperative / farm name" : "Organization";
 

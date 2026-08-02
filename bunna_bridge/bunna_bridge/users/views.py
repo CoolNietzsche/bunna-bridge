@@ -73,6 +73,21 @@ def farmer_lots(request):
     return Response(CoffeeLotListSerializer(qs, many=True).data)
 
 
+class RoasterProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class   = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser, JSONParser]
+
+    def get_object(self):
+        return self.request.user
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user.role != "roaster" and not user.is_staff:
+            return Response({"detail": "Not a roaster account."}, status=403)
+        return super().get(request, *args, **kwargs)
+
+
 class ExporterProfileView(generics.RetrieveAPIView):
     serializer_class   = ExporterPublicSerializer
     permission_classes = [permissions.IsAuthenticated]
