@@ -77,6 +77,9 @@ export default function Landing() {
                 <img
                   src={heroImage}
                   alt="Terraced highland coffee farm in Yirgacheffe, Ethiopia, at dawn"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 />
               </div>
@@ -109,6 +112,8 @@ export default function Landing() {
               <img
                 src={cuppingDetailImage}
                 alt="A Q-grader arranging cupping bowls at a wooden cupping table"
+                loading="lazy"
+                decoding="async"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
             </div>
@@ -183,6 +188,8 @@ export default function Landing() {
               src={ctaBandImage}
               alt=""
               aria-hidden
+              loading="lazy"
+              decoding="async"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
             />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(23,64,47,0.90) 0%, rgba(14,42,32,0.94) 100%)" }} />
