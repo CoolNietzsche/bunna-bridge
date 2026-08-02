@@ -7,10 +7,11 @@ import type { RoasterProfile, RoasteryType } from "../api/roaster";
 import AdminShell from "../components/admin/AdminShell";
 import {
   Coffee, Globe, Calendar, Package, Flame, Leaf,
-  Edit2, Check, X, ShoppingBag, TrendingUp,
+  Edit2, Check, X, ShoppingBag, TrendingUp, ClipboardCheck,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { WidgetStatSimple, WidgetStatProgress } from "../components/admin/AdminWidgets";
 
 const ROASTERY_TYPES: { value: RoasteryType | ""; label: string }[] = [
   { value: "", label: "Not set" },
@@ -87,6 +88,13 @@ export default function MyRoastery() {
   const roastStyles = tagList(p?.roastery_roast_styles);
   const preferredOrigins = tagList(p?.roastery_preferred_origins);
 
+  const profileFields = [
+    p?.company_name, p?.roastery_type, p?.roastery_monthly_capacity_kg,
+    p?.roastery_roast_styles, p?.roastery_preferred_origins, p?.roastery_established_year,
+    p?.roastery_website, p?.phone, p?.country,
+  ];
+  const profileCompleteness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
+
   return (
     <AdminShell>
       <div className="ab-roastery-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "12px", marginBottom: "20px" }}>
@@ -117,19 +125,19 @@ export default function MyRoastery() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "20px" }}>
-        {[
-          { icon: <Package size={16} />, val: p?.roastery_monthly_capacity_kg ? `${p.roastery_monthly_capacity_kg} kg` : "—", lbl: "Monthly Capacity" },
-          { icon: <Flame size={16} />, val: roastStyles.length || "—", lbl: "Roast Styles" },
-          { icon: <Leaf size={16} />, val: preferredOrigins.length || "—", lbl: "Preferred Origins" },
-          { icon: <Calendar size={16} />, val: p?.roastery_established_year || "—", lbl: "Established" },
-        ].map((s) => (
-          <div key={s.lbl} style={{ ...AC.card, ...AC.cardPad }}>
-            <div style={{ color: AT.color.primary, marginBottom: "8px" }}>{s.icon}</div>
-            <p style={{ ...AC.metricValue, fontSize: "1.5rem", margin: "0 0 4px" }}>{s.val}</p>
-            <p style={{ ...AC.metricLabel, margin: 0 }}>{s.lbl}</p>
-          </div>
-        ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px", marginBottom: "20px" }}>
+        <WidgetStatSimple icon={<Package size={16} />} value={p?.roastery_monthly_capacity_kg ? `${p.roastery_monthly_capacity_kg} kg` : "—"} label="Monthly Capacity" tone="green" />
+        <WidgetStatSimple icon={<Flame size={16} />} value={roastStyles.length || "—"} label="Roast Styles" tone="green" />
+        <WidgetStatSimple icon={<Leaf size={16} />} value={preferredOrigins.length || "—"} label="Preferred Origins" tone="green" />
+        <WidgetStatSimple icon={<Calendar size={16} />} value={p?.roastery_established_year || "—"} label="Established" tone="green" />
+        <WidgetStatProgress
+          icon={<ClipboardCheck size={16} />}
+          value={`${profileCompleteness}%`}
+          label="Profile Completeness"
+          tone="blue"
+          percent={profileCompleteness}
+          footer={profileCompleteness < 100 ? "Complete your profile to help exporters find you" : "Profile fully complete"}
+        />
       </div>
 
       <div className="ab-roastery-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>

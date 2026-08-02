@@ -10,10 +10,11 @@ import FarmMapDisplay from "../components/FarmMapDisplay";
 import { LotStatusBadge } from "../components/admin/AdminStatusBadge";
 import {
   Sprout, MapPin, Mountain, Ruler, Users,
-  Edit2, Check, X, Coffee, ExternalLink, ShieldCheck, AlertTriangle
+  Edit2, Check, X, Coffee, ExternalLink, ShieldCheck, AlertTriangle, TrendingUp
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
+import { WidgetStatSimple, WidgetStatProgress } from "../components/admin/AdminWidgets";
 
 export default function MyFarm() {
   const { user } = useAuth();
@@ -113,19 +114,18 @@ export default function MyFarm() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px", marginBottom: "20px" }}>
-        {[
-          { icon: <Mountain size={16} />, val: p?.farm_altitude_m ? `${p.farm_altitude_m}m` : "—", lbl: "Altitude" },
-          { icon: <Ruler size={16} />, val: p?.farm_size_ha ? `${p.farm_size_ha} ha` : "—", lbl: "Farm Size" },
-          { icon: <Coffee size={16} />, val: lots?.length ?? "—", lbl: "Linked Lots" },
-          { icon: <Users size={16} />, val: p?.cooperative ? "Yes" : "—", lbl: "Cooperative" },
-        ].map((s) => (
-          <div key={s.lbl} style={{ ...AC.card, ...AC.cardPad }}>
-            <div style={{ color: AT.color.primary, marginBottom: "8px" }}>{s.icon}</div>
-            <p style={{ ...AC.metricValue, fontSize: "1.5rem", margin: "0 0 4px" }}>{s.val}</p>
-            <p style={{ ...AC.metricLabel, margin: 0 }}>{s.lbl}</p>
-          </div>
-        ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "12px", marginBottom: "20px" }}>
+        <WidgetStatSimple icon={<Mountain size={16} />} value={p?.farm_altitude_m ? `${p.farm_altitude_m}m` : "—"} label="Altitude" tone="green" />
+        <WidgetStatSimple icon={<Ruler size={16} />} value={p?.farm_size_ha ? `${p.farm_size_ha} ha` : "—"} label="Farm Size" tone="green" />
+        <WidgetStatSimple icon={<Users size={16} />} value={p?.cooperative ? "Yes" : "—"} label="Cooperative" tone="green" />
+        <WidgetStatProgress
+          icon={<TrendingUp size={16} />}
+          value={lots?.length ?? 0}
+          label="Linked Lots"
+          tone="blue"
+          percent={lots && lots.length > 0 ? Math.round((lots.filter((l) => l.export_ready).length / lots.length) * 100) : 0}
+          footer={lots && lots.length > 0 ? `${lots.filter((l) => l.export_ready).length} of ${lots.length} export ready` : "No lots linked yet"}
+        />
       </div>
 
       <div className="ab-farm-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
