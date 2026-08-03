@@ -23,14 +23,14 @@ const ORIGIN_IMAGES: Record<string, string> = {
   harrar: originHarrar,
 };
 
-// The marketplace list requires auth on this deployment, and this page is
-// only ever shown to anonymous visitors (authenticated users are redirected
-// to /dashboard before reaching here — see App.tsx's RootRoute). So this
-// page intentionally makes no live API calls: no fabricated counts, no
-// guaranteed-to-401 requests. "Explore" links to /marketplace, which
-// ProtectedRoute naturally bounces to /login?next=/marketplace. The "7
-// gates / 3 frameworks / 1 passport" figures below are structural facts
-// about the compliance pipeline (see CLAUDE.md), not live metrics.
+// This page is only ever shown to anonymous visitors (authenticated users
+// are redirected to /dashboard before reaching here — see App.tsx's
+// RootRoute). It intentionally makes no live API calls: no fabricated
+// counts, no requests that would need auth. /marketplace is public
+// browsing (only watchlist/sample/offer actions require login), so
+// "Explore" links straight there. The "7 gates / 3 frameworks / 1
+// passport" figures below are structural facts about the compliance
+// pipeline (see CLAUDE.md), not live metrics.
 export default function Landing() {
   const navigate = useNavigate();
 

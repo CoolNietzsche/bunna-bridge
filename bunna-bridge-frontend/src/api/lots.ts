@@ -1,4 +1,5 @@
 import type { GeoPolygon } from './boundary';
+import type { LotCertification } from '../lib/certifications';
 import api from "./client";
 
 export interface CoffeeLot {
@@ -46,6 +47,7 @@ export interface CoffeeLot {
   is_organic: boolean;
   is_fair_trade: boolean;
   is_rainforest_alliance: boolean;
+  certifications: LotCertification[];
   tasting_notes: string;
   farm_story: string;
   compliance_score: number;
@@ -81,6 +83,7 @@ export interface PublicLotStory {
   is_organic: boolean;
   is_fair_trade: boolean;
   is_rainforest_alliance: boolean;
+  certifications: LotCertification[];
   latest_sca_score: number | null;
   latest_q_grader: string | null;
   compliance_score: number;

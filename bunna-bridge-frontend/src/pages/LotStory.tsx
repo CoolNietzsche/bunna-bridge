@@ -5,12 +5,13 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import QRCode from "qrcode";
 import {
-  MapPin, Award, Leaf, TreePine, ShieldCheck, QrCode, Coffee,
+  MapPin, ShieldCheck, QrCode, Coffee,
 } from "lucide-react";
 import { getLotStory } from "../api/lots";
 import FarmMapDisplay from "../components/FarmMapDisplay";
 import logoFull from "../assets/logo-full.png";
 import { titleCase } from "../lib/utils";
+import { certIcon } from "../lib/certifications";
 import { AT } from "../styles/adminTokens";
 
 function PointMap({ lng, lat }: { lng: number; lat: number }) {
@@ -80,11 +81,10 @@ export default function LotStory() {
     );
   }
 
-  const certs = [
-    lot.is_organic && <CertBadge key="organic" icon={<Leaf size={12} />} label="Organic" />,
-    lot.is_fair_trade && <CertBadge key="fairtrade" icon={<Award size={12} />} label="Fair Trade" />,
-    lot.is_rainforest_alliance && <CertBadge key="ra" icon={<TreePine size={12} />} label="Rainforest Alliance" />,
-  ].filter(Boolean);
+  const certs = lot.certifications.map((cert) => {
+    const Icon = certIcon(cert.cert_type);
+    return <CertBadge key={cert.cert_type} icon={<Icon size={12} />} label={cert.label} />;
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: AT.color.bodyBg, fontFamily: AT.font.sans }}>

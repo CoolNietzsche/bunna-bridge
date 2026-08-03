@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLot, createOffer, downloadEudrDds, downloadSpecSheet } from "../api/lots";
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
-import AdminShell from "../components/admin/AdminShell";
+import AppShell from "../components/AppShell";
 import {
-  ShieldCheck, Mountain, Leaf, FlaskConical, TrendingUp,
-  ArrowLeft, Award, CheckCircle, XCircle, Download,
-  MapPin, Calendar, Package, X, FileText, Building2, Sprout, Share2,
+  ShieldCheck, Mountain, FlaskConical, TrendingUp,
+  ArrowLeft, CheckCircle, XCircle, Download,
+  MapPin, Calendar, X, FileText, Building2, Sprout, Share2,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 import { titleCase, formatUsd, formatKg, isBuyerRole } from "../lib/utils";
+import { certIcon } from "../lib/certifications";
 
 // ── Radar chart (pure SVG) ────────────────────────────────────────────────────
 function RadarChart({ scores }: { scores: Record<string, number> }) {
@@ -127,6 +128,7 @@ function OfferModal({ lot, onClose }: { lot: any; onClose: () => void }) {
 export default function MarketplaceLotDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
   const qc = useQueryClient();
@@ -144,6 +146,9 @@ export default function MarketplaceLotDetail() {
   });
 
   const canTransact = isAuthenticated && (isBuyerRole(user?.role) || user?.role === "admin");
+  // Buttons render for anonymous visitors too (so clicking them can redirect
+  // to login); an authenticated-but-ineligible role still never sees them.
+  const showTransactButtons = !isAuthenticated || canTransact;
 
   useEffect(() => {
     if (!canTransact) return;
@@ -151,15 +156,26 @@ export default function MarketplaceLotDetail() {
     if (searchParams.get("sample") === "1") setShowSample(true);
   }, [searchParams, canTransact]);
 
+  // Gate a click-triggered action behind login, resuming via the same
+  // "?offer=1" / "?sample=1" query-param pattern the effect above consumes.
+  const requireAuth = (param: "offer" | "sample", action: () => void) => {
+    if (!isAuthenticated) {
+      const next = `${location.pathname}?${param}=1`;
+      navigate(`/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    action();
+  };
+
   if (isLoading) return (
-    <AdminShell>
+    <AppShell>
       <div style={{ padding: "96px 0", textAlign: "center" }}><p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.textMuted }}>Loading lot…</p></div>
-    </AdminShell>
+    </AppShell>
   );
   if (!lot) return (
-    <AdminShell>
+    <AppShell>
       <div style={{ padding: "96px 0", textAlign: "center" }}><p style={{ fontFamily: AT.font.sans, color: AT.color.textMuted }}>Lot not found.</p></div>
-    </AdminShell>
+    </AppShell>
   );
 
   const score = lot.latest_sca_score ?? (typeof lot.sca_score === "number" ? lot.sca_score : null);
@@ -186,7 +202,8 @@ export default function MarketplaceLotDetail() {
   ];
 
   return (
-    <AdminShell>
+    <AppShell>
+      <div className="container-editorial" style={{ padding: "24px 0" }}>
       {showOffer && <OfferModal lot={lot} onClose={() => setShowOffer(false)} />}
 
       <button onClick={() => navigate("/marketplace")} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: AT.color.textMuted, fontFamily: AT.font.sans, fontSize: "0.82rem", cursor: "pointer", padding: 0, marginBottom: "16px" }}>
@@ -282,19 +299,19 @@ export default function MarketplaceLotDetail() {
           <div style={{ ...AC.card, ...AC.cardPad }}>
             <p style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.textDisabled, margin: "0 0 3px" }}>FOB PRICE / KG</p>
             <p style={{ fontFamily: AT.font.sans, fontSize: "2rem", fontWeight: 700, color: AT.color.text, margin: "0 0 4px", lineHeight: 1 }}>
-              {lot.fob_price_usd ? formatUsd(lot.fob_price_usd) : "On request"}
+              {!isAuthenticated ? "Sign in to see price" : lot.fob_price_usd ? formatUsd(lot.fob_price_usd) : "On request"}
             </p>
             <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.textMuted, margin: "0 0 16px" }}>
               {formatKg(lot.available_qty_kg || lot.volume_kg)} available{lot.delivery_window ? ` · ${lot.delivery_window}` : ""}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {canTransact && (
-                <button onClick={() => setShowOffer(true)} style={{ ...AC.btnPrimary, width: "100%", justifyContent: "center" }}>
+              {showTransactButtons && (
+                <button onClick={() => requireAuth("offer", () => setShowOffer(true))} style={{ ...AC.btnPrimary, width: "100%", justifyContent: "center" }}>
                   <TrendingUp size={15} /> Make an offer
                 </button>
               )}
-              {canTransact && !showSample && (
-                <button onClick={() => setShowSample(true)} style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}>
+              {showTransactButtons && !showSample && (
+                <button onClick={() => requireAuth("sample", () => setShowSample(true))} style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}>
                   <FlaskConical size={15} /> Request a sample
                 </button>
               )}
@@ -345,7 +362,7 @@ export default function MarketplaceLotDetail() {
               ["Varietal", lot.varietal],
               ["Altitude", `${lot.altitude_m} masl`],
               ["Harvest", lot.harvest_date],
-              ["Min order", `${lot.min_order_kg} kg`],
+              ["Min order", lot.min_order_kg ? `${lot.min_order_kg} kg` : (isAuthenticated ? "—" : "Sign in to view")],
               ["Lot type", titleCase(lot.lot_type)],
             ] as [string, string][]).map(([k, v]) => (
               <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${AT.color.borderLight}` }}>
@@ -366,13 +383,14 @@ export default function MarketplaceLotDetail() {
             </div>
           </div>
 
-          {(lot.is_organic || lot.is_fair_trade || lot.is_rainforest_alliance) && (
+          {lot.certifications?.length > 0 && (
             <div style={{ ...AC.card, ...AC.cardPad }}>
               <p style={AC.eyebrow}>Certifications</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
-                {lot.is_organic && <Cert icon={<Leaf size={13} />} label="Organic" />}
-                {lot.is_fair_trade && <Cert icon={<Award size={13} />} label="Fair Trade" />}
-                {lot.is_rainforest_alliance && <Cert icon={<Package size={13} />} label="Rainforest Alliance" />}
+                {lot.certifications.map((cert) => {
+                  const Icon = certIcon(cert.cert_type);
+                  return <Cert key={cert.cert_type} icon={<Icon size={13} />} label={cert.label} />;
+                })}
               </div>
             </div>
           )}
@@ -380,7 +398,8 @@ export default function MarketplaceLotDetail() {
       </div>
 
       <style>{`@media (max-width: 900px){ .ml-story { grid-template-columns: 1fr !important; } .ml-story > div:last-child { position: static !important; } }`}</style>
-    </AdminShell>
+      </div>
+    </AppShell>
   );
 }
 

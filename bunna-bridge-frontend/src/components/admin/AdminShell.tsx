@@ -13,8 +13,8 @@ interface AdminShellProps {
  * real structure. Used by operational pages (Dashboard, Lots, Pipeline,
  * Offers, Samples, Farm, Cupping, Settings…), replacing the public
  * AppShell/SiteHeader for that area. Marketplace and the Lot Story detail
- * keep the public shell — they're the buyer's storefront journey, not
- * back-office.
+ * use the public AppShell/SiteHeader instead — they're the buyer's public
+ * storefront journey, not back-office.
  */
 export default function AdminShell({ children }: AdminShellProps) {
   const [collapsed, setCollapsed] = useState(false);

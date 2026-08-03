@@ -14,6 +14,7 @@ from rest_framework.test import APIClient
 from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.models import Notification
 from bunna_bridge.lots.models import Offer
+from bunna_bridge.users.models import Certification
 from bunna_bridge.users.models import User
 
 pytestmark = pytest.mark.django_db
@@ -202,6 +203,114 @@ class TestPublicLotStory:
             "exporter_ecta_number", "exporter_ecta_file",
         }
         assert not (forbidden_keys & set(resp.data.keys()))
+
+
+class TestAnonymousMarketplaceAccess:
+    def test_anonymous_can_list_marketplace_lots(self):
+        exporter = _make_user("exporter")
+        _make_lot(exporter, lot_id="LOT-LISTED", status="listed")
+        _make_lot(exporter, lot_id="LOT-DRAFT", status="draft")
+
+        resp = APIClient().get(reverse("lot-list"))
+
+        assert resp.status_code == HTTPStatus.OK
+        lot_ids = {item["lot_id"] for item in resp.data["results"]}
+        assert lot_ids == {"LOT-LISTED"}
+
+    def test_anonymous_can_retrieve_a_listed_lot(self):
+        exporter = _make_user("exporter")
+        lot = _make_lot(exporter, status="listed")
+
+        resp = APIClient().get(reverse("lot-detail", args=[lot.pk]))
+
+        assert resp.status_code == HTTPStatus.OK
+
+    def test_anonymous_cannot_retrieve_a_draft_lot(self):
+        exporter = _make_user("exporter")
+        lot = _make_lot(exporter, status="draft")
+
+        resp = APIClient().get(reverse("lot-detail", args=[lot.pk]))
+
+        assert resp.status_code == HTTPStatus.NOT_FOUND
+
+    def test_anonymous_pricing_is_masked_on_list_and_detail(self):
+        exporter = _make_user("exporter")
+        lot = _make_lot(
+            exporter, status="listed",
+            price_per_kg=Decimal("12.50"), fob_price_usd=Decimal("9.75"),
+            min_order_kg=Decimal("300.00"), delivery_window="Q3 2026",
+        )
+        commercial_fields = ["price_per_kg", "fob_price_usd", "min_order_kg", "delivery_window"]
+
+        list_resp = APIClient().get(reverse("lot-list"))
+        detail_resp = APIClient().get(reverse("lot-detail", args=[lot.pk]))
+
+        assert list_resp.status_code == HTTPStatus.OK
+        item = list_resp.data["results"][0]
+        for field in commercial_fields:
+            assert item[field] is None, f"{field} should be masked for anonymous list requests"
+
+        assert detail_resp.status_code == HTTPStatus.OK
+        props = detail_resp.data.get("properties", detail_resp.data)
+        for field in commercial_fields:
+            assert props[field] is None, f"{field} should be masked for anonymous detail requests"
+
+    def test_authenticated_buyer_still_sees_real_pricing(self):
+        exporter = _make_user("exporter")
+        buyer = _make_user("buyer")
+        _make_lot(exporter, status="listed", fob_price_usd=Decimal("9.75"))
+
+        client = APIClient()
+        client.force_authenticate(buyer)
+        resp = client.get(reverse("lot-list"))
+
+        assert resp.status_code == HTTPStatus.OK
+        assert Decimal(resp.data["results"][0]["fob_price_usd"]) == Decimal("9.75")
+
+    def test_anonymous_cannot_create_a_lot(self):
+        resp = APIClient().post(
+            reverse("lot-list"),
+            {"lot_id": "LOT-X", "name": "X", "status": "draft"},
+            format="json",
+        )
+
+        assert resp.status_code == HTTPStatus.UNAUTHORIZED
+
+
+class TestCertificationBadges:
+    def _cert(self, holder, cert_type, **kwargs):
+        return Certification.objects.create(holder=holder, cert_type=cert_type, **kwargs)
+
+    def test_lot_list_includes_the_exporters_valid_certifications(self):
+        exporter = _make_user("exporter")
+        self._cert(exporter, Certification.CertType.ORGANIC)
+        self._cert(exporter, Certification.CertType.Q_ARABICA)
+        _make_lot(exporter, status="listed")
+
+        resp = APIClient().get(reverse("lot-list"))
+
+        assert resp.status_code == HTTPStatus.OK
+        cert_types = {c["cert_type"] for c in resp.data["results"][0]["certifications"]}
+        assert cert_types == {"organic", "q_arabica"}
+
+    def test_expired_certifications_are_excluded(self):
+        exporter = _make_user("exporter")
+        self._cert(exporter, Certification.CertType.ORGANIC, expiry_date=date(2020, 1, 1))
+        _make_lot(exporter, status="listed")
+
+        resp = APIClient().get(reverse("lot-list"))
+
+        assert resp.data["results"][0]["certifications"] == []
+
+    def test_lot_story_includes_certifications(self):
+        exporter = _make_user("exporter")
+        self._cert(exporter, Certification.CertType.FAIR_TRADE)
+        lot = _make_lot(exporter, status="listed")
+
+        resp = APIClient().get(reverse("lot-story-public", args=[lot.pk]))
+
+        assert resp.status_code == HTTPStatus.OK
+        assert resp.data["certifications"] == [{"cert_type": "fair_trade", "label": "Fair Trade"}]
 
 
 class TestFarmId:

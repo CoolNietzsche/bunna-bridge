@@ -1,23 +1,38 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MapPin, ShieldCheck, Heart } from "lucide-react";
 import { AT } from "../../styles/adminTokens";
 import { AC } from "../../styles/adminComponents";
 import { titleCase, formatUsd, formatKg } from "../../lib/utils";
+import { certIcon } from "../../lib/certifications";
+import { useAuth } from "../../context/AuthContext";
 import { LotStatusBadge } from "./AdminStatusBadge";
 import type { CoffeeLot } from "../../api/lots";
 
 interface AdminLotCardProps {
   lot: CoffeeLot;
-  isBuyer?: boolean;
+  /** Whether the watchlist heart should render at all for the viewer's role. */
+  showWatch?: boolean;
   isWatched?: boolean;
   onToggleWatch?: (id: string) => void;
   key?: string | number;
 }
 
 /** Product-catalog card, Gentelella e-commerce style: flat surface, top accent, no photography. */
-export default function AdminLotCard({ lot, isBuyer = false, isWatched = false, onToggleWatch }: AdminLotCardProps) {
+export default function AdminLotCard({ lot, showWatch = false, isWatched = false, onToggleWatch }: AdminLotCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const score = lot.latest_sca_score ?? (typeof lot.sca_score === "number" ? lot.sca_score : null);
+
+  const handleToggleWatch = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      const next = `${location.pathname}${location.search ? location.search + "&" : "?"}watchlist=${lot.id}`;
+      navigate(`/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    onToggleWatch?.(lot.id);
+  };
 
   return (
     <article
@@ -55,13 +70,21 @@ export default function AdminLotCard({ lot, isBuyer = false, isWatched = false, 
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {lot.is_eudr_ready && <span style={{ ...AC.status.base, ...AC.status.green }}><ShieldCheck size={11} /> EUDR</span>}
           <LotStatusBadge status={lot.status} />
+          {lot.certifications?.map((cert) => {
+            const Icon = certIcon(cert.cert_type);
+            return (
+              <span key={cert.cert_type} title={cert.label} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "22px", height: "22px", borderRadius: AT.radius.pill, background: AT.color.primaryLight, color: AT.color.primaryDark }}>
+                <Icon size={11} />
+              </span>
+            );
+          })}
         </div>
 
         <div style={{ marginTop: "auto", paddingTop: "10px", borderTop: `1px solid ${AT.color.borderLight}`, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
             <p style={{ margin: 0, fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.textDisabled }}>FOB / KG</p>
             <p style={{ margin: 0, fontFamily: AT.font.sans, fontSize: "1.15rem", fontWeight: 700, color: AT.color.text }}>
-              {lot.fob_price_usd ? formatUsd(lot.fob_price_usd) : "On request"}
+              {!isAuthenticated ? "Sign in" : lot.fob_price_usd ? formatUsd(lot.fob_price_usd) : "On request"}
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -70,10 +93,10 @@ export default function AdminLotCard({ lot, isBuyer = false, isWatched = false, 
               {formatKg(lot.available_qty_kg || lot.volume_kg)}
             </p>
           </div>
-          {isBuyer && onToggleWatch && (
+          {showWatch && (
             <button
               aria-label={isWatched ? "Remove from watchlist" : "Add to watchlist"}
-              onClick={(e) => { e.stopPropagation(); onToggleWatch(lot.id); }}
+              onClick={handleToggleWatch}
               style={{ width: "30px", height: "30px", borderRadius: AT.radius.md, border: `1px solid ${AT.color.border}`, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
             >
               <Heart size={14} color={isWatched ? AT.color.red : AT.color.textMuted} fill={isWatched ? AT.color.red : "none"} />

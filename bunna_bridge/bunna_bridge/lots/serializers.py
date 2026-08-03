@@ -4,6 +4,30 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
 from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation
 
+# Commercial terms hidden from anonymous marketplace visitors — same set the
+# public Lot Story page has always excluded, now applied consistently to the
+# list/detail endpoints anonymous users can reach too.
+COMMERCIAL_FIELDS = ["price_per_kg", "fob_price_usd", "min_order_kg", "delivery_window"]
+
+
+def mask_commercial_fields(properties, request):
+    user = getattr(request, "user", None) if request else None
+    if not (user and user.is_authenticated):
+        for field in COMMERCIAL_FIELDS:
+            if field in properties:
+                properties[field] = None
+
+
+def lot_certifications(lot):
+    """Currently-valid (non-expired) certifications held by the lot's exporter."""
+    if not lot.exporter_id:
+        return []
+    return [
+        {"cert_type": cert.cert_type, "label": cert.get_cert_type_display()}
+        for cert in lot.exporter.certifications.all()
+        if not cert.is_expired
+    ]
+
 
 class WashingStationSerializer(serializers.ModelSerializer):
     lots_count = serializers.IntegerField(source="lots.count", read_only=True)
@@ -55,6 +79,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
     farmer_farm_id       = serializers.CharField(
         source="farmer.farm_id", read_only=True,
     )
+    certifications       = serializers.SerializerMethodField()
 
     class Meta:
         model  = CoffeeLot
@@ -66,7 +91,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             # marketplace
             "flavor_tags", "available_qty_kg", "fob_price_usd", "min_order_kg",
             "delivery_window", "lot_type",
-            "is_organic", "is_fair_trade", "is_rainforest_alliance",
+            "is_organic", "is_fair_trade", "is_rainforest_alliance", "certifications",
             "tasting_notes",
             # compliance
             "deforestation_free", "eudr_dds_ready", "gps_verified",
@@ -114,6 +139,14 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         score = obj.cupping_scores.first()
         return score.total_score if score else None
 
+    def get_certifications(self, obj):
+        return lot_certifications(obj)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        mask_commercial_fields(data, self.context.get("request"))
+        return data
+
 
 class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
     # Restricted to the lot's own exporter and admins — see to_representation().
@@ -137,6 +170,7 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
     exporter_ecta_expiry = serializers.DateField(source="exporter.ecta_license_expiry", read_only=True)
     sample_requests_count = serializers.SerializerMethodField()
     offers_count         = serializers.SerializerMethodField()
+    certifications        = serializers.SerializerMethodField()
 
     class Meta:
         model     = CoffeeLot
@@ -159,10 +193,11 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
             or getattr(user, "is_staff", False)
             or instance.exporter_id == getattr(user, "id", None)
         )
+        properties = data.get("properties", data)
         if not is_owner_or_admin:
-            properties = data.get("properties", data)
             for field in self.RESTRICTED_DOCUMENT_FIELDS:
                 properties.pop(field, None)
+        mask_commercial_fields(properties, request)
         return data
 
     def get_compliance_score(self, obj):
@@ -176,6 +211,9 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
 
     def get_offers_count(self, obj):
         return obj.offers.count()
+
+    def get_certifications(self, obj):
+        return lot_certifications(obj)
 
 
 class PublicLotStorySerializer(serializers.ModelSerializer):
@@ -195,6 +233,7 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
     latest_q_grader   = serializers.SerializerMethodField()
     boundary_geojson      = serializers.SerializerMethodField()
     farm_location_geojson = serializers.SerializerMethodField()
+    certifications         = serializers.SerializerMethodField()
 
     class Meta:
         model  = CoffeeLot
@@ -203,7 +242,7 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
             "region", "washing_station", "altitude_m",
             "processing", "grade", "varietal", "harvest_date",
             "flavor_notes", "tasting_notes", "farm_story", "flavor_tags", "farm_photos",
-            "is_organic", "is_fair_trade", "is_rainforest_alliance",
+            "is_organic", "is_fair_trade", "is_rainforest_alliance", "certifications",
             "latest_sca_score", "latest_q_grader",
             "compliance_score", "export_ready",
             "exporter_company",
@@ -230,6 +269,9 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
 
     def get_farm_location_geojson(self, obj):
         return json.loads(obj.farm_location.geojson) if obj.farm_location else None
+
+    def get_certifications(self, obj):
+        return lot_certifications(obj)
 
 
 class SampleRequestSerializer(serializers.ModelSerializer):
