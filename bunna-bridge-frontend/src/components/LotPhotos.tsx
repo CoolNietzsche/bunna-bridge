@@ -14,7 +14,7 @@ const MAX_PHOTOS = 8;
 export default function LotPhotos({ lotId, photos }: Props) {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const canUpload = user?.role === "exporter" || user?.role === "admin";
+  const canUpload = user?.role === "exporter" || user?.role === "admin" || user?.role === "farmer";
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState("");
