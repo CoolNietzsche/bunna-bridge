@@ -74,7 +74,7 @@ class WashingStationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class CoffeeLotViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    queryset           = CoffeeLot.objects.select_related("exporter", "farmer").all()
+    queryset           = CoffeeLot.objects.select_related("exporter", "farmer").prefetch_related("exporter__certifications").all()
     permission_classes = [CanManageLotOrReadOnly]
     filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields   = ["region", "grade", "processing", "status",
@@ -82,9 +82,20 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
     search_fields      = ["lot_id", "name", "washing_station", "region"]
     ordering_fields    = ["sca_score", "altitude_m", "volume_kg", "created_at"]
 
+    def get_permissions(self):
+        # Marketplace browsing (list/retrieve) is public; every other action
+        # (create/update/delete + the custom @action endpoints below) stays
+        # behind CanManageLotOrReadOnly.
+        if self.action in ("list", "retrieve"):
+            return [permissions.AllowAny()]
+        return [permission() for permission in self.permission_classes]
+
     def get_queryset(self):
         user = self.request.user
-        qs   = CoffeeLot.objects.select_related("exporter", "farmer").all()
+        qs   = CoffeeLot.objects.select_related("exporter", "farmer").prefetch_related("exporter__certifications").all()
+        if not user.is_authenticated:
+            # Anonymous marketplace visitors get the same slice buyers do.
+            return qs.filter(status__in=["listed", "contracted", "exported"])
         if user.is_staff or user.is_superuser:
             return qs
         role = getattr(user, "role", "exporter")
@@ -823,7 +834,7 @@ class LotStoryPublicView(APIView):
         lot = get_object_or_404(
             CoffeeLot.objects.select_related(
                 "exporter", "farmer",
-            ).prefetch_related("cupping_scores"),
+            ).prefetch_related("cupping_scores", "exporter__certifications"),
             pk=pk,
             status__in=["listed", "contracted", "exported"],
         )

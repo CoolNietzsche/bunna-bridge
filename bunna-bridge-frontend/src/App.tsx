@@ -67,8 +67,8 @@ export default function App() {
             <Route path="/washing-stations" element={<ProtectedRoute><WashingStations /></ProtectedRoute>} />
             <Route path="/roast-equipment" element={<ProtectedRoute><RoastEquipmentPage /></ProtectedRoute>} />
             <Route path="/roast-batches" element={<ProtectedRoute><RoastBatches /></ProtectedRoute>} />
-            <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
-            <Route path="/marketplace/:id" element={<ProtectedRoute><MarketplaceLotDetail /></ProtectedRoute>} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/:id" element={<MarketplaceLotDetail />} />
             <Route path="/buyer/offers"     element={<ProtectedRoute><BuyerOffers /></ProtectedRoute>} />
             <Route path="/buyer/watchlist"      element={<ProtectedRoute><BuyerWatchlist /></ProtectedRoute>} />
             <Route path="/exporters/:id"        element={<ProtectedRoute><ExporterStorefront /></ProtectedRoute>} />
