@@ -713,7 +713,11 @@ class LotPhotosView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def _check_owner(self, request, lot):
-        if request.user.role not in ("admin",) and lot.exporter != request.user:
+        if (
+            request.user.role not in ("admin",)
+            and lot.exporter != request.user
+            and lot.farmer != request.user
+        ):
             return Response({"detail": "Not allowed."}, status=403)
         return None
 

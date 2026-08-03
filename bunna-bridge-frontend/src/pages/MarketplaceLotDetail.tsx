@@ -5,6 +5,7 @@ import { getLot, createOffer, downloadEudrDds, downloadSpecSheet } from "../api/
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
 import AppShell from "../components/AppShell";
+import LotPhotoGallery from "../components/LotPhotoGallery";
 import {
   ShieldCheck, Mountain, FlaskConical, TrendingUp,
   ArrowLeft, CheckCircle, XCircle, Download,
@@ -233,6 +234,10 @@ export default function MarketplaceLotDetail() {
         </div>
       </div>
 
+      {lot.farm_photos?.length > 0 && (
+        <LotPhotoGallery photos={lot.farm_photos} alt={lot.name} />
+      )}
+
       <div className="ml-story" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.6fr) minmax(280px, 0.9fr)", gap: "20px", alignItems: "start" }}>
         {/* Left — story */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px", minWidth: 0 }}>
@@ -253,8 +258,17 @@ export default function MarketplaceLotDetail() {
           {lot.farm_story && (
             <section style={{ ...AC.card, ...AC.cardPad }}>
               <p style={AC.eyebrow}>The farm</p>
-              <p style={{ fontFamily: AT.font.sans, fontSize: "0.9rem", color: AT.color.textSecondary, lineHeight: 1.65, margin: "12px 0 0" }}>{lot.farm_story}</p>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "14px" }}>
+              <h2 style={{ fontFamily: AT.font.sans, fontSize: "1.25rem", fontWeight: 600, color: AT.color.text, margin: "8px 0 0", lineHeight: 1.3 }}>
+                {titleCase(lot.region)}{lot.washing_station ? ` · ${lot.washing_station}` : ""}
+              </h2>
+              <p style={{
+                fontFamily: AT.font.sans, fontSize: "0.95rem", color: AT.color.textSecondary,
+                lineHeight: 1.85, margin: "18px 0 0",
+                borderLeft: `3px solid ${AT.color.primary}`, paddingLeft: "18px",
+              }}>
+                {lot.farm_story}
+              </p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "18px" }}>
                 {lot.washing_station && <Fact label="Station" value={lot.washing_station} />}
                 {lot.kebele && <Fact label="Kebele" value={lot.kebele} />}
                 {lot.varietal && <Fact label="Varietal" value={lot.varietal} />}
