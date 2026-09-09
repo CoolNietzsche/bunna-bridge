@@ -62,11 +62,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Urgent Fixes
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._
@@ -137,11 +137,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Urgent Fixes
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._
@@ -210,11 +210,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Urgent Fixes
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._
@@ -286,11 +286,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Urgent Fixes
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._
@@ -370,11 +370,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Urgent Fixes
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._
@@ -443,11 +443,11 @@ For each issue use this format:
 | **Total** | **N** |
 
 ## Top 5 Compliance Gaps
-1. 
-2. 
-3. 
-4. 
-5. 
+1.
+2.
+3.
+4.
+5.
 
 ## Fix Log
 _To be filled in as fixes are applied._

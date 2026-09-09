@@ -47,25 +47,41 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Create local env files
+        run: |
+          mkdir -p bunna_bridge/.envs/.local
+          cat > bunna_bridge/.envs/.local/.django <<'EOF'
+          USE_DOCKER=yes
+          EOF
+          cat > bunna_bridge/.envs/.local/.postgres <<'EOF'
+          POSTGRES_HOST=postgres
+          POSTGRES_PORT=5432
+          POSTGRES_DB=bunna_bridge
+          POSTGRES_USER=bunna_bridge
+          POSTGRES_PASSWORD=ci-only-not-a-real-secret
+          EOF
+
       - name: Build and cache local backend
         uses: docker/bake-action@v6
         with:
+          source: .
+          workdir: bunna_bridge
           push: false
           load: true
-          files: bunna_bridge/docker-compose.local.yml
+          files: docker-compose.local.yml
           targets: django
           set: |
             django.cache-from=type=gha,scope=django-cached-tests
             django.cache-to=type=gha,scope=django-cached-tests,mode=max
-            postgres.cache-from=type=gha,scope=postgres-cached-tests
-            postgres.cache-to=type=gha,scope=postgres-cached-tests,mode=max
 
       - name: Build and cache docs
         uses: docker/bake-action@v6
         with:
+          source: .
+          workdir: bunna_bridge
           push: false
           load: true
-          files: bunna_bridge/docker-compose.docs.yml
+          files: docker-compose.docs.yml
           set: |
             docs.cache-from=type=gha,scope=cached-docs
             docs.cache-to=type=gha,scope=cached-docs,mode=max
