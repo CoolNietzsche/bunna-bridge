@@ -1,0 +1,304 @@
+ ▐▛███▜▌   Claude Code v2.1.220
+▝▜█████▛▘  Sonnet 5 · Claude Pro
+  ▘▘ ▝▝    ~/bunna-bridge
+
+
+❯ /plugin install superpowers@claude-plugins-official                           
+  ⎿  ✓ Installed frontend-design. Run /reload-plugins to apply.
+
+❯ /reload-plugins                                                               
+  ⎿  Reloaded: 1 plugin · 0 skills · 6 agents · 0 hooks · 0 plugin MCP servers · 0 plugin LSP servers
+
+❯ /skills 
+  ⎿  No changes
+
+❯ /plugin install feature-dev@claude-plugins-official                           
+  ⎿  ✓ Installed feature-dev. Run /reload-plugins to apply.
+
+❯ /reload-plugins                                                               
+  ⎿  Reloaded: 2 plugins · 1 skill · 9 agents · 0 hooks · 0 plugin MCP servers · 0 plugin LSP servers
+
+❯ /feature-dev:feature-dev                                                      
+
+● I don't see a feature description attached to this command — the "Initial
+  request" field is empty. What would you like to build?
+
+✻ Baked for 3s
+
+❯ /feature-dev:feature-dev coffee roasters workflows and functionalities        
+
+  Searched for 4 patterns, read 1 file, ran 2 shell commands (ctrl+o to expand)
+
+● The "Roaster" role already exists as a first-class user type — recent work
+  (PRs #18–19) added profile fields, a MyRoastery dashboard, marketplace
+  browsing, offers, and sample requests, all with buyer-equivalent permissions
+  on lots. "Coffee roasters workflows and functionalities" could mean a lot of
+  different things on top of that foundation, so before I explore further I want
+  to narrow scope.
+
+● User declined to answer questions
+  ⎿  · Which part of the roaster experience are you trying to build or improve? 
+     (Post-purchase order tracking / Sourcing/discovery tools / Roast data & 
+     quality feedback / Communication/relationship tools)
+     · What's driving this request right now? (A specific roaster asked for it /
+     Filling out the role for launch / Not sure yet / exploratory)
+
+✻ Baked for 2m 4s
+
+❯ /feature-dev:feature-dev the roasters are a big part of the workflow          
+eventhough beersheba is more focused on tracibility and d2c amongst other       
+things i want to include functionalities that centralize day to day works the   
+exporters and roasters do to carry out their business operations like the       
+pipeline feature but roasters usually have washing stations and usually         
+export.so for the roastsers actual roasting workflow,the orocess,steos and      
+machines us3d and certifications, i want a plan and functionalities or features 
+list.                                                                           
+
+● Understood — this is broader than a single feature: you want a roaster-side
+  operations module (mirroring whatever the exporter "pipeline" is) that covers
+  washing-station/export activity roasters also do, plus the actual roasting
+  process itself (steps, machines, certifications). Let me first see what the
+  existing "pipeline" feature looks like before I explore further, since that's
+  the pattern to mirror.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● 2 background agents launched (↓ to manage)
+   ├ Map exporter lot pipeline feature
+   └ Map roaster role and profile features
+
+● Two explorer agents are running in the background — one mapping the existing
+  exporter "pipeline" feature, one mapping the current roaster
+  role/profile/offer functionality and any certification modeling. I'll report
+  back once both complete.
+
+✻ Worked for 40s
+
+● Agent "Map roaster role and profile features" finished · 1m 19s
+
+● Roaster-side exploration is done — confirms roasters today have zero
+  operations tooling: they're purely a buyer-equivalent with an editable
+  text-field profile, no washing-station/export ownership, and no certifications
+  model exists anywhere in the codebase (greenfield). Still waiting on the
+  pipeline-feature agent before I consolidate a plan.
+
+✻ Cooked for 10s
+● Agent "Map exporter lot pipeline feature" finished · 1m 33s
+
+  Read 2 files (ctrl+o to expand)
+
+● Both exploration agents are done, and I've read the core files myself. Here's
+  the grounded picture and a plan.
+
+  What exists today
+
+  - Roaster is a first-class User.Role, but purely as a buyer-equivalent with an
+  editable profile (MyRoastery.tsx) — read-only marketplace access, offers,
+  sample requests. No operational tooling.
+  - Exporter "Pipeline" (LotPipeline.tsx) is a simple 4-stage Kanban (draft → 
+  listed → contracted → exported) driven by a status field on CoffeeLot, gated
+  by a set of boolean compliance flags (export_ready = all gates true) and
+  enforced server-side in LotStatusUpdateView.
+  - Washing station exists only as free text on CoffeeLot.washing_station — no
+  structured entity a roaster (or anyone) could own/operate.
+  - Certifications don't exist anywhere as a model. CoffeeLot has three
+  standalone booleans (is_organic, is_fair_trade, is_rainforest_alliance) but
+  nothing tracking cert body, number, or expiry — and compliance docs (phyto,
+  EUDR DDS, etc.) are bespoke FileFields directly on the lot, not a reusable
+  document/cert table.
+  - Nothing exists for roasting itself: no batch, machine, or roast-step model
+  of any kind.
+
+  Proposed feature plan
+
+  Key architecture decision first: you said roasters "usually have washing
+  stations and usually export" — meaning many roaster-users are really dual-role
+  (they process/export green coffee and roast it). I'd recommend extending lot 
+  ownership/export rights to the roaster role rather than building a parallel
+  lot-like model for washing stations — it reuses the compliance-gate machinery,
+  EUDR DDS generation, and document-upload pattern that's already built and
+  battle-tested, instead of duplicating it. A roaster who exports becomes,
+  functionally, an exporter who also roasts.
+
+  A. Roaster-as-exporter / washing-station operations (reuses existing Pipeline)
+  1. Let role == "roaster" own/create CoffeeLots (extend IsExporterOrReadOnly,
+  get_queryset, LotStatusUpdateView permission checks)
+  2. Promote washing_station from free text to a structured WashingStation model
+  (name, location, capacity_kg_per_day, owner FK)
+  3. Surface the existing Lot Pipeline board for roaster-owned lots (nav change
+  only — the board itself needs no new code)
+
+  B. In-house roasting workflow (net new)
+  4. RoastEquipment model — name, machine type (drum/fluid-bed/etc.), brand,
+  batch capacity, install date
+  5. RoastBatch model — green lot(s) in, batch code, roast date, machine used,
+  input/output weight (loss %), roast level, key roast-curve points (charge
+  temp, first-crack time/temp, development time, drop temp)
+  6. A roast-batch board mirroring the Lot Pipeline pattern: Queued → Roasting →
+  Resting → QC → Packaged → Shipped
+  7. QC step reusing (or extending) the existing generic CuppingScore model
+  against the roasted batch
+
+  C. Certifications (net new, greenfield — built generically so it serves
+  exporters, roasters, and washing stations alike)
+  8. Certification model — holder, cert type
+  (organic/fair-trade/rainforest-alliance/Q-Arabica/ISO/HACCP/other), issuing
+  body, number, issue/expiry date, file (reusing the existing
+  document_extension_validator/size-limit pattern)
+  9. Certification management UI with expiry tracking/alerts
+  10. Surface certs as trust badges on public roaster/lot-story pages — ties
+  into the D2C storytelling angle
+
+  D. Roaster ops dashboard — active batches, green-coffee inventory, cert expiry
+  alerts, pipeline summary; new nav entries in AdminSidebar.tsx/SiteHeader.tsx.
+
+  Suggested phasing: Certifications (self-contained, no dependencies) →
+  roaster-as-exporter permission extension → roast batch/equipment tracking → QC
+  + dashboard rollup.
+
+  Before I design the architecture, four things only you can call
+
+  1. Does every roaster get export/washing-station rights, or only some? If only
+  some, we need a flag (e.g. roaster_also_exports) rather than a blanket
+  permission change.
+  2. Roast curve depth — simple fields (roast level, total time, drop temp) or a
+  full time-series curve (multiple timestamped readings)? Big complexity
+  difference.
+  3. Can a RoastBatch blend multiple green lots, or is it strictly one lot in →
+  one batch out? Blending is realistic for roasters but complicates traceability
+  math.
+  4. Should the existing is_organic/is_fair_trade/is_rainforest_alliance 
+  booleans on CoffeeLot be replaced by real Certification records, or left alone
+  with Certification as an additive layer?
+
+  Once you weigh in on those, I'll move to architecture design (Phase 4) with
+  concrete file-level changes.
+
+✻ Worked for 3m 30s
+
+● Agent "Map exporter lot pipeline feature" finished · 13m 10s
+
+● That's a stray duplicate notification from the earlier pipeline-exploration
+  agent (it was asked to write a report file, declined per its instructions, and
+  has nothing new). Nothing further to do there — the plan above stands and I'm
+  waiting on your answers to the four open questions before moving to
+  architecture design.
+
+✻ Crunched for 7s
+
+❯ /export                                                                       
+  ⎿  Conversation copied to clipboard
+
+● Agent "Map exporter lot pipeline feature" finished · 23m 39s
+
+● This is another stray echo from the earlier subagent (task a56a05219a525e008)
+  — it's confused about receiving my four questions and correctly declining to
+  answer them, since it's a read-only trace agent, not the design authority.
+  Nothing to act on there; that agent's work is done and its findings are
+  already folded into the plan above.
+
+  Still waiting on your input on the four open questions (roaster export scope,
+  roast-curve depth, batch blending, certification-vs-boolean-flags) before I
+  move to architecture design.
+
+✻ Cogitated for 3s
+
+❯ 1. Roasters get washing station rights                                        
+  2. Roast curve depth                                                          
+  3. Lets make blending possible for now                                        
+  4. Existing fields you mentioned should be  real certification records.       
+
+● Got it. Locking in: all roasters get washing-station/export rights (no
+  dual-role flag — just extend exporter-permission checks to include role == 
+  "roaster"), blending allowed (batch can draw from multiple green lots), and
+  is_organic/is_fair_trade/is_rainforest_alliance become derived from real 
+  Certification records instead of standalone booleans.
+
+  One thing to confirm on roast curve depth — your answer just echoed the
+  question back, so let me state my read and you correct me if wrong: I'm going
+  with key roast-curve points (charge temp, first-crack time/temp, development
+  time, drop temp) rather than a continuous time-series log (many timestamped
+  readings, like a roast-logger app). The latter is a much bigger data model (a
+  RoastCurvePoint table, real-time logging UI) and isn't something you mentioned
+  needing — but tell me if that's actually what you want, since it changes the
+  schema significantly.
+
+  Architecture
+
+  New/changed models:
+
+  App: lots
+  Model: WashingStation
+  Purpose: owner FK, name, location, capacity — replaces free-text
+  CoffeeLot.washing_station (kept as legacy display field, synced from the FK)
+  ────────────────────────────────────────
+  App: lots
+  Model: CoffeeLot permission change
+  Purpose: exporter/roaster roles both allowed to own & advance lots through the
+
+  existing Pipeline — no schema change, just widening IsExporterOrReadOnly and
+  the queryset/status-update role checks
+  ────────────────────────────────────────
+  App: users
+  Model: Certification
+  Purpose: holder FK, cert_type, issuing body, number, issue/expiry date, file
+  (reuses existing document_extension_validator)
+  ────────────────────────────────────────
+  App: users
+  Model: signal on Certification
+  Purpose: recomputes CoffeeLot.is_organic/is_fair_trade/is_rainforest_alliance
+  for that holder's lots whenever a cert is added/removed/expires
+  ────────────────────────────────────────
+  App: roasting (new app)
+  Model: RoastEquipment
+  Purpose: roaster FK, machine type, brand, batch capacity, install date
+  ────────────────────────────────────────
+  App: roasting (new)
+  Model: RoastBatch
+  Purpose: batch code, roaster, equipment FK, status
+  (queued→roasting→resting→qc→packaged→shipped), weights in/out, roast level,
+  charge/first-crack/development/drop points, qc_score/qc_notes
+  ────────────────────────────────────────
+  App: roasting (new)
+  Model: RoastBatchLot
+  Purpose: through-table for blending: batch ↔ multiple CoffeeLots + quantity_kg
+
+  each
+
+  Why a new roasting app rather than piling onto lots: lots already carries
+  CoffeeLot, CuppingScore, Offer, SampleRequest, Notification. Roasting is a
+  genuinely separate business domain (post-purchase, in-house), so a dedicated
+  app keeps migrations and permissions clean — and matches the existing pattern
+  of users/lots being separate apps.
+
+  ⚠️ Flag before I build this: is_organic etc. today are per-lot, freely
+  settable by the exporter on that one lot. Making them derived from
+  Certification changes the semantics to "does this lot's owner hold a valid
+  cert" — every lot from a certified roaster/exporter becomes flagged, and
+  there's no way to say "this specific lot only" anymore. That's a real behavior
+  change, not just a refactor. Confirm you're OK with that trade before I do it
+  — if not, I'd keep the booleans manually settable per lot and add
+  Certification as a purely additive trust-badge layer instead.
+
+  Frontend: new pages WashingStations.tsx, RoastEquipment.tsx + RoastBatches.tsx
+  (Kanban board cloned from LotPipeline.tsx's pattern, with a blend picker for
+  multi-lot batches), Certifications.tsx; nav entries added to SiteHeader.tsx +
+  AdminSidebar.tsx for roaster role; Dashboard gets roaster-ops widgets (active
+  batches, cert expiry alerts, green-coffee inventory).
+
+  Rollout order (each is independently shippable):
+  1. Certifications (self-contained, no dependents)
+  2. Roaster lot-ownership permission extension + WashingStation
+  3. roasting app: equipment + batches + blending
+  4. Dashboard rollup + nav polish
+
+  Given the size of this, I'd suggest we implement one phase at a time as
+  separate reviewable changes rather than one giant PR. Two things to confirm
+  before I start:
+
+  1. OK with the is_organic/etc. behavior change above (or keep them manual +
+  additive certs)?
+  2. Start with Phase 1 (Certifications) since it's self-contained and
+  immediately useful?
+
+✻ Worked for 1m 26s
