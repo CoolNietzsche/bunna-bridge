@@ -60,6 +60,14 @@ jobs:
           POSTGRES_USER=bunna_bridge
           POSTGRES_PASSWORD=ci-only-not-a-real-secret
           EOF
+          # docker/bake-action resolves docker-compose.local.yml's relative
+          # env_file paths against the repo root, not the compose file's own
+          # directory (unlike plain `docker compose -f ...`, which the later
+          # migrate/pytest steps use and which DOES resolve them relative to
+          # bunna_bridge/) — so duplicate the same files at the root too.
+          mkdir -p .envs/.local
+          cp bunna_bridge/.envs/.local/.django .envs/.local/.django
+          cp bunna_bridge/.envs/.local/.postgres .envs/.local/.postgres
 
       - name: Build and cache local backend
         uses: docker/bake-action@v6
