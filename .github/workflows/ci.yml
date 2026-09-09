@@ -79,8 +79,6 @@ jobs:
           set: |
             django.cache-from=type=gha,scope=django-cached-tests
             django.cache-to=type=gha,scope=django-cached-tests,mode=max
-            postgres.cache-from=type=gha,scope=postgres-cached-tests
-            postgres.cache-to=type=gha,scope=postgres-cached-tests,mode=max
 
       - name: Build and cache docs
         uses: docker/bake-action@v6
