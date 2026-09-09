@@ -64,7 +64,8 @@ jobs:
       - name: Build and cache local backend
         uses: docker/bake-action@v6
         with:
-          source: bunna_bridge
+          source: .
+          workdir: bunna_bridge
           push: false
           load: true
           files: docker-compose.local.yml
@@ -76,7 +77,8 @@ jobs:
       - name: Build and cache docs
         uses: docker/bake-action@v6
         with:
-          source: bunna_bridge
+          source: .
+          workdir: bunna_bridge
           push: false
           load: true
           files: docker-compose.docs.yml
