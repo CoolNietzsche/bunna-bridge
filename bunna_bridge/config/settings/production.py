@@ -64,12 +64,18 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
 
 # STATIC & MEDIA
 # ------------------------
+# jazzmin vendors a bootstrap.bundle.min.js that references a .map file it
+# doesn't actually ship. CompressedManifestStaticFilesStorage's hashed_name()
+# raises unconditionally (not gated by WHITENOISE_MANIFEST_STRICT) when a
+# referenced file genuinely doesn't exist on disk, which aborts collectstatic
+# entirely. Using the non-manifest compressed storage still gets gzip/brotli
+# compression and correct serving, just without cache-busted hashed filenames.
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -101,12 +107,23 @@ INSTALLED_APPS += ["anymail"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 # https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
 # https://anymail.readthedocs.io/en/stable/esps/mailgun/
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-ANYMAIL = {
-    "MAILGUN_API_KEY": env("MAILGUN_API_KEY"),
-    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_DOMAIN"),
-    "MAILGUN_API_URL": env("MAILGUN_API_URL", default="https://api.mailgun.net/v3"),
-}
+# Falls back to the console backend (prints emails to the container log)
+# when Mailgun isn't configured yet, so a blank MAILGUN_API_KEY/DOMAIN
+# doesn't crash Django at boot in production.
+MAILGUN_API_KEY = env("MAILGUN_API_KEY", default="")
+MAILGUN_DOMAIN = env("MAILGUN_DOMAIN", default="")
+if MAILGUN_API_KEY and MAILGUN_DOMAIN:
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    ANYMAIL = {
+        "MAILGUN_API_KEY": MAILGUN_API_KEY,
+        "MAILGUN_SENDER_DOMAIN": MAILGUN_DOMAIN,
+        "MAILGUN_API_URL": env(
+            "MAILGUN_API_URL",
+            default="https://api.mailgun.net/v3",
+        ),
+    }
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
 # LOGGING

@@ -1,0 +1,33 @@
+# VPS deployment override — layers on top of docker-compose.local.yml.
+#
+# Why this exists instead of using docker-compose.production.yml directly:
+# this VPS runs Traefik-free, host-level nginx in front of several unrelated
+# projects on ports 80/443. docker-compose.production.yml brings its own
+# Traefik that binds those same ports, which would collide with the shared
+# host nginx and every other site it fronts. So we keep the existing
+# local Postgres/Redis/Flower containers (already holding real data) and
+# only change how django/celeryworker/celerybeat are configured: real
+# production Django settings (DEBUG=False) instead of local settings, and
+# Gunicorn instead of the runserver_plus dev server.
+#
+# Usage: docker compose -f docker-compose.local.yml -f docker-compose.vps.yml up -d
+
+services:
+  django:
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
+    command: bash -c "python manage.py collectstatic --noinput && exec gunicorn config.wsgi --bind 0.0.0.0:8000 --chdir=/app"
+
+  celeryworker:
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
+
+  celerybeat:
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
