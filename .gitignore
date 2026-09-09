@@ -9,3 +9,7 @@ bunna-bridge-frontend/dist/
 .DS_Store
 outpt.txt
 output.txt
+response.txt
+session.txt
+claudesession.txt
+*-local-command-caveat*.txt
