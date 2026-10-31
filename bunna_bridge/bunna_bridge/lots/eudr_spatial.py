@@ -1,37 +1,52 @@
 """
-Spatial EUDR compliance checks.
-Used by the compliance engine to auto-compute deforestation_free.
+Spatial EUDR compliance checks (gate: deforestation_free).
+
+A lot's plot geometry is intersected (PostGIS ST_Intersects) with known
+forest-loss polygons detected after the EUDR cutoff (31 Dec 2020).
 """
-from django.contrib.gis.geos import GEOSGeometry
+
 from bunna_bridge.lots.deforestation import DeforestationZone
+
+# Ethiopia spans UTM zones 36N-38N; zone 37N (EPSG:32637) keeps distortion
+# small enough for a buffer around a single farm point.
+METRIC_SRID = 32637
+POINT_BUFFER_METRES = 500
+EUDR_CUTOFF_YEAR = 2020
+
+
+def point_buffer(point, metres=POINT_BUFFER_METRES):
+    """Buffer a WGS84 point by a distance in metres, returning a WGS84 polygon."""
+    projected = point.clone()
+    if projected.srid is None:
+        projected.srid = 4326
+    projected.transform(METRIC_SRID)
+    area = projected.buffer(metres)
+    area.transform(4326)
+    return area
+
+
+def check_geometry_for_lot(lot):
+    if lot.boundary:
+        return lot.boundary
+    if lot.farm_location:
+        return point_buffer(lot.farm_location)
+    return None
 
 
 def check_deforestation_overlap(boundary) -> dict:
     """
-    Check if a farm/lot boundary polygon overlaps with any known
-    deforestation zone (post-2020, EUDR cutoff).
-
-    Args:
-        boundary: GEOSGeometry Polygon or None
-
-    Returns:
-        {
-          "status": "clear" | "overlap" | "pending" | "no_data",
-          "deforestation_free": True | False | None,
-          "overlap_count": int,
-          "message": str,
-        }
+    Returns {"status": clear|overlap|pending|no_data, "deforestation_free": bool|None,
+             "overlap_count": int, "message": str}.
     """
     if boundary is None:
         return {
             "status": "pending",
             "deforestation_free": None,
             "overlap_count": 0,
-            "message": "No boundary captured yet — deforestation check pending.",
+            "message": "No farm location captured yet — deforestation check pending.",
         }
 
-    total_zones = DeforestationZone.objects.count()
-    if total_zones == 0:
+    if not DeforestationZone.objects.exists():
         return {
             "status": "no_data",
             "deforestation_free": None,
@@ -39,9 +54,8 @@ def check_deforestation_overlap(boundary) -> dict:
             "message": "No deforestation reference data loaded yet.",
         }
 
-    # PostGIS ST_Intersects query — only zones after 2020
     overlapping = DeforestationZone.objects.filter(
-        year__gt=2020,
+        year__gt=EUDR_CUTOFF_YEAR,
         geometry__intersects=boundary,
     ).count()
 
@@ -50,38 +64,28 @@ def check_deforestation_overlap(boundary) -> dict:
             "status": "overlap",
             "deforestation_free": False,
             "overlap_count": overlapping,
-            "message": f"⚠️ Boundary overlaps {overlapping} deforestation zone(s) after 2020.",
+            "message": f"Plot overlaps {overlapping} area(s) of forest loss detected after 2020.",
         }
 
     return {
         "status": "clear",
         "deforestation_free": True,
         "overlap_count": 0,
-        "message": "✅ No deforestation overlap detected. EUDR Gate 1 passed.",
+        "message": "No forest loss after 2020 detected inside the plot.",
     }
 
 
-def run_deforestation_check_for_lot(lot) -> bool | None:
-    """
-    Run deforestation check for a lot and update lot.deforestation_free.
-    Uses lot.boundary if available, falls back to a point buffer around
-    lot.farm_location.
-    Returns True/False/None (None = pending, no geometry available).
-    """
-    boundary = None
+def deforestation_result_for_lot(lot) -> dict:
+    return check_deforestation_overlap(check_geometry_for_lot(lot))
 
-    if lot.boundary:
-        boundary = lot.boundary
-    elif lot.farm_location:
-        # Buffer the GPS point by ~500m as a rough farm area proxy
-        # 0.005 degrees ≈ 500m at Ethiopian latitudes
-        boundary = lot.farm_location.buffer(0.005)
 
-    result = check_deforestation_overlap(boundary)
-
-    # Auto-update the lot field if we got a definitive answer
-    if result["deforestation_free"] is not None:
+def run_deforestation_check_for_lot(lot, actor=None) -> dict:
+    """Run the check, persist the result on the lot (logged), and return the result dict."""
+    result = deforestation_result_for_lot(lot)
+    if (
+        result["deforestation_free"] is not None
+        and result["deforestation_free"] != lot.deforestation_free
+    ):
         lot.deforestation_free = result["deforestation_free"]
-        lot.save(update_fields=["deforestation_free"])
-
-    return result["deforestation_free"]
+        lot.save(actor=actor)
+    return result

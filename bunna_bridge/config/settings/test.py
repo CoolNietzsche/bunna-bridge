@@ -36,3 +36,11 @@ TEMPLATES[0]["OPTIONS"]["debug"] = True  # type: ignore[index]
 MEDIA_URL = "http://media.testserver/"
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+
+# Throttling uses the cache; keep it effectively unlimited in tests except
+# where a test overrides it on purpose.
+REST_FRAMEWORK = {  # noqa: F405
+    **REST_FRAMEWORK,  # noqa: F405
+    "DEFAULT_THROTTLE_RATES": {"anon": "100000/hour", "user": "100000/hour", "auth": "100000/hour"},
+}

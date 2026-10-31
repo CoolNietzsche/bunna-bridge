@@ -1,12 +1,23 @@
+from django.db.models.signals import post_delete
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import SampleRequest, Notification
+from .models import FloorPrice, SampleRequest, Notification
+
+
+@receiver([post_save, post_delete], sender=FloorPrice)
+def floor_price_changed(sender, instance, **kwargs):
+    """Gate 7 depends on the floor table — re-derive it on every open lot."""
+    from .models import CoffeeLot
+    for lot in CoffeeLot.objects.exclude(status="exported").select_related("exporter"):
+        lot.save()
 
 # Avoid circular import — CoffeeLot imported inside functions
 
 
 @receiver(post_save, sender=SampleRequest)
 def sample_request_notifications(sender, instance, created, **kwargs):
+    if kwargs.get("raw"):
+        return
     if created:
         # Notify exporter: new sample request
         Notification.objects.create(

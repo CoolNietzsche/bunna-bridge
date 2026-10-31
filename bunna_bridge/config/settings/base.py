@@ -86,6 +86,7 @@ THIRD_PARTY_APPS = [
     "rest_framework_gis",
     "corsheaders",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
 ]
 
@@ -115,7 +116,7 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "users:redirect"
+LOGIN_REDIRECT_URL = "/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
 
@@ -313,6 +314,16 @@ CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_TASK_SOFT_TIME_LIMIT = 60
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# Synced into the DB scheduler on beat start.
+from celery.schedules import crontab  # noqa: E402
+
+CELERY_BEAT_SCHEDULE = {
+    "daily-compliance-refresh": {
+        # Re-derive gates (expiries, license, floor price, cert badges) and send expiry alerts.
+        "task": "bunna_bridge.lots.tasks.daily_compliance_refresh",
+        "schedule": crontab(hour=6, minute=17),
+    },
+}
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#worker-send-task-events
 CELERY_WORKER_SEND_TASK_EVENTS = True
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-task_send_sent_event
@@ -364,6 +375,17 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": env("DRF_THROTTLE_ANON", default="600/hour"),
+        "user": env("DRF_THROTTLE_USER", default="5000/hour"),
+        # login + registration: brute-force protection
+        "auth": env("DRF_THROTTLE_AUTH", default="10/minute"),
+    },
 }
 
 # ── JWT ───────────────────────────────────────────────
@@ -372,6 +394,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "TOKEN_OBTAIN_SERIALIZER": "bunna_bridge.users.serializers.EmailTokenObtainPairSerializer",
 }
@@ -379,12 +402,12 @@ SIMPLE_JWT = {
 
 # ── Jazzmin Admin Theme ────────────────────────────────
 JAZZMIN_SETTINGS = {
-    "site_title": "Bunna Bridge",
-    "site_header": "Bunna Bridge Admin",
-    "site_brand": "ቡና ብሪጅ",
+    "site_title": "Beersheba",
+    "site_header": "Beersheba Admin",
+    "site_brand": "Beersheba",
     "site_logo": None,
-    "welcome_sign": "Bunna Bridge Operations",
-    "copyright": "Bunna Bridge",
+    "welcome_sign": "Beersheba Operations",
+    "copyright": "Beersheba",
     "search_model": ["lots.CoffeeLot", "auth.User"],
     "topmenu_links": [
         {"name": "API",   "url": "/api/v1/",    "new_window": True},
@@ -393,9 +416,15 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "icons": {
-        "auth":             "fas fa-users-cog",
-        "auth.user":        "fas fa-user",
-        "lots.coffeelot":   "fas fa-seedling",
+        "auth":                  "fas fa-users-cog",
+        "users.user":            "fas fa-user",
+        "users.certification":   "fas fa-certificate",
+        "lots.coffeelot":        "fas fa-seedling",
+        "lots.floorprice":       "fas fa-dollar-sign",
+        "lots.complianceevent":  "fas fa-link",
+        "lots.offer":            "fas fa-handshake",
+        "lots.samplerequest":    "fas fa-box",
+        "lots.cuppingscore":     "fas fa-mug-hot",
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
@@ -413,22 +442,22 @@ JAZZMIN_UI_TWEAKS = {
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-danger",
-    "accent": "accent-warning",
+    "brand_colour": "navbar-success",
+    "accent": "accent-success",
     "navbar": "navbar-dark",
     "no_navbar_border": True,
     "navbar_fixed": True,
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-warning",
+    "sidebar": "sidebar-dark-success",
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "darkly",
+    "theme": "flatly",
     "dark_mode_theme": "darkly",
     "button_classes": {
         "primary":   "btn-primary",

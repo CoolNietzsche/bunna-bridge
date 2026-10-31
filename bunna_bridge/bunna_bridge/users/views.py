@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from .serializers import UserSerializer, RegisterSerializer, ExporterPublicSerializer
-from .serializers import FarmerSerializer, CertificationSerializer
+from .serializers import FarmerSerializer, CertificationSerializer, LicenseReviewSerializer
 from .models import Certification
 User = get_user_model()
 
@@ -14,6 +14,72 @@ class RegisterView(generics.CreateAPIView):
     queryset           = User.objects.all()
     serializer_class   = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_scope     = "auth"
+
+
+class LogoutView(generics.GenericAPIView):
+    """Blacklist the refresh token so it can't mint new access tokens."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from rest_framework_simplejwt.exceptions import TokenError
+        from rest_framework_simplejwt.tokens import RefreshToken
+
+        refresh = request.data.get("refresh")
+        if refresh:
+            try:
+                RefreshToken(refresh).blacklist()
+            except TokenError:
+                pass  # already invalid/expired — nothing to revoke
+        return Response(status=status.HTTP_205_RESET_CONTENT)
+
+
+def _is_platform_admin(user):
+    return user.is_staff or user.is_superuser or getattr(user, "role", None) == "admin"
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def license_review_list(request):
+    """Exporters/roasters with an uploaded ECTA license, unverified first. Platform admins only."""
+    if not _is_platform_admin(request.user):
+        return Response({"detail": "Not allowed."}, status=403)
+    users = User.objects.filter(role__in=["exporter", "roaster"]).exclude(ecta_license_file="").exclude(
+        ecta_license_file__isnull=True,
+    ).order_by("-ecta_license_verified_at", "email")
+    pending = [u for u in users if not u.ecta_license_verified_at]
+    verified = [u for u in users if u.ecta_license_verified_at]
+    return Response(LicenseReviewSerializer(pending + verified, many=True).data)
+
+
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def license_review_decide(request, pk):
+    """POST {"approve": true|false} — mark an exporter's ECTA license verified (or revoke)."""
+    from django.utils import timezone
+
+    if not _is_platform_admin(request.user):
+        return Response({"detail": "Not allowed."}, status=403)
+    user = generics.get_object_or_404(User, pk=pk, role__in=["exporter", "roaster"])
+    approve = bool(request.data.get("approve"))
+    if approve and not user.ecta_license_file:
+        return Response({"detail": "No license file uploaded."}, status=400)
+    user.ecta_license_verified_at = timezone.now() if approve else None
+    if approve:
+        user.is_verified = True
+    user.save()
+    from bunna_bridge.lots.models import Notification
+    Notification.objects.create(
+        recipient=user, notification_type="compliance",
+        title="ECTA license verified" if approve else "ECTA license needs attention",
+        message=(
+            "Your ECTA export license was verified. The license gate now passes on your lots."
+            if approve else
+            "Your ECTA export license could not be verified. Please upload a clear, current copy."
+        ),
+        link="/settings",
+    )
+    return Response(LicenseReviewSerializer(user).data)
 
 
 class MeView(generics.RetrieveUpdateAPIView):
@@ -62,16 +128,10 @@ class FarmerProfileView(generics.RetrieveUpdateAPIView):
 def farmer_lots(request):
     from bunna_bridge.lots.models import CoffeeLot
     from bunna_bridge.lots.serializers import CoffeeLotListSerializer
-    user = request.user
-
-    heuristic = Q(pk__in=[])
-    if user.farm_kebele:
-        heuristic = Q(farmer__isnull=True, kebele__icontains=user.farm_kebele)
-    elif user.farm_region:
-        heuristic = Q(farmer__isnull=True, region=user.farm_region)
-
-    qs = CoffeeLot.objects.filter(Q(farmer=user) | heuristic)
-    return Response(CoffeeLotListSerializer(qs, many=True).data)
+    qs = CoffeeLot.objects.filter(farmer=request.user).select_related("exporter", "farmer").prefetch_related(
+        "exporter__certifications", "cupping_scores",
+    )
+    return Response(CoffeeLotListSerializer(qs, many=True, context={"request": request}).data)
 
 
 class RoasterProfileView(generics.RetrieveUpdateAPIView):
@@ -91,15 +151,15 @@ class RoasterProfileView(generics.RetrieveUpdateAPIView):
 
 class ExporterProfileView(generics.RetrieveAPIView):
     serializer_class   = ExporterPublicSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_object(self):
         return generics.get_object_or_404(
-            User, id=self.kwargs["pk"], role="exporter"
+            User, id=self.kwargs["pk"], role__in=["exporter", "roaster"],
         )
 
 class ExporterLotsView(generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         from bunna_bridge.lots.models import CoffeeLot
@@ -143,7 +203,7 @@ class ExporterEctaLicenseDownloadView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk):
-        exporter = generics.get_object_or_404(User, id=pk, role="exporter")
+        exporter = generics.get_object_or_404(User, id=pk, role__in=["exporter", "roaster"])
         is_owner_or_admin = (
             request.user.role == "admin"
             or request.user.is_staff

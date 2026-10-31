@@ -6,9 +6,14 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    throttle_scope = "auth"
+
+
 urlpatterns = [
-    # ── Bunna Bridge API ──
-    path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    # ── Beersheba API ──
+    path("api/auth/token/", ThrottledTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/v1/", include("bunna_bridge.lots.urls")),
     path("api/v1/", include("bunna_bridge.roasting.urls")),
@@ -18,8 +23,6 @@ urlpatterns = [
     path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
     # ── Django Admin ──
     path(settings.ADMIN_URL, admin.site.urls),
-    # ── User management ──
-    path("users/", include("bunna_bridge.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # ── Media ──
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

@@ -2,6 +2,8 @@ from django.urls import path
 from bunna_bridge.lots.admin_views import FarmBoundaryMapView
 from django.contrib.gis import admin
 from .models import CoffeeLot, CuppingScore, SampleRequest, WashingStation
+from .models import ComplianceEvent, FloorPrice, Offer, Notification
+from .models import GATE_FIELDS
 
 
 class CuppingScoreInline(admin.TabularInline):
@@ -18,8 +20,12 @@ class CoffeeLotAdmin(admin.GISModelAdmin):
     list_filter     = ["region", "grade", "processing", "status",
                        "deforestation_free", "eudr_dds_ready"]
     search_fields   = ["lot_id", "name", "washing_station", "farmer__farm_id", "farmer__email"]
-    readonly_fields = ["id", "created_at", "updated_at"]
+    # Gates are derived from evidence in CoffeeLot.save(); never hand-set.
+    readonly_fields = ["id", "created_at", "updated_at", *GATE_FIELDS, "eudr_dds_generated_at"]
     inlines         = [CuppingScoreInline]
+
+    def save_model(self, request, obj, form, change):
+        obj.save(actor=request.user)
     def get_urls(self):
         urls = super().get_urls()
         custom = [
@@ -38,8 +44,13 @@ class CoffeeLotAdmin(admin.GISModelAdmin):
         ("Compliance Gates",  {"fields": ["deforestation_free", "phyto_cert_uploaded",
                                           "ecta_license_active", "nbe_fx_declared",
                                           "cta_floor_met", "eudr_dds_ready"]}),
-        ("Documents",         {"fields": ["phyto_cert_file", "eudr_dds_file"]}),
-        ("Commercial",        {"fields": ["volume_kg", "price_per_kg"]}),
+        ("Documents",         {"fields": ["phyto_cert_file", "phyto_cert_expiry",
+                                          "ecex_permit_file", "ecex_permit_number", "ecex_permit_expiry",
+                                          "nbe_fx_declaration_file",
+                                          "customs_declaration_file", "customs_declaration_id",
+                                          "eudr_dds_file", "eudr_dds_generated_at", "eudr_dds_reference"]}),
+        ("Commercial",        {"fields": ["volume_kg", "available_qty_kg", "price_per_kg", "fob_price_usd",
+                                          "min_order_kg", "delivery_window", "lot_type"]}),
         ("Timestamps",        {"fields": ["created_at", "updated_at"]}),
     )
 
@@ -73,3 +84,39 @@ from bunna_bridge.lots.deforestation import DeforestationZone
 class DeforestationZoneAdmin(admin.GISModelAdmin):
     list_display = ["id", "year", "region", "area_ha", "source"]
     list_filter  = ["year", "region"]
+
+
+
+@admin.register(FloorPrice)
+class FloorPriceAdmin(admin.ModelAdmin):
+    list_display = ["grade", "processing", "min_price_usd_per_kg", "valid_from", "valid_to", "source"]
+    list_filter  = ["grade", "processing"]
+
+
+@admin.register(ComplianceEvent)
+class ComplianceEventAdmin(admin.ModelAdmin):
+    list_display  = ["lot", "gate", "old_value", "new_value", "actor", "created_at"]
+    list_filter   = ["gate", "new_value"]
+    search_fields = ["lot__lot_id"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display  = ["lot", "buyer", "quantity_kg", "price_per_kg_usd", "status", "created_at"]
+    list_filter   = ["status"]
+    search_fields = ["lot__lot_id", "buyer__email"]
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display  = ["recipient", "notification_type", "title", "is_read", "created_at"]
+    list_filter   = ["notification_type", "is_read"]

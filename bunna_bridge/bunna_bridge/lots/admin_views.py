@@ -13,6 +13,8 @@ from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.deforestation import DeforestationZone
 import json
 
+MAX_ZONES = 3000
+
 
 @method_decorator(staff_member_required, name="dispatch")
 class FarmBoundaryMapView(View):
@@ -33,13 +35,13 @@ class FarmBoundaryMapView(View):
             # Deforestation status color
             if lot.boundary:
                 if lot.deforestation_free:
-                    color = "#4A7C59"   # sage green — clear
+                    color = "#6E9A4B"   # matcha — clear
                     status_label = "Clear"
                 else:
-                    color = "#C1440E"   # terracotta — overlap or fail
+                    color = "#B2532E"   # clay — overlap or fail
                     status_label = "Overlap / Fail"
             else:
-                color = "#C9952A"       # gold — pending
+                color = "#D6892C"       # amber — pending
                 status_label = "Pending"
 
             lots_data.append({
@@ -57,9 +59,16 @@ class FarmBoundaryMapView(View):
                 "point": point_geojson,
             })
 
-        # Deforestation zones for overlay
+        # Deforestation zones for overlay — only those within 5 km of a lot.
+        # Rendering all ~72k national polygons in one page would hang the browser.
+        from django.contrib.gis.measure import D
+        from django.db.models import Q as _Q
+        near = _Q(pk__in=[])
+        for lot in CoffeeLot.objects.exclude(boundary__isnull=True, farm_location__isnull=True):
+            geom = lot.boundary or lot.farm_location
+            near |= _Q(geometry__dwithin=(geom, D(m=5000)))
         zones_data = []
-        for zone in DeforestationZone.objects.all():
+        for zone in DeforestationZone.objects.filter(near)[:MAX_ZONES]:
             zones_data.append({
                 "id": zone.id,
                 "year": zone.year,
@@ -72,25 +81,25 @@ class FarmBoundaryMapView(View):
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Farm Boundary Map — Bunna Bridge Admin</title>
+  <title>Farm Boundary Map — Beersheba Admin</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-    body {{ font-family: 'Instrument Sans', sans-serif; background: #1A0F07; color: #F5EDD8; }}
+    body {{ font-family: 'Instrument Sans', sans-serif; background: #0C2A21; color: #F8F5EF; }}
     #header {{
       padding: 16px 24px;
-      background: #2C1810;
-      border-bottom: 1px solid rgba(201,149,42,0.2);
+      background: #123A2E;
+      border-bottom: 1px solid rgba(248,245,239,0.15);
       display: flex; align-items: center; justify-content: space-between;
     }}
     #header h1 {{ font-size: 18px; font-weight: 500; letter-spacing: 0.05em; }}
-    #header a {{ color: #D4824A; font-size: 13px; text-decoration: none; }}
+    #header a {{ color: #D6892C; font-size: 13px; text-decoration: none; }}
     #map {{ height: calc(100vh - 120px); width: 100%; }}
     #legend {{
       padding: 12px 24px;
-      background: #2C1810;
-      border-top: 1px solid rgba(201,149,42,0.15);
+      background: #123A2E;
+      border-top: 1px solid rgba(248,245,239,0.15);
       display: flex; gap: 24px; align-items: center; font-size: 12px;
     }}
     .legend-item {{ display: flex; align-items: center; gap: 6px; }}
@@ -102,42 +111,45 @@ class FarmBoundaryMapView(View):
       font-size: 11px; font-weight: 600; margin-top: 4px;
     }}
     .badge-clear {{ background: #d4edda; color: #1E3A2F; }}
-    .badge-overlap {{ background: #f8d7da; color: #C1440E; }}
+    .badge-overlap {{ background: #f8d7da; color: #B2532E; }}
     .badge-pending {{ background: #fff3cd; color: #856404; }}
   </style>
 </head>
 <body>
   <div id="header">
-    <h1>☕ Bunna Bridge — Farm Boundary Overview</h1>
+    <h1>Beersheba — Farm Boundary Overview</h1>
     <a href="/admin/">← Back to Admin</a>
   </div>
   <div id="map"></div>
   <div id="legend">
-    <span style="font-size:12px; color: rgba(245,237,216,0.5);">LEGEND:</span>
+    <span style="font-size:12px; color: rgba(248,245,239,0.5);">LEGEND:</span>
     <div class="legend-item">
-      <div class="legend-dot" style="background:#4A7C59"></div>
+      <div class="legend-dot" style="background:#6E9A4B"></div>
       <span>Deforestation Clear</span>
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="background:#C1440E"></div>
+      <div class="legend-dot" style="background:#B2532E"></div>
       <span>Overlap / Fail</span>
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="background:#C9952A"></div>
+      <div class="legend-dot" style="background:#D6892C"></div>
       <span>Pending (no boundary)</span>
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="background: rgba(193,68,14,0.3); border: 1px solid #C1440E;"></div>
+      <div class="legend-dot" style="background: rgba(178,83,46,0.3); border: 1px solid #B2532E;"></div>
       <span>Deforestation Zone (post-2020)</span>
     </div>
-    <span style="margin-left:auto; color: rgba(245,237,216,0.4); font-size:11px;">
-      {len(lots_data)} lots · {len(zones_data)} deforestation zones loaded
+    <span style="margin-left:auto; color: rgba(248,245,239,0.4); font-size:11px;">
+      {len(lots_data)} lots · {len(zones_data)} nearby deforestation zones shown
     </span>
   </div>
 
   <script>
-    const lots = {json.dumps(lots_data)};
-    const zones = {json.dumps(zones_data)};
+    // json.dumps output is embedded in a <script>; escape "</" so data can't close the tag.
+    const lots = {json.dumps(lots_data).replace("</", "<\\/")};
+    const zones = {json.dumps(zones_data).replace("</", "<\\/")};
+    const esc = (v) => String(v ?? "").replace(/[&<>"']/g,
+      (c) => ({{"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}})[c]);
 
     const map = L.map('map').setView([8.5, 39.0], 7);
     L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
@@ -149,17 +161,17 @@ class FarmBoundaryMapView(View):
     zones.forEach(z => {{
       L.geoJSON(z.geojson, {{
         style: {{
-          color: '#C1440E',
-          fillColor: '#C1440E',
+          color: '#B2532E',
+          fillColor: '#B2532E',
           fillOpacity: 0.12,
           weight: 1,
           dashArray: '4,4',
         }}
       }}).bindPopup(
-        '<div class="popup-title">⚠️ Deforestation Zone</div>' +
-        '<div class="popup-row">Year: ' + z.year + '</div>' +
-        '<div class="popup-row">Region: ' + z.region + '</div>' +
-        '<div class="popup-row">Area: ~' + z.area_ha + ' ha</div>'
+        '<div class="popup-title">Deforestation Zone</div>' +
+        '<div class="popup-row">Year: ' + esc(z.year) + '</div>' +
+        '<div class="popup-row">Region: ' + esc(z.region) + '</div>' +
+        '<div class="popup-row">Area: ~' + esc(z.area_ha) + ' ha</div>'
       ).addTo(map);
     }});
 
@@ -167,15 +179,15 @@ class FarmBoundaryMapView(View):
     const bounds = [];
     lots.forEach(lot => {{
       const popupHtml =
-        '<div class="popup-title">' + lot.lot_id + ' — ' + lot.name + '</div>' +
-        '<div class="popup-row">Region: ' + lot.region + '</div>' +
-        '<div class="popup-row">Exporter: ' + lot.exporter + '</div>' +
-        '<div class="popup-row">Status: ' + lot.status + '</div>' +
-        '<div class="popup-row">SCA Score: ' + lot.sca_score + '</div>' +
+        '<div class="popup-title">' + esc(lot.lot_id) + ' — ' + esc(lot.name) + '</div>' +
+        '<div class="popup-row">Region: ' + esc(lot.region) + '</div>' +
+        '<div class="popup-row">Exporter: ' + esc(lot.exporter) + '</div>' +
+        '<div class="popup-row">Status: ' + esc(lot.status) + '</div>' +
+        '<div class="popup-row">SCA Score: ' + esc(lot.sca_score) + '</div>' +
         '<span class="popup-badge badge-' + (lot.deforestation_free === true ? 'clear' : lot.deforestation_free === false ? 'overlap' : 'pending') + '">' +
-        lot.deforestation_status + '</span>' +
-        '<br><a href="/admin/lots/coffeelot/' + lot.id + '/change/" ' +
-        'style="font-size:11px;color:#C1440E;margin-top:6px;display:inline-block;">Edit in Admin →</a>';
+        esc(lot.deforestation_status) + '</span>' +
+        '<br><a href="/admin/lots/coffeelot/' + encodeURIComponent(lot.id) + '/change/" ' +
+        'style="font-size:11px;color:#B2532E;margin-top:6px;display:inline-block;">Edit in Admin →</a>';
 
       if (lot.boundary) {{
         const layer = L.geoJSON(lot.boundary, {{

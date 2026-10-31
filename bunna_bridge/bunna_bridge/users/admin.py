@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.gis import admin
+from django.utils import timezone
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Certification
 
@@ -11,11 +13,25 @@ class CustomUserAdmin(admin.GISModelAdmin, UserAdmin):
     search_fields = ["email", "username", "company_name", "farm_id"]
     ordering      = ["role", "email"]
     readonly_fields = [*UserAdmin.readonly_fields, "farm_id"]
+    actions = ["verify_ecta_license"]
+
+    @admin.action(description="Mark ECTA license as verified")
+    def verify_ecta_license(self, request, queryset):
+        done = 0
+        for user in queryset.exclude(ecta_license_file="").exclude(ecta_license_file__isnull=True):
+            user.ecta_license_verified_at = timezone.now()
+            user.is_verified = True
+            user.save()
+            done += 1
+        self.message_user(request, f"Verified {done} license(s).", messages.SUCCESS)
 
     fieldsets = UserAdmin.fieldsets + (
-        ("Bunna Bridge Profile", {"fields": [
+        ("Beersheba Profile", {"fields": [
             "role", "company_name", "phone", "country", "bio", "is_verified",
             "gps_lat", "gps_lng", "boundary",
+        ]}),
+        ("ECTA Export License", {"fields": [
+            "ecta_license_number", "ecta_license_file", "ecta_license_expiry", "ecta_license_verified_at",
         ]}),
         ("Farm Profile", {"fields": [
             "farm_id", "farm_name", "farm_region", "farm_kebele",
@@ -28,7 +44,7 @@ class CustomUserAdmin(admin.GISModelAdmin, UserAdmin):
         ]}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ("Bunna Bridge Profile", {"fields": [
+        ("Beersheba Profile", {"fields": [
             "role", "company_name", "phone", "country",
         ]}),
     )

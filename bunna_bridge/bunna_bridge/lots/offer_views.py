@@ -1,3 +1,7 @@
+from decimal import Decimal
+from decimal import InvalidOperation
+
+from django.db import transaction
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,6 +24,41 @@ def _contract_lot(lot):
         create_lot_status_notification(lot, "listed", "contracted")
 
 
+def _accept(offer, qty, price):
+    """
+    Accept `offer` at qty/price atomically: lock the lot, check stock,
+    decrement available quantity, contract the lot, and close every other
+    open offer on it. Returns an error string or None.
+    """
+    lot = CoffeeLot.objects.select_for_update().get(pk=offer.lot_id)
+    if lot.status != "listed":
+        return "This lot is no longer open — it has already been contracted."
+    if qty > lot.available_qty_kg:
+        return f"Only {lot.available_qty_kg} kg is still available."
+
+    offer.status = "accepted"
+    offer.quantity_kg = qty
+    offer.price_per_kg_usd = price
+    offer.save()
+
+    lot.available_qty_kg = lot.available_qty_kg - qty
+    lot.save(update_fields=["available_qty_kg"])
+    _contract_lot(lot)
+
+    for other in Offer.objects.filter(lot=lot, status__in=["pending", "countered"]).exclude(pk=offer.pk):
+        other.status = "rejected"
+        other.exporter_notes = "Lot was contracted to another buyer."
+        other.save()
+        Notification.objects.create(
+            recipient=other.buyer, notification_type="offer",
+            title="Offer Closed",
+            message=f"Lot {lot.lot_id} ({lot.name}) was contracted to another buyer.",
+            link="/buyer/offers",
+        )
+    offer.lot = lot
+    return None
+
+
 class OfferListCreateView(generics.ListCreateAPIView):
     serializer_class = OfferSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -40,9 +79,16 @@ class OfferListCreateView(generics.ListCreateAPIView):
         return Offer.objects.none()
 
     def perform_create(self, serializer):
-        lot_id = self.request.data.get("lot")
-        lot = get_object_or_404(CoffeeLot, id=lot_id)
-        serializer.save(buyer=self.request.user, lot=lot)
+        offer = serializer.save(buyer=self.request.user)
+        Notification.objects.create(
+            recipient=offer.lot.exporter, notification_type="offer",
+            title="New Offer",
+            message=(
+                f"{offer.buyer.company_name or offer.buyer.email} offered ${offer.price_per_kg_usd}/kg "
+                f"for {offer.quantity_kg} kg of lot {offer.lot.lot_id}."
+            ),
+            link="/offers",
+        )
 
 
 class OfferDetailView(generics.RetrieveAPIView):
@@ -61,8 +107,9 @@ class OfferRespondView(APIView):
     """Exporter accepts, rejects, or counters an offer."""
     permission_classes = [permissions.IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request, pk):
-        offer = get_object_or_404(Offer, pk=pk, lot__exporter=request.user)
+        offer = get_object_or_404(Offer.objects.select_for_update(), pk=pk, lot__exporter=request.user)
         action = request.data.get("action")
 
         if offer.status not in ("pending", "countered"):
@@ -72,9 +119,14 @@ class OfferRespondView(APIView):
             )
 
         if action == "accept":
-            offer.status = "accepted"
-            offer.save()
-            _contract_lot(offer.lot)
+            if offer.status == "countered":
+                return Response(
+                    {"detail": "You countered this offer — wait for the buyer to accept or withdraw."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            error = _accept(offer, offer.quantity_kg, offer.price_per_kg_usd)
+            if error:
+                return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
             Notification.objects.create(
                 recipient=offer.buyer,
                 notification_type="offer",
@@ -94,15 +146,23 @@ class OfferRespondView(APIView):
                 link="/buyer/offers",
             )
         elif action == "counter":
-            counter_price = request.data.get("counter_price")
-            if not counter_price:
+            try:
+                counter_price = Decimal(str(request.data.get("counter_price")))
+                counter_qty = Decimal(str(request.data.get("counter_qty") or offer.quantity_kg))
+            except (InvalidOperation, TypeError):
                 return Response(
-                    {"detail": "counter_price is required."},
+                    {"detail": "counter_price (and counter_qty, if given) must be numbers."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            if counter_price <= 0 or counter_qty <= 0:
+                return Response({"detail": "Counter price and quantity must be positive."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if counter_qty > offer.lot.available_qty_kg:
+                return Response({"detail": f"Only {offer.lot.available_qty_kg} kg is available."},
+                                status=status.HTTP_400_BAD_REQUEST)
             offer.status = "countered"
             offer.counter_price = counter_price
-            offer.counter_qty = request.data.get("counter_qty") or offer.quantity_kg
+            offer.counter_qty = counter_qty
             offer.exporter_notes = request.data.get("exporter_notes", "")
             offer.save()
             Notification.objects.create(
@@ -151,16 +211,17 @@ class OfferAcceptCounterView(APIView):
     """Buyer accepts exporter's counter-offer."""
     permission_classes = [permissions.IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request, pk):
-        offer = get_object_or_404(Offer, pk=pk, buyer=request.user)
+        offer = get_object_or_404(Offer.objects.select_for_update(), pk=pk, buyer=request.user)
         if offer.status != "countered":
             return Response(
                 {"detail": "No counter-offer to accept."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        offer.status = "accepted"
-        offer.save()
-        _contract_lot(offer.lot)
+        error = _accept(offer, offer.counter_qty or offer.quantity_kg, offer.counter_price)
+        if error:
+            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
         Notification.objects.create(
             recipient=offer.lot.exporter,
             notification_type="offer",

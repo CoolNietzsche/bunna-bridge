@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import Certification
 User = get_user_model()
 
@@ -16,16 +18,23 @@ class UserSerializer(serializers.ModelSerializer):
             "farm_altitude_m", "farm_size_ha", "cooperative",
             "gps_lat", "gps_lng", "boundary",
             "ecta_license_number", "ecta_license_file", "ecta_license_expiry",
+            "ecta_license_verified_at",
             "roastery_type", "roastery_monthly_capacity_kg",
             "roastery_roast_styles", "roastery_preferred_origins",
             "roastery_established_year", "roastery_website",
         ]
-        read_only_fields = ["id", "date_joined", "is_verified", "farm_id"]
+        # role is fixed at registration (qgrader/admin are assigned by staff);
+        # verification fields are set by staff only.
+        read_only_fields = ["id", "date_joined", "is_verified", "farm_id", "role", "ecta_license_verified_at"]
+
+
+SELF_SERVICE_ROLES = ["exporter", "buyer", "farmer", "roaster"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password  = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True)
+    role      = serializers.ChoiceField(choices=SELF_SERVICE_ROLES, default="exporter")
 
     class Meta:
         model  = User
@@ -35,9 +44,22 @@ class RegisterSerializer(serializers.ModelSerializer):
             "company_name", "phone", "country",
         ]
 
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return value
+
     def validate(self, attrs):
         if attrs["password"] != attrs.pop("password2"):
-            raise serializers.ValidationError("Passwords do not match.")
+            raise serializers.ValidationError({"password2": "Passwords do not match."})
+        candidate = User(
+            username=attrs.get("username", ""), email=attrs.get("email", ""),
+            first_name=attrs.get("first_name", ""), last_name=attrs.get("last_name", ""),
+        )
+        try:
+            validate_password(attrs["password"], user=candidate)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)}) from exc
         return attrs
 
     def create(self, validated_data):
@@ -55,19 +77,17 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         email    = attrs.get("email")
         password = attrs.get("password")
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            raise serializers.ValidationError("No account found with this email.")
+        invalid = serializers.ValidationError("Invalid email or password.")
+        account = User.objects.filter(email__iexact=email).first()
+        if account is None:
+            raise invalid
         user = authenticate(
             request=self.context.get("request"),
-            username=user.username,
+            username=account.username,
             password=password,
         )
-        if not user:
-            raise serializers.ValidationError("Invalid credentials.")
-        if not user.is_active:
-            raise serializers.ValidationError("Account is disabled.")
+        if not user or not user.is_active:
+            raise invalid
         refresh = self.get_token(user)
         return {
             "refresh": str(refresh),
@@ -107,9 +127,14 @@ class ExporterPublicSerializer(serializers.ModelSerializer):
         fields = [
             "id", "full_name", "company_name", "country", "bio",
             "is_verified", "date_joined",
-            "ecta_license_number", "ecta_license_expiry",
+            "ecta_license_number", "ecta_license_expiry", "license_verified",
             "lots_count", "exported_count", "avg_sca_score",
         ]
+
+    license_verified = serializers.SerializerMethodField()
+
+    def get_license_verified(self, obj):
+        return bool(obj.ecta_license_verified_at)
 
     def get_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}".strip() or obj.email
@@ -125,7 +150,9 @@ class ExporterPublicSerializer(serializers.ModelSerializer):
     def get_avg_sca_score(self, obj):
         from django.db.models import Avg
         from bunna_bridge.lots.models import CoffeeLot
-        result = CoffeeLot.objects.filter(exporter=obj, sca_score__isnull=False).aggregate(avg=Avg("sca_score"))
+        result = CoffeeLot.objects.filter(
+            exporter=obj, sca_score__isnull=False, status__in=["listed", "contracted", "exported"],
+        ).aggregate(avg=Avg("sca_score"))
         avg = result.get("avg")
         return round(float(avg), 2) if avg else None
 
@@ -141,3 +168,19 @@ class CertificationSerializer(serializers.ModelSerializer):
             "created_at", "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class LicenseReviewSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    lots_count = serializers.IntegerField(source="lots.count", read_only=True)
+
+    class Meta:
+        model  = User
+        fields = [
+            "id", "email", "full_name", "company_name", "role",
+            "ecta_license_number", "ecta_license_expiry", "ecta_license_verified_at",
+            "lots_count", "date_joined",
+        ]
+
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}".strip() or obj.email

@@ -67,6 +67,11 @@ class User(AbstractUser):
         validators=[document_extension_validator, validate_document_size],
     )
     ecta_license_expiry = models.DateField(null=True, blank=True)
+    ecta_license_verified_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Set by Beersheba staff after checking the uploaded license. "
+                  "Cleared automatically whenever the license file, number or expiry changes.",
+    )
 
     # Roaster-specific fields
     roastery_type = models.CharField(max_length=20, choices=RoasteryType.choices, blank=True)
@@ -82,10 +87,34 @@ class User(AbstractUser):
     roastery_established_year = models.PositiveIntegerField(null=True, blank=True)
     roastery_website = models.URLField(blank=True)
 
+    LICENSE_FIELDS = ("ecta_license_file", "ecta_license_number", "ecta_license_expiry")
+
     def save(self, *args, **kwargs):
         if self.role == self.Role.FARMER and not self.farm_id:
             self.farm_id = self._generate_farm_id()
+
+        license_changed = False
+        if self.pk and not self._state.adding:
+            previous = User.objects.filter(pk=self.pk).first()
+            if previous is not None:
+                license_changed = any(
+                    str(getattr(previous, f) or "") != str(getattr(self, f) or "")
+                    for f in self.LICENSE_FIELDS
+                )
+                verification_changed = previous.ecta_license_verified_at != self.ecta_license_verified_at
+                if license_changed and not verification_changed:
+                    # A new or edited license must be re-checked before it counts.
+                    self.ecta_license_verified_at = None
+                license_changed = license_changed or verification_changed
+                update_fields = kwargs.get("update_fields")
+                if update_fields is not None:
+                    kwargs["update_fields"] = set(update_fields) | {"ecta_license_verified_at"}
         super().save(*args, **kwargs)
+
+        if license_changed:
+            # Gate 5 on every lot this user owns depends on the license.
+            for lot in self.lots.all():
+                lot.save(actor=self)
 
     def _generate_farm_id(self):
         region_code = _region_code(self.farm_region)
@@ -118,6 +147,10 @@ class User(AbstractUser):
     @property
     def is_roaster(self):
         return self.role == self.Role.ROASTER
+
+    @property
+    def ecta_license_verified(self):
+        return bool(self.ecta_license_verified_at)
 
 
 class Certification(models.Model):

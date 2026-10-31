@@ -47,6 +47,46 @@ class WashingStation(models.Model):
         return self.name
 
 
+GATE_FIELDS = (
+    "gps_verified", "deforestation_free", "eudr_dds_ready",
+    "phyto_cert_uploaded", "ecta_license_active", "nbe_fx_declared", "cta_floor_met",
+)
+
+GATE_LABELS = {
+    "gps_verified":        "GPS geolocation",
+    "deforestation_free":  "Deforestation-free (post-2020)",
+    "eudr_dds_ready":      "EUDR Due Diligence Statement",
+    "phyto_cert_uploaded": "Phytosanitary certificate",
+    "ecta_license_active": "ECTA export license",
+    "nbe_fx_declared":     "NBE FX declaration",
+    "cta_floor_met":       "Minimum export price",
+}
+
+
+class FloorPrice(models.Model):
+    """
+    Minimum export (FOB) price per kg used by gate 7. Managed by platform
+    admins in Django admin. A blank grade / processing matches any value;
+    the most specific active row wins.
+    """
+
+    grade      = models.CharField(max_length=5, blank=True, help_text="Blank = any grade.")
+    processing = models.CharField(max_length=20, blank=True, help_text="Blank = any processing.")
+    min_price_usd_per_kg = models.DecimalField(max_digits=8, decimal_places=2)
+    valid_from = models.DateField()
+    valid_to   = models.DateField(null=True, blank=True)
+    source     = models.CharField(max_length=200, blank=True, help_text="Directive / notice this floor comes from.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-valid_from"]
+        verbose_name = "Floor Price"
+
+    def __str__(self):
+        scope = f"{self.grade or 'any grade'} / {self.processing or 'any process'}"
+        return f"{scope}: ${self.min_price_usd_per_kg}/kg from {self.valid_from}"
+
+
 class CoffeeLot(models.Model):
     PROCESSING_CHOICES = [
         ("washed", "Washed"),
@@ -156,6 +196,14 @@ class CoffeeLot(models.Model):
         upload_to="lots/dds/", null=True, blank=True,
         validators=[document_extension_validator, validate_document_size],
     )
+    eudr_dds_generated_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="When the platform last generated and stored the DDS PDF.",
+    )
+    eudr_dds_reference = models.CharField(
+        max_length=100, blank=True, default="",
+        help_text="Reference number returned by the EU Information System (TRACES) after submission.",
+    )
 
     # ── Commercial ───────────────────────────────────────────────────────────
     volume_kg    = models.DecimalField(max_digits=10, decimal_places=2)
@@ -184,12 +232,33 @@ class CoffeeLot(models.Model):
         verbose_name_plural = "Coffee Lots"
 
     def save(self, *args, **kwargs):
-        self.phyto_cert_uploaded = bool(self.phyto_cert_file)
-        self.nbe_fx_declared = bool(self.nbe_fx_declaration_file)
-        self.gps_verified = bool(self.boundary or self.farm_location)
+        """
+        Every compliance gate is derived here, on every save, so no API path
+        (generic PATCH, admin, management command) can set a gate directly.
+        Gate changes are written to the append-only ComplianceEvent log.
+        See lots/compliance.py.
+        """
+        from .compliance import apply_gates
+        from .compliance import log_gate_changes
+
+        actor = kwargs.pop("actor", None) or getattr(self, "_actor", None)
         if self.washing_station_facility_id:
             self.washing_station = self.washing_station_facility.name
+        if self._state.adding and not self.available_qty_kg and self.volume_kg:
+            # A new lot starts with its full volume available for sale.
+            self.available_qty_kg = self.volume_kg
+
+        previous = None
+        if self.pk and not self._state.adding:
+            previous = CoffeeLot.objects.filter(pk=self.pk).first()
+
+        apply_gates(self, previous)
+
+        update_fields = kwargs.get("update_fields")
+        if update_fields is not None:
+            kwargs["update_fields"] = set(update_fields) | set(GATE_FIELDS) | {"washing_station"}
         super().save(*args, **kwargs)
+        log_gate_changes(self, previous, actor)
 
     def __str__(self):
         return f"{self.lot_id} — {self.name}"
@@ -278,7 +347,7 @@ class CuppingScore(models.Model):
             self.lot.cupping_date     = self.cupping_date
             self.lot.q_grader_name    = self.grader.get_full_name()
             self.lot.q_grader_cert_id = getattr(self.grader, "q_grader_cert_id", "")
-            self.lot.save()
+            self.lot.save(actor=self.grader)
 
 
 class SampleRequest(models.Model):
@@ -311,12 +380,73 @@ class SampleRequest(models.Model):
         return f"Sample: {self.lot.lot_id} → {self.buyer.email} ({self.status})"
 
 
+class ComplianceEvent(models.Model):
+    """
+    Append-only, hash-chained record of every compliance gate change on a lot.
+    Each row stores the SHA-256 of its own content plus the previous row's
+    hash for the same lot, so any later edit or deletion breaks the chain
+    and is detectable with verify_chain().
+    """
+
+    id         = models.BigAutoField(primary_key=True)
+    lot        = models.ForeignKey(CoffeeLot, on_delete=models.CASCADE, related_name="compliance_events")
+    gate       = models.CharField(max_length=40)
+    old_value  = models.BooleanField(null=True)
+    new_value  = models.BooleanField()
+    actor      = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name="+",
+    )
+    reason     = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField()
+    prev_hash  = models.CharField(max_length=64, blank=True)
+    hash       = models.CharField(max_length=64)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+
+    def __str__(self):
+        return f"{self.lot.lot_id} {self.gate}: {self.old_value} -> {self.new_value}"
+
+    def compute_hash(self):
+        import hashlib
+        payload = "|".join([
+            self.prev_hash or "",
+            str(self.lot_id),
+            self.gate,
+            str(self.old_value),
+            str(self.new_value),
+            str(self.actor_id or ""),
+            self.reason,
+            self.created_at.isoformat(),
+        ])
+        return hashlib.sha256(payload.encode()).hexdigest()
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            raise ValueError("Compliance events are append-only.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Compliance events are append-only.")
+
+    @classmethod
+    def verify_chain(cls, lot):
+        prev = ""
+        for event in cls.objects.filter(lot=lot).order_by("created_at", "id"):
+            if event.prev_hash != prev or event.compute_hash() != event.hash:
+                return False
+            prev = event.hash
+        return True
+
+
 class Notification(models.Model):
     TYPES = [
         ('lot_status',     'Lot Status Change'),
         ('sample_request', 'Sample Request'),
         ('eudr_alert',     'EUDR Alert'),
         ('offer',          'Offer'),
+        ('compliance',     'Compliance'),
     ]
     recipient         = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications'

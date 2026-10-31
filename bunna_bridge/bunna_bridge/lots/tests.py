@@ -104,9 +104,12 @@ class TestOfferAcceptContractsLot:
             format="json",
         )
 
-        assert resp.status_code == HTTPStatus.OK
+        # A contracted lot can't be sold twice.
+        assert resp.status_code == HTTPStatus.BAD_REQUEST
         lot.refresh_from_db()
+        offer.refresh_from_db()
         assert lot.status == "contracted"
+        assert offer.status == "pending"
 
     def test_buyer_accepting_counter_offer_contracts_the_lot(self):
         exporter = _make_user("exporter")
@@ -492,23 +495,22 @@ class TestComplianceGatesNotSelfCertifiable:
         # be True in the first place, which is the fix working as intended,
         # not something this test should be exercising.
         point = Point(38.2, 6.15, srid=4326)
-        lot = _make_lot(
-            exporter, status="listed", farm_location=point,
-            **dict.fromkeys(self.GATES, True),
-        )
+        lot = _make_lot(exporter, status="listed", farm_location=point, deforestation_free=True)
+        before = {g: getattr(lot, g) for g in self.GATES}
+        assert before["gps_verified"] is True
 
         client = APIClient()
         client.force_authenticate(exporter)
         resp = client.patch(
             reverse("lot-detail", args=[lot.pk]),
-            dict.fromkeys(self.GATES, False),
+            {g: not v for g, v in before.items()},
             format="json",
         )
 
         assert resp.status_code == HTTPStatus.OK
         lot.refresh_from_db()
         for g in self.GATES:
-            assert getattr(lot, g) is True, f"{g} should not have been writable"
+            assert getattr(lot, g) is before[g], f"{g} should not have been writable"
 
     def test_admin_also_cannot_patch_gates_via_the_api(self):
         # Matches CuppingScoreSerializer / SampleRequestSerializer precedent:
@@ -516,19 +518,20 @@ class TestComplianceGatesNotSelfCertifiable:
         # these through Django admin instead, which bypasses DRF entirely.
         exporter = _make_user("exporter")
         admin = _make_user("admin")
-        lot = _make_lot(exporter, status="listed", cta_floor_met=True)
+        lot = _make_lot(exporter, status="listed")
+        assert lot.cta_floor_met is False
 
         client = APIClient()
         client.force_authenticate(admin)
         resp = client.patch(
             reverse("lot-detail", args=[lot.pk]),
-            {"cta_floor_met": False},
+            {"cta_floor_met": True},
             format="json",
         )
 
         assert resp.status_code == HTTPStatus.OK
         lot.refresh_from_db()
-        assert lot.cta_floor_met is True
+        assert lot.cta_floor_met is False
 
     def test_phyto_and_nbe_gates_still_ignore_direct_patch_as_before(self):
         exporter = _make_user("exporter")
@@ -575,21 +578,25 @@ class TestGpsVerifiedAutoDerivation:
 
 
 class TestEudrDdsReadyAutoSet:
-    def test_generating_a_real_dds_sets_eudr_dds_ready(self):
+    def test_generating_a_real_dds_sets_eudr_dds_ready(self, tmp_path):
         point = Point(38.2, 6.15, srid=4326)
         exporter = _make_user("exporter")
-        lot = _make_lot(
-            exporter, status="listed",
-            gps_verified=True, farm_location=point, eudr_dds_ready=False,
-        )
+        # No zone data is loaded in tests, so the satellite check can't run;
+        # seed the deforestation result the check would have produced.
+        lot = _make_lot(exporter, status="listed", farm_location=point, deforestation_free=True)
+        assert lot.eudr_dds_ready is False
 
         client = APIClient()
         client.force_authenticate(exporter)
-        resp = client.get(reverse("lot-eudr-dds", args=[lot.pk]))
+        with override_settings(MEDIA_ROOT=tmp_path):
+            resp = client.get(reverse("lot-eudr-dds", args=[lot.pk]))
 
         assert resp.status_code == HTTPStatus.OK
+        assert resp["Content-Type"] == "application/pdf"
         lot.refresh_from_db()
         assert lot.eudr_dds_ready is True
+        assert lot.eudr_dds_file
+        assert lot.eudr_dds_generated_at is not None
 
     def test_dds_generation_blocked_without_gps(self):
         exporter = _make_user("exporter")
@@ -671,7 +678,7 @@ class TestComplianceDocumentAccessControl:
                 reverse("lot-document-download", args=[lot.pk, "phyto_cert_file"]),
             )
 
-            assert resp.status_code == HTTPStatus.FORBIDDEN
+            assert resp.status_code == HTTPStatus.NOT_FOUND
 
     def test_document_download_view_allows_owner(self, tmp_path):
         with override_settings(MEDIA_ROOT=tmp_path):

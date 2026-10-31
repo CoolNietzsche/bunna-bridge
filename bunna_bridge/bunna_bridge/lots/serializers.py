@@ -2,7 +2,8 @@ import json
 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
-from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation
+from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation, ComplianceEvent
+from .models import GATE_FIELDS
 
 # Commercial terms hidden from anonymous marketplace visitors — same set the
 # public Lot Story page has always excluded, now applied consistently to the
@@ -103,23 +104,80 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "latest_sca_score",
             "exporter_name", "exporter_company",
             "farmer", "farmer_name", "farmer_farm_id",
-            "harvest_date", "created_at", "boundary",
+            "harvest_date", "created_at", "boundary", "farm_location",
+            "readiness_percent", "sca_verified",
+            # documents — write-only here; owners read them via the detail
+            # endpoint and download through LotDocumentDownloadView.
+            "phyto_cert_file", "phyto_cert_expiry",
+            "ecex_permit_file", "ecex_permit_number", "ecex_permit_expiry",
+            "nbe_fx_declaration_file",
+            "customs_declaration_file", "customs_declaration_id",
+            "eudr_dds_reference",
         ]
-        # These gates are not exporter-settable: deforestation_free and
-        # gps_verified are derived automatically (see eudr_spatial.py and
-        # CoffeeLot.save()), eudr_dds_ready is set on real DDS generation
-        # (EudrDdsView), and ecta_license_active / cta_floor_met have no
-        # automated check yet — admin-only via Django admin until they do.
-        # phyto_cert_uploaded / nbe_fx_declared aren't listed here because
-        # CoffeeLot.save() already overrides whatever's submitted for them.
-        # is_organic / is_fair_trade / is_rainforest_alliance are derived from
-        # the holder's Certification records (see users/signals.py) rather
-        # than settable per lot.
+        # Every gate is derived in CoffeeLot.save() (lots/compliance.py), so
+        # none are writable. `status` only changes through the status endpoint
+        # (which enforces the pipeline and the export gate) or offer acceptance.
+        # Certification badges are derived from Certification records.
         read_only_fields = [
-            "deforestation_free", "gps_verified", "eudr_dds_ready",
-            "ecta_license_active", "cta_floor_met",
+            *GATE_FIELDS, "status",
             "is_organic", "is_fair_trade", "is_rainforest_alliance",
         ]
+        extra_kwargs = {
+            "phyto_cert_file":          {"write_only": True},
+            "ecex_permit_file":         {"write_only": True},
+            "nbe_fx_declaration_file":  {"write_only": True},
+            "customs_declaration_file": {"write_only": True},
+            "phyto_cert_expiry":        {"write_only": True},
+            "ecex_permit_number":       {"write_only": True},
+            "ecex_permit_expiry":       {"write_only": True},
+            "customs_declaration_id":   {"write_only": True},
+            "eudr_dds_reference":       {"write_only": True},
+        }
+
+    readiness_percent = serializers.SerializerMethodField()
+    sca_verified      = serializers.SerializerMethodField()
+
+    def _request_user(self):
+        request = self.context.get("request")
+        return getattr(request, "user", None)
+
+    def validate_farmer(self, value):
+        if value is not None and value.role != "farmer":
+            raise serializers.ValidationError("Linked producer must be a farmer account.")
+        return value
+
+    def validate_washing_station_facility(self, value):
+        user = self._request_user()
+        if value is None or user is None:
+            return value
+        if value.owner_id != user.id and not (user.is_staff or getattr(user, "role", "") == "admin"):
+            raise serializers.ValidationError("You can only link your own washing stations.")
+        return value
+
+    def validate_sca_score(self, value):
+        if self.instance is not None and value != self.instance.sca_score and \
+                self.instance.cupping_scores.filter(status="confirmed").exists():
+            raise serializers.ValidationError(
+                "This lot has a confirmed Q-grader score; the SCA score can no longer be edited.",
+            )
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        # New lots start with their full volume available for sale.
+        if self.instance is None and "volume_kg" in attrs and not attrs.get("available_qty_kg"):
+            attrs["available_qty_kg"] = attrs["volume_kg"]
+        return attrs
+
+    def get_readiness_percent(self, obj):
+        return round(100 * obj.compliance_score() / len(GATE_FIELDS))
+
+    def _confirmed_scores(self, obj):
+        # Uses the prefetched cupping_scores when available (no N+1).
+        return [s for s in obj.cupping_scores.all() if s.status == "confirmed"]
+
+    def get_sca_verified(self, obj):
+        return bool(self._confirmed_scores(obj))
 
     def get_farmer_name(self, obj):
         if not obj.farmer_id:
@@ -133,17 +191,18 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         return obj.is_eudr_ready()
 
     def get_latest_sca_score(self, obj):
-        score = obj.cupping_scores.filter(status="confirmed").first()
-        if score:
-            return score.total_score
-        score = obj.cupping_scores.first()
-        return score.total_score if score else None
+        confirmed = self._confirmed_scores(obj)
+        if confirmed:
+            return confirmed[0].total_score
+        return float(obj.sca_score) if obj.sca_score is not None else None
 
     def get_certifications(self, obj):
         return lot_certifications(obj)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        if data.get("farm_location"):
+            data["gps_lng"], data["gps_lat"] = data["farm_location"]["coordinates"][:2]
         mask_commercial_fields(data, self.context.get("request"))
         return data
 
@@ -162,9 +221,12 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
     export_ready         = serializers.ReadOnlyField()
     compliance_score     = serializers.SerializerMethodField()
     is_eudr_ready        = serializers.SerializerMethodField()
-    cupping_scores       = CuppingScoreSerializer(many=True, read_only=True)
+    cupping_scores       = serializers.SerializerMethodField()
+    gate_report          = serializers.SerializerMethodField()
+    readiness_percent    = serializers.SerializerMethodField()
     exporter_name        = serializers.CharField(source="exporter.get_full_name", read_only=True)
     exporter_company     = serializers.CharField(source="exporter.company_name", read_only=True)
+    exporter_verified    = serializers.SerializerMethodField()
     exporter_ecta_number = serializers.CharField(source="exporter.ecta_license_number", read_only=True)
     exporter_ecta_file   = serializers.FileField(source="exporter.ecta_license_file", read_only=True)
     exporter_ecta_expiry = serializers.DateField(source="exporter.ecta_license_expiry", read_only=True)
@@ -179,23 +241,46 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
         # Same 5 gates as CoffeeLotListSerializer — this serializer is only
         # wired to the read-only "retrieve" action today, but marking these
         # read-only here too means that stays true even if that changes.
-        read_only_fields = [
-            "deforestation_free", "gps_verified", "eudr_dds_ready",
-            "ecta_license_active", "cta_floor_met",
-        ]
+        read_only_fields = [*GATE_FIELDS, "status"]
 
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
+    def _is_owner_or_admin(self, instance):
         request = self.context.get("request")
         user = getattr(request, "user", None)
-        is_owner_or_admin = bool(user) and bool(user.is_authenticated) and (
+        return bool(user) and bool(user.is_authenticated) and (
             getattr(user, "role", None) == "admin"
             or getattr(user, "is_staff", False)
             or instance.exporter_id == getattr(user, "id", None)
         )
+
+    def get_cupping_scores(self, obj):
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        scores = list(obj.cupping_scores.all())
+        if not self._is_owner_or_admin(obj):
+            scores = [
+                s for s in scores
+                if s.status == "confirmed" or (user and s.grader_id == getattr(user, "id", None))
+            ]
+        return CuppingScoreSerializer(scores, many=True).data
+
+    def get_gate_report(self, obj):
+        from .compliance import gate_report
+        return gate_report(obj)
+
+    def get_readiness_percent(self, obj):
+        return round(100 * obj.compliance_score() / len(GATE_FIELDS))
+
+    def get_exporter_verified(self, obj):
+        return bool(obj.exporter_id and obj.exporter.ecta_license_verified_at)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
         properties = data.get("properties", data)
-        if not is_owner_or_admin:
+        if not self._is_owner_or_admin(instance):
             for field in self.RESTRICTED_DOCUMENT_FIELDS:
+                properties.pop(field, None)
+            for field in ("ecex_permit_number", "customs_declaration_id", "eudr_dds_reference"):
                 properties.pop(field, None)
         mask_commercial_fields(properties, request)
         return data
@@ -256,7 +341,7 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
         score = obj.cupping_scores.filter(status="confirmed").first()
         if score:
             return score.total_score
-        return obj.sca_score
+        return float(obj.sca_score) if obj.sca_score is not None else None
 
     def get_latest_q_grader(self, obj):
         score = obj.cupping_scores.filter(status="confirmed").first()
@@ -291,7 +376,20 @@ class SampleRequestSerializer(serializers.ModelSerializer):
             "shipping_address", "tracking_number",
             "created_at", "updated_at",
         ]
-        read_only_fields = ["id", "buyer", "created_at", "updated_at"]
+        read_only_fields = ["id", "buyer", "status", "response", "tracking_number", "created_at", "updated_at"]
+
+    def validate_lot(self, lot):
+        user = self.context["request"].user
+        if lot.status != "listed":
+            raise serializers.ValidationError("Samples can only be requested for lots listed on the marketplace.")
+        if lot.exporter_id == user.id:
+            raise serializers.ValidationError("You cannot request a sample of your own lot.")
+        return lot
+
+    def validate_quantity_g(self, value):
+        if not 50 <= value <= 2000:
+            raise serializers.ValidationError("Sample size must be between 50 g and 2,000 g.")
+        return value
 
 
 class LotStatusUpdateSerializer(serializers.Serializer):
@@ -329,3 +427,41 @@ class OfferSerializer(serializers.ModelSerializer):
     def get_buyer_name(self, obj):
         u = obj.buyer
         return f"{u.first_name} {u.last_name}".strip() or u.email
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user = self.context["request"].user
+        lot = attrs.get("lot")
+        if getattr(user, "role", None) not in ("buyer", "roaster"):
+            raise serializers.ValidationError("Only buyer and roaster accounts can make offers.")
+        if lot is None:
+            raise serializers.ValidationError({"lot": "This field is required."})
+        if lot.status != "listed":
+            raise serializers.ValidationError({"lot": "This lot is not open for offers."})
+        if lot.exporter_id == user.id:
+            raise serializers.ValidationError({"lot": "You cannot make an offer on your own lot."})
+        qty = attrs.get("quantity_kg")
+        if qty is not None:
+            if qty <= 0:
+                raise serializers.ValidationError({"quantity_kg": "Quantity must be positive."})
+            if lot.min_order_kg and qty < lot.min_order_kg:
+                raise serializers.ValidationError({"quantity_kg": f"Minimum order is {lot.min_order_kg} kg."})
+            if qty > lot.available_qty_kg:
+                raise serializers.ValidationError({"quantity_kg": f"Only {lot.available_qty_kg} kg is available."})
+        price = attrs.get("price_per_kg_usd")
+        if price is not None and price <= 0:
+            raise serializers.ValidationError({"price_per_kg_usd": "Price must be positive."})
+        return attrs
+
+
+class ComplianceEventSerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = ComplianceEvent
+        fields = ["id", "gate", "old_value", "new_value", "actor_name", "reason", "created_at", "hash"]
+
+    def get_actor_name(self, obj):
+        if not obj.actor_id:
+            return "System"
+        return obj.actor.get_full_name() or obj.actor.email
