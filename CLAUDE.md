@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Beersheba (aka Bunna Bridge, ቡና ብሪጅ) — an Ethiopian D2C specialty coffee export compliance marketplace (EUDR 2026 compliance automation). Django/DRF backend + React/Vite frontend, deployed on a single VPS. Full context: `@docs/ai/AI_WORKFLOW.md`.
+Beersheba (aka Bunna Bridge, ቡና ብሪጅ) — an Ethiopian D2C specialty coffee export compliance marketplace (EUDR 2026 compliance automation). Django/DRF backend + React/Vite frontend, deployed on a single VPS. Start with the verified knowledge base and task plan: `docs/knowledge-base/README.md` (2026-10-31). `docs/ai/AI_WORKFLOW.md` has interaction rules but stale infrastructure details.
 
 The primary user is a non-technical solo founder who runs commands on a VPS and pastes output back. Give complete, copy-paste-ready bash commands and full file contents — never partial snippets or "fill in the blank" instructions.
 
@@ -47,4 +47,4 @@ Other backend gotchas:
 
 Docs under `docs/` can drift from the actual code — a prior audit had stale claims caught only by reading the real source (same session log as above). When a doc's claim matters, check it against the current code rather than citing the doc directly. Several docs also exist in near-duplicate at both `docs/X.md` and `docs/subdir/X.md`; if in doubt which is canonical, prefer the more recently modified one or ask.
 
-Note: `.github/workflows/ci.yml` triggers on `main`, but the repo's actual default branch is `master` — CI is likely not firing on pushes as configured.
+Note: `.github/workflows/ci.yml` triggers on `master` (fixed in `7803a56`). CI runs backend lint + pytest only — there is no frontend build/lint job.
