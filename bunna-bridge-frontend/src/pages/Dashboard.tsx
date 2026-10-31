@@ -142,7 +142,7 @@ export default function Dashboard() {
   const isBuyerLike = isBuyerRole(role);
   const canTrack = role === "exporter" || isBuyerLike || role === "admin";
 
-  const { data } = useQuery({ queryKey: ["lots-dashboard", role], queryFn: () => getLots(), enabled: !isFarmer });
+  const { data } = useQuery({ queryKey: ["lots-dashboard", role], queryFn: () => getLots({ page_size: "500" }), enabled: !isFarmer });
   const { data: farmerLots } = useQuery({ queryKey: ["farmer-lots-dashboard"], queryFn: getFarmerLots, enabled: isFarmer });
   const { data: farmProfile } = useQuery({ queryKey: ["farmer-profile-dashboard"], queryFn: getFarmerProfile, enabled: isFarmer });
   const { data: offers } = useQuery({ queryKey: ["offers-dashboard"], queryFn: getOffers, enabled: canTrack });

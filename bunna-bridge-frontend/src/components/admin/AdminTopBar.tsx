@@ -95,7 +95,7 @@ export default function AdminTopBar({ onMobileMenu }: AdminTopBarProps) {
 
         {/* User */}
         <div style={{ position: "relative" }}>
-          <button onClick={() => setUserOpen((v) => !v)} style={{ display: "flex", alignItems: "center", gap: "8px", background: "transparent", border: "none", cursor: "pointer", padding: "4px 6px 4px 4px", borderRadius: AT.radius.md }}>
+          <button aria-label="Account menu" aria-expanded={userOpen} onClick={() => setUserOpen((v) => !v)} style={{ display: "flex", alignItems: "center", gap: "8px", background: "transparent", border: "none", cursor: "pointer", padding: "4px 6px 4px 4px", borderRadius: AT.radius.md }}>
             <span style={{ width: "30px", height: "30px", borderRadius: "999px", background: AT.color.primary, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: AT.font.sans, fontSize: "0.7rem", fontWeight: 600 }}>
               {initials(user?.first_name, user?.last_name, (user?.email?.[0] ?? "?").toUpperCase())}
             </span>

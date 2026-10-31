@@ -24,7 +24,7 @@ export default function LotPipeline() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({ queryKey: ["lots-pipeline"], queryFn: () => getLots({ ordering: "-created_at" }) });
+  const { data, isLoading } = useQuery({ queryKey: ["lots-pipeline"], queryFn: () => getLots({ ordering: "-created_at", page_size: "500" }) });
 
   const statusMutation = useMutation({
     mutationFn: ({ lotId, status }: { lotId: string; status: string }) => updateLotStatus(lotId, status),

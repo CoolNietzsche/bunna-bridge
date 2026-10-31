@@ -13,14 +13,17 @@ export interface SettlementResult {
   calculated_at: string;
 }
 
+/**
+ * nbeRate is optional: when omitted the server uses its configured
+ * NBE_DEFAULT_FX_RATE, so the frontend never hardcodes an exchange rate.
+ */
 export async function calculateSettlement(
   lotId: string,
   totalUsd: number,
-  nbeRate: number = 59.85,
+  nbeRate?: number,
 ): Promise<SettlementResult> {
-  const { data } = await apiClient.post(`/v1/lots/${lotId}/settlement/`, {
-    total_usd: totalUsd,
-    nbe_rate:  nbeRate,
-  });
+  const body: Record<string, number> = { total_usd: totalUsd };
+  if (nbeRate !== undefined && Number.isFinite(nbeRate) && nbeRate > 0) body.nbe_rate = nbeRate;
+  const { data } = await apiClient.post(`/v1/lots/${lotId}/settlement/`, body);
   return data;
 }

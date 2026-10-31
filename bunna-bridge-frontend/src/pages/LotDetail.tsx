@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getLot, getComplianceCheck, downloadEudrDds } from "../api/lots";
+import { getLot, getComplianceCheck } from "../api/lots";
 import { getCuppingScores } from "../api/cupping";
 import { useAuth } from "../context/AuthContext";
 import AdminShell from "../components/admin/AdminShell";
@@ -12,15 +12,13 @@ import SampleRequestWidget from "../components/SampleRequestWidget";
 import SettlementWidget from "../components/SettlementWidget";
 import LotDocuments from "../components/LotDocuments";
 import LotPhotos from "../components/LotPhotos";
-import { useState } from "react";
+import ComplianceGatesPanel from "../components/ComplianceGatesPanel";
 import {
-  ArrowLeft, MapPin, Mountain, Layers, Award, Download,
-  ShieldCheck, ShieldAlert, ShieldOff, Clock, CheckCircle,
-  XCircle, AlertTriangle, Leaf, FileCheck, Upload, Lock,
-  Pencil, FlaskConical, TrendingUp, Package, Users,
-  Globe, BadgeCheck, Share2
+  ArrowLeft, MapPin, Mountain, Layers, ShieldCheck, Leaf,
+  Pencil, FlaskConical, Package, Users, Globe, BadgeCheck, Share2,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
+import { titleCase } from "../lib/utils";
 import { AC } from "../styles/adminComponents";
 
 function RadarChart({ scores }: { scores: Record<string, number> }) {
@@ -41,7 +39,7 @@ function RadarChart({ scores }: { scores: Record<string, number> }) {
   const scorePoints = attrs.map((k, i) => point(i, scores[k] ?? 8));
   const polyline = scorePoints.map((p) => p.join(",")).join(" ");
   return (
-    <svg viewBox="0 0 220 220" style={{ width: "100%", maxWidth: 220 }}>
+    <svg viewBox="-24 -6 268 232" style={{ width: "100%", maxWidth: 240 }}>
       {[0.25, 0.5, 0.75, 1].map((pct) => (
         <polygon key={pct} points={attrs.map((_, i) => gridPoint(i, pct).join(",")).join(" ")} fill="none" stroke={AT.color.border} strokeWidth="1" />
       ))}
@@ -68,16 +66,13 @@ export default function LotDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isExporter = user?.role === "exporter" || user?.role === "admin";
-  const [ddsLoading, setDdsLoading] = useState(false);
-  const [ddsError, setDdsError] = useState("");
 
   const { data: lot, isLoading, refetch } = useQuery({
     queryKey: ["lot", id],
     queryFn: () => getLot(id!),
     enabled: !!id,
   });
-  const { data: compliance } = useQuery({
+  const { data: compliance, refetch: refetchCompliance } = useQuery({
     queryKey: ["compliance", id],
     queryFn: () => getComplianceCheck(id!),
     enabled: !!id,
@@ -87,25 +82,6 @@ export default function LotDetail() {
     queryFn: () => getCuppingScores(id!),
     enabled: !!id,
   });
-
-  const gateLabels: Record<string, string> = {
-    gps_verified: "GPS Verified",
-    deforestation_free: "Deforestation Free",
-    eudr_dds_ready: "EUDR DDS Ready",
-    phyto_cert_uploaded: "Phytosanitary Cert",
-    ecta_license_active: "ECTA License",
-    nbe_fx_declared: "NBE FX Declaration",
-    cta_floor_met: "CTA Floor Price Met",
-  };
-  const gateIcons: Record<string, React.ReactNode> = {
-    gps_verified: <MapPin size={12} />,
-    deforestation_free: <Leaf size={12} />,
-    eudr_dds_ready: <FileCheck size={12} />,
-    phyto_cert_uploaded: <Upload size={12} />,
-    ecta_license_active: <ShieldCheck size={12} />,
-    nbe_fx_declared: <TrendingUp size={12} />,
-    cta_floor_met: <Award size={12} />,
-  };
 
   if (isLoading) {
     return (
@@ -137,25 +113,20 @@ export default function LotDetail() {
   } : { fragrance_aroma: 8, flavor: 8, aftertaste: 8, acidity: 8, body: 8, balance: 8, sweetness: 8, overall: 8 };
 
   const hasRealScores = !!bestScore;
-  const dcStatus = compliance?.deforestation_check?.status;
-  const allGatesPass = compliance && compliance.failed_gates.length === 0;
   const scaNum = lot.sca_score ? parseFloat(String(lot.sca_score)) : null;
+  const isOwner = !!user && (user.role === "admin" || String(user.id) === String(lot.exporter));
+  const qVerified = !!cuppingScores?.some((s) => s.status === "confirmed");
 
   const trustBadges = [
-    { icon: <Globe size={13} />, label: "100% Traceable", active: lot.gps_verified },
-    { icon: <Leaf size={13} />, label: "Zero Deforestation", active: lot.deforestation_free },
-    { icon: <Users size={13} />, label: "Farmer Positive", active: true },
-    { icon: <BadgeCheck size={13} />, label: "EU Compliant", active: lot.eudr_dds_ready },
+    { icon: <Globe size={13} />, label: "Geolocated", active: lot.gps_verified },
+    { icon: <Leaf size={13} />, label: "Deforestation-free", active: lot.deforestation_free },
+    { icon: <FlaskConical size={13} />, label: "Q-grader verified", active: qVerified },
+    { icon: <BadgeCheck size={13} />, label: "EUDR statement", active: lot.eudr_dds_ready },
+    { icon: <ShieldCheck size={13} />, label: "Export-ready", active: lot.export_ready },
   ];
 
   const card: React.CSSProperties = { ...AC.card, ...AC.cardPad };
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "16px" };
-  const gateRow = (pass: boolean): React.CSSProperties => ({
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "8px 12px", borderRadius: AT.radius.sm,
-    background: pass ? AT.color.primaryLight : AT.color.redLight,
-    border: `1px solid ${pass ? AT.color.primary + "33" : AT.color.red + "22"}`,
-  });
 
   return (
     <AdminShell>
@@ -176,7 +147,7 @@ export default function LotDetail() {
                   <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", color: AT.color.sidebarText, margin: 0, letterSpacing: "0.04em" }}>{lot.lot_id}</p>
                   <LotStatusBadge status={lot.status} />
                 </div>
-                <h1 style={{ fontFamily: AT.font.sans, fontSize: "1.7rem", fontWeight: 700, color: "#ffffff", margin: "0 0 6px", lineHeight: 1.15 }}>
+                <h1 style={{ fontFamily: AT.font.display, fontSize: "2rem", fontWeight: 500, color: "#ffffff", margin: "0 0 6px", lineHeight: 1.15, letterSpacing: "-0.01em" }}>
                   {lot.name}
                 </h1>
                 <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.sidebarTextHover, margin: "0 0 14px", textTransform: "capitalize" }}>
@@ -228,7 +199,7 @@ export default function LotDetail() {
           </div>
         </div>
 
-        <div className="ld-grid" style={{ display: "grid", gridTemplateColumns: "clamp(1px,100%,1.4fr) clamp(1px,100%,1fr)", gap: "20px", alignItems: "start" }}>
+        <div className="ld-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)", gap: "20px", alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div style={card}>
               <p style={cardTitle}>Quality & Sensory</p>
@@ -300,16 +271,18 @@ export default function LotDetail() {
               <p style={cardTitle}>Origin & Processing</p>
               <div className="ab-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 {[
-                  ["Processing", lot.processing],
+                  ["Available", `${Number(lot.available_qty_kg).toLocaleString()} kg`],
+                  ["FOB / kg", lot.fob_price_usd ? `$${Number(lot.fob_price_usd).toFixed(2)}` : "—"],
+                  ["Processing", titleCase(lot.processing)],
                   ["Varietal", lot.varietal || "Ethiopian Heirloom"],
                   ["Harvest Date", lot.harvest_date],
                   ["Washing Station", lot.washing_station || "—"],
                   ["Kebele", lot.kebele || "—"],
-                  ["Price / kg", lot.price_per_kg ? `$${lot.price_per_kg}` : "—"],
+                  ["Delivery window", lot.delivery_window || "—"],
                 ].map(([label, val]) => (
                   <div key={label}>
                     <p style={{ fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 4px" }}>{label}</p>
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text, margin: 0, textTransform: "capitalize" }}>{val}</p>
+                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text, margin: 0 }}>{val}</p>
                   </div>
                 ))}
               </div>
@@ -317,7 +290,10 @@ export default function LotDetail() {
 
             <div style={card}>
               <CuppingHistory lotId={lot.id} />
-              <div style={{ marginTop: "24px" }}>
+            </div>
+
+            {isOwner && (
+              <div style={card}>
                 <SettlementWidget
                   lotId={lot.id} lotRef={lot.lot_id}
                   defaultUsd={lot.price_per_kg && lot.volume_kg
@@ -325,17 +301,19 @@ export default function LotDetail() {
                     : undefined}
                 />
               </div>
-            </div>
+            )}
 
-            <div style={card}>
-              <LotDocuments lot={lot} lotId={lot.id} />
-            </div>
+            {isOwner && (
+              <div style={card}>
+                <LotDocuments lot={lot} lotId={lot.id} />
+              </div>
+            )}
 
             <div style={card}>
               <LotPhotos lotId={lot.id} photos={lot.farm_photos ?? []} />
             </div>
 
-            {isExporter && (
+            {isOwner && (
               <PolygonCaptureWidget
                 mode="lot" lotId={lot.id}
                 existingPolygon={lot.boundary ?? null}
@@ -351,137 +329,28 @@ export default function LotDetail() {
               </div>
             )}
 
-            <div style={card}>
-              <p style={cardTitle}>EUDR Compliance</p>
+            <ComplianceGatesPanel
+              lot={lot} compliance={compliance} isOwner={isOwner}
+              onChanged={() => { refetch(); refetchCompliance(); }}
+            />
 
-              {compliance && (
-                <div style={{
-                  padding: "16px", borderRadius: AT.radius.md, marginBottom: "16px",
-                  background: allGatesPass ? AT.color.primaryLight : AT.color.redLight,
-                  border: `1px solid ${allGatesPass ? AT.color.primary + "44" : AT.color.red + "33"}`,
-                  textAlign: "center",
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "4px" }}>
-                    {allGatesPass ? <ShieldCheck size={18} color={AT.color.primaryDark} /> : <ShieldAlert size={18} color={AT.color.red} />}
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.95rem", fontWeight: 600, color: allGatesPass ? AT.color.primaryDark : AT.color.red, margin: 0 }}>
-                      {allGatesPass ? "Status: Verified" : `${compliance.failed_gates.length} gate${compliance.failed_gates.length > 1 ? "s" : ""} failing`}
-                    </p>
-                  </div>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", color: allGatesPass ? AT.color.primaryDark : AT.color.red, opacity: 0.8, margin: 0 }}>
-                    {allGatesPass ? "Negligible Risk · Export Cleared" : "Export button blocked until all gates pass"}
-                  </p>
-                </div>
-              )}
-
-              {compliance?.deforestation_check && (
-                <div style={{
-                  display: "flex", alignItems: "flex-start", gap: "10px",
-                  padding: "10px 12px", borderRadius: AT.radius.sm, marginBottom: "14px",
-                  background: dcStatus === "clear" ? AT.color.primaryLight : dcStatus === "overlap" ? AT.color.redLight : AT.color.yellowLight,
-                  border: `1px solid ${dcStatus === "clear" ? AT.color.primary + "33" : dcStatus === "overlap" ? AT.color.red + "33" : AT.color.yellow + "33"}`,
-                }}>
-                  <span style={{ flexShrink: 0, marginTop: "1px", color: dcStatus === "clear" ? AT.color.primaryDark : dcStatus === "overlap" ? AT.color.red : "#b45309" }}>
-                    {dcStatus === "clear" && <ShieldCheck size={13} />}
-                    {dcStatus === "overlap" && <ShieldAlert size={13} />}
-                    {dcStatus === "pending" && <Clock size={13} />}
-                    {dcStatus === "no_data" && <ShieldOff size={13} />}
-                  </span>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", margin: 0, color: dcStatus === "clear" ? AT.color.primaryDark : dcStatus === "overlap" ? AT.color.red : "#b45309" }}>
-                    {compliance.deforestation_check.message}
-                  </p>
-                </div>
-              )}
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "18px" }}>
-                {compliance ? Object.entries(compliance.gates).map(([key, pass]) => {
-                  if (key === "deforestation_free") {
-                    const dc = compliance.deforestation_check;
-                    const isPending = dc?.status === "pending" || dc?.status === "no_data";
-                    const isOverlap = dc?.status === "overlap";
-                    const ic = isPending ? "#b45309" : isOverlap ? AT.color.red : AT.color.primaryDark;
-                    return (
-                      <div key={key} style={gateRow(!isPending && !isOverlap)}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                          <span style={{ color: ic, flexShrink: 0 }}>{gateIcons[key]}</span>
-                          <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text }}>{gateLabels[key]}</span>
-                        </div>
-                        <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: AT.font.sans, fontSize: "0.68rem", color: ic, fontWeight: 600 }}>
-                          {isPending ? <Clock size={10} /> : isOverlap ? <XCircle size={10} /> : <CheckCircle size={10} />}
-                          {isPending ? "Pending" : isOverlap ? "Overlap" : "Pass"}
-                        </span>
-                      </div>
-                    );
-                  }
-                  return (
-                    <div key={key} style={gateRow(!!pass)}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                        <span style={{ color: pass ? AT.color.primaryDark : AT.color.red, flexShrink: 0 }}>{gateIcons[key]}</span>
-                        <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text }}>{gateLabels[key] || key}</span>
-                      </div>
-                      <span style={{ display: "flex", alignItems: "center", gap: "3px", fontFamily: AT.font.sans, fontSize: "0.68rem", color: pass ? AT.color.primaryDark : AT.color.red, fontWeight: 600 }}>
-                        {pass ? <CheckCircle size={10} /> : <XCircle size={10} />}
-                        {pass ? "Pass" : "Fail"}
-                      </span>
-                    </div>
-                  );
-                }) : (
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.textMuted }}>Loading…</p>
-                )}
-              </div>
-
-              {compliance && compliance.failed_gates.length > 0 && (
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "10px 12px", borderRadius: AT.radius.sm, marginBottom: "14px", background: AT.color.redLight, border: `1px solid ${AT.color.red}33` }}>
-                  <AlertTriangle size={13} style={{ color: AT.color.red, flexShrink: 0, marginTop: "1px" }} />
-                  <div>
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.red, letterSpacing: "0.04em", margin: "0 0 3px", textTransform: "uppercase" }}>
-                      {compliance.failed_gates.length} gate{compliance.failed_gates.length > 1 ? "s" : ""} failing
-                    </p>
-                    {compliance.failed_gates.map((g: string) => (
-                      <p key={g} style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.red, opacity: 0.85, margin: "2px 0" }}>{gateLabels[g] || g}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <button
-                  onClick={async () => {
-                    setDdsLoading(true); setDdsError("");
-                    try { await downloadEudrDds(lot.id); }
-                    catch (e: unknown) { setDdsError((e as Error).message); }
-                    finally { setDdsLoading(false); }
-                  }}
-                  disabled={!lot.eudr_dds_ready || ddsLoading}
-                  style={{ ...AC.btnPrimary, width: "100%", justifyContent: "center", opacity: lot.eudr_dds_ready ? 1 : 0.45, cursor: lot.eudr_dds_ready ? "pointer" : "not-allowed" }}
-                >
-                  {ddsLoading ? <Clock size={14} /> : <Download size={14} />}
-                  {ddsLoading ? "Generating PDF…" : "Generate EUDR DDS Certificate"}
-                </button>
-                {ddsError && <p style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.red, margin: 0 }}>{ddsError}</p>}
-
-                {isExporter && (
-                  <button onClick={() => navigate(`/lots/${lot.id}/edit`)} style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}>
-                    <Pencil size={13} /> Edit Lot
+            {(isOwner || lot.status !== "draft") && (
+              <div style={{ display: "grid", gridTemplateColumns: isOwner ? "1fr 1fr" : "1fr", gap: "8px" }}>
+                {isOwner && (
+                  <button onClick={() => navigate(`/lots/${lot.id}/edit`)} style={{ ...AC.btnGhost, justifyContent: "center" }}>
+                    <Pencil size={13} /> Edit lot
                   </button>
                 )}
-
-                {(lot.status === "listed" || lot.status === "contracted" || lot.status === "exported") && (
+                {lot.status !== "draft" && (
                   <button
                     onClick={() => window.open(`/story/${lot.id}`, "_blank", "noopener,noreferrer")}
-                    style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}
+                    style={{ ...AC.btnGhost, justifyContent: "center" }}
                   >
-                    <Share2 size={13} /> Public Lot Story
+                    <Share2 size={13} /> Public story
                   </button>
                 )}
-
-                <button
-                  disabled={!lot.export_ready}
-                  style={{ ...AC.btnPrimary, width: "100%", justifyContent: "center", opacity: lot.export_ready ? 1 : 0.45, cursor: lot.export_ready ? "pointer" : "not-allowed" }}
-                >
-                  {lot.export_ready ? <><TrendingUp size={14} /> Proceed to Export</> : <><Lock size={14} /> Export Locked</>}
-                </button>
               </div>
-            </div>
+            )}
 
             <div style={card}>
               <p style={cardTitle}>Traceability</p>
@@ -504,41 +373,6 @@ export default function LotDetail() {
                     <span style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.text, textTransform: "capitalize" }}>{row.val}</span>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            <div style={card}>
-              <p style={cardTitle}>Green Passport</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "12px" }}>
-                {[
-                  { label: "GPS Verified", pass: lot.gps_verified, icon: <MapPin size={11} /> },
-                  { label: "Deforestation Free", pass: lot.deforestation_free, icon: <Leaf size={11} /> },
-                  { label: "EUDR DDS Ready", pass: lot.eudr_dds_ready, icon: <FileCheck size={11} /> },
-                ].map((item) => (
-                  <div key={item.label} style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    padding: "7px 10px", borderRadius: AT.radius.sm,
-                    background: item.pass ? AT.color.primaryLight : AT.color.surfaceSecondary,
-                    border: `1px solid ${item.pass ? AT.color.primary + "33" : AT.color.border}`,
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                      <span style={{ color: item.pass ? AT.color.primaryDark : AT.color.textDisabled }}>{item.icon}</span>
-                      <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: item.pass ? AT.color.text : AT.color.textMuted }}>{item.label}</span>
-                    </div>
-                    {item.pass ? <CheckCircle size={13} color={AT.color.primaryDark} /> : <XCircle size={13} color={AT.color.textDisabled} />}
-                  </div>
-                ))}
-              </div>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "11px",
-                background: lot.green_passport_ready ? AT.color.primaryLight : AT.color.surfaceSecondary,
-                border: `1px solid ${lot.green_passport_ready ? AT.color.primary + "33" : AT.color.border}`,
-                borderRadius: AT.radius.md,
-              }}>
-                <Leaf size={13} color={lot.green_passport_ready ? AT.color.primaryDark : AT.color.textDisabled} />
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", margin: 0, color: lot.green_passport_ready ? AT.color.primaryDark : AT.color.textMuted }}>
-                  {lot.green_passport_ready ? "Green Passport Issued" : "Passport Not Yet Issued"}
-                </p>
               </div>
             </div>
 

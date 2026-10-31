@@ -15,7 +15,7 @@ export default function BuyerWatchlist() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["marketplace"],
-    queryFn: () => getLots({ status: "listed" }),
+    queryFn: () => getLots({ marketplace: "1", status: "listed", page_size: "500" }),
     enabled: ids.length > 0,
   });
 

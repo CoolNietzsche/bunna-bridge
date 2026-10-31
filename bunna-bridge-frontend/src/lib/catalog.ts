@@ -96,7 +96,7 @@ export function applyLotFilters(lots: CoffeeLot[], f: LotFilters): CoffeeLot[] {
     if (f.minAltitude && (l.altitude_m ?? 0) < f.minAltitude) return false;
     return true;
   });
-  const score = (l: CoffeeLot) => l.latest_sca_score ?? l.sca_score ?? 0;
+  const score = (l: CoffeeLot) => Number(l.latest_sca_score ?? l.sca_score ?? 0);
   out = [...out].sort((a, b) => {
     switch (f.sort) {
       case "price_asc":  return num(a.fob_price_usd) - num(b.fob_price_usd);

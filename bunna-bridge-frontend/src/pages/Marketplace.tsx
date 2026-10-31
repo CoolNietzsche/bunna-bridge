@@ -6,7 +6,7 @@ import { getLots } from "../api/lots";
 import { useAuth } from "../context/AuthContext";
 import { useWatchlist } from "../hooks/useWatchlist";
 import AppShell from "../components/AppShell";
-import AdminLotCard from "../components/admin/AdminLotCard";
+import LotCard from "../components/market/LotCard";
 import AdminFilterBar from "../components/admin/AdminFilterBar";
 import { computeOrigins, applyLotFilters, filtersFromParams, type LotFilters } from "../lib/catalog";
 import { isBuyerRole } from "../lib/utils";
@@ -21,14 +21,14 @@ export default function Marketplace() {
   const isBuyer = isBuyerRole(user?.role) || user?.role === "admin";
   const showWatch = !isAuthenticated || isBuyer;
 
-  const { data, isLoading } = useQuery({ queryKey: ["marketplace-lots"], queryFn: () => getLots() });
+  const { data, isLoading } = useQuery({ queryKey: ["marketplace-lots"], queryFn: () => getLots({ marketplace: "1", page_size: "500" }) });
   const lots = data?.results ?? [];
 
   const [filters, setFilters] = useState<LotFilters>(() => filtersFromParams(params));
   useEffect(() => { setFilters(filtersFromParams(params)); }, [searchKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resumes a watchlist toggle that was interrupted by a login redirect
-  // (see AdminLotCard's onToggleWatch gate) — same "?param=1" resume pattern
+  // (see LotCard's onToggleWatch gate) — same "?param=1" resume pattern
   // MarketplaceLotDetail uses for offer/sample.
   useEffect(() => {
     const watchId = params.get("watchlist");
@@ -45,11 +45,13 @@ export default function Marketplace() {
 
   return (
     <AppShell>
-      <div className="container-editorial" style={{ padding: "32px 0" }}>
+      <div className="container-editorial" style={{ paddingBlock: "32px" }}>
         <div style={{ marginBottom: "20px" }}>
           <p style={AC.eyebrow}>Catalog</p>
-          <h1 style={{ ...AC.pageTitle, marginTop: "4px" }}>Marketplace</h1>
-          <p style={AC.pageSubtitle}>{lots.length} Ethiopian micro-lots, verified and ready to trade.</p>
+          <h1 style={{ ...AC.pageTitle, fontSize: "clamp(2rem, 4vw, 2.6rem)", marginTop: "4px" }}>Marketplace</h1>
+          <p style={AC.pageSubtitle}>
+            {lots.length} Ethiopian lots, each traceable to its farm and checked against seven export gates.
+          </p>
         </div>
 
         <AdminFilterBar value={filters} onChange={setFilters} origins={origins} count={filtered.length} />
@@ -64,9 +66,9 @@ export default function Marketplace() {
             <p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.textMuted }}>No lots match these filters.</p>
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: "16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 300px), 1fr))", gap: "20px" }}>
             {filtered.map((lot) => (
-              <AdminLotCard key={lot.id} lot={lot} showWatch={showWatch} isWatched={isWatched(lot.id)} onToggleWatch={toggle} />
+              <LotCard key={lot.id} lot={lot} showWatch={showWatch} isWatched={isWatched(lot.id)} onToggleWatch={toggle} />
             ))}
           </div>
         )}

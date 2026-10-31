@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getOffers, respondToOffer } from "../api/lots";
+import { getOffers, respondToOffer, apiErrorText } from "../api/lots";
 import type { Offer } from "../api/lots";
 import AdminShell from "../components/admin/AdminShell";
 import { Inbox, CheckCircle, XCircle, RefreshCw, ArrowRight } from "lucide-react";
@@ -58,7 +58,7 @@ function CounterModal({ offer, onClose }: { offer: Offer; onClose: () => void })
                 <textarea style={{ ...AC.input, minHeight: "64px", resize: "vertical" as const }} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Explain your counter…" />
               </div>
             </div>
-            {mutation.isError && <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.red, marginBottom: "12px" }}>Failed. Please try again.</p>}
+            {mutation.isError && <p role="alert" style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.red, marginBottom: "12px" }}>{apiErrorText(mutation.error, "Failed. Please try again.")}</p>}
             <div style={{ display: "flex", gap: "10px" }}>
               <button onClick={onClose} style={{ flex: 1, ...AC.btnGhost, justifyContent: "center" }}>Cancel</button>
               <button onClick={() => mutation.mutate()} disabled={!price || !qty || mutation.isPending} style={{ flex: 2, ...AC.btnPrimary, justifyContent: "center", opacity: !price || !qty ? 0.5 : 1 }}>
@@ -79,7 +79,11 @@ function OfferRow({ offer }: { offer: Offer }) {
 
   const respondMutation = useMutation({
     mutationFn: (action: "accept" | "reject") => respondToOffer(offer.id, action),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["offers"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["offers"] });
+      qc.invalidateQueries({ queryKey: ["lots"] });
+      qc.invalidateQueries({ queryKey: ["lot", offer.lot] });
+    },
   });
 
   const isPending = offer.status === "pending";
@@ -130,6 +134,11 @@ function OfferRow({ offer }: { offer: Offer }) {
               <ArrowRight size={13} /> View Lot
             </button>
           </div>
+        )}
+        {respondMutation.isError && (
+          <p role="alert" style={{ fontFamily: AT.font.sans, fontSize: "0.8rem", color: AT.color.red, margin: "10px 0 0" }}>
+            {apiErrorText(respondMutation.error, "Could not update the offer.")}
+          </p>
         )}
 
         {!isPending && (

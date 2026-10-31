@@ -1,3 +1,4 @@
+import { apiErrorText } from "../api/lots";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSampleRequest } from "../api/samples";
@@ -26,8 +27,7 @@ export default function SampleRequestWidget({ lotId, lotRef, onSuccess }: Props)
       setForm({ quantity_g: 200, message: "", shipping_address: "" });
     },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { detail?: string } } };
-      setError(e.response?.data?.detail || "Failed to submit request.");
+      setError(apiErrorText(err, "Failed to submit request."));
     },
   });
 

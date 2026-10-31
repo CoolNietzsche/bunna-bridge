@@ -108,7 +108,7 @@ export default function SiteHeader() {
         .bb-hamburger { display: none; }
         .bb-mobile { display: none; }
         @media (max-width: 900px) {
-          .bb-nav.desktop, .bb-right .desktop-only { display: none; }
+          .bb-nav.desktop, .bb-right .desktop-only { display: none !important; }
           .bb-hamburger { display: inline-flex; }
         }
         .bb-mobile.open { display: block; }
@@ -144,6 +144,8 @@ export default function SiteHeader() {
             ) : (
               <div className="desktop-only" style={{ position: "relative" }}>
                 <button
+                  aria-label="Account menu"
+                  aria-expanded={menuOpen}
                   onClick={() => setMenuOpen((v) => !v)}
                   style={{ display: "flex", alignItems: "center", gap: "8px", background: "transparent", border: "none", cursor: "pointer", padding: "4px 6px 4px 4px", borderRadius: "999px" }}
                 >
@@ -175,7 +177,7 @@ export default function SiteHeader() {
 
         {/* Mobile panel */}
         <div className={`bb-mobile${mobileOpen ? " open" : ""}`} style={{ borderTop: `1px solid ${T.color.border}`, background: T.color.paper }}>
-          <div className="container-editorial" style={{ padding: "16px 0", display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div className="container-editorial" style={{ paddingBlock: "16px", display: "flex", flexDirection: "column", gap: "4px" }}>
             {links.map((l) => (
               <button key={l.path} onClick={() => go(l.path)} style={mobileItem}>{l.label}</button>
             ))}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getLot, createOffer, downloadEudrDds, downloadSpecSheet } from "../api/lots";
+import { getLot, createOffer, downloadSpecSheet, apiErrorText } from "../api/lots";
+import { viewLotDocument } from "../api/docs";
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
 import AppShell from "../components/AppShell";
@@ -32,7 +33,7 @@ function RadarChart({ scores }: { scores: Record<string, number> }) {
         <polygon key={lvl} points={keys.map((_, i) => { const p = gridPt(i, lvl); return `${p.x},${p.y}`; }).join(" ")} fill="none" stroke={AT.color.border} strokeWidth="1" />
       ))}
       {keys.map((_, i) => { const p = gridPt(i, 1); return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke={AT.color.border} strokeWidth="1" />; })}
-      <path d={dataPath} fill="rgba(26,187,156,0.14)" stroke={AT.color.primary} strokeWidth="1.5" />
+      <path d={dataPath} fill="rgba(31,107,79,0.14)" stroke={AT.color.primary} strokeWidth="1.5" />
       {keys.map((k, i) => { const p = pt(i, scores[k] || min); return <circle key={k} cx={p.x} cy={p.y} r="3" fill={AT.color.primary} />; })}
       {keys.map((k, i) => { const a = angle(i); const lx = cx + (r + 18) * Math.cos(a); const ly = cy + (r + 18) * Math.sin(a); return (
         <text key={k} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fontSize="7" fill={AT.color.textMuted} fontFamily={AT.font.sans}>
@@ -110,7 +111,7 @@ function OfferModal({ lot, onClose }: { lot: any; onClose: () => void }) {
               </div>
             )}
 
-            {mutation.isError && <p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.red, marginBottom: "12px", fontWeight: 500 }}>Failed to send offer. Please try again.</p>}
+            {mutation.isError && <p role="alert" style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.red, marginBottom: "12px", fontWeight: 500 }}>{apiErrorText(mutation.error, "Failed to send offer. Please try again.")}</p>}
 
             <div style={{ display: "flex", gap: "10px" }}>
               <button onClick={onClose} style={{ flex: 1, ...AC.btnGhost, justifyContent: "center" }}>Cancel</button>
@@ -135,6 +136,7 @@ export default function MarketplaceLotDetail() {
   const qc = useQueryClient();
 
   const [showOffer, setShowOffer] = useState(false);
+  const [ddsError, setDdsError] = useState("");
   const [showSample, setShowSample] = useState(false);
   const [sampleDone, setSampleDone] = useState(false);
   const [sampleNote, setSampleNote] = useState("");
@@ -204,7 +206,7 @@ export default function MarketplaceLotDetail() {
 
   return (
     <AppShell>
-      <div className="container-editorial" style={{ padding: "24px 0" }}>
+      <div className="container-editorial" style={{ paddingBlock: "24px" }}>
       {showOffer && <OfferModal lot={lot} onClose={() => setShowOffer(false)} />}
 
       <button onClick={() => navigate("/marketplace")} style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: AT.color.textMuted, fontFamily: AT.font.sans, fontSize: "0.82rem", cursor: "pointer", padding: 0, marginBottom: "16px" }}>
@@ -329,10 +331,20 @@ export default function MarketplaceLotDetail() {
                   <FlaskConical size={15} /> Request a sample
                 </button>
               )}
-              {lot.eudr_dds_ready && (
-                <button onClick={() => downloadEudrDds(lot.id)} style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}>
+              {lot.eudr_dds_ready && isAuthenticated && (
+                <button
+                  onClick={async () => {
+                    setDdsError("");
+                    try { await viewLotDocument(lot.id, "eudr_dds_file"); }
+                    catch { setDdsError("The DDS is shared with the buyer once their offer is accepted."); }
+                  }}
+                  style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}
+                >
                   <Download size={14} /> Download EUDR DDS
                 </button>
+              )}
+              {ddsError && (
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: 0, textAlign: "center" }}>{ddsError}</p>
               )}
               <button onClick={() => downloadSpecSheet(lot.id, lot.lot_id)} style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}>
                 <FileText size={14} /> Download spec sheet

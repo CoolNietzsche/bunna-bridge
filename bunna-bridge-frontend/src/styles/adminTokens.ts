@@ -1,65 +1,65 @@
 // Admin design tokens — for the back-office / operational area only
 // (Dashboard, Lots, Pipeline, Offers, Samples, Farm, Cupping, Settings…).
 //
-// Deliberately a SEPARATE visual system from src/styles/tokens.ts (which
-// stays "Highland Editorial" for the public site: Landing, Marketplace,
-// Lot Story, Auth). Values below are extracted directly from Gentelella
-// v4's compiled CSS (preview.colorlib.com/theme/gentelella), not
-// approximated — dark navy sidebar, signature teal accent, dense SaaS
-// spacing/radii, Inter typography.
+// Layout and density follow Gentelella v4 (fixed dark sidebar, top bar,
+// compact cards and tables, Inter for data). The palette is Beersheba's
+// "Highland Editorial" brand (src/index.css @theme) so the back office and
+// the public site read as one product: deep forest chrome, forest-green
+// actions, amber highlights, warm paper surfaces, Fraunces page titles.
 
 export const AT = {
   color: {
     // Sidebar (dark, fixed — the one place dark chrome is intentional here)
-    sidebarBg:         "#1a2332",
-    sidebarHover:       "rgba(255,255,255,0.04)",
-    sidebarActive:      "rgba(26,187,156,0.08)",
-    sidebarText:        "#7b8fa3",
-    sidebarTextHover:   "#c5d0dc",
+    sidebarBg:         "#0F2A21",
+    sidebarHover:       "rgba(255,255,255,0.05)",
+    sidebarActive:      "rgba(214,137,44,0.14)",
+    sidebarText:        "#9DB3A8",
+    sidebarTextHover:   "#E4EEE8",
     sidebarTextActive:  "#ffffff",
-    sidebarBorder:      "rgba(255,255,255,0.06)",
+    sidebarBorder:      "rgba(255,255,255,0.07)",
 
-    // Primary accent — the signature Gentelella teal
-    primary:            "#1abb9c",
-    primaryLight:       "rgba(26,187,156,0.06)",
-    primaryDark:        "#169f85",
+    // Primary accent — Beersheba forest green
+    primary:            "#1F6B4F",
+    primaryLight:       "rgba(31,107,79,0.08)",
+    primaryDark:        "#123A2E",
 
     // Surfaces
-    bodyBg:              "#f5f7fb",
+    bodyBg:              "#F6F4EE",
     surface:              "#ffffff",
-    surfaceSecondary:    "#f9fafb",
+    surfaceSecondary:    "#FAF8F3",
 
     // Borders
-    border:              "#e6e7eb",
-    borderLight:        "#eff0f3",
+    border:              "#E7E2D7",
+    borderLight:        "#EFEBE2",
 
     // Text
-    text:                "#1e2633",
-    textSecondary:       "#626d7d",
-    textMuted:           "#7e8896",
-    textDisabled:        "#c0c7cf",
+    text:                "#1A1613",
+    textSecondary:       "#5E5A52",
+    textMuted:           "#857F74",
+    textDisabled:        "#C8C2B6",
 
     // Status palette (matches Gentelella's semantic set)
     blue:                "#066fd1",
     azure:                "#4299e1",
-    green:                "#2fb344",
+    green:                "#3E8E5E",
     lime:                "#74b816",
-    yellow:              "#f59f00",
-    orange:              "#f76707",
+    yellow:              "#D6892C",
+    orange:              "#B2532E",
     red:                  "#d63939",
     pink:                "#d6336c",
     purple:              "#ae3ec9",
     indigo:              "#4263eb",
     cyan:                "#17a2b8",
 
-    greenLight:          "rgba(47,179,68,0.06)",
+    greenLight:          "rgba(62,142,94,0.08)",
     redLight:            "rgba(214,57,57,0.06)",
-    yellowLight:        "rgba(245,159,0,0.06)",
+    yellowLight:        "rgba(214,137,44,0.09)",
     blueLight:            "rgba(6,111,209,0.06)",
   },
   font: {
     sans: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    mono: '"SF Mono", Monaco, Consolas, "Liberation Mono", monospace',
+    display: '"Fraunces", Georgia, serif',
+    mono: '"DM Mono", "SF Mono", Monaco, Consolas, monospace',
   },
   radius: {
     sm: "4px",

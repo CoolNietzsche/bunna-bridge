@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { login as apiLogin } from "../api/auth";
+import { login as apiLogin, logout as apiLogout, clearAuthStorage } from "../api/auth";
 import type { LoginCredentials, UserProfile } from "../api/auth";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: UserProfile | null;
   login: (creds: LoginCredentials) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setUser(parsed);
       } catch {
-        localStorage.clear();
+        clearAuthStorage();
       }
     }
     setLoading(false);
@@ -42,8 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(tokens.user);
   };
 
-  const logout = () => {
-    localStorage.clear();
+  const logout = async () => {
+    // Revoke the refresh token server-side first, then drop only auth keys
+    // so the watchlist, theme and offline boundary queue survive.
+    await apiLogout();
+    clearAuthStorage();
     setIsAuthenticated(false);
     setUser(null);
     window.location.href = "/login";

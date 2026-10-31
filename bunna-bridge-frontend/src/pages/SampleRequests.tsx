@@ -1,9 +1,10 @@
+import { apiErrorText } from "../api/lots";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
-import { getSampleRequests, respondToSample } from "../api/samples";
+import { getSampleRequests, respondToSample, confirmSampleReceived } from "../api/samples";
 import AdminShell from "../components/admin/AdminShell";
-import { CheckCircle, XCircle, Truck, Clock, Package, MessageSquare } from "lucide-react";
+import { CheckCircle, XCircle, Truck, Clock, Package, MessageSquare, PackageCheck } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 import { isBuyerRole } from "../lib/utils";
@@ -24,6 +25,12 @@ export default function SampleRequests() {
   const [responseForm, setResponseForm] = useState({ status: "approved", response: "", tracking_number: "" });
   const [error, setError] = useState("");
 
+  const receivedMutation = useMutation({
+    mutationFn: (id: string) => confirmSampleReceived(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sample-requests"] }),
+    onError: (err: unknown) => setError(apiErrorText(err, "Could not confirm delivery.")),
+  });
+
   const { data: requests, isLoading } = useQuery({
     queryKey: ["sample-requests"],
     queryFn: getSampleRequests,
@@ -38,7 +45,7 @@ export default function SampleRequests() {
       setResponseForm({ status: "approved", response: "", tracking_number: "" });
       setError("");
     },
-    onError: () => setError("Failed to respond. Please try again."),
+    onError: (err: unknown) => setError(apiErrorText(err, "Failed to respond. Please try again.")),
   });
 
   return (
@@ -68,6 +75,9 @@ export default function SampleRequests() {
         {requests?.map((req) => {
           const sc = STATUS_CONFIG[req.status];
           const isResponding = respondingId === req.id;
+          // Per request, not per role: roasters both request samples and own lots.
+          const mine = String(req.buyer) === String(user?.id);
+          const ownerView = !mine;
           return (
             <div key={req.id} style={{ ...AC.card, ...AC.cardPad }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", marginBottom: "16px" }}>
@@ -80,8 +90,8 @@ export default function SampleRequests() {
 
               <div className="ab-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "14px" }}>
                 {[
-                  [role === "exporter" ? "BUYER" : "SAMPLE SIZE", role === "exporter" ? (req.buyer_name || req.buyer_email) : `${req.quantity_g}g`],
-                  [role === "exporter" ? "COMPANY" : "REQUESTED", role === "exporter" ? (req.buyer_company || "—") : new Date(req.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })],
+                  [ownerView ? "BUYER" : "SAMPLE SIZE", ownerView ? (req.buyer_name || req.buyer_email) : `${req.quantity_g}g`],
+                  [ownerView ? "COMPANY" : "REQUESTED", ownerView ? (req.buyer_company || "—") : new Date(req.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })],
                   ["QUANTITY", `${req.quantity_g}g`],
                 ].map(([k, v]) => (
                   <div key={k} style={{ background: AT.color.surfaceSecondary, borderRadius: AT.radius.md, padding: "10px 12px", border: `1px solid ${AT.color.border}` }}>
@@ -112,13 +122,25 @@ export default function SampleRequests() {
                 </div>
               )}
 
-              {role === "exporter" && req.status === "pending" && !isResponding && (
+              {ownerView && req.status === "pending" && !isResponding && (
                 <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
                   <button onClick={() => setRespondingId(req.id)} style={AC.btnPrimary}>Respond</button>
                 </div>
               )}
 
-              {role === "exporter" && req.status === "approved" && !isResponding && (
+              {mine && req.status === "shipped" && (
+                <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+                  <button
+                    onClick={() => receivedMutation.mutate(req.id)}
+                    disabled={receivedMutation.isPending}
+                    style={AC.btnPrimary}
+                  >
+                    <PackageCheck size={13} /> Confirm received
+                  </button>
+                </div>
+              )}
+
+              {ownerView && req.status === "approved" && !isResponding && (
                 <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
                   <button
                     onClick={() => { setRespondingId(req.id); setResponseForm((f) => ({ ...f, status: "shipped" })); }}
@@ -139,9 +161,9 @@ export default function SampleRequests() {
                     value={responseForm.status}
                     onChange={(e) => setResponseForm((f) => ({ ...f, status: e.target.value }))}
                   >
-                    <option value="approved">Approve</option>
+                    {req.status === "pending" && <option value="approved">Approve</option>}
+                    {req.status === "approved" && <option value="shipped">Mark as shipped</option>}
                     <option value="rejected">Reject</option>
-                    <option value="shipped">Mark as Shipped</option>
                   </select>
 
                   <label style={{ display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" }}>

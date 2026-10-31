@@ -14,9 +14,14 @@ api.interceptors.response.use((res) => res, async (err) => {
       try {
         const { data } = await axios.post("/api/auth/token/refresh/", { refresh });
         localStorage.setItem("access_token", data.access);
+        // Refresh tokens rotate (and the old one is blacklisted) — keep the new one.
+        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
         original.headers.Authorization = `Bearer ${data.access}`;
         return api(original);
-      } catch { localStorage.clear(); window.location.href = "/login"; }
+      } catch {
+        ["access_token", "refresh_token", "user_data"].forEach((k) => localStorage.removeItem(k));
+        window.location.href = "/login";
+      }
     }
   }
   return Promise.reject(err);

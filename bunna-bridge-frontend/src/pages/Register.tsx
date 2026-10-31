@@ -11,7 +11,6 @@ const ROLES = [
   { value: "buyer", label: "Buyer", desc: "I source green coffee for trade or resale" },
   { value: "roaster", label: "Roaster", desc: "I roast and sell specialty coffee" },
   { value: "farmer", label: "Farmer", desc: "I grow coffee in Ethiopia" },
-  { value: "qgrader", label: "Q-Grader", desc: "I cup and grade coffee professionally" },
 ];
 
 export default function Register() {
@@ -33,9 +32,10 @@ export default function Register() {
       await register(form);
       navigate("/login?registered=1");
     } catch (err: unknown) {
-      const e = err as { response?: { data?: Record<string, string[]> } };
-      if (e.response?.data) {
-        setError(Object.entries(e.response.data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`).join(" | "));
+      const e = err as { response?: { data?: Record<string, string[] | string> } };
+      if (e.response?.data && typeof e.response.data === "object") {
+        const label = (k: string) => (k === "non_field_errors" || k === "detail" ? "" : `${k.replace(/_/g, " ").replace(/2$/, " (confirm)")}: `);
+        setError(Object.entries(e.response.data).map(([k, v]) => `${label(k)}${Array.isArray(v) ? v.join(" ") : v}`).join("  ·  "));
       } else {
         setError("Registration failed. Please try again.");
       }
@@ -80,6 +80,9 @@ export default function Register() {
                 );
               })}
             </div>
+            <p style={{ fontFamily: T.font.sans, fontSize: "0.78rem", color: T.color.textFaint, margin: "-10px 0 20px" }}>
+              Licensed Q-graders are onboarded by the Beersheba team — email us to get a grading account.
+            </p>
 
             <Row>
               <Field label="First name"><input style={CS.input} value={form.first_name} onChange={(e) => set("first_name", e.target.value)} placeholder="Abebe" /></Field>

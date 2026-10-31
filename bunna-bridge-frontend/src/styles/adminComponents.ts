@@ -42,9 +42,10 @@ export const AC = {
 
   // ── Typography ────────────────────────────────────────────
   pageTitle: {
-    fontFamily: AT.font.sans,
-    fontSize: "1.4rem",
-    fontWeight: 600,
+    fontFamily: AT.font.display,
+    fontSize: "1.75rem",
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
     color: AT.color.text,
     margin: 0,
     lineHeight: 1.3,

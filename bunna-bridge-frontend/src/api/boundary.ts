@@ -28,17 +28,26 @@ export async function setFarmBoundary(polygon: GeoPolygon) {
 }
 
 // Calculate polygon area in hectares (client-side, no server needed)
-export function calcAreaHa(polygon: GeoPolygon): number {
-  const coords = polygon.coordinates[0];
-  // Shoelace formula on geographic coords → approximate hectares
-  let area = 0;
-  for (let i = 0; i < coords.length - 1; i++) {
-    area += coords[i][0] * coords[i + 1][1];
-    area -= coords[i + 1][0] * coords[i][1];
+/**
+ * Geodesic area of a WGS84 polygon ring in hectares (spherical excess
+ * approximation, as used by Leaflet.draw's geodesicArea). Accurate to well
+ * under 1% at farm scale, unlike a planar shoelace on raw degrees.
+ */
+export function ringAreaHa(coords: number[][]): number {
+  const R = 6378137; // metres
+  const rad = Math.PI / 180;
+  let total = 0;
+  for (let i = 0; i < coords.length; i++) {
+    const [lng1, lat1] = coords[i];
+    const [lng2, lat2] = coords[(i + 1) % coords.length];
+    total += (lng2 - lng1) * rad * (2 + Math.sin(lat1 * rad) + Math.sin(lat2 * rad));
   }
-  const sqDeg = Math.abs(area / 2);
-  // 1 degree² ≈ 12,308 km² at equator; convert to hectares
-  return Math.round(sqDeg * 1230800000) / 100;
+  const m2 = Math.abs((total * R * R) / 2);
+  return Math.round(m2 / 100) / 100; // m² → ha, 2 decimals
+}
+
+export function calcAreaHa(polygon: GeoPolygon): number {
+  return ringAreaHa(polygon.coordinates[0] as number[][]);
 }
 
 // Offline queue — save pending boundary to localStorage

@@ -15,7 +15,10 @@ export interface CoffeeLot {
   kebele: string;
   washing_station: string;
   washing_station_facility: string | null;
-  sca_score: number | null;
+  // DRF serialises DecimalFields as strings — always Number() before maths.
+  sca_score: string | null;
+  sca_verified?: boolean;
+  readiness_percent?: number;
   flavor_notes: string;
   volume_kg: string;
   price_per_kg: string | null;
@@ -62,6 +65,39 @@ export interface CoffeeLot {
   cupping_scores?: CuppingScore[];
   sample_requests_count?: number;
   offers_count?: number;
+  // detail-only (owner/admin see documents; everyone sees the report)
+  gate_report?: GateReport[];
+  exporter_verified?: boolean;
+  eudr_dds_generated_at?: string | null;
+  eudr_dds_reference?: string;
+  phyto_cert_file?: string | null;
+  phyto_cert_expiry?: string | null;
+  ecex_permit_file?: string | null;
+  ecex_permit_number?: string;
+  ecex_permit_expiry?: string | null;
+  nbe_fx_declaration_file?: string | null;
+  customs_declaration_file?: string | null;
+  customs_declaration_id?: string;
+  eudr_dds_file?: string | null;
+}
+
+export interface GateReport {
+  gate: string;
+  label: string;
+  passed: boolean;
+  reason: string;
+  action: string;
+}
+
+export interface ComplianceEvent {
+  id: number;
+  gate: string;
+  old_value: boolean | null;
+  new_value: boolean;
+  actor_name: string;
+  reason: string;
+  created_at: string;
+  hash: string;
 }
 
 export interface PublicLotStory {
@@ -98,17 +134,17 @@ export interface CuppingScore {
   grader_name: string;
   status: string;
   total_score: number;
-  fragrance_aroma: number;
-  flavor: number;
-  aftertaste: number;
-  acidity: number;
-  body: number;
-  balance: number;
-  uniformity: number;
-  clean_cup: number;
-  sweetness: number;
-  overall: number;
-  defects: number;
+  fragrance_aroma: string;
+  flavor: string;
+  aftertaste: string;
+  acidity: string;
+  body: string;
+  balance: string;
+  uniformity: string;
+  clean_cup: string;
+  sweetness: string;
+  overall: string;
+  defects: string;
   flavor_notes: string;
   cupping_date: string;
 }
@@ -142,6 +178,8 @@ export interface ComplianceCheck {
   green_passport_ready: boolean;
   failed_gates: string[];
   gates: Record<string, boolean>;
+  readiness_percent: number;
+  report: GateReport[];
   deforestation_check?: {
     status: 'clear' | 'overlap' | 'pending' | 'no_data';
     deforestation_free: boolean | null;
@@ -200,18 +238,87 @@ export const createLot = async (lot: Partial<CoffeeLot>) => {
   return data;
 };
 
-export const downloadEudrDds = async (lotId: string): Promise<void> => {
-  const response = await api.get(`/v1/lots/${lotId}/eudr-dds/`, { responseType: "blob" });
-  const blob = new Blob([response.data], { type: "application/pdf" });
+/** Synchronous version for JSON error responses (most mutations). */
+export function apiErrorText(err: unknown, fallback = "Something went wrong."): string {
+  const data = (err as { response?: { data?: unknown } })?.response?.data;
+  if (data && typeof data === "object" && !(data instanceof Blob)) {
+    const d = data as Record<string, unknown>;
+    if (typeof d.detail === "string") return d.detail;
+    const first = Object.entries(d)[0];
+    if (first) {
+      const [field, val] = first;
+      const msg = Array.isArray(val) ? val[0] : val;
+      return field === "non_field_errors" ? String(msg) : `${field.replace(/_/g, " ")}: ${msg}`;
+    }
+  }
+  return fallback;
+}
+
+/** Turn an axios error (including blob responses) into a readable message. */
+export async function apiErrorMessage(err: unknown, fallback = "Something went wrong."): Promise<string> {
+  const e = err as { response?: { data?: unknown } };
+  let data = e?.response?.data;
+  if (data instanceof Blob) {
+    try { data = JSON.parse(await data.text()); } catch { return fallback; }
+  }
+  if (data && typeof data === "object") {
+    const d = data as Record<string, unknown>;
+    if (typeof d.detail === "string") return d.detail;
+    const first = Object.entries(d)[0];
+    if (first) {
+      const [field, val] = first;
+      const msg = Array.isArray(val) ? val[0] : val;
+      return field === "non_field_errors" ? String(msg) : `${field.replace(/_/g, " ")}: ${msg}`;
+    }
+  }
+  return fallback;
+}
+
+function saveBlob(data: BlobPart, type: string, disposition: string, fallbackName: string) {
+  const blob = new Blob([data], { type });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement("a");
   a.href     = url;
-  const disposition = response.headers["content-disposition"] || "";
-  a.download = disposition.split("filename=")[1]?.replace(/['"]/g, "") || `EUDR-DDS-${lotId}.pdf`;
+  a.download = disposition.split("filename=")[1]?.replace(/['"]/g, "") || fallbackName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+/** Generates (and stores) the DDS, then downloads it. Throws an Error with the server's reason. */
+export const downloadEudrDds = async (lotId: string): Promise<void> => {
+  try {
+    const response = await api.get(`/v1/lots/${lotId}/eudr-dds/`, { responseType: "blob" });
+    saveBlob(response.data, "application/pdf", response.headers["content-disposition"] || "", `EUDR-DDS-${lotId}.pdf`);
+  } catch (err) {
+    throw new Error(await apiErrorMessage(err, "Could not generate the DDS."), { cause: err });
+  }
+};
+
+export const downloadEudrGeoJson = async (lotId: string): Promise<void> => {
+  try {
+    const response = await api.get(`/v1/lots/${lotId}/eudr-geojson/`, { responseType: "blob" });
+    saveBlob(response.data, "application/geo+json", response.headers["content-disposition"] || "", `${lotId}.geojson`);
+  } catch (err) {
+    throw new Error(await apiErrorMessage(err, "Could not export the geolocation."), { cause: err });
+  }
+};
+
+export const getComplianceEvents = async (id: string) => {
+  const { data } = await api.get<{ chain_valid: boolean; events: ComplianceEvent[] }>(
+    `/v1/lots/${id}/compliance-events/`,
+  );
+  return data;
+};
+
+export const updateLotStatus = async (id: string, status: CoffeeLot["status"]) => {
+  try {
+    const { data } = await api.patch(`/v1/lots/${id}/status/`, { status });
+    return data as { lot_id: string; status: CoffeeLot["status"]; export_ready: boolean };
+  } catch (err) {
+    throw new Error(await apiErrorMessage(err, "Could not update the status."), { cause: err });
+  }
 };
 
 // ── Offers ────────────────────────────────────────────────────────────────────

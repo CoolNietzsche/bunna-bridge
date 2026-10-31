@@ -213,12 +213,12 @@ export default function PolygonCaptureWidget({
       } else {
         if (mode === "farm") await setFarmBoundary(polygon);
         else if (mode === "lot" && lotId) await setLotBoundary(lotId, polygon);
-        setStatus(`✅ Boundary saved — ~${calcAreaHa(polygon)} ha`);
+        setStatus(`Boundary saved — ~${calcAreaHa(polygon)} ha`);
         onSaved?.(polygon);
       }
     } catch (err: any) {
       queueBoundarySync(mode, lotId || null, polygon);
-      setStatus("⚠️ Save failed — stored locally for retry.");
+      setStatus("Save failed — stored on this device and will retry when you are back online.");
     } finally {
       setSaving(false);
     }
@@ -229,7 +229,7 @@ export default function PolygonCaptureWidget({
     setSaving(true);
     try {
       await inheritLotBoundary(lotId);
-      setStatus("✅ Farm boundary inherited.");
+      setStatus("Farm boundary inherited.");
       onSaved?.(polygon!);
     } catch {
       setStatus("No farm boundary found to inherit.");
@@ -323,7 +323,7 @@ export default function PolygonCaptureWidget({
           background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.md, padding: "8px 14px",
           marginBottom: 12, fontFamily: AT.font.mono, fontSize: 13, color: AT.color.primaryDark,
         }}>
-          Area: ~{areaHa} ha · {points.length} boundary points
+          Area: ~{areaHa} ha · {points.length || Math.max(0, (polygon?.coordinates[0].length ?? 1) - 1)} boundary points
         </div>
       )}
 

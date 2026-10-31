@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { ringAreaHa } from "../api/boundary";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GeoPolygon } from "../api/boundary";
@@ -45,14 +46,8 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
     return () => { map.remove(); leafletMap.current = null; };
   }, [polygon]);
 
-  // Calculate area for display
   const coords = polygon.coordinates[0];
-  let area = 0;
-  for (let i = 0; i < coords.length - 1; i++) {
-    area += coords[i][0] * coords[i + 1][1];
-    area -= coords[i + 1][0] * coords[i][1];
-  }
-  const areaHa = Math.round(Math.abs(area / 2) * 1230800000) / 100;
+  const areaHa = ringAreaHa(coords as number[][]);
 
   return (
     <div style={{ borderRadius: AT.radius.lg, overflow: "hidden", border: `1px solid ${AT.color.border}` }}>

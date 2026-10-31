@@ -43,6 +43,11 @@ export const respondToSample = async (
   return data;
 };
 
+export const confirmSampleReceived = async (id: string): Promise<SampleRequest> => {
+  const { data } = await api.post(`/v1/sample-requests/${id}/received/`);
+  return data;
+};
+
 export const updateLotStatus = async (
   lotId: string,
   status: string

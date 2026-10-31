@@ -52,3 +52,26 @@ export const getMe = async (): Promise<UserProfile> => {
   const { data } = await api.get<UserProfile>("/v1/auth/me/");
   return data;
 };
+
+const AUTH_KEYS = ["access_token", "refresh_token", "user_data"];
+
+export function clearAuthStorage() {
+  AUTH_KEYS.forEach((k) => localStorage.removeItem(k));
+}
+
+/** Blacklists the refresh token so it can't be reused after logout. */
+export async function logout(): Promise<void> {
+  const refresh = localStorage.getItem("refresh_token");
+  if (!refresh) return;
+  try {
+    // Plain request (no auth interceptor/refresh retry): the refresh token is the credential.
+    await fetch("/api/v1/auth/logout/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh }),
+      keepalive: true,
+    });
+  } catch {
+    // Token already expired/invalid — nothing to revoke.
+  }
+}

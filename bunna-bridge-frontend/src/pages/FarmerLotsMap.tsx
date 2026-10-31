@@ -22,7 +22,7 @@ export default function FarmerLotsMap() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["lots-map"],
-    queryFn: () => getLots({}),
+    queryFn: () => getLots({ page_size: "500" }),
   });
 
   useEffect(() => {

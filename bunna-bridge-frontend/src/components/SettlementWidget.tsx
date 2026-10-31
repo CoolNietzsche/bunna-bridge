@@ -15,10 +15,11 @@ interface Props {
 export default function SettlementWidget({ lotId, lotRef, defaultUsd }: Props) {
   const [inputUsd, setInputUsd] = useState(defaultUsd ? defaultUsd.toFixed(2) : '');
   const [result, setResult] = useState<SettlementResult | null>(null);
-  const [nbeRate, setNbeRate] = useState('59.85');
+  // Empty = use the platform's configured NBE rate (server-side default).
+  const [nbeRate, setNbeRate] = useState('');
 
   const mutation = useMutation({
-    mutationFn: () => calculateSettlement(lotId, parseFloat(inputUsd)),
+    mutationFn: () => calculateSettlement(lotId, parseFloat(inputUsd), nbeRate ? parseFloat(nbeRate) : undefined),
     onSuccess: (data) => setResult(data),
     onError: (err) => console.error("Settlement error:", err),
   });
@@ -33,7 +34,8 @@ export default function SettlementWidget({ lotId, lotRef, defaultUsd }: Props) {
   const fmt = (n: number, decimals = 2) =>
     n?.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) ?? '—';
 
-  const isDisabled = mutation.isPending || !inputUsd || isNaN(parseFloat(inputUsd));
+  const rateInvalid = nbeRate !== '' && !(parseFloat(nbeRate) > 0);
+  const isDisabled = mutation.isPending || !inputUsd || isNaN(parseFloat(inputUsd)) || rateInvalid;
 
   return (
     <div style={{ background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.md, padding: '20px', fontFamily: AT.font.sans }}>
@@ -82,11 +84,15 @@ export default function SettlementWidget({ lotId, lotRef, defaultUsd }: Props) {
         <input
           type="number"
           value={nbeRate}
-          onChange={(e) => setNbeRate(e.target.value)}
+          min="0"
+          step="0.01"
+          placeholder={result ? String(result.nbe_rate) : 'Default'}
+          aria-label="NBE exchange rate, ETB per USD"
+          onChange={(e) => { setNbeRate(e.target.value); setResult(null); }}
           style={{ ...AC.input, width: '90px', color: AT.color.primaryDark, fontFamily: AT.font.mono, fontSize: '12px', padding: '4px 8px' }}
         />
         <span style={{ fontFamily: AT.font.sans, fontSize: '0.68rem', color: AT.color.textDisabled }}>
-          Default: 59.85
+          {nbeRate ? 'Custom rate' : 'Leave blank to use the current platform rate'}
         </span>
       </div>
 

@@ -1,37 +1,50 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useBoundarySync } from './hooks/useBoundarySync';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+const LicenseReviews = lazy(() => import("./pages/LicenseReviews"));
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Lots from "./pages/Lots";
-import LotDetail from "./pages/LotDetail";
-import CreateLot from "./pages/CreateLot";
-import Marketplace from "./pages/Marketplace";
-import MyFarm from "./pages/MyFarm";
-import MyRoastery from "./pages/MyRoastery";
-import Certifications from "./pages/Certifications";
-import WashingStations from "./pages/WashingStations";
-import RoastEquipmentPage from "./pages/RoastEquipment";
-import RoastBatches from "./pages/RoastBatches";
-import LotPipeline from "./pages/LotPipeline";
-import EditLot from "./pages/EditLot";
-import FarmerLotsMap from "./pages/FarmerLotsMap";
-import SampleRequests from "./pages/SampleRequests";
-import Settings from "./pages/Settings";
-import CuppingForm from "./pages/CuppingForm";
-import BuyerOffers from "./pages/BuyerOffers";
-import BuyerWatchlist from "./pages/BuyerWatchlist";
-import ExporterStorefront from "./pages/ExporterStorefront";
-import ExporterOffers from "./pages/ExporterOffers";
-import MarketplaceLotDetail from "./pages/MarketplaceLotDetail";
-import LotStory from "./pages/LotStory";
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Lots = lazy(() => import("./pages/Lots"));
+const LotDetail = lazy(() => import("./pages/LotDetail"));
+const CreateLot = lazy(() => import("./pages/CreateLot"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
+const MyFarm = lazy(() => import("./pages/MyFarm"));
+const MyRoastery = lazy(() => import("./pages/MyRoastery"));
+const Certifications = lazy(() => import("./pages/Certifications"));
+const WashingStations = lazy(() => import("./pages/WashingStations"));
+const RoastEquipmentPage = lazy(() => import("./pages/RoastEquipment"));
+const RoastBatches = lazy(() => import("./pages/RoastBatches"));
+const LotPipeline = lazy(() => import("./pages/LotPipeline"));
+const EditLot = lazy(() => import("./pages/EditLot"));
+const FarmerLotsMap = lazy(() => import("./pages/FarmerLotsMap"));
+const SampleRequests = lazy(() => import("./pages/SampleRequests"));
+const Settings = lazy(() => import("./pages/Settings"));
+const CuppingForm = lazy(() => import("./pages/CuppingForm"));
+const BuyerOffers = lazy(() => import("./pages/BuyerOffers"));
+const BuyerWatchlist = lazy(() => import("./pages/BuyerWatchlist"));
+const ExporterStorefront = lazy(() => import("./pages/ExporterStorefront"));
+const ExporterOffers = lazy(() => import("./pages/ExporterOffers"));
+const MarketplaceLotDetail = lazy(() => import("./pages/MarketplaceLotDetail"));
+const LotStory = lazy(() => import("./pages/LotStory"));
 
+// Pages are code-split per route; the landing page stays in the main bundle
+// so first paint for visitors doesn't wait on a second request.
 const queryClient = new QueryClient();
+
+function PageFallback() {
+  return (
+    <div role="status" aria-live="polite" style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <span className="bb-spinner" aria-hidden />
+      <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Loading…</span>
+    </div>
+  );
+}
 
 /** Public marketing landing at "/"; authenticated users go to their dashboard. */
 function RootRoute() {
@@ -47,6 +60,7 @@ export default function App() {
       <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/"            element={<RootRoute />} />
             <Route path="/story/:id"   element={<LotStory />} />
@@ -74,8 +88,10 @@ export default function App() {
             <Route path="/exporters/:id"        element={<ProtectedRoute><ExporterStorefront /></ProtectedRoute>} />
             <Route path="/offers"       element={<ProtectedRoute><ExporterOffers /></ProtectedRoute>} />
             <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/admin/licenses" element={<ProtectedRoute><LicenseReviews /></ProtectedRoute>} />
             <Route path="*"            element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
       </ThemeProvider>

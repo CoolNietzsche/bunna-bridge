@@ -4,8 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench,
-} from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
@@ -18,6 +17,7 @@ function groupsFor(role: string | undefined): NavGroup[] {
   const s = 16;
   const operations: Record<string, NavItem[]> = {
     admin: [
+      { label: "License Reviews", path: "/admin/licenses", icon: <BadgeCheck size={s} /> },
       { label: "Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
