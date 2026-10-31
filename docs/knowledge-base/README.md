@@ -15,6 +15,7 @@ This folder is the **single starting point** for anyone (human or AI) picking up
 | 7 | [07-known-issues.md](07-known-issues.md) | Verified bugs and security gaps, with file:line and severity |
 | 8 | [08-repos-docs-and-history.md](08-repos-docs-and-history.md) | The two repos, which docs are stale, stray files, project timeline |
 | 9 | [09-task-plan.md](09-task-plan.md) | **The plan** — prioritized tasks for what comes next |
+| 10 | [10-release-2026-10-31.md](10-release-2026-10-31.md) | **Latest release**: what changed and the exact deploy commands |
 
 ## Source-of-truth order
 
@@ -28,5 +29,5 @@ This folder is the **single starting point** for anyone (human or AI) picking up
 1. **Backend commands only go through Docker Compose**, never bare `uv`/`manage.py` on the host (see `CLAUDE.md`). Running `uv` on the host once crash-looped Celery in production.
 2. **The "local" Docker stack is production.** The VPS runs `docker-compose.local.yml` (plus `docker-compose.vps.yml` override since 2026-09-09). Its Postgres volume holds the only copy of real data. No verified backups exist.
 3. **The VPS is shared** with other client projects (Odoo, ERPNext, Cal.com…). Don't touch host nginx, ports, cron or systemd for anything that isn't `bunna-bridge`.
-4. **There are critical open security holes** (any user can make themselves `admin` through the API; lots can skip the compliance gate via a plain PATCH). See [07-known-issues.md](07-known-issues.md) §1 — fix these before onboarding real customers.
+4. **The security holes found on 2026-10-31 are fixed** (release notes in [10](10-release-2026-10-31.md)). The biggest remaining risk is operational: **no backups** — see [07-known-issues.md](07-known-issues.md) §3.
 5. **The founder is non-technical** and runs commands on the VPS. Give complete copy-paste commands and full file contents.

@@ -37,7 +37,7 @@ DeforestationZone (standalone reference data, Hansen GFC)
 ## `users.Certification`
 
 UUID PK. `holder`, `cert_type` (organic, fair_trade, rainforest_alliance, utz, q_arabica, iso, haccp, other), `issuing_body`, `cert_number`, `issue_date`, `expiry_date`, `file`. `is_expired` property.
-Signal (`users/signals.py`): on save/delete, recomputes `is_organic` / `is_fair_trade` / `is_rainforest_alliance` on **all** the holder's lots. ⚠ Only recomputed on save/delete — a cert that expires with time leaves stale `True` badges until something re-saves it (no periodic task).
+Signal (`users/signals.py`): on save/delete, recomputes `is_organic` / `is_fair_trade` / `is_rainforest_alliance` on **all** the holder's lots. The daily `lots.tasks.daily_compliance_refresh` job also recomputes them, so badges drop when a certificate expires.
 
 ## `lots.CoffeeLot` (`lots/models.py`) — the core entity
 
@@ -77,7 +77,8 @@ Computed: `green_passport_ready` (deforestation + GPS + DDS), `export_ready` (al
 
 - DRF serializes model `DecimalField`s as **strings** (`"82.0"`); `SerializerMethodField` decimals and `total_score` come out as **numbers**. The frontend `CoffeeLot.sca_score` and `CuppingScore` component types are still declared `number` — wrong; always `Number(...)`.
 - List endpoint returns plain JSON; lot **detail** returns a GeoJSON Feature (`GeoFeatureModelSerializer`, `geo_field=farm_location`) — the frontend `getLot` unwraps `properties`.
-- The list serializer has no `farm_location`/`gps_lat`, so maps built from list data can't show point-only farms.
+- The list serializer includes `farm_location` plus derived `gps_lat`/`gps_lng`.
 - Use `CoffeeLot.objects.filter(exporter=u)` or `u.lots` — never `coffeelot_set`.
-- `available_qty_kg` is never decremented when offers are accepted.
-- Migrations: lots 0001–0013, users 0001–0009, roasting 0001.
+- `available_qty_kg` defaults to `volume_kg` for new lots and is decremented when an offer is accepted.
+- New in 2026-10-31: `FloorPrice` (gate 7 table), `ComplianceEvent` (append-only hash-chained gate log), `CoffeeLot.eudr_dds_generated_at` / `eudr_dds_reference`, `User.ecta_license_verified_at`.
+- Migrations: lots 0001–0015, users 0001–0010, roasting 0001.

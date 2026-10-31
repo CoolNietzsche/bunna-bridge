@@ -1,22 +1,22 @@
-# 05 — Compliance Engine (as it really works on 2026-10-31)
+# 05 — Compliance Engine (updated after the 2026-10-31 release)
 
-The selling point is a "7-gate" export-readiness engine. This is the verified behaviour after the 2026-07-27 fix commit `6543886` (which locked gates against exporter PATCH).
+All seven gates are derived in `CoffeeLot.save()` by `lots/compliance.py::apply_gates()` — there is no API, admin form or management command that can set a gate directly. Every change is written to the append-only, SHA-256 hash-chained `ComplianceEvent` log (`ComplianceEvent.verify_chain(lot)` detects tampering). `gate_report(lot)` produces the per-gate reason/next-step shown in the UI.
 
 ## The 7 gates
 
-| # | Gate (field) | How it becomes `True` today | Automated? | Honest status |
-|---|---|---|---|---|
-| 1 | `deforestation_free` | PostGIS `ST_Intersects` of lot `boundary` (or a ~500 m buffer around `farm_location`) against `DeforestationZone` rows with `year > 2020`. Runs on boundary PATCH, boundary inherit, and `compliance-check`. Read-only via API. | **Yes** | Real and strong. Gaps: not re-run when zones are reloaded; point buffer is in degrees (`buffer(0.005)` on a 4326 point); returns `None` if no geometry/data so the flag simply stays at its old value. |
-| 2 | `gps_verified` | `CoffeeLot.save()`: `bool(boundary or farm_location)` | Yes (presence only) | Means "has coordinates", not "coordinates verified". No check that the point is in Ethiopia, the polygon is valid, or area matches `farm_size_ha`. EUDR requires polygons for plots > 4 ha — not enforced. |
-| 3 | `eudr_dds_ready` | Set `True` by `GET /lots/<id>/eudr-dds/` after the PDF is built | Yes, but flawed | ⚠ Any authenticated user (incl. a buyer) can trigger it on any lot; it's set even if `deforestation_free` is `False`; the PDF text **always says "Deforestation Free: Yes"** (`lots/views.py:542`); the PDF isn't stored, so there's no record of what was attested. |
-| 4 | `phyto_cert_uploaded` | `save()`: `bool(phyto_cert_file)` | Yes (presence) | Expiry (`phyto_cert_expiry`) is ignored. No review that the file is really a phyto cert. |
-| 5 | `ecta_license_active` | Only Django admin can set it | **No** | Data to automate exists: exporter's `ecta_license_file` + `ecta_license_expiry`. |
-| 6 | `nbe_fx_declared` | `save()`: `bool(nbe_fx_declaration_file)` | Yes (presence) | |
-| 7 | `cta_floor_met` | Only Django admin can set it | **No** | No floor-price table exists anywhere. Needs a configurable minimum (by grade/processing/period) compared to `fob_price_usd`/`price_per_kg`. |
+| # | Field | Derived from | Notes |
+|---|---|---|---|
+| 1 | `gps_verified` | `boundary` or `farm_location` present | EUDR needs polygons for plots > 4 ha — surfaced as guidance, not enforced |
+| 2 | `deforestation_free` | PostGIS intersect with `DeforestationZone` (year > 2020); boundary, or a 500 m metric buffer around a point (EPSG:32637) | Re-run on every geometry change; reset to False when geometry is removed; if no zone data is loaded the previous value is kept |
+| 3 | `eudr_dds_ready` | stored `eudr_dds_file` **and** gates 1 + 2 pass | DDS is generated only by the owner and only when 1 + 2 pass; changing geometry clears the stored DDS |
+| 4 | `phyto_cert_uploaded` | file present and `phyto_cert_expiry` not past | |
+| 5 | `ecta_license_active` | exporter's license file + expiry ≥ today + `ecta_license_verified_at` set by staff | Editing the license clears verification; saving the user re-derives all their lots |
+| 6 | `nbe_fx_declared` | file present | |
+| 7 | `cta_floor_met` | `fob_price_usd` (else `price_per_kg`) ≥ most specific active `FloorPrice` | **No floor configured ⇒ fails**; saving a FloorPrice re-derives all open lots |
 
-`export_ready` = all 7. `LotStatusUpdateView` blocks `→ exported` unless `export_ready` — **but** the generic `PATCH /lots/<id>/` accepts `status` and bypasses that check (see 07 §1.2).
+`export_ready` = all 7. The only way to reach `exported` is `PATCH /lots/<id>/status/` from `contracted`, which re-derives gates first and returns the failing gate names.
 
-Also present but not part of `export_ready`: `ecex_permit_file/number/expiry`, `customs_declaration_file/id`, `eudr_dds_file`.
+Daily job `lots.tasks.daily_compliance_refresh` (beat 06:17): re-derives open lots, recomputes certification badges, sends 30/7/1/0-day expiry reminders. Run on demand with `manage.py refresh_compliance`.
 
 ## Deforestation data
 
@@ -45,16 +45,14 @@ usd_retained = net − etb_portion
 milestones  = 20 % / 30 % / 50 % of gross
 ```
 Rate: request `nbe_rate` → else `settings.NBE_DEFAULT_FX_RATE` (env, default 59.85).
-⚠ The frontend widget shows an editable NBE rate field but never sends it (`SettlementWidget.tsx:21` calls `calculateSettlement(lotId, usd)` without the rate), so the default is always used. The 50/50 rule and rate need re-validating against current NBE directives.
+The widget sends the typed rate (blank = server default). The 50/50 rule and rate still need re-validating against current NBE directives.
 
 ## Cupping (quality ledger)
 
 Write-once after confirmation (enforced in `CuppingScore.save()`). Not hash-chained or signed yet. Live DB had 0 cupping rows at the July audit — every displayed score was a manually typed `sca_score`, which exporters can still edit freely via PATCH.
 
-## Where to take it (summary — details in 09)
+## Still to do
 
-1. Close the bypasses (status PATCH, DDS trigger by non-owners, DDS claiming "Yes" when false).
-2. Automate gate 5 from license expiry, gate 7 from a floor-price table, gate 4 with expiry.
-3. Add a per-lot **compliance audit log** (who/what/when changed each gate, with the evidence) — the foundation for the "tamper-evident ledger" promise.
-4. TRACES-ready GeoJSON export + stored DDS reference.
-5. Re-run deforestation checks in a Celery task when data is reloaded; add expiry alerts via Celery beat.
+- JRC Global Forest Cover 2020 baseline alongside Hansen loss; script the Hansen preprocessing into the repo.
+- Store the TRACES reference number returned after submission (`eudr_dds_reference` field exists; add it to the edit form).
+- Enforce polygons for plots > 4 ha once farm sizes are reliable.

@@ -30,10 +30,10 @@ Protected (any logged-in role — **no per-role route guards**; pages hide/show 
 
 ## Known frontend debts
 
-- Settlement NBE rate input is ignored (`components/SettlementWidget.tsx:21`).
-- `CoffeeLot.sca_score` and cupping component types declared `number` but arrive as strings (`api/lots.ts:18`).
-- `FarmerLotsMap.tsx:73` point-only fallback never fires (list API lacks coordinates).
-- JWT stored in `localStorage` (XSS-exposed); refresh-failure does `localStorage.clear()` (also wipes watchlist/theme/offline boundary queue).
-- No tests, no frontend CI. README is Vite boilerplate. Stray files: `=` (empty), `output.txt`, `response.txt`.
+- JWT stored in `localStorage` (XSS-exposed). Move to httpOnly cookies when the backend supports it.
+- 52 pre-existing ESLint errors (mostly `any` types and React-hooks rules); CI reports lint without blocking.
+- No frontend tests beyond the Playwright click-through used for the 2026-10-31 release (not yet committed as a CI job).
 - No i18n (Amharic is a strategic requirement).
-- `mapbox-gl` is a dependency but is imported nowhere — remove it.
+- Many components still use inline style objects rather than Tailwind token classes.
+- Back office (`styles/adminTokens.ts`) uses the Beersheba palette since 2026-10-31; page titles use Fraunces.
+- Routes are lazy-loaded (`App.tsx`); keep new pages lazy too.
