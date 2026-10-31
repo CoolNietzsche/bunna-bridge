@@ -660,7 +660,16 @@ class LotDocumentDownloadView(APIView):
         if field_name not in LOT_DOCUMENT_FIELDS:
             return Response({"detail": "Unknown document field."}, status=404)
 
-        lot = owned_lot_or_404(request, lot_pk)
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
+        is_owner = is_admin(request.user) or lot.exporter_id == request.user.id
+        # The EU importer needs the DDS: a buyer whose offer was accepted may
+        # download the stored statement (but no other compliance document).
+        is_contracted_buyer = field_name == "eudr_dds_file" and lot.offers.filter(
+            buyer=request.user, status="accepted",
+        ).exists()
+        if not (is_owner or is_contracted_buyer):
+            from django.http import Http404
+            raise Http404
         file_field = getattr(lot, field_name)
         if not file_field:
             return Response({"detail": "No file uploaded for this field."}, status=404)

@@ -97,6 +97,8 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "email":        user.email,
                 "username":     user.username,
                 "role":         user.role,
+                "first_name":   user.first_name,
+                "last_name":    user.last_name,
                 "company_name": user.company_name,
                 "is_verified":  user.is_verified,
             },

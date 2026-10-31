@@ -18,8 +18,13 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LogoutView(generics.GenericAPIView):
-    """Blacklist the refresh token so it can't mint new access tokens."""
-    permission_classes = [permissions.IsAuthenticated]
+    """
+    Blacklist the refresh token so it can't mint new access tokens. The
+    refresh token itself is the credential: revoking a token you hold is
+    always safe, and logout must work even when the access token expired.
+    """
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         from rest_framework_simplejwt.exceptions import TokenError

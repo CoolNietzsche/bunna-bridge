@@ -90,7 +90,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "altitude_m", "processing", "grade", "varietal",
             "sca_score", "flavor_notes", "volume_kg", "price_per_kg",
             # marketplace
-            "flavor_tags", "available_qty_kg", "fob_price_usd", "min_order_kg",
+            "flavor_tags", "farm_photos", "available_qty_kg", "fob_price_usd", "min_order_kg",
             "delivery_window", "lot_type",
             "is_organic", "is_fair_trade", "is_rainforest_alliance", "certifications",
             "tasting_notes",
@@ -119,7 +119,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         # (which enforces the pipeline and the export gate) or offer acceptance.
         # Certification badges are derived from Certification records.
         read_only_fields = [
-            *GATE_FIELDS, "status",
+            *GATE_FIELDS, "status", "farm_photos",
             "is_organic", "is_fair_trade", "is_rainforest_alliance",
         ]
         extra_kwargs = {

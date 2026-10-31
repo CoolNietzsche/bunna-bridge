@@ -194,13 +194,12 @@ class TestLogin:
             {"email": "b@example.com", "password": PASSWORD},
             format="json",
         ).data
-        c.credentials(HTTP_AUTHORIZATION=f"Bearer {tokens['access']}")
-        assert (
-            c.post(
-                reverse("logout"), {"refresh": tokens["refresh"]}, format="json",
-            ).status_code
-            == 205
+        # No access token needed: the refresh token is the credential, so
+        # logout still works after the access token has been cleared/expired.
+        resp = client_for().post(
+            reverse("logout"), {"refresh": tokens["refresh"]}, format="json",
         )
+        assert resp.status_code == HTTPStatus.RESET_CONTENT
         resp = c.post(
             "/api/auth/token/refresh/", {"refresh": tokens["refresh"]}, format="json",
         )
@@ -887,3 +886,20 @@ class TestGeoJsonExport:
         assert body["type"] == "FeatureCollection"
         assert body["features"][0]["geometry"]["type"] == "Polygon"
         assert body["features"][0]["properties"]["ProducerCountry"] == "ET"
+
+
+class TestContractedBuyerDds:
+    def test_only_contracted_buyer_can_download_stored_dds(self, tmp_path):
+        exp, buyer, other = make_user("exporter"), make_user("buyer"), make_user("buyer")
+        with override_settings(MEDIA_ROOT=tmp_path):
+            lot = make_lot(exp, boundary=SQUARE, deforestation_free=True, phyto_cert_file=pdf())
+            client_for(exp).get(reverse("lot-eudr-dds", args=[lot.pk]))
+            Offer.objects.create(
+                lot=lot, buyer=buyer, quantity_kg=Decimal("100"),
+                price_per_kg_usd=Decimal("9"), status="accepted",
+            )
+            dds = reverse("lot-document-download", args=[lot.pk, "eudr_dds_file"])
+            phyto = reverse("lot-document-download", args=[lot.pk, "phyto_cert_file"])
+            assert client_for(buyer).get(dds).status_code == HTTPStatus.OK
+            assert client_for(buyer).get(phyto).status_code == HTTPStatus.NOT_FOUND
+            assert client_for(other).get(dds).status_code == HTTPStatus.NOT_FOUND
