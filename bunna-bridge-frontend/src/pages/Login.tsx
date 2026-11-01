@@ -6,18 +6,6 @@ import AuthBrandPanel from "../components/site/AuthBrandPanel";
 import { T } from "../styles/tokens";
 import { CS } from "../styles/components";
 
-// Development-only shortcut to the accounts created by `manage.py seed_demo`.
-// Guarded by import.meta.env.DEV so it is stripped from production builds —
-// never put real accounts or passwords here.
-function demoAccounts() {
-  const password = "Beersheba-Demo-2026";
-  return ["exporter", "buyer", "roaster", "farmer", "qgrader", "admin"].map((role) => ({
-    role: role === "qgrader" ? "Q-grader" : role[0].toUpperCase() + role.slice(1),
-    email: `${role}@demo.beersheba.et`,
-    pw: password,
-  }));
-}
-
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -84,18 +72,6 @@ export default function Login() {
             No account? <Link to="/register" style={{ color: T.color.forest, textDecoration: "none", fontWeight: 600 }}>Create one</Link>
           </p>
 
-          {/* Demo accounts — local development only (see demoAccounts above) */}
-          {import.meta.env.DEV && (
-          <div style={{ ...CS.cardInner, marginTop: "22px", padding: "16px" }}>
-            <p style={{ fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: T.color.textFaint, margin: "0 0 10px" }}>Demo accounts (dev only) — click to autofill</p>
-            {demoAccounts().map(({ role, email: e, pw }) => (
-              <button key={role} type="button" onClick={() => { setEmail(e); setPassword(pw); }} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: "5px 0" }}>
-                <span style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.textMuted }}>{role}</span>
-                <span style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.forest }}>{e}</span>
-              </button>
-            ))}
-          </div>
-          )}
         </div>
       </div>
 

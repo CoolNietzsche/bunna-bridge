@@ -3,11 +3,15 @@ Build a complete, realistic demo dataset by going through the real code paths
 (gates are derived, DDS PDFs generated, offers accepted, etc.). Every demo
 account uses an @demo.beersheba.et email so it can be removed with --reset.
 
-    python manage.py seed_demo            # create (idempotent: skips if present)
-    python manage.py seed_demo --reset    # delete demo data, then create
+    python manage.py seed_demo                       # full dataset (local / staging)
+    python manage.py seed_demo --reset               # delete demo data, then rebuild
+    python manage.py seed_demo --users-only --password 'YourOwnSecret'
+        # just one login per role, no lots/offers/samples — the safe way to
+        # get demo logins on the live site without polluting the marketplace
 
-Never run this against production data you care about — it is for local
-development, staging and demos.
+The default password is public (it is in this file), so always pass
+--password when the accounts live anywhere reachable from the internet.
+The full dataset adds fake lots to the marketplace: local/staging only.
 """
 from datetime import date
 from datetime import timedelta
@@ -75,8 +79,17 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--reset", action="store_true", help="Delete existing demo data first.")
+        parser.add_argument("--password", default=PASSWORD,
+                            help="Password for every demo account (default is public — override it on any live server).")
+        parser.add_argument("--users-only", action="store_true",
+                            help="Create one login per role only: no lots, offers, samples, floor prices or zones.")
 
     def handle(self, *args, **options):
+        self.password = options["password"]
+        self.users_only = options["users_only"]
+        if len(self.password) < 10:
+            self.stderr.write(self.style.ERROR("Use a password of at least 10 characters."))
+            return
         if options["reset"]:
             self._reset()
         if User.objects.filter(email__endswith=f"@{DOMAIN}").exists():
@@ -85,7 +98,8 @@ class Command(BaseCommand):
         with transaction.atomic():
             self._create()
         self.stdout.write(self.style.SUCCESS(
-            f"Demo data ready. Log in with any account below, password: {PASSWORD}\n"
+            ("Demo accounts ready" if self.users_only else "Demo data ready")
+            + f". Log in with any account below, password: {self.password}\n"
             + "\n".join(f"  {u.role:9} {u.email}" for u in User.objects.filter(email__endswith=f"@{DOMAIN}")
                         .order_by("role")),
         ))
@@ -112,7 +126,7 @@ class Command(BaseCommand):
     # ── helpers ────────────────────────────────────────────────────────────
     def _user(self, key, role, first, last, **extra):
         user = User.objects.create_user(
-            username=f"{key}-demo", email=f"{key}@{DOMAIN}", password=PASSWORD,
+            username=f"{key}-demo", email=f"{key}@{DOMAIN}", password=self.password,
             role=role, first_name=first, last_name=last, country=extra.pop("country", "Ethiopia"), **extra,
         )
         return user
@@ -142,8 +156,27 @@ class Command(BaseCommand):
         return score
 
     # ── dataset ────────────────────────────────────────────────────────────
+    def _create_accounts_only(self):
+        """One login per role with realistic profiles; nothing else is created."""
+        # Platform-admin role only — deliberately NOT Django staff/superuser,
+        # so a shared demo password can never open /admin/.
+        self._user("admin", "admin", "Meron", "Alemu", company_name="Beersheba")
+        self._user("exporter", "exporter", "Dawit", "Haile", company_name="Highland Exports PLC (demo)",
+                   bio="Demo exporter account.")
+        self._user("buyer", "buyer", "Sarah", "Lindqvist", company_name="Nordic Green Imports AB (demo)",
+                   country="Sweden")
+        self._user("roaster", "roaster", "Yonas", "Tesfaye", company_name="Addis Micro Roastery (demo)",
+                   roastery_type="micro", roastery_monthly_capacity_kg=400)
+        self._user("farmer", "farmer", "Abebe", "Worku", farm_name="Kochere Ridge Farm (demo)",
+                   farm_region="Yirgacheffe", farm_kebele="Kochere", cooperative="Kochere Farmers Coop",
+                   farm_altitude_m=1950, farm_size_ha=Decimal("3.20"))
+        self._user("qgrader", "qgrader", "Tigist", "Bekele", company_name="Licensed Q Arabica Grader (demo)")
+
     def _create(self):
         today = timezone.localdate()
+        if self.users_only:
+            self._create_accounts_only()
+            return
 
         FloorPrice.objects.create(min_price_usd_per_kg=Decimal("4.20"), valid_from=date(2026, 1, 1),
                                   source="Demo floor — replace with the current ECTA minimum")
