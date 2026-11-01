@@ -42,7 +42,7 @@ function CertBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
   );
 }
 
-const label: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 2px" };
+const label: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, margin: "0 0 2px" };
 const card: React.CSSProperties = { background: AT.color.surface, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.lg, padding: "20px" };
 
 export default function LotStory() {
@@ -92,21 +92,21 @@ export default function LotStory() {
       <div style={{ borderBottom: `1px solid ${AT.color.border}`, background: AT.color.surface }}>
         <div style={{ maxWidth: "720px", margin: "0 auto", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <img src={logoFull} alt="Beersheba" style={{ height: "32px" }} />
-          <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.06em", textTransform: "uppercase", color: AT.color.textDisabled, fontWeight: 500 }}>Lot Story</span>
+          <span style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textDisabled, fontWeight: 500 }}>Lot Story</span>
         </div>
       </div>
 
       {/* Header band — flat, teal-accented (Gentelella has no photographic gradients) */}
-      <div style={{ background: AT.color.sidebarBg, position: "relative", overflow: "hidden" }}>
+      <div style={{ background: AT.color.heroBg, position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "220px", height: "220px", borderRadius: "999px", background: `${AT.color.primary}14` }} />
         <div style={{ maxWidth: "720px", margin: "0 auto", padding: "36px 20px 32px", position: "relative" }}>
-          <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", letterSpacing: "0.06em", color: AT.color.sidebarText, margin: "0 0 8px" }}>
+          <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", letterSpacing: "0.06em", color: AT.color.heroTextMuted, margin: "0 0 8px" }}>
             {lot.lot_id} · {lot.exporter_company || "Ethiopian Exporter"}
           </p>
           <h1 style={{ fontFamily: AT.font.sans, fontSize: "2rem", fontWeight: 700, lineHeight: 1.15, color: "#ffffff", margin: "0 0 10px" }}>
             {lot.name}
           </h1>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: AT.color.sidebarTextHover }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: AT.color.heroText }}>
             <MapPin size={14} />
             <span style={{ fontSize: "0.85rem" }}>
               {titleCase(lot.region)}{lot.washing_station ? ` · ${lot.washing_station}` : ""} · {lot.altitude_m}m
@@ -178,7 +178,7 @@ export default function LotStory() {
         <div style={{ ...card, display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
           {qrDataUrl && <img src={qrDataUrl} alt="QR code linking to this lot's story" width={88} height={88} />}
           <div>
-            <p style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: AT.font.sans, fontSize: "0.72rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textMuted, margin: "0 0 4px", fontWeight: 500 }}>
+            <p style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: "0 0 4px", fontWeight: 500 }}>
               <QrCode size={13} /> Scan to verify
             </p>
             <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textSecondary, margin: 0 }}>
@@ -187,7 +187,7 @@ export default function LotStory() {
           </div>
         </div>
 
-        <p style={{ textAlign: "center", fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, paddingBottom: "32px" }}>
+        <p style={{ textAlign: "center", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, paddingBottom: "32px" }}>
           Verified by Beersheba — Ethiopian Coffee Export Platform
         </p>
       </div>

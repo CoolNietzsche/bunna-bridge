@@ -88,7 +88,7 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
       <style>{`
         .ab-sidebar { position: fixed; left: 0; top: 0; height: 100vh; z-index: 60;
           width: ${collapsed ? AT.spacing.sidebarCollapsedW : AT.spacing.sidebarW};
-          background: ${AT.color.sidebarBg}; border-right: 1px solid ${AT.color.sidebarBorder};
+          border-right: 1px solid ${AT.color.sidebarBorder};
           display: flex; flex-direction: column; transition: width 0.18s ease; overflow: hidden; }
         @media (max-width: 860px) {
           .ab-sidebar { transform: translateX(-100%); width: ${AT.spacing.sidebarW} !important; transition: transform 0.2s ease; }
@@ -98,15 +98,14 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
         }
       `}</style>
 
-      <aside className={`ab-sidebar${mobileOpen ? " open" : ""}`}>
+      <aside className={`ab-sidebar bb-material-sidebar${mobileOpen ? " open" : ""}`}>
         {/* Logo */}
         <div style={{
           display: "flex", alignItems: "center", height: AT.spacing.topbarH, flexShrink: 0,
           padding: collapsed ? "0" : "0 18px", justifyContent: collapsed ? "center" : "flex-start",
-          borderBottom: `1px solid ${AT.color.sidebarBorder}`,
         }}>
           <div onClick={() => go("/dashboard")} style={{ cursor: "pointer", display: "flex" }}>
-            <BrandMark wordmark={!collapsed} onDark size={26} />
+            <BrandMark wordmark={!collapsed} size={26} />
           </div>
           <button
             className="ab-mobile-close"
@@ -118,11 +117,11 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: "14px 10px", overflowY: "auto" }}>
+        <nav style={{ flex: 1, padding: "6px 12px 14px", overflowY: "auto" }}>
           {groups.map((group) => (
             <div key={group.title} style={{ marginBottom: "18px" }}>
               {!collapsed && (
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: AT.color.sidebarText, opacity: 0.6, margin: "0 0 6px", padding: "0 10px" }}>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 600, color: AT.color.textMuted, margin: "0 0 4px", padding: "0 10px" }}>
                   {group.title}
                 </p>
               )}
@@ -139,16 +138,17 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
                         title={collapsed ? item.label : undefined}
                         style={{
                           width: "100%", background: active ? AT.color.sidebarActive : hovered ? AT.color.sidebarHover : "transparent",
-                          border: "none", borderRadius: AT.radius.sm, cursor: "pointer",
+                          border: "none", borderRadius: "8px", cursor: "pointer",
                           display: "flex", alignItems: "center", gap: "10px",
-                          minHeight: "34px", padding: collapsed ? "8px" : "7px 10px",
+                          minHeight: "32px", padding: collapsed ? "8px" : "6px 10px",
                           justifyContent: collapsed ? "center" : "flex-start",
-                          fontFamily: AT.font.sans, fontSize: AT.fontSize.sm, fontWeight: active ? 600 : 400,
+                          fontFamily: AT.font.sans, fontSize: "0.86rem", fontWeight: active ? 600 : 500, letterSpacing: "-0.01em",
                           color: active ? AT.color.sidebarTextActive : hovered ? AT.color.sidebarTextHover : AT.color.sidebarText,
                           marginBottom: "1px", transition: "background 0.12s, color 0.12s",
                         }}
                       >
-                        <span style={{ color: active ? AT.color.primary : "inherit", flexShrink: 0, display: "inline-flex" }}>{item.icon}</span>
+                        {/* macOS sidebars tint every icon with the accent colour */}
+                        <span style={{ color: AT.color.primary, flexShrink: 0, display: "inline-flex" }}>{item.icon}</span>
                         {!collapsed && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.label}</span>}
                       </button>
                     </li>
@@ -166,7 +166,7 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
           style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
             padding: "12px", background: "none", border: "none", borderTop: `1px solid ${AT.color.sidebarBorder}`,
-            color: AT.color.sidebarText, cursor: "pointer", fontFamily: AT.font.sans, fontSize: "0.78rem",
+            color: AT.color.textMuted, cursor: "pointer", fontFamily: AT.font.sans, fontSize: "0.8rem", fontWeight: 500,
           }}
         >
           {collapsed ? <ChevronRight size={15} /> : <><ChevronLeft size={15} /> Collapse</>}

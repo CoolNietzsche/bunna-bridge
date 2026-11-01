@@ -91,20 +91,21 @@ export default function SiteHeader() {
     <>
       <style>{`
         .bb-hd { position: sticky; top: 0; z-index: 100;
-          background: color-mix(in srgb, var(--color-paper) 82%, transparent);
-          backdrop-filter: saturate(140%) blur(12px);
+          background: var(--material-bar);
+          -webkit-backdrop-filter: saturate(180%) blur(20px);
+          backdrop-filter: saturate(180%) blur(20px);
           border-bottom: 1px solid var(--color-border); }
         .bb-hd-inner { height: var(--header-height); display: flex; align-items: center; gap: 20px; }
         .bb-nav { display: flex; align-items: center; gap: 4px; }
-        .bb-nav a { font-family: ${T.font.sans}; font-size: 0.9rem; font-weight: 500;
-          color: var(--color-text-muted); text-decoration: none; padding: 8px 12px;
-          border-radius: 999px; transition: all .15s; white-space: nowrap; }
-        .bb-nav a:hover { color: var(--color-ink); background: var(--color-stone); }
-        .bb-nav a.active { color: var(--color-forest); }
+        .bb-nav a { font-family: ${T.font.sans}; font-size: 0.86rem; font-weight: 400; letter-spacing: -0.01em;
+          color: color-mix(in srgb, var(--color-ink) 80%, transparent); text-decoration: none; padding: 8px 12px;
+          border-radius: 999px; transition: color .2s; white-space: nowrap; }
+        .bb-nav a:hover { color: var(--color-ink); }
+        .bb-nav a.active { color: var(--color-ink); font-weight: 600; }
         .bb-icon-btn { display: inline-flex; align-items: center; justify-content: center;
-          width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--color-border);
-          background: transparent; color: var(--color-ink); cursor: pointer; transition: all .15s; }
-        .bb-icon-btn:hover { background: var(--color-stone); border-color: var(--color-border-strong); }
+          width: 36px; height: 36px; border-radius: 999px; border: none;
+          background: transparent; color: var(--color-ink); cursor: pointer; transition: background .2s; }
+        .bb-icon-btn:hover { background: color-mix(in srgb, var(--color-ink) 7%, transparent); }
         .bb-hamburger { display: none; }
         .bb-mobile { display: none; }
         @media (max-width: 900px) {
@@ -202,16 +203,17 @@ export default function SiteHeader() {
 }
 
 const primaryBtn: React.CSSProperties = {
-  padding: "9px 18px", borderRadius: "999px", background: T.color.forest, border: `1px solid ${T.color.forest}`,
-  color: "#FFFFFF", fontFamily: T.font.sans, fontSize: "0.875rem", fontWeight: 500, cursor: "pointer",
+  padding: "7px 16px", borderRadius: "999px", background: T.color.forest, border: "none",
+  color: "#FFFFFF", fontFamily: T.font.sans, fontSize: "0.84rem", fontWeight: 500, cursor: "pointer",
 };
 const ghostBtn: React.CSSProperties = {
-  padding: "9px 16px", borderRadius: "999px", background: "transparent", border: `1px solid ${T.color.borderStrong}`,
-  color: T.color.ink, fontFamily: T.font.sans, fontSize: "0.875rem", fontWeight: 500, cursor: "pointer",
+  padding: "7px 14px", borderRadius: "999px", background: "transparent", border: "none",
+  color: T.color.forest, fontFamily: T.font.sans, fontSize: "0.84rem", fontWeight: 500, cursor: "pointer",
 };
 const avatar: React.CSSProperties = {
-  width: "34px", height: "34px", borderRadius: "999px", background: T.color.forest, color: "#FFFFFF",
-  display: "flex", alignItems: "center", justifyContent: "center", fontFamily: T.font.mono, fontSize: "0.72rem", fontWeight: 500,
+  width: "32px", height: "32px", borderRadius: "999px",
+  background: "linear-gradient(180deg, #2E9A66 0%, #1B7A4E 100%)", color: "#FFFFFF",
+  display: "flex", alignItems: "center", justifyContent: "center", fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600,
 };
 const menuPanel: React.CSSProperties = {
   position: "absolute", right: 0, top: "48px", width: "220px", background: T.color.surface,

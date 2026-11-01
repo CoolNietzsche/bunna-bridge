@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, ArrowUpRight, MapPin, Leaf, FileCheck2, ScanLine,
+  ArrowUpRight, ChevronRight, MapPin, Leaf, FileCheck2, ScanLine,
   ShieldCheck, Landmark, BadgeCheck, CheckCircle2,
 } from "lucide-react";
 import AppShell from "../components/AppShell";
@@ -36,73 +36,66 @@ export default function Landing() {
 
   return (
     <AppShell footer>
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <section style={{ position: "relative", overflow: "hidden", borderBottom: `1px solid ${T.color.border}` }}>
-        <TopographicMark
-          style={{ position: "absolute", top: "-18%", right: "-14%", width: "min(60vw, 720px)" }}
-          strokeA="var(--color-forest-light)"
-          strokeB="var(--color-border)"
-        />
-        <div className="container-editorial" style={{ position: "relative", paddingTop: "clamp(72px, 11vw, 152px)", paddingBottom: "clamp(64px, 9vw, 108px)" }}>
-          <div className="bb-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "48px", alignItems: "center" }}>
-            <div>
-              <Reveal>
-                <span style={kicker}>Farm boundary → FOB, fully traceable</span>
-              </Reveal>
-              <Reveal delay={90}>
-                <h1 style={{ fontFamily: T.font.display, fontSize: "clamp(2.9rem, 5.6vw, 4.6rem)", fontWeight: 400, lineHeight: 0.98, letterSpacing: "-0.025em", color: T.color.ink, margin: "22px 0 0" }}>
-                  Ethiopian specialty coffee,<br />
-                  <em style={{ fontStyle: "italic", color: T.color.forest }}>traceable to the tree.</em>
-                </h1>
-              </Reveal>
-              <Reveal delay={170}>
-                <p style={{ fontFamily: T.font.sans, fontSize: "clamp(1.05rem, 1.6vw, 1.2rem)", lineHeight: 1.65, color: T.color.textMuted, margin: "26px 0 0", maxWidth: "48ch" }}>
-                  Beersheba connects farmers, exporters and roasters through a single
-                  compliance pipeline — EUDR, ECTA and NBE — so every micro-lot carries
-                  its own verified origin story, from GPS boundary to bill of lading.
-                </p>
-              </Reveal>
-              <Reveal delay={250}>
-                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "14px", marginTop: "36px" }}>
-                  <button className="bb-cta" onClick={() => navigate("/marketplace")} style={primaryBtn}>
-                    Explore the coffees <ArrowRight size={17} className="bb-cta-icon" />
-                  </button>
-                  <a href="#pipeline" style={ghostBtn}>How it works</a>
-                </div>
-              </Reveal>
+      {/* ── Hero (Apple product-page composition: centred headline, then a wide image) ── */}
+      <section style={{ position: "relative" }}>
+        <div className="container-editorial" style={{ textAlign: "center", paddingTop: "clamp(64px, 9vw, 124px)" }}>
+          <Reveal>
+            <span style={kicker}>Ethiopian specialty coffee</span>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1 className="bb-hero-title" style={{ fontFamily: T.font.display, fontSize: "clamp(3rem, 8vw, 5.6rem)", fontWeight: 700, lineHeight: 1.02, letterSpacing: "-0.045em", color: T.color.ink, margin: "14px auto 0" }}>
+              Traceable<br /><span className="bb-gradient-text">to the tree.</span>
+            </h1>
+          </Reveal>
+          <Reveal delay={160}>
+            <p style={{ fontFamily: T.font.sans, fontSize: "clamp(1.15rem, 2vw, 1.45rem)", lineHeight: 1.45, letterSpacing: "-0.015em", color: T.color.textMuted, margin: "22px auto 0", maxWidth: "36ch" }}>
+              Every lot, from GPS boundary to bill of lading — checked against EUDR, ECTA and NBE before it reaches your roastery.
+            </p>
+          </Reveal>
+          <Reveal delay={240}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "22px", marginTop: "32px" }}>
+              <button className="bb-cta" onClick={() => navigate("/marketplace")} style={primaryBtn}>
+                Explore the coffees
+              </button>
+              <a href="#pipeline" className="bb-text-link" style={textLink}>
+                How it works <ChevronRight size={18} className="bb-cta-icon" />
+              </a>
             </div>
+          </Reveal>
 
-            <Reveal delay={140} className="bb-hero-image" style={{ position: "relative" }}>
-              <div style={{ position: "relative", borderRadius: T.radius.xl, overflow: "hidden", boxShadow: T.shadow.hover, aspectRatio: "4 / 5" }}>
-                <img
-                  src={heroImage}
-                  alt="Terraced highland coffee farm in Yirgacheffe, Ethiopia, at dawn"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                />
-              </div>
-            </Reveal>
-          </div>
-
-          <Reveal delay={340}>
-            <div className="bb-proof-strip" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", marginTop: "64px", paddingTop: "22px", borderTop: `1px solid ${T.color.border}` }}>
-              {["EUDR", "ECTA", "NBE", "SCA Q-grading", "GPS boundaries"].map((label, i) => (
-                <span key={label} style={{ display: "flex", alignItems: "center" }}>
-                  {i > 0 && <span aria-hidden style={{ width: "1px", height: "12px", background: T.color.border, margin: "0 18px" }} />}
-                  <span style={{ fontFamily: T.font.mono, fontSize: "0.68rem", letterSpacing: "0.12em", textTransform: "uppercase", color: T.color.textFaint }}>
-                    {label}
-                  </span>
+          <Reveal delay={320}>
+            <div className="bb-hero-media" style={{ position: "relative", marginTop: "clamp(44px, 6vw, 72px)", borderRadius: T.radius.xl, overflow: "hidden", boxShadow: "0 30px 80px rgba(0,0,0,0.18)", aspectRatio: "16 / 7" }}>
+              <img
+                src={heroImage}
+                alt="Terraced highland coffee farm in Yirgacheffe, Ethiopia, at dawn"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", display: "block" }}
+              />
+              {/* Floating glass chip — the product promise, on the photo */}
+              <div className="bb-material-bar bb-hero-chip" style={{ position: "absolute", left: "24px", bottom: "24px", display: "flex", alignItems: "center", gap: "12px", padding: "12px 18px 12px 12px", borderRadius: "18px", textAlign: "left", boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}>
+                <span style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(180deg, #2E9A66, #1B7A4E)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                  <ShieldCheck size={20} />
                 </span>
-              ))}
+                <span>
+                  <span style={{ display: "block", fontFamily: T.font.sans, fontSize: "0.92rem", fontWeight: 600, color: T.color.ink, letterSpacing: "-0.01em" }}>Deforestation-free, verified</span>
+                  <span style={{ display: "block", fontFamily: T.font.sans, fontSize: "0.8rem", color: T.color.textMuted }}>Satellite-checked against forest loss since 2020</span>
+                </span>
+              </div>
             </div>
+          </Reveal>
+
+          <Reveal delay={380}>
+            <p className="bb-proof-strip" style={{ fontFamily: T.font.sans, fontSize: "0.86rem", color: T.color.textFaint, margin: "28px 0 0", letterSpacing: "-0.005em" }}>
+              {["EUDR", "ECTA", "NBE", "SCA Q-grading", "GPS boundaries"].join("  ·  ")}
+            </p>
           </Reveal>
         </div>
       </section>
 
       {/* ── The pipeline ─────────────────────────────────────── */}
-      <section id="pipeline" className="container-editorial" style={{ paddingTop: "96px", scrollMarginTop: "90px" }}>
+      <section id="pipeline" className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)", scrollMarginTop: "90px" }}>
         <div className="bb-pipeline-head" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "32px" }}>
           <Reveal style={{ flex: 1 }}>
             <SectionHead kicker="The pipeline" title="Seven gates to a Green Passport" sub="Every lot is scored against seven independent compliance checks before it can list. Pass all seven, and it earns a verifiable Green Passport." />
@@ -127,19 +120,19 @@ export default function Landing() {
             {GATES.map((g, i) => (
               <Reveal key={g.label} delay={i * 55} className="bb-gate-item" style={{ flex: "1 1 0", minWidth: 0 }}>
                 <span style={{
-                  width: "46px", height: "46px", borderRadius: "999px", flexShrink: 0,
+                  width: "48px", height: "48px", borderRadius: "14px", flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: g.final ? T.color.amber : T.color.surface,
-                  border: `1.5px solid ${g.final ? T.color.amber : T.color.borderStrong}`,
-                  color: g.final ? "#1A1613" : T.color.forest,
-                  boxShadow: g.final ? T.shadow.hover : "none",
+                  background: g.final ? "linear-gradient(180deg, #2E9A66, #1B7A4E)" : T.color.surface,
+                  border: g.final ? "none" : `1px solid ${T.color.border}`,
+                  color: g.final ? "#FFFFFF" : T.color.forest,
+                  boxShadow: g.final ? "0 10px 24px rgba(27,122,78,0.30)" : T.shadow.card,
                 }}>
                   {g.icon}
                 </span>
                 <div>
-                  {!g.final && <span style={{ display: "block", fontFamily: T.font.mono, fontSize: "0.58rem", color: T.color.textGhost, marginBottom: "6px" }}>0{i + 1}</span>}
-                  <h4 style={{ fontFamily: T.font.sans, fontSize: "0.85rem", fontWeight: 600, color: T.color.ink, margin: "0 0 4px", lineHeight: 1.3 }}>{g.label}</h4>
-                  <p style={{ fontFamily: T.font.sans, fontSize: "0.76rem", color: T.color.textMuted, margin: 0, lineHeight: 1.45 }}>{g.sub}</p>
+                  {!g.final && <span style={{ display: "block", fontFamily: T.font.sans, fontSize: "0.72rem", fontWeight: 600, color: T.color.textFaint, marginBottom: "4px" }}>Gate {i + 1}</span>}
+                  <h4 style={{ fontFamily: T.font.sans, fontSize: "0.92rem", fontWeight: 600, letterSpacing: "-0.015em", color: T.color.ink, margin: "0 0 4px", lineHeight: 1.3 }}>{g.label}</h4>
+                  <p style={{ fontFamily: T.font.sans, fontSize: "0.8rem", color: T.color.textMuted, margin: 0, lineHeight: 1.45 }}>{g.sub}</p>
                 </div>
               </Reveal>
             ))}
@@ -148,7 +141,7 @@ export default function Landing() {
       </section>
 
       {/* ── Browse by origin (asymmetric bento) ──────────────── */}
-      <section className="container-editorial" style={{ paddingTop: "104px" }}>
+      <section className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)" }}>
         <Reveal>
           <SectionHead kicker="Terroir" title="Browse by origin" sub="From the highlands of Yirgacheffe to the dry beds of Harrar." />
         </Reveal>
@@ -162,7 +155,7 @@ export default function Landing() {
       </section>
 
       {/* ── Browse by selection (editorial index list) ───────── */}
-      <section className="container-editorial" style={{ paddingTop: "104px" }}>
+      <section className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)" }}>
         <Reveal>
           <SectionHead kicker="Curated" title="Browse by selection" sub="Discover coffees by what matters — compliance, certification, and terroir." />
         </Reveal>
@@ -181,7 +174,7 @@ export default function Landing() {
       </section>
 
       {/* ── Values + CTA ─────────────────────────────────────── */}
-      <section className="container-editorial" style={{ paddingTop: "104px" }}>
+      <section className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)" }}>
         <Reveal>
           <div style={{ position: "relative", overflow: "hidden", borderRadius: T.radius.xl, padding: "clamp(40px, 6vw, 76px)" }}>
             <img
@@ -192,30 +185,30 @@ export default function Landing() {
               decoding="async"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
             />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(23,64,47,0.90) 0%, rgba(14,42,32,0.94) 100%)" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(8,28,19,0.86) 0%, rgba(4,16,11,0.94) 100%)" }} />
             <TopographicMark
               style={{ position: "absolute", top: "-28%", right: "-16%", width: "460px" }}
               strokeA="rgba(255,255,255,0.12)"
               strokeB="rgba(255,255,255,0.07)"
             />
             <div style={{ position: "relative", maxWidth: "660px" }}>
-              <span style={{ ...kicker, color: T.color.mint }}>Why Beersheba</span>
-              <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(2rem, 4vw, 3.1rem)", fontWeight: 400, lineHeight: 1.08, color: "#FFFFFF", margin: "16px 0 0" }}>
+              <span style={{ ...kicker, color: "#7EE0A8" }}>Why Beersheba</span>
+              <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(2rem, 4vw, 3.1rem)", fontWeight: 700, lineHeight: 1.06, letterSpacing: "-0.03em", color: "#FFFFFF", margin: "14px 0 0" }}>
                 Traceability, transparency, and a fair income — built into the trade.
               </h2>
 
               <div style={{ display: "flex", flexWrap: "wrap", marginTop: "30px", paddingTop: "22px", borderTop: "1px solid rgba(255,255,255,0.14)" }}>
                 {[["7", "compliance gates"], ["3", "government frameworks"], ["1", "green passport"]].map(([n, l], i) => (
                   <div key={l as string} style={{ display: "flex", alignItems: "baseline", paddingRight: "28px", marginRight: "28px", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.14)" : "none", marginBottom: "8px" }}>
-                    <span style={{ fontFamily: T.font.display, fontSize: "2rem", color: "#FFFFFF", lineHeight: 1 }}>{n}</span>
-                    <span style={{ fontFamily: T.font.mono, fontSize: "0.64rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginLeft: "8px" }}>{l}</span>
+                    <span style={{ fontFamily: T.font.display, fontSize: "2.2rem", fontWeight: 700, letterSpacing: "-0.03em", color: "#FFFFFF", lineHeight: 1 }}>{n}</span>
+                    <span style={{ fontFamily: T.font.sans, fontSize: "0.86rem", color: "rgba(255,255,255,0.62)", marginLeft: "8px" }}>{l}</span>
                   </div>
                 ))}
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "28px" }}>
-                <button className="bb-cta" onClick={() => navigate("/marketplace")} style={{ ...primaryBtn, background: T.color.amber, borderColor: T.color.amber, color: "#1A1613", fontWeight: 600 }}>
-                  Browse the marketplace <ArrowRight size={17} className="bb-cta-icon" />
+                <button className="bb-cta" onClick={() => navigate("/marketplace")} style={{ ...primaryBtn, background: "#FFFFFF", color: "#1D1D1F" }}>
+                  Browse the marketplace
                 </button>
                 <button onClick={() => navigate("/register")} style={ghostOnDarkBtn}>
                   Create an account
@@ -227,16 +220,26 @@ export default function Landing() {
       </section>
 
       <style>{`
-        @media (max-width: 960px){ .bb-hero-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }
-        @media (max-width: 640px){ .bb-proof-strip { row-gap: 8px; } }
-        @media (max-width: 720px){ .bb-hero-image { max-width: 380px; margin: 0 auto; } }
+        .bb-gradient-text {
+          background: linear-gradient(100deg, #1B7A4E 0%, #2E9A66 45%, #8FBF4A 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .dark .bb-gradient-text { background-image: linear-gradient(100deg, #34C77B 0%, #7EE0A8 60%, #C7E97A 100%); }
+        .bb-text-link { transition: opacity .2s; }
+        .bb-text-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+        @media (max-width: 720px){
+          .bb-hero-media { aspect-ratio: 4 / 5 !important; }
+          .bb-hero-chip { left: 12px !important; right: 12px; bottom: 12px !important; }
+        }
         @media (max-width: 700px){ .bb-pipeline-image { display: none; } .bb-pipeline-head { display: block; } }
 
-        .bb-cta .bb-cta-icon { transition: transform 0.2s cubic-bezier(0.22,1,0.36,1); }
-        .bb-cta:hover .bb-cta-icon { transform: translateX(3px); }
+        .bb-cta { transition: background .2s, transform .2s; }
+        .bb-cta:hover { filter: brightness(1.06); }
+        .bb-cta-icon { transition: transform 0.2s cubic-bezier(0.25,0.1,0.25,1); }
+        .bb-text-link:hover .bb-cta-icon { transform: translateX(2px); }
 
         /* Seven-gates connected timeline */
-        .bb-gates-line-h { position: absolute; left: 3%; right: 3%; top: 23px; height: 1px; background: var(--color-border); }
+        .bb-gates-line-h { position: absolute; left: 3%; right: 3%; top: 24px; height: 1px; background: var(--color-border); }
         .bb-gates-line-v { display: none; }
         .bb-gate-item { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
         @media (max-width: 780px) {
@@ -269,9 +272,9 @@ export default function Landing() {
           transition: padding-left 0.2s ease;
         }
         .bb-selection-row:last-child { border-bottom: 1px solid var(--color-border); }
-        .bb-selection-index { font-family: "DM Mono", monospace; font-size: 0.75rem; color: var(--color-text-ghost); width: 30px; flex-shrink: 0; }
-        .bb-selection-label { font-family: "Fraunces", serif; font-size: 1.2rem; font-weight: 500; color: var(--color-ink); width: 200px; flex-shrink: 0; transition: color 0.2s ease; }
-        .bb-selection-desc { font-family: "Space Grotesk", sans-serif; font-size: 0.9rem; color: var(--color-text-muted); flex: 1; }
+        .bb-selection-index { font-size: 0.8rem; font-weight: 600; color: var(--color-text-faint); width: 30px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+        .bb-selection-label { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.025em; color: var(--color-ink); width: 220px; flex-shrink: 0; transition: color 0.2s ease; }
+        .bb-selection-desc { font-size: 0.98rem; color: var(--color-text-muted); flex: 1; letter-spacing: -0.01em; }
         .bb-selection-arrow { color: var(--color-text-ghost); transition: transform 0.2s ease, color 0.2s ease; flex-shrink: 0; }
         .bb-selection-row:hover { padding-left: 14px; }
         .bb-selection-row:hover .bb-selection-label { color: var(--color-forest); }
@@ -313,25 +316,25 @@ function SectionHead({ kicker: k, title, sub }: { kicker: string; title: string;
   return (
     <div>
       <span style={kicker}>{k}</span>
-      <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(1.9rem, 3.2vw, 2.75rem)", fontWeight: 400, lineHeight: 1.08, letterSpacing: "-0.01em", color: T.color.ink, margin: "12px 0 0" }}>{title}</h2>
+      <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(2.1rem, 4vw, 3.4rem)", fontWeight: 700, lineHeight: 1.05, letterSpacing: "-0.035em", color: T.color.ink, margin: "10px 0 0" }}>{title}</h2>
       {sub && <p style={{ fontFamily: T.font.sans, fontSize: "1rem", color: T.color.textMuted, margin: "10px 0 0", maxWidth: "60ch" }}>{sub}</p>}
     </div>
   );
 }
 
+// Apple-style eyebrow: sentence case, semibold, warm accent.
 const kicker: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", gap: "8px",
-  fontFamily: T.font.mono, fontSize: "0.68rem", letterSpacing: "0.22em",
-  textTransform: "uppercase", color: T.color.clay,
+  fontFamily: T.font.sans, fontSize: "1.05rem", fontWeight: 600, letterSpacing: "-0.01em", color: T.color.clay,
 };
 const primaryBtn: React.CSSProperties = {
   display: "inline-flex", alignItems: "center", gap: "8px", padding: "13px 26px", borderRadius: "999px",
-  background: T.color.forest, border: `1px solid ${T.color.forest}`, color: "#FFFFFF", fontFamily: T.font.sans, fontSize: "0.95rem", fontWeight: 500, cursor: "pointer",
+  background: T.color.forest, border: "none", color: "#FFFFFF", fontFamily: T.font.sans, fontSize: "1.02rem", fontWeight: 500, letterSpacing: "-0.01em", cursor: "pointer",
 };
-const ghostBtn: React.CSSProperties = {
-  display: "inline-flex", alignItems: "center", gap: "8px", padding: "13px 24px", borderRadius: "999px",
-  background: "transparent", border: `1px solid ${T.color.borderStrong}`, color: T.color.ink, fontFamily: T.font.sans, fontSize: "0.95rem", fontWeight: 500, cursor: "pointer",
-  textDecoration: "none",
+// "Learn more ›" text link — Apple's secondary call to action.
+const textLink: React.CSSProperties = {
+  display: "inline-flex", alignItems: "center", gap: "2px", color: T.color.forest,
+  fontFamily: T.font.sans, fontSize: "1.02rem", fontWeight: 500, letterSpacing: "-0.01em", textDecoration: "none",
 };
 const ghostOnDarkBtn: React.CSSProperties = {
   padding: "13px 24px", borderRadius: "999px", background: "transparent", border: "1px solid rgba(255,255,255,0.35)",

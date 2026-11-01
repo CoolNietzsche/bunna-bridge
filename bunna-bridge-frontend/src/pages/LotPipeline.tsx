@@ -12,7 +12,7 @@ import { AC } from "../styles/adminComponents";
 const PIPELINE = [
   { key: "draft", label: "Draft", color: AT.color.textMuted, bg: AT.color.surfaceSecondary },
   { key: "listed", label: "Listed", color: AT.color.blue, bg: AT.color.blueLight },
-  { key: "contracted", label: "Contracted", color: "#b45309", bg: AT.color.yellowLight },
+  { key: "contracted", label: "Contracted", color: AT.color.yellow, bg: AT.color.yellowLight },
   { key: "exported", label: "Exported", color: AT.color.primaryDark, bg: AT.color.primaryLight },
 ];
 
@@ -99,7 +99,7 @@ export default function LotPipeline() {
             return (
               <div key={stage.key} style={{ background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.lg, padding: "14px", minHeight: "280px", flex: "0 0 260px", width: "260px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", paddingBottom: "10px", borderBottom: `1px solid ${AT.color.border}` }}>
-                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 600, color: stage.color, textTransform: "uppercase", letterSpacing: "0.03em" }}>{stage.label}</span>
+                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", fontWeight: 600, color: stage.color }}>{stage.label}</span>
                   <span style={{ fontFamily: AT.font.sans, fontSize: "1.1rem", fontWeight: 700, color: stage.color, lineHeight: 1 }}>{lots.length}</span>
                 </div>
 

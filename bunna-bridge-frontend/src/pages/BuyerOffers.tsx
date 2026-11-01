@@ -55,17 +55,17 @@ function OfferCard({ offer }: { offer: Offer }) {
       </div>
 
       {offer.status === "countered" && offer.counter_price && (
-        <div style={{ background: AT.color.yellowLight, border: `1px solid #b4530933`, borderRadius: AT.radius.md, padding: "14px 16px", marginBottom: "14px" }}>
-          <p style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", fontWeight: 600, color: "#b45309", margin: "0 0 10px" }}>COUNTER OFFER FROM EXPORTER</p>
+        <div style={{ background: AT.color.yellowLight, border: `1px solid ${AT.color.yellow}33`, borderRadius: AT.radius.md, padding: "14px 16px", marginBottom: "14px" }}>
+          <p style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", fontWeight: 600, color: AT.color.yellow, margin: "0 0 10px" }}>COUNTER OFFER FROM EXPORTER</p>
           <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
             <div>
               <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", color: AT.color.textDisabled, margin: "0 0 2px" }}>PRICE</p>
-              <p style={{ fontFamily: AT.font.sans, fontSize: "1.2rem", fontWeight: 700, color: "#b45309", margin: 0 }}>${parseFloat(offer.counter_price).toFixed(2)}/kg</p>
+              <p style={{ fontFamily: AT.font.sans, fontSize: "1.2rem", fontWeight: 700, color: AT.color.yellow, margin: 0 }}>${parseFloat(offer.counter_price).toFixed(2)}/kg</p>
             </div>
             {offer.counter_qty && (
               <div>
                 <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", color: AT.color.textDisabled, margin: "0 0 2px" }}>QUANTITY</p>
-                <p style={{ fontFamily: AT.font.sans, fontSize: "1.2rem", fontWeight: 700, color: "#b45309", margin: 0 }}>{parseFloat(offer.counter_qty).toLocaleString()} kg</p>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "1.2rem", fontWeight: 700, color: AT.color.yellow, margin: 0 }}>{parseFloat(offer.counter_qty).toLocaleString()} kg</p>
               </div>
             )}
           </div>

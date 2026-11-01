@@ -60,7 +60,7 @@ export default function DonutChart({ segments, size = 132, thickness = 16, cente
         {(centerLabel || centerSublabel) && (
           <>
             {centerLabel && (
-              <text x={cx} y={cy - 2} textAnchor="middle" dominantBaseline="middle" fontFamily={T.font.display} fontSize={size * 0.19} fill={T.color.ink}>
+              <text x={cx} y={cy - 2} textAnchor="middle" dominantBaseline="middle" fontFamily={T.font.display} fontSize={size * 0.19} fontWeight={700} fill={T.color.ink}>
                 {centerLabel}
               </text>
             )}

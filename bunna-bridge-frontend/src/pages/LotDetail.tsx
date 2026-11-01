@@ -139,18 +139,18 @@ export default function LotDetail() {
         </button>
 
         <div style={{ ...AC.card, marginBottom: "20px", overflow: "hidden" }}>
-          <div style={{ background: AT.color.sidebarBg, padding: "24px 28px", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: AT.color.heroBg, padding: "24px 28px", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: "-40px", right: "-40px", width: "200px", height: "200px", borderRadius: "999px", background: `${AT.color.primary}14` }} />
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "16px", position: "relative" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-                  <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", color: AT.color.sidebarText, margin: 0, letterSpacing: "0.04em" }}>{lot.lot_id}</p>
+                  <p style={{ fontFamily: AT.font.mono, fontSize: "0.7rem", color: AT.color.heroTextMuted, margin: 0, letterSpacing: "0.04em" }}>{lot.lot_id}</p>
                   <LotStatusBadge status={lot.status} />
                 </div>
-                <h1 style={{ fontFamily: AT.font.display, fontSize: "2rem", fontWeight: 500, color: "#ffffff", margin: "0 0 6px", lineHeight: 1.15, letterSpacing: "-0.01em" }}>
+                <h1 style={{ fontFamily: AT.font.display, fontSize: "clamp(2rem, 4vw, 2.6rem)", fontWeight: 700, color: "#ffffff", margin: "0 0 6px", lineHeight: 1.08, letterSpacing: "-0.03em" }}>
                   {lot.name}
                 </h1>
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.sidebarTextHover, margin: "0 0 14px", textTransform: "capitalize" }}>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.heroText, margin: "0 0 14px", textTransform: "capitalize" }}>
                   {lot.region} · {lot.processing} · {lot.grade}
                 </p>
                 <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
@@ -160,8 +160,8 @@ export default function LotDetail() {
                     { icon: <MapPin size={12} />, label: "Kebele", val: lot.kebele || lot.region },
                   ].map((m) => (
                     <div key={m.label} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                      <span style={{ color: AT.color.sidebarText, opacity: 0.6 }}>{m.icon}</span>
-                      <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.sidebarText, opacity: 0.7 }}>{m.label}</span>
+                      <span style={{ color: AT.color.heroTextMuted, opacity: 0.6 }}>{m.icon}</span>
+                      <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.heroTextMuted, opacity: 0.7 }}>{m.label}</span>
                       <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: "#ffffff" }}>{m.val}</span>
                     </div>
                   ))}
@@ -170,7 +170,7 @@ export default function LotDetail() {
 
               {lot.sca_score && (
                 <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: AT.radius.md, padding: "14px 22px", textAlign: "center", flexShrink: 0 }}>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.6)", margin: "0 0 2px", textTransform: "uppercase" }}>Q-Score</p>
+                  <p style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: "rgba(255,255,255,0.6)", margin: "0 0 2px" }}>Q-Score</p>
                   <p style={{ fontFamily: AT.font.sans, fontSize: "2.2rem", fontWeight: 700, color: "#ffffff", margin: 0, lineHeight: 1 }}>{lot.sca_score}</p>
                   <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", color: "rgba(255,255,255,0.5)", margin: "3px 0 0" }}>
                     {scaNum && scaNum >= 90 ? "Outstanding" : scaNum && scaNum >= 85 ? "Excellent" : scaNum && scaNum >= 80 ? "Specialty" : "Standard"}
@@ -206,20 +206,20 @@ export default function LotDetail() {
 
               <div style={{ display: "flex", gap: "10px", marginBottom: "20px", flexWrap: "wrap" }}>
                 {lot.sca_score && (
-                  <div style={{ flex: 1, minWidth: "90px", background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.md, padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.6rem", color: AT.color.primaryDark, opacity: 0.75, margin: "0 0 4px", textTransform: "uppercase" }}>Q-Score</p>
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "clamp(1.3rem, 6vw, 2rem)", fontWeight: 700, color: AT.color.primaryDark, margin: 0, lineHeight: 1 }}>{Number(lot.sca_score).toFixed(1)}</p>
+                  <div style={{ flex: 1, minWidth: "90px", background: AT.color.surfaceSecondary, borderRadius: "14px", padding: "16px", textAlign: "center", overflow: "hidden" }}>
+                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", fontWeight: 500, color: AT.color.textSecondary, margin: "0 0 6px" }}>Q-score</p>
+                    <p style={{ fontFamily: AT.font.display, fontSize: "clamp(1.5rem, 6vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.03em", color: AT.color.green, margin: 0, lineHeight: 1 }}>{Number(lot.sca_score).toFixed(1)}</p>
                   </div>
                 )}
-                <div style={{ flex: 1, minWidth: "90px", background: AT.color.blueLight, border: `1px solid ${AT.color.blue}33`, borderRadius: AT.radius.md, padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.6rem", color: AT.color.blue, margin: "0 0 4px", textTransform: "uppercase" }}>Altitude</p>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "clamp(1.3rem, 6vw, 2rem)", fontWeight: 700, color: AT.color.blue, margin: 0, lineHeight: 1 }}>{Number(lot.altitude_m).toLocaleString()}</p>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.58rem", color: AT.color.blue, opacity: 0.75, margin: "2px 0 0" }}>MASL</p>
+                <div style={{ flex: 1, minWidth: "90px", background: AT.color.surfaceSecondary, borderRadius: "14px", padding: "16px", textAlign: "center", overflow: "hidden" }}>
+                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", fontWeight: 500, color: AT.color.textSecondary, margin: "0 0 6px" }}>Altitude</p>
+                  <p style={{ fontFamily: AT.font.display, fontSize: "clamp(1.5rem, 6vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.03em", color: AT.color.text, margin: 0, lineHeight: 1 }}>{Number(lot.altitude_m).toLocaleString()}</p>
+                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: "4px 0 0" }}>metres</p>
                 </div>
-                <div style={{ flex: 1, minWidth: "90px", background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.md, padding: "14px 16px", textAlign: "center", overflow: "hidden" }}>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.6rem", color: AT.color.textMuted, margin: "0 0 4px", textTransform: "uppercase" }}>Volume</p>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "clamp(1.3rem, 6vw, 2rem)", fontWeight: 700, color: AT.color.text, margin: 0, lineHeight: 1 }}>{Number(lot.volume_kg).toLocaleString()}</p>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.58rem", color: AT.color.textDisabled, margin: "2px 0 0" }}>KG</p>
+                <div style={{ flex: 1, minWidth: "90px", background: AT.color.surfaceSecondary, borderRadius: "14px", padding: "16px", textAlign: "center", overflow: "hidden" }}>
+                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", fontWeight: 500, color: AT.color.textSecondary, margin: "0 0 6px" }}>Volume</p>
+                  <p style={{ fontFamily: AT.font.display, fontSize: "clamp(1.5rem, 6vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.03em", color: AT.color.text, margin: 0, lineHeight: 1 }}>{Number(lot.volume_kg).toLocaleString()}</p>
+                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: "4px 0 0" }}>kg</p>
                 </div>
               </div>
 
@@ -233,7 +233,7 @@ export default function LotDetail() {
                 <div style={{ flex: 1, minWidth: "140px" }}>
                   {lot.q_grader_name && (
                     <div style={{ marginBottom: "12px" }}>
-                      <p style={{ fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 3px" }}>Q-Grader</p>
+                      <p style={{ fontFamily: AT.font.sans, fontSize: "0.76rem", fontWeight: 500, color: AT.color.textMuted, margin: "0 0 3px" }}>Q-Grader</p>
                       <p style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.text, margin: 0 }}>
                         {lot.q_grader_name}
                         {lot.q_grader_cert_id && <span style={{ fontFamily: AT.font.mono, fontSize: "0.72rem", color: AT.color.textMuted }}> · #{lot.q_grader_cert_id}</span>}
@@ -242,7 +242,7 @@ export default function LotDetail() {
                   )}
                   {lot.flavor_notes && (
                     <div>
-                      <p style={{ fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 6px" }}>Flavor Notes</p>
+                      <p style={{ fontFamily: AT.font.sans, fontSize: "0.76rem", fontWeight: 500, color: AT.color.textMuted, margin: "0 0 6px" }}>Flavor Notes</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                         {lot.flavor_notes.split(",").map((f: string) => (
                           <span key={f} style={{ padding: "3px 9px", background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.pill, fontFamily: AT.font.sans, fontSize: "0.7rem", color: AT.color.textSecondary }}>
@@ -281,7 +281,7 @@ export default function LotDetail() {
                   ["Delivery window", lot.delivery_window || "—"],
                 ].map(([label, val]) => (
                   <div key={label}>
-                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 4px" }}>{label}</p>
+                    <p style={{ fontFamily: AT.font.sans, fontSize: "0.76rem", fontWeight: 500, color: AT.color.textMuted, margin: "0 0 4px" }}>{label}</p>
                     <p style={{ fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text, margin: 0 }}>{val}</p>
                   </div>
                 ))}
@@ -368,7 +368,7 @@ export default function LotDetail() {
                   <div key={row.label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${AT.color.borderLight}` }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
                       <span style={{ color: AT.color.textDisabled }}>{row.icon}</span>
-                      <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.textDisabled, textTransform: "uppercase" }}>{row.label}</span>
+                      <span style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled }}>{row.label}</span>
                     </div>
                     <span style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.text, textTransform: "capitalize" }}>{row.val}</span>
                   </div>

@@ -59,7 +59,7 @@ function PipelineBar({ draft, listed, contracted, exported }: {
 function RoastBatchPipelineBar({ counts }: { counts: Record<string, number> }) {
   const stages = [
     { key: "queued", label: "Queued", color: AT.color.textDisabled },
-    { key: "roasting", label: "Roasting", color: "#b45309" },
+    { key: "roasting", label: "Roasting", color: AT.color.yellow },
     { key: "resting", label: "Resting", color: AT.color.blue },
     { key: "qc", label: "QC", color: AT.color.blue },
     { key: "packaged", label: "Packaged", color: AT.color.primary },

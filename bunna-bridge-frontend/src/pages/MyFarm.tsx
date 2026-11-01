@@ -64,7 +64,7 @@ export default function MyFarm() {
   const set = (k: keyof FarmerProfile, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "16px" };
-  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" };
+  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" };
   const fval: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text };
   const field: React.CSSProperties = { marginBottom: "14px" };
 

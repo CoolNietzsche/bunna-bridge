@@ -53,9 +53,5 @@ The full ~200-item wish list is `mds/feature-registry.md`; the reasoning is in `
 ## Brand
 
 - Name: **Beersheba**. Old name "Bunna Bridge" still appears in Django admin (Jazzmin), the DDS PDF header, admin map, code identifiers and the package name `bunna_bridge` — the package name should **not** be renamed.
-- Palette — three generations exist; **the code is the truth** (`bunna-bridge-frontend/src/index.css` `@theme`):
-  1. "Dark Roast" (espresso `#1A0F07`, gold `#C9952A`, terracotta `#C1440E`, sage `#4A7C59`) — deprecated, still in the admin map, DDS PDF and a few components.
-  2. June 2026 rebrand (Forest `#1B4D35`, Linen `#FBF9F4`, Coffee `#7B4B2A`) — what `docs/THEMING.md` describes; superseded.
-  3. **"Highland Editorial" (2026-08-01, current)**: forest `#123A2E`, forest-dark `#0C2A21`, forest-light `#E7EFEA`, amber `#D6892C`, clay/coffee `#B2532E`, matcha `#6E9A4B`, paper/linen `#F8F5EF`, stone `#EFEAE0`, ink `#1A1613`, slate `#6B6357`. Light/dark theme via `ThemeContext`.
-- Fonts (current, `index.css`): Fraunces (display), Space Grotesk / Instrument Sans (UI), DM Mono (IDs, gates). Older docs say Playfair / Inter / JetBrains Mono — outdated.
+- Visual design (since 2026-11-01): **Apple-inspired** — system SF Pro / Inter type with bold tight headlines, neutral `#F5F5F7` canvas, one forest-green accent (`#1B7A4E`), frosted translucent bars, pill buttons, Activity-ring readiness. Full rules: [06-frontend.md](06-frontend.md) "Design system". Earlier palettes ("Dark Roast", the June forest/linen rebrand, and "Highland Editorial" with Fraunces serif) are retired.
 - UI rules: `lucide-react` icons only, **no emojis**.

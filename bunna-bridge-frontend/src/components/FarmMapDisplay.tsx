@@ -60,7 +60,7 @@ export default function FarmMapDisplay({ polygon, height = 220, label }: Props) 
             {label}
           </span>
           <span style={{ fontFamily: AT.font.mono, fontSize: 11, color: AT.color.primaryDark }}>
-            ~{areaHa} ha · {coords.length - 1} pts
+            ≈ {areaHa} ha · {coords.length - 1} pts
           </span>
         </div>
       )}

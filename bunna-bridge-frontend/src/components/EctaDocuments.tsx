@@ -36,7 +36,7 @@ export default function EctaDocuments() {
 
   const hasLicense = !!me?.ecta_license_file;
 
-  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
+  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
 
   async function handleSubmit() {
     if (!file && !hasLicense) { setError("Select a file."); return; }

@@ -59,7 +59,7 @@ const GATES = [
   { k: "cta_floor_met", label: "CTA Floor Price Met", icon: <Award size={13} /> },
 ];
 
-const lbl: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" };
+const lbl: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "5px" };
 const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "18px" };
 const cardStyle: React.CSSProperties = { ...AC.card, ...AC.cardPad, marginBottom: "16px" };
 
@@ -158,7 +158,6 @@ export default function CreateLot() {
               >
                 <span style={{
                   fontFamily: AT.font.mono, fontSize: "0.62rem",
-                  letterSpacing: "0.06em", textTransform: "uppercase",
                   color: active ? AT.color.primaryDark : done ? AT.color.primary : AT.color.textDisabled,
                 }}>
                   {String(i + 1).padStart(2, "0")}
@@ -421,7 +420,7 @@ export default function CreateLot() {
                 <p style={cardTitle}>{section.title}</p>
                 {section.rows.map(([l, v]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "8px 0", borderBottom: `1px solid ${AT.color.borderLight}` }}>
-                    <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled }}>{l}</span>
+                    <span style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled }}>{l}</span>
                     <span style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.text, textAlign: "right" }}>{v}</span>
                   </div>
                 ))}

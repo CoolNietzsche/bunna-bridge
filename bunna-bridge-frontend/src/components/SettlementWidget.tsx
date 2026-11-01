@@ -147,13 +147,13 @@ export default function SettlementWidget({ lotId, lotRef, defaultUsd }: Props) {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ArrowRightLeft size={14} color="#b45309" />
+              <ArrowRightLeft size={14} color={AT.color.yellow} />
               <div>
-                <p style={{ color: '#b45309', fontSize: '0.78rem', fontWeight: 600, margin: 0 }}>ETB Converted (50%)</p>
-                <p style={{ color: '#b45309', opacity: 0.7, fontSize: '0.68rem', margin: '2px 0 0' }}>@ {result.nbe_rate} ETB/USD · NBE official rate</p>
+                <p style={{ color: AT.color.yellow, fontSize: '0.78rem', fontWeight: 600, margin: 0 }}>ETB Converted (50%)</p>
+                <p style={{ color: AT.color.yellow, opacity: 0.7, fontSize: '0.68rem', margin: '2px 0 0' }}>@ {result.nbe_rate} ETB/USD · NBE official rate</p>
               </div>
             </div>
-            <span style={{ color: '#b45309', fontFamily: AT.font.mono, fontSize: '1.1rem', fontWeight: 700 }}>
+            <span style={{ color: AT.color.yellow, fontFamily: AT.font.mono, fontSize: '1.1rem', fontWeight: 700 }}>
               {fmt(result.etb_converted, 0)} ETB
             </span>
           </div>

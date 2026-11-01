@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", background: T.color.paper, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ fontFamily: T.font.mono, color: T.color.forest, letterSpacing: "0.2em", fontSize: "0.75rem" }}>LOADING…</p>
+        <span className="bb-spinner" role="status" aria-label="Loading" />
       </div>
     );
   }

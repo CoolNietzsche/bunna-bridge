@@ -152,7 +152,7 @@ export default function PolygonCaptureWidget({
       const closed = [...points, points[0]];
       const poly: GeoPolygon = { type: "Polygon", coordinates: [closed] };
       setPolygon(poly);
-      setStatus(`Boundary captured — ${points.length} points, ~${calcAreaHa(poly)} ha`);
+      setStatus(`Boundary captured — ${points.length} points, ≈ ${calcAreaHa(poly)} ha`);
     } else {
       setStatus("Need at least 3 points to form a boundary. Try again.");
     }
@@ -192,7 +192,7 @@ export default function PolygonCaptureWidget({
         setPolygon(geo);
         updateMap(geo.coordinates[0]);
         setPoints(geo.coordinates[0]);
-        setStatus(`File imported — ~${calcAreaHa(geo)} ha`);
+        setStatus(`File imported — ≈ ${calcAreaHa(geo)} ha`);
       } catch (err: any) {
         setStatus(`Import failed: ${err.message}`);
       }
@@ -213,7 +213,7 @@ export default function PolygonCaptureWidget({
       } else {
         if (mode === "farm") await setFarmBoundary(polygon);
         else if (mode === "lot" && lotId) await setLotBoundary(lotId, polygon);
-        setStatus(`Boundary saved — ~${calcAreaHa(polygon)} ha`);
+        setStatus(`Boundary saved — ≈ ${calcAreaHa(polygon)} ha`);
         onSaved?.(polygon);
       }
     } catch (err: any) {
@@ -323,7 +323,7 @@ export default function PolygonCaptureWidget({
           background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.md, padding: "8px 14px",
           marginBottom: 12, fontFamily: AT.font.mono, fontSize: 13, color: AT.color.primaryDark,
         }}>
-          Area: ~{areaHa} ha · {points.length || Math.max(0, (polygon?.coordinates[0].length ?? 1) - 1)} boundary points
+          Area: ≈ {areaHa} ha · {points.length || Math.max(0, (polygon?.coordinates[0].length ?? 1) - 1)} boundary points
         </div>
       )}
 

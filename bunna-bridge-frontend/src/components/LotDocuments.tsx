@@ -119,7 +119,7 @@ export default function LotDocuments({ lot, lotId }: Props) {
     } finally { setLoading(null); }
   }
 
-  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
+  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "14px" };
 
   return (

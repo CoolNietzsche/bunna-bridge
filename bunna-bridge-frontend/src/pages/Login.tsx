@@ -6,14 +6,17 @@ import AuthBrandPanel from "../components/site/AuthBrandPanel";
 import { T } from "../styles/tokens";
 import { CS } from "../styles/components";
 
-const DEMO = [
-  { role: "Admin", email: "admin@bunnabridge.com", pw: "BunnaAdmin2026!" },
-  { role: "Exporter", email: "dawit@addiscoffee.et", pw: "Bunna2026!" },
-  { role: "Buyer", email: "sarah@nordicros.de", pw: "Bunna2026!" },
-  { role: "Roaster", email: "james@brooklynroastery.com", pw: "Bunna2026!" },
-  { role: "Farmer", email: "abebe@kochere.et", pw: "Bunna2026!" },
-  { role: "Q-Grader", email: "tigist@scaethiopia.et", pw: "Bunna2026!" },
-];
+// Development-only shortcut to the accounts created by `manage.py seed_demo`.
+// Guarded by import.meta.env.DEV so it is stripped from production builds —
+// never put real accounts or passwords here.
+function demoAccounts() {
+  const password = "Beersheba-Demo-2026";
+  return ["exporter", "buyer", "roaster", "farmer", "qgrader", "admin"].map((role) => ({
+    role: role === "qgrader" ? "Q-grader" : role[0].toUpperCase() + role.slice(1),
+    email: `${role}@demo.beersheba.et`,
+    pw: password,
+  }));
+}
 
 export default function Login() {
   const { login } = useAuth();
@@ -48,7 +51,7 @@ export default function Login() {
         <div style={{ width: "100%", maxWidth: "400px" }}>
           <Link to="/" style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.textMuted, textDecoration: "none" }}>← Back home</Link>
 
-          <h1 style={{ fontFamily: T.font.display, fontSize: "2rem", fontWeight: 400, color: T.color.ink, margin: "20px 0 4px", letterSpacing: "-0.01em" }}>Welcome back</h1>
+          <h1 style={{ fontFamily: T.font.display, fontSize: "2.2rem", fontWeight: 700, color: T.color.ink, margin: "20px 0 6px", letterSpacing: "-0.03em" }}>Welcome back</h1>
           <p style={{ fontFamily: T.font.sans, fontSize: "0.95rem", color: T.color.textMuted, margin: "0 0 24px" }}>Sign in to your Beersheba account.</p>
 
           {params.get("registered") && (
@@ -81,16 +84,18 @@ export default function Login() {
             No account? <Link to="/register" style={{ color: T.color.forest, textDecoration: "none", fontWeight: 600 }}>Create one</Link>
           </p>
 
-          {/* Demo accounts */}
+          {/* Demo accounts — local development only (see demoAccounts above) */}
+          {import.meta.env.DEV && (
           <div style={{ ...CS.cardInner, marginTop: "22px", padding: "16px" }}>
-            <p style={{ fontFamily: T.font.mono, fontSize: "0.56rem", letterSpacing: "0.16em", textTransform: "uppercase", color: T.color.textFaint, margin: "0 0 10px" }}>Demo accounts — click to autofill</p>
-            {DEMO.map(({ role, email: e, pw }) => (
+            <p style={{ fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: T.color.textFaint, margin: "0 0 10px" }}>Demo accounts (dev only) — click to autofill</p>
+            {demoAccounts().map(({ role, email: e, pw }) => (
               <button key={role} type="button" onClick={() => { setEmail(e); setPassword(pw); }} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: "5px 0" }}>
-                <span style={{ fontFamily: T.font.mono, fontSize: "0.66rem", color: T.color.textMuted }}>{role}</span>
-                <span style={{ fontFamily: T.font.mono, fontSize: "0.66rem", color: T.color.forest }}>{e}</span>
+                <span style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.textMuted }}>{role}</span>
+                <span style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.forest }}>{e}</span>
               </button>
             ))}
           </div>
+          )}
         </div>
       </div>
 

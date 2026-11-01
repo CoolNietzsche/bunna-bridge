@@ -121,7 +121,7 @@ export default function FarmerLotsMap() {
         ].map((s) => (
           <div key={s.label} style={{ ...AC.card, ...AC.cardPad }}>
             <div style={{ fontFamily: AT.font.sans, fontSize: "1.3rem", color: s.color, fontWeight: 700 }}>{s.val}</div>
-            <div style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", color: AT.color.textMuted, textTransform: "uppercase", letterSpacing: "0.04em", marginTop: "2px" }}>{s.label}</div>
+            <div style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textMuted, marginTop: "2px" }}>{s.label}</div>
           </div>
         ))}
       </div>

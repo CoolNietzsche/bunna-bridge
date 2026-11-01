@@ -33,7 +33,7 @@ export default function SampleRequestWidget({ lotId, lotRef, onSuccess }: Props)
 
   if (!isBuyerRole(user?.role) && user?.role !== "admin") return null;
 
-  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
+  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
 
   return (
     <div style={{ ...AC.card, ...AC.cardPad }}>

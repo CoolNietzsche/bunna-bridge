@@ -1,82 +1,87 @@
-// Admin design tokens — for the back-office / operational area only
-// (Dashboard, Lots, Pipeline, Offers, Samples, Farm, Cupping, Settings…).
+// Admin design tokens — back office (Dashboard, Lots, Pipeline, Offers…).
 //
-// Layout and density follow Gentelella v4 (fixed dark sidebar, top bar,
-// compact cards and tables, Inter for data). The palette is Beersheba's
-// "Highland Editorial" brand (src/index.css @theme) so the back office and
-// the public site read as one product: deep forest chrome, forest-green
-// actions, amber highlights, warm paper surfaces, Fraunces page titles.
+// Apple-inspired, matching the public site (src/index.css):
+//   · light, translucent macOS-style sidebar and frosted top bar
+//   · neutral canvas (#F5F5F7), white grouped cards, soft layered shadows
+//   · one accent (Beersheba forest) + Apple semantic status colours
+//   · system SF Pro / Inter, bold tight titles
+// Colours are hex where components append alpha suffixes (e.g. `${c}33`).
 
 export const AT = {
   color: {
     // Sidebar (dark, fixed — the one place dark chrome is intentional here)
-    sidebarBg:         "#0F2A21",
-    sidebarHover:       "rgba(255,255,255,0.05)",
-    sidebarActive:      "rgba(214,137,44,0.14)",
-    sidebarText:        "#9DB3A8",
-    sidebarTextHover:   "#E4EEE8",
-    sidebarTextActive:  "#ffffff",
-    sidebarBorder:      "rgba(255,255,255,0.07)",
+    sidebarBg:         "rgba(246,246,248,0.82)",
+    sidebarHover:       "rgba(0,0,0,0.045)",
+    sidebarActive:      "rgba(27,122,78,0.12)",
+    sidebarText:        "#3A3A3C",
+    sidebarTextHover:   "#1D1D1F",
+    sidebarTextActive:  "#125C3A",
+    sidebarBorder:      "rgba(0,0,0,0.08)",
+
+    // Dark "product page" hero (lot detail / lot story headers)
+    heroBg:             "#0E2219",
+    heroText:           "#F5F5F7",
+    heroTextMuted:      "rgba(245,245,247,0.62)",
 
     // Primary accent — Beersheba forest green
-    primary:            "#1F6B4F",
-    primaryLight:       "rgba(31,107,79,0.08)",
-    primaryDark:        "#123A2E",
+    primary:            "#1B7A4E",
+    primaryLight:       "rgba(27,122,78,0.09)",
+    primaryDark:        "#125C3A",
 
     // Surfaces
-    bodyBg:              "#F6F4EE",
+    bodyBg:              "#F5F5F7",
     surface:              "#ffffff",
-    surfaceSecondary:    "#FAF8F3",
+    surfaceSecondary:    "#F7F7F9",
 
     // Borders
-    border:              "#E7E2D7",
-    borderLight:        "#EFEBE2",
+    border:              "#E5E5EA",
+    borderLight:        "#F0F0F3",
 
     // Text
-    text:                "#1A1613",
-    textSecondary:       "#5E5A52",
-    textMuted:           "#857F74",
-    textDisabled:        "#C8C2B6",
+    text:                "#1D1D1F",
+    textSecondary:       "#6E6E73",
+    textMuted:           "#86868B",
+    textDisabled:        "#AEAEB2",
 
     // Status palette (matches Gentelella's semantic set)
-    blue:                "#066fd1",
+    blue:                "#0071E3",
     azure:                "#4299e1",
-    green:                "#3E8E5E",
+    green:                "#248A3D",
     lime:                "#74b816",
-    yellow:              "#D6892C",
-    orange:              "#B2532E",
-    red:                  "#d63939",
+    yellow:              "#C77700",
+    orange:              "#C93400",
+    red:                  "#D70015",
     pink:                "#d6336c",
     purple:              "#ae3ec9",
     indigo:              "#4263eb",
     cyan:                "#17a2b8",
 
-    greenLight:          "rgba(62,142,94,0.08)",
-    redLight:            "rgba(214,57,57,0.06)",
-    yellowLight:        "rgba(214,137,44,0.09)",
-    blueLight:            "rgba(6,111,209,0.06)",
+    greenLight:          "rgba(36,138,61,0.09)",
+    redLight:            "rgba(215,0,21,0.07)",
+    yellowLight:        "rgba(255,149,0,0.11)",
+    blueLight:            "rgba(0,113,227,0.08)",
   },
   font: {
-    sans: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    display: '"Fraunces", Georgia, serif',
-    mono: '"DM Mono", "SF Mono", Monaco, Consolas, monospace',
+    sans: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif',
+    display: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif',
+    mono: 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace',
   },
   radius: {
-    sm: "4px",
-    md: "6px",
-    lg: "8px",
+    sm: "8px",
+    md: "10px",
+    lg: "16px",
     pill: "999px",
   },
   shadow: {
-    card:  "0 2px 4px 0 rgba(30,38,51,0.04)",
-    hover: "0 4px 12px 0 rgba(30,38,51,0.08)",
-    modal: "0 16px 48px rgba(30,38,51,0.18)",
+    card:  "0 1px 2px rgba(0,0,0,0.03), 0 4px 16px rgba(0,0,0,0.04)",
+    hover: "0 2px 6px rgba(0,0,0,0.04), 0 16px 36px rgba(0,0,0,0.10)",
+    modal: "0 30px 80px rgba(0,0,0,0.25)",
   },
   spacing: {
     "1": "4px", "2": "8px", "3": "12px", "4": "16px",
     "5": "24px", "6": "32px", "7": "48px", "8": "64px",
-    sidebarW: "252px",
-    sidebarCollapsedW: "68px",
+    sidebarW: "248px",
+    sidebarCollapsedW: "72px",
     topbarH: "60px",
   },
   fontSize: {

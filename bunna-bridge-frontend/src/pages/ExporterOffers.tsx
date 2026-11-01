@@ -124,7 +124,7 @@ function OfferRow({ offer }: { offer: Offer }) {
             <button onClick={() => respondMutation.mutate("accept")} disabled={respondMutation.isPending} style={{ display: "flex", alignItems: "center", gap: "6px", ...AC.btnSm, background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}55`, color: AT.color.primaryDark }}>
               <CheckCircle size={13} /> Accept
             </button>
-            <button onClick={() => setShowCounter(true)} style={{ display: "flex", alignItems: "center", gap: "6px", ...AC.btnSm, background: AT.color.yellowLight, border: `1px solid #b4530955`, color: "#b45309" }}>
+            <button onClick={() => setShowCounter(true)} style={{ display: "flex", alignItems: "center", gap: "6px", ...AC.btnSm, background: AT.color.yellowLight, border: `1px solid ${AT.color.yellow}55`, color: AT.color.yellow }}>
               <RefreshCw size={13} /> Counter
             </button>
             <button onClick={() => respondMutation.mutate("reject")} disabled={respondMutation.isPending} style={{ display: "flex", alignItems: "center", gap: "6px", ...AC.btnSm, background: AT.color.redLight, border: `1px solid ${AT.color.red}44`, color: AT.color.red }}>
@@ -142,7 +142,7 @@ function OfferRow({ offer }: { offer: Offer }) {
         )}
 
         {!isPending && (
-          <span style={{ ...AC.pill.base, ...(offer.status === "accepted" ? AC.pill.green : AC.pill.muted), marginTop: "12px", textTransform: "uppercase" }}>
+          <span style={{ ...AC.pill.base, ...(offer.status === "accepted" ? AC.pill.green : AC.pill.muted), marginTop: "12px" }}>
             {offer.status}
           </span>
         )}

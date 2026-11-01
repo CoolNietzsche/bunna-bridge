@@ -1,4 +1,4 @@
-// Beersheba Design Tokens — single source of truth ("Highland Editorial")
+// Beersheba Design Tokens — single source of truth (Apple-inspired system)
 // Never hardcode colors in components. Always import from here.
 // Values resolve to CSS variables in src/index.css, so every token is
 // light/dark aware automatically.
@@ -52,30 +52,38 @@ export const T = {
     sidebarActive:"var(--color-forest-light)",
   },
   font: {
-    display: '"Fraunces", Georgia, serif',
-    mono:    '"DM Mono", monospace',
-    sans:    '"Space Grotesk", "Instrument Sans", sans-serif',
-    mark:    '"Fraunces", serif',
+    // System SF Pro on Apple devices, Inter everywhere else.
+    display: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif',
+    mono:    'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace',
+    sans:    '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", Arial, sans-serif',
+    mark:    '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif',
+  },
+  // Headline weights/tracking — Apple uses heavy, tight display type.
+  type: {
+    displayWeight: 700,
+    titleWeight:   600,
+    tightTracking: "-0.03em",
+    titleTracking: "-0.022em",
   },
   radius: {
-    sm:   "6px",
-    md:   "10px",
-    lg:   "16px",
-    xl:   "24px",
+    sm:   "8px",
+    md:   "12px",
+    lg:   "18px",
+    xl:   "28px",
     pill: "999px",
   },
   shadow: {
-    card:  "0 1px 2px rgba(26,22,19,0.04), 0 2px 10px rgba(26,22,19,0.05)",
-    hover: "0 8px 30px rgba(26,22,19,0.10)",
-    modal: "0 24px 60px rgba(26,22,19,0.22)",
-    sm:    "0 1px 2px rgba(26,22,19,0.04), 0 2px 10px rgba(26,22,19,0.05)",
-    md:    "0 8px 30px rgba(26,22,19,0.10)",
+    card:  "0 1px 2px rgba(0,0,0,0.03), 0 6px 20px rgba(0,0,0,0.04)",
+    hover: "0 2px 6px rgba(0,0,0,0.04), 0 22px 48px rgba(0,0,0,0.12)",
+    modal: "0 30px 80px rgba(0,0,0,0.25)",
+    sm:    "0 1px 2px rgba(0,0,0,0.03), 0 6px 20px rgba(0,0,0,0.04)",
+    md:    "0 2px 6px rgba(0,0,0,0.04), 0 22px 48px rgba(0,0,0,0.12)",
   },
   spacing: {
     cardPad:  "24px",
     pagePad:  "clamp(20px, 5vw, 40px)",
-    section:  "clamp(64px, 10vw, 128px)",
-    maxW:     "1200px",
+    section:  "clamp(80px, 12vw, 160px)",
+    maxW:     "1180px",
   },
 } as const;
 

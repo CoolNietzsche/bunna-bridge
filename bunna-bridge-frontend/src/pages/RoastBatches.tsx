@@ -12,7 +12,7 @@ import { AC } from "../styles/adminComponents";
 
 const PIPELINE: { key: RoastBatchStatus; label: string; color: string; bg: string }[] = [
   { key: "queued", label: "Queued", color: AT.color.textMuted, bg: AT.color.surfaceSecondary },
-  { key: "roasting", label: "Roasting", color: "#b45309", bg: AT.color.yellowLight },
+  { key: "roasting", label: "Roasting", color: AT.color.yellow, bg: AT.color.yellowLight },
   { key: "resting", label: "Resting", color: AT.color.blue, bg: AT.color.blueLight },
   { key: "qc", label: "QC", color: AT.color.blue, bg: AT.color.blueLight },
   { key: "packaged", label: "Packaged", color: AT.color.primaryDark, bg: AT.color.primaryLight },
@@ -122,7 +122,7 @@ export default function RoastBatches() {
 
   const saving = createMutation.isPending || updateMutation.isPending;
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "16px" };
-  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
+  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
   const field: React.CSSProperties = { marginBottom: "14px" };
   const usedLotIds = new Set(form.lot_inputs.map((l) => l.lot));
 
@@ -287,7 +287,7 @@ export default function RoastBatches() {
             return (
               <div key={stage.key} style={{ background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.lg, padding: "14px", minHeight: "280px", flex: "0 0 240px", width: "240px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px", paddingBottom: "10px", borderBottom: `1px solid ${AT.color.border}` }}>
-                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 600, color: stage.color, textTransform: "uppercase", letterSpacing: "0.03em" }}>{stage.label}</span>
+                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", fontWeight: 600, color: stage.color }}>{stage.label}</span>
                   <span style={{ fontFamily: AT.font.sans, fontSize: "1.1rem", fontWeight: 700, color: stage.color, lineHeight: 1 }}>{stageBatches.length}</span>
                 </div>
 

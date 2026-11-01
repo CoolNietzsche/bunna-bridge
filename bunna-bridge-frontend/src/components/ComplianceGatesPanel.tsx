@@ -28,21 +28,28 @@ const GATE_SHORT: Record<string, string> = {
   cta_floor_met: "Floor price",
 };
 
+/** Activity-ring style progress: thick round-capped arc with a gradient over a tinted track. */
 function ReadinessRing({ percent }: { percent: number }) {
-  const r = 30;
-  const c = 2 * Math.PI * r;
-  const color = percent === 100 ? AT.color.green : percent >= 57 ? AT.color.yellow : AT.color.red;
+  const size = 84, stroke = 11, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  const [from, to] = percent === 100 ? ["#30D158", "#1B7A4E"] : percent >= 57 ? ["#FFD60A", "#FF9500"] : ["#FF6B5E", "#D70015"];
+  const id = `ring-${from.slice(1)}`;
   return (
-    <div style={{ position: "relative", width: 76, height: 76, flexShrink: 0 }}>
-      <svg width="76" height="76" viewBox="0 0 76 76" aria-hidden>
-        <circle cx="38" cy="38" r={r} fill="none" stroke={AT.color.borderLight} strokeWidth="7" />
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={from} />
+            <stop offset="100%" stopColor={to} />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={to} strokeOpacity={0.16} strokeWidth={stroke} />
         <circle
-          cx="38" cy="38" r={r} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round"
-          strokeDasharray={`${(percent / 100) * c} ${c}`} transform="rotate(-90 38 38)"
-          style={{ transition: "stroke-dasharray 0.6s ease" }}
+          cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`url(#${id})`} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={`${Math.max(0.001, (percent / 100) * c)} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          style={{ transition: "stroke-dasharray 0.8s cubic-bezier(0.25,0.1,0.25,1)" }}
         />
       </svg>
-      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: AT.font.sans, fontWeight: 700, fontSize: "1.05rem", color: AT.color.text }}>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: AT.font.display, fontWeight: 700, fontSize: "1.15rem", letterSpacing: "-0.03em", color: AT.color.text }}>
         {percent}%
       </div>
     </div>
@@ -98,8 +105,8 @@ export default function ComplianceGatesPanel({ lot, compliance, isOwner, onChang
       <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "18px" }}>
         <ReadinessRing percent={percent} />
         <div style={{ minWidth: 0 }}>
-          <p style={{ ...AC.cardTitle, margin: 0 }}>Export readiness</p>
-          <p style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: AT.font.sans, fontSize: "0.86rem", fontWeight: 600, margin: "4px 0 2px", color: allPass ? AT.color.green : AT.color.text }}>
+          <p style={{ ...AC.cardTitle, fontSize: "1.2rem", fontWeight: 700, letterSpacing: "-0.025em", margin: 0 }}>Export readiness</p>
+          <p style={{ display: "flex", alignItems: "center", gap: "6px", fontFamily: AT.font.sans, fontSize: "0.9rem", fontWeight: 600, margin: "4px 0 2px", color: allPass ? AT.color.green : AT.color.text }}>
             {allPass ? <ShieldCheck size={15} /> : <ShieldAlert size={15} color={AT.color.yellow} />}
             {allPass ? "All gates passed — export cleared" : `${passed} of 7 gates passed`}
           </p>
@@ -109,25 +116,28 @@ export default function ComplianceGatesPanel({ lot, compliance, isOwner, onChang
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        {report.map((g) => (
-          <div
-            key={g.gate}
-            style={{
-              display: "flex", gap: "10px", padding: "10px 12px", borderRadius: AT.radius.md,
-              background: g.passed ? AT.color.greenLight : AT.color.surfaceSecondary,
-              border: `1px solid ${g.passed ? AT.color.green + "33" : AT.color.border}`,
-            }}
-          >
-            <span style={{ flexShrink: 0, marginTop: "1px", color: g.passed ? AT.color.green : AT.color.red }}>
+      {/* iOS Settings-style inset grouped list */}
+      <div style={{ background: AT.color.surfaceSecondary, borderRadius: "14px", overflow: "hidden" }}>
+        {report.map((g, idx) => (
+          <div key={g.gate} style={{ display: "flex", gap: "12px", padding: "12px 14px", position: "relative" }}>
+            {idx > 0 && <span aria-hidden style={{ position: "absolute", top: 0, left: "54px", right: 0, height: "1px", background: AT.color.border }} />}
+            <span style={{
+              flexShrink: 0, width: 28, height: 28, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+              background: g.passed ? "linear-gradient(180deg, #34C759, #248A3D)" : "linear-gradient(180deg, #FFB340, #FF9500)",
+            }}>
               {g.passed ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
             </span>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontFamily: AT.font.sans, fontSize: "0.83rem", fontWeight: 600, color: AT.color.text, margin: 0 }}>{g.label}</p>
-              <p style={{ fontFamily: AT.font.sans, fontSize: "0.76rem", color: AT.color.textSecondary, margin: "2px 0 0", lineHeight: 1.45 }}>{g.reason}</p>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "10px", alignItems: "baseline" }}>
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.9rem", fontWeight: 600, letterSpacing: "-0.012em", color: AT.color.text, margin: 0 }}>{g.label}</p>
+                <span style={{ fontFamily: AT.font.sans, fontSize: "0.76rem", fontWeight: 500, color: g.passed ? AT.color.green : AT.color.yellow, flexShrink: 0 }}>
+                  {g.passed ? "Passed" : "Needs action"}
+                </span>
+              </div>
+              <p style={{ fontFamily: AT.font.sans, fontSize: "0.8rem", color: AT.color.textSecondary, margin: "2px 0 0", lineHeight: 1.45 }}>{g.reason}</p>
               {!g.passed && g.action && isOwner && (
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.orange, margin: "4px 0 0", fontWeight: 500 }}>
-                  Next step: {g.action}
+                <p style={{ fontFamily: AT.font.sans, fontSize: "0.8rem", color: AT.color.blue, margin: "4px 0 0", fontWeight: 500 }}>
+                  {g.action}
                 </p>
               )}
             </div>

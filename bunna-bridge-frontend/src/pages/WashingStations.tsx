@@ -63,7 +63,7 @@ export default function WashingStations() {
 
   const saving = createMutation.isPending || updateMutation.isPending;
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "16px" };
-  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
+  const flabel: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, display: "block", marginBottom: "4px" };
   const field: React.CSSProperties = { marginBottom: "14px" };
 
   return (

@@ -103,14 +103,14 @@ export default function SampleRequests() {
 
               {req.message && (
                 <div style={{ background: AT.color.surfaceSecondary, borderRadius: AT.radius.md, padding: "10px 12px", marginBottom: "10px", border: `1px solid ${AT.color.border}` }}>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, margin: "0 0 4px" }}>Message</p>
+                  <p style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, margin: "0 0 4px" }}>Message</p>
                   <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.textSecondary, margin: 0, lineHeight: 1.5 }}>{req.message}</p>
                 </div>
               )}
 
               {req.response && (
                 <div style={{ background: AT.color.primaryLight, border: `1px solid ${AT.color.primary}33`, borderRadius: AT.radius.md, padding: "10px 12px", marginBottom: "10px" }}>
-                  <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.primaryDark, margin: "0 0 4px" }}>Response</p>
+                  <p style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.primaryDark, margin: "0 0 4px" }}>Response</p>
                   <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.primaryDark, margin: 0, lineHeight: 1.5 }}>{req.response}</p>
                 </div>
               )}
@@ -153,7 +153,7 @@ export default function SampleRequests() {
 
               {isResponding && (
                 <div style={{ background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.md, padding: "16px", marginTop: "12px" }}>
-                  <label style={{ display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" }}>
+                  <label style={{ display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "5px" }}>
                     Decision
                   </label>
                   <select
@@ -166,7 +166,7 @@ export default function SampleRequests() {
                     <option value="rejected">Reject</option>
                   </select>
 
-                  <label style={{ display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" }}>
+                  <label style={{ display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "5px" }}>
                     Message to buyer
                   </label>
                   <input
@@ -178,7 +178,7 @@ export default function SampleRequests() {
 
                   {responseForm.status === "shipped" && (
                     <>
-                      <label style={{ display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" }}>
+                      <label style={{ display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "5px" }}>
                         Tracking Number
                       </label>
                       <input

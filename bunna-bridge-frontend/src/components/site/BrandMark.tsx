@@ -24,10 +24,10 @@ export default function BrandMark({ wordmark = true, size = 32, onDark = false }
         <span
           style={{
             fontFamily: T.font.display,
-            fontSize: "1.3rem",
-            fontWeight: 500,
-            letterSpacing: "-0.01em",
-            color: onDark ? "#F4F0E8" : T.color.ink,
+            fontSize: "1.18rem",
+            fontWeight: 600,
+            letterSpacing: "-0.025em",
+            color: onDark ? "#F5F5F7" : T.color.ink,
             lineHeight: 1,
           }}
         >

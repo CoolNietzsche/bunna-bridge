@@ -14,7 +14,7 @@ export default function Settings() {
 
   const cardStyle: React.CSSProperties = { ...AC.card, ...AC.cardPad, marginBottom: "16px" };
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "16px" };
-  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "4px", display: "block" };
+  const labelStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "4px", display: "block" };
   const valueStyle: React.CSSProperties = { fontFamily: AT.font.sans, fontSize: "0.88rem", color: AT.color.text };
 
   return (

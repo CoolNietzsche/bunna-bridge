@@ -20,6 +20,21 @@ Public: `/` (Landing, or redirect to `/dashboard` when logged in), `/story/:id`,
 
 Protected (any logged-in role — **no per-role route guards**; pages hide/show by role and the API enforces): `/dashboard`, `/lots`, `/lots/new`, `/lots/:id`, `/lots/:id/edit`, `/lots/:id/cup`, `/map`, `/pipeline`, `/samples`, `/farm`, `/roastery`, `/certifications`, `/washing-stations`, `/roast-equipment`, `/roast-batches`, `/buyer/offers`, `/buyer/watchlist`, `/exporters/:id`, `/offers`, `/settings`.
 
+## Design system (Apple-inspired, since 2026-11-01)
+
+Principles: **clarity** (bold, tight, sentence-case type; no shouty uppercase labels), **deference** (neutral canvas so photos and data lead; one accent colour), **depth** (frosted translucent bars, soft layered shadows, generous radii).
+
+| Element | Rule |
+|---|---|
+| Type | System SF Pro on Apple devices, Inter elsewhere (`-apple-system, …, "Inter"`). Headlines 700 weight, tracking −0.03 to −0.045em. Monospace (`ui-monospace` / SF Mono) only for data such as lot IDs and scores. |
+| Colour | Canvas `#F5F5F7`, surfaces white, text `#1D1D1F` / `#6E6E73` / `#86868B`. Single accent: forest `#1B7A4E` (dark mode `#23874F`, both AA with white text). Eyebrows `#BF4800`. Status: Apple system green/orange/red/blue. |
+| Shape | Radii 8 / 12 / 18 / 28 px; buttons are pills. Primary = filled accent; secondary = tinted grey fill (no outline); tertiary = text link with "›". |
+| Materials | `.bb-material-bar` / `.bb-material-sidebar` (blur 20–24px, saturate 180%) for the site header, back-office top bar and sidebar. |
+| Signature components | Activity-ring readiness (`ComplianceGatesPanel`), iOS inset grouped lists for gate rows, gradient "app icon" tiles in dashboard widgets, centred product-page hero with gradient headline on Landing. |
+| Dark mode | `.dark` on `<html>`: true-black canvas, `#1C1C1E` surfaces. |
+
+Where it lives: CSS variables in `src/index.css` (`:root`, `.dark`, `@theme`); `styles/tokens.ts` (public) and `styles/adminTokens.ts` (back office) map onto them. Change colours there, not in components. `docs/THEMING.md` describes an older system and is obsolete.
+
 ## Conventions (from `CLAUDE.md` + code)
 
 - Theme tokens live in `src/index.css` `@theme` — use Tailwind classes (`bg-forest`, `text-ink`). No `tailwind.config.js`.
@@ -35,5 +50,4 @@ Protected (any logged-in role — **no per-role route guards**; pages hide/show 
 - No frontend tests beyond the Playwright click-through used for the 2026-10-31 release (not yet committed as a CI job).
 - No i18n (Amharic is a strategic requirement).
 - Many components still use inline style objects rather than Tailwind token classes.
-- Back office (`styles/adminTokens.ts`) uses the Beersheba palette since 2026-10-31; page titles use Fraunces.
 - Routes are lazy-loaded (`App.tsx`); keep new pages lazy too.

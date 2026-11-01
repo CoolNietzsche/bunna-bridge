@@ -11,8 +11,7 @@ export default function RoleBadge({ role }: { role: string }) {
   return (
     <span style={{
       padding: "2px 8px", borderRadius: "20px",
-      fontFamily: "DM Mono, monospace", fontSize: "0.58rem",
-      letterSpacing: "0.1em", textTransform: "uppercase",
+      fontFamily: "inherit", fontSize: "0.72rem", fontWeight: 600, textTransform: "capitalize",
       background: c.bg, color: c.color, border: `1px solid ${c.border}`,
     }}>
       {role}

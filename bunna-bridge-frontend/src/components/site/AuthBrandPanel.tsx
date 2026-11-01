@@ -26,7 +26,7 @@ export default function AuthBrandPanel() {
       </Link>
 
       <div style={{ position: "relative" }}>
-        <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.12, margin: 0, letterSpacing: "-0.01em" }}>
+        <h2 style={{ fontFamily: T.font.display, fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.08, margin: 0, letterSpacing: "-0.03em" }}>
           Specialty Ethiopian coffee,<br />traceable to the tree.
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "24px" }}>

@@ -37,9 +37,9 @@ export default function AdminTopBar({ onMobileMenu }: AdminTopBarProps) {
   };
 
   return (
-    <header style={{
+    <header className="bb-material-bar" style={{
       height: AT.spacing.topbarH, display: "flex", alignItems: "center", gap: "16px",
-      padding: "0 20px", background: AT.color.surface, borderBottom: `1px solid ${AT.color.border}`,
+      padding: "0 24px", borderBottom: `1px solid ${AT.color.border}`,
       position: "sticky", top: 0, zIndex: 40,
     }}>
       <button className="ab-hamburger" onClick={onMobileMenu} style={{ display: "none", background: "none", border: "none", cursor: "pointer", color: AT.color.textSecondary }}>
@@ -47,11 +47,13 @@ export default function AdminTopBar({ onMobileMenu }: AdminTopBarProps) {
       </button>
 
       {/* Search */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.md, padding: "7px 12px", flex: "0 1 320px", minWidth: "160px" }}>
+      {/* Spotlight-style search field: tinted, borderless, fully rounded */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(0,0,0,0.05)", borderRadius: AT.radius.pill, padding: "8px 14px", flex: "0 1 320px", minWidth: "160px" }}>
         <Search size={15} color={AT.color.textMuted} />
         <input
           placeholder="Search lots, offers…"
-          style={{ background: "transparent", border: "none", outline: "none", fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text, width: "100%" }}
+          aria-label="Search lots and offers"
+          style={{ background: "transparent", border: "none", outline: "none", fontFamily: AT.font.sans, fontSize: "0.86rem", color: AT.color.text, width: "100%" }}
         />
       </div>
 

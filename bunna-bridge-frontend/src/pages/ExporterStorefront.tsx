@@ -132,7 +132,7 @@ export default function ExporterStorefront() {
             ].map(([label, value]) => (
               <div key={label} style={{ background: AT.color.surface, padding: "16px", textAlign: "center" }}>
                 <p style={{ fontFamily: AT.font.sans, fontSize: "1.5rem", fontWeight: 700, color: AT.color.text, margin: "0 0 3px", lineHeight: 1 }}>{value}</p>
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", color: AT.color.textDisabled, letterSpacing: "0.04em", margin: 0, textTransform: "uppercase" }}>{label}</p>
+                <p style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, margin: 0 }}>{label}</p>
               </div>
             ))}
           </div>

@@ -36,10 +36,10 @@ export default function OriginCard({ origin, featured = false, image }: { origin
       </svg>
       <div style={{ position: "absolute", inset: 0, background: image ? "linear-gradient(to top, rgba(8,16,12,0.78), rgba(8,16,12,0.12) 55%, rgba(8,16,12,0.22))" : "linear-gradient(to top, rgba(8,16,12,0.62), transparent 62%)" }} />
       <div style={{ position: "relative", padding: featured ? "0 26px 26px" : "0 18px 16px" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontFamily: T.font.mono, fontSize: "0.58rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
           <MapPin size={11} /> Ethiopia
         </span>
-        <h3 style={{ fontFamily: T.font.display, fontSize: featured ? "clamp(1.9rem, 3vw, 2.6rem)" : "1.5rem", fontWeight: 500, color: "#FFFFFF", margin: "6px 0 0", lineHeight: 1.02 }}>
+        <h3 style={{ fontFamily: T.font.display, fontSize: featured ? "clamp(1.9rem, 3vw, 2.6rem)" : "1.5rem", fontWeight: 700, color: "#FFFFFF", margin: "6px 0 0", lineHeight: 1.02, letterSpacing: "-0.03em" }}>
           {origin.label}
         </h3>
         {origin.count != null && (

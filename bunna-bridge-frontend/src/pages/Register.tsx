@@ -57,7 +57,7 @@ export default function Register() {
         <div style={{ width: "100%", maxWidth: "480px" }}>
           <Link to="/" style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.textMuted, textDecoration: "none" }}>← Back home</Link>
 
-          <h1 style={{ fontFamily: T.font.display, fontSize: "2rem", fontWeight: 400, color: T.color.ink, margin: "20px 0 4px", letterSpacing: "-0.01em" }}>Create your account</h1>
+          <h1 style={{ fontFamily: T.font.display, fontSize: "2.2rem", fontWeight: 700, color: T.color.ink, margin: "20px 0 6px", letterSpacing: "-0.03em" }}>Create your account</h1>
           <p style={{ fontFamily: T.font.sans, fontSize: "0.95rem", color: T.color.textMuted, margin: "0 0 24px" }}>Join the Beersheba coffee network.</p>
 
           {error && <div style={{ ...CS.errorBanner, marginBottom: "16px" }}>{error}</div>}

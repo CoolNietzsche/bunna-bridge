@@ -61,7 +61,7 @@ const GATES = [
   { k: "cta_floor_met", label: "CTA Floor Price Met", icon: <Award size={13} /> },
 ];
 
-const lbl: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "5px" };
+const lbl: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "5px" };
 const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "18px" };
 const cardStyle: React.CSSProperties = { ...AC.card, ...AC.cardPad, marginBottom: "16px" };
 
@@ -240,7 +240,7 @@ export default function EditLot() {
                   display: "flex", flexDirection: "column", alignItems: "center", gap: "4px",
                 }}
               >
-                <span style={{ fontFamily: AT.font.mono, fontSize: "0.62rem", letterSpacing: "0.06em", textTransform: "uppercase", color: active ? AT.color.primaryDark : done ? AT.color.primary : AT.color.textDisabled }}>
+                <span style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", fontWeight: 600, color: active ? AT.color.primaryDark : done ? AT.color.primary : AT.color.textDisabled }}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <span style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: active ? AT.color.primaryDark : done ? AT.color.primary : AT.color.textMuted, whiteSpace: "nowrap" }}>
@@ -431,7 +431,7 @@ export default function EditLot() {
                 ["GPS", form.gps_lat && form.gps_lng ? `${form.gps_lat}°N, ${form.gps_lng}°E` : "Not set"],
               ].map(([l, v]) => (
                 <div key={l} style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "8px 0", borderBottom: `1px solid ${AT.color.borderLight}` }}>
-                  <span style={{ fontFamily: AT.font.sans, fontSize: "0.68rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled }}>{l}</span>
+                  <span style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled }}>{l}</span>
                   <span style={{ fontFamily: AT.font.sans, fontSize: "0.85rem", color: AT.color.text, textAlign: "right" }}>{v}</span>
                 </div>
               ))}

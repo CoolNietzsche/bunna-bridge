@@ -45,7 +45,7 @@ export default function SiteFooter() {
           </div>
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <p style={{ fontFamily: T.font.mono, fontSize: "0.62rem", letterSpacing: "0.18em", textTransform: "uppercase", color: T.color.textFaint, margin: "0 0 16px" }}>
+              <p style={{ fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: T.color.textFaint, margin: "0 0 16px" }}>
                 {col.title}
               </p>
               <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>

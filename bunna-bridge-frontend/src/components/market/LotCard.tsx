@@ -66,7 +66,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(10,20,15,0.72), rgba(10,20,15,0.05) 62%)" }} />
         <div style={{ position: "absolute", top: "12px", left: "12px", right: "12px", display: "flex", justifyContent: "space-between", gap: "8px" }}>
           {status && (
-            <span style={{ fontFamily: T.font.mono, fontSize: "0.6rem", letterSpacing: "0.06em", textTransform: "uppercase", color: status.fg, background: status.bg, padding: "4px 10px", borderRadius: "999px" }}>
+            <span style={{ fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: status.fg, background: status.bg, padding: "4px 10px", borderRadius: "999px" }}>
               {status.label}
             </span>
           )}
@@ -79,7 +79,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
         </div>
         <div style={{ position: "absolute", left: "16px", right: showWatch ? "60px" : "16px", bottom: "14px" }}>
           <p style={{ fontFamily: T.font.mono, fontSize: "0.6rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.78)", margin: "0 0 4px" }}>{lot.lot_id}</p>
-          <h3 style={{ fontFamily: T.font.display, fontSize: "1.4rem", fontWeight: 500, color: "#FFFFFF", margin: 0, lineHeight: 1.1 }}>
+          <h3 style={{ fontFamily: T.font.display, fontSize: "1.45rem", fontWeight: 700, color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.025em" }}>
             {lot.name}
           </h3>
         </div>
@@ -96,7 +96,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
 
       {/* Body */}
       <div style={{ padding: "16px 18px 18px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-        <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", fontFamily: T.font.mono, fontSize: "0.62rem", letterSpacing: "0.05em", textTransform: "uppercase", color: T.color.textFaint }}>
+        <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", fontFamily: T.font.sans, fontSize: "0.74rem", fontWeight: 600, color: T.color.textFaint }}>
           <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
             <MapPin size={11} /> {titleCase(lot.region === "other" ? lot.kebele || "Ethiopia" : lot.region)}
           </span>
@@ -130,9 +130,9 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
 
         <div style={{ marginTop: "auto", paddingTop: "12px", borderTop: `1px solid ${T.color.border}`, display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "12px" }}>
           <div>
-            <p style={{ fontFamily: T.font.mono, fontSize: "0.54rem", letterSpacing: "0.08em", color: T.color.textGhost, margin: "0 0 3px" }}>FOB / KG</p>
+            <p style={{ fontFamily: T.font.sans, fontSize: "0.7rem", fontWeight: 500, color: T.color.textFaint, margin: "0 0 3px" }}>FOB per kg</p>
             {isAuthenticated ? (
-              <p style={{ fontFamily: T.font.display, fontSize: "1.5rem", fontWeight: 500, color: T.color.ink, margin: 0, lineHeight: 1 }}>
+              <p style={{ fontFamily: T.font.display, fontSize: "1.55rem", fontWeight: 700, color: T.color.ink, margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
                 {lot.fob_price_usd ? formatUsd(lot.fob_price_usd) : "On request"}
               </p>
             ) : (
@@ -142,7 +142,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
             )}
           </div>
           <div style={{ textAlign: "right" }}>
-            <p style={{ fontFamily: T.font.mono, fontSize: "0.54rem", letterSpacing: "0.08em", color: T.color.textGhost, margin: "0 0 3px" }}>AVAILABLE</p>
+            <p style={{ fontFamily: T.font.sans, fontSize: "0.7rem", fontWeight: 500, color: T.color.textFaint, margin: "0 0 3px" }}>Available</p>
             <p style={{ fontFamily: T.font.mono, fontSize: "0.8rem", color: T.color.ink, margin: 0, fontWeight: 500 }}>
               {formatKg(lot.available_qty_kg || lot.volume_kg)}
             </p>

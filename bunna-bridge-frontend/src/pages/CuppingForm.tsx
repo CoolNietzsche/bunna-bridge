@@ -92,7 +92,7 @@ export default function CuppingForm() {
 
   const cardTitle: React.CSSProperties = { ...AC.cardTitle, marginBottom: "18px" };
   const attrRow: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", padding: "12px 0", borderBottom: `1px solid ${AT.color.borderLight}`, flexWrap: "wrap" };
-  const label: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontSize: "0.66rem", letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.textDisabled, marginBottom: "6px" };
+  const label: React.CSSProperties = { display: "block", fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled, marginBottom: "6px" };
   const scoreColor = (val: number) => (val >= 9 ? AT.color.primaryDark : val >= 8 ? AT.color.blue : AT.color.textSecondary);
 
   const score = parseFloat(totalScore());
@@ -134,7 +134,7 @@ export default function CuppingForm() {
         <>
           <div style={{ ...AC.card, ...AC.cardPad, background: AT.color.primaryLight, borderColor: `${AT.color.primary}33`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: "16px", marginBottom: "20px", flexWrap: "wrap" }}>
             <div>
-              <p style={{ fontFamily: AT.font.sans, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: AT.color.primaryDark, margin: 0 }}>Live Total Score</p>
+              <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", fontWeight: 600, color: AT.color.primaryDark, margin: 0 }}>Live Total Score</p>
               <p style={{ fontFamily: AT.font.sans, fontSize: "0.75rem", color: AT.color.primaryDark, opacity: 0.75, margin: "4px 0 0" }}>
                 {score >= 90 ? "Outstanding" : score >= 85 ? "Excellent" : score >= 80 ? "Specialty" : score >= 75 ? "Very Good" : "Below Specialty"}
               </p>

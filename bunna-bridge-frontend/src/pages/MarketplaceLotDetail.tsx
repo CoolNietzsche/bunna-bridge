@@ -435,7 +435,7 @@ function Meta({ icon, text }: { icon: React.ReactNode; text: string }) {
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <span style={{ display: "inline-flex", flexDirection: "column", gap: "2px", padding: "8px 14px", background: AT.color.surfaceSecondary, border: `1px solid ${AT.color.border}`, borderRadius: AT.radius.md }}>
-      <span style={{ fontFamily: AT.font.sans, fontSize: "0.62rem", textTransform: "uppercase", letterSpacing: "0.04em", color: AT.color.textDisabled }}>{label}</span>
+      <span style={{ fontFamily: AT.font.sans, fontWeight: 500, fontSize: "0.74rem", color: AT.color.textDisabled }}>{label}</span>
       <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text, fontWeight: 500 }}>{value}</span>
     </span>
   );
