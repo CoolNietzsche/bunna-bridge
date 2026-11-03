@@ -16,6 +16,8 @@ This folder is the **single starting point** for anyone (human or AI) picking up
 | 8 | [08-repos-docs-and-history.md](08-repos-docs-and-history.md) | The two repos, which docs are stale, stray files, project timeline |
 | 9 | [09-task-plan.md](09-task-plan.md) | **The plan** — prioritized tasks for what comes next |
 | 10 | [10-release-2026-10-31.md](10-release-2026-10-31.md) | **Latest release**: what changed and the exact deploy commands |
+| 11 | [11-market-research-and-gap-analysis.md](11-market-research-and-gap-analysis.md) | Industry research (Belco, Algrano, importers, EUDR tech, ECTMS), regulations, every user type's workflow vs. what we cover |
+| 12 | [12-roadmap-and-tasks.md](12-roadmap-and-tasks.md) | **Current plan**: founder decisions, phased roadmap to the 30 Dec 2026 EUDR date and beyond, task list, KPIs |
 
 ## Source-of-truth order
 

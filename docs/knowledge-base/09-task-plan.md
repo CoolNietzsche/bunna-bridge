@@ -1,5 +1,7 @@
 # 09 — Task Plan (from 2026-10-31)
 
+> **Superseded for new work by [12-roadmap-and-tasks.md](12-roadmap-and-tasks.md)** (2026-11-03, based on market research). Kept for history of what the 2026-10-31 release completed.
+
 > **Status update (same day):** Phase 0 items 0.2–0.5 and 0.7 (partly — the repo note was added), all of Phase 1 except 1.11 (Sentry/email) and 1.12 (deploy script), and Phase 2 items 2.1–2.5, 2.7–2.9 and most of 2.6, plus Phase 3 items 3.1–3.3, 3.5 (delivery confirmation part), 3.6 (in-app part) and 3.8 are **done** — see [10-release-2026-10-31.md](10-release-2026-10-31.md). Backups (0.1) and VPS checks (0.6) were deliberately left for a later round. Remaining work is listed in [07-known-issues.md](07-known-issues.md) §3 and Phases 4–5 below.
 
 Ordered by risk first, then by what makes the core promise ("automated EUDR + export compliance") true, then growth. Issue IDs (SEC-, BUG-, OPS-) are defined in [07-known-issues.md](07-known-issues.md).
