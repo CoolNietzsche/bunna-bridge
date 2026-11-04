@@ -119,6 +119,8 @@ The aggregation backbone and the importer evidence package. This is the product-
 
 ## Phase 5 — Marketplace growth (Mar–Jun 2027)
 
+> **Status 2026-11-04: built early, before deployment.** M-1 to M-7 are done (backend, UI and tests). Before go-live: agree the auction terms (buyer's premium, payment deadline, what happens if a winner does not pay) with a lawyer, and sign the first EU warehouse partner, whose stock and order flow the EU stock page assumes. Details are in [/DONE.md](../../DONE.md).
+
 | ID | Task | Size | Notes |
 |---|---|---|---|
 | M-1 | **Beersheba Select**: periodic curated programme of jury-cupped, EUDR-ready lots; optional timed auction | L | Proven by ACE/M-Cultivo Ethiopia Select |

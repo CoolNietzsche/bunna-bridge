@@ -9,6 +9,7 @@ export interface Producer {
   name: string;
   phone: string;
   language: "am" | "om" | "en";
+  gender?: "" | "female" | "male" | "undisclosed";
   region: string;
   zone: string;
   woreda: string;

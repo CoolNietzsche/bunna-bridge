@@ -128,11 +128,21 @@ class OrderSerializer(serializers.ModelSerializer):
     lines = serializers.SerializerMethodField()
     total_kg = serializers.DecimalField(max_digits=12, decimal_places=1, read_only=True)
     total_eur = serializers.DecimalField(max_digits=14, decimal_places=2, read_only=True)
+    side = serializers.SerializerMethodField()
 
     class Meta:
         model = StockOrder
         fields = ["id", "buyer_name", "partner_name", "warehouse", "warehouse_label", "status", "status_label",
-                  "delivery", "notes", "lines", "total_kg", "total_eur", "created_at"]
+                  "delivery", "notes", "lines", "total_kg", "total_eur", "created_at", "side"]
+
+    def get_side(self, obj):
+        """'partner' when the viewer's team holds the stock, 'buyer' when it placed the order."""
+        from bunna_bridge.orgs.access import same_team
+
+        user = self.context.get("user")
+        if user is None:
+            return None
+        return "partner" if same_team(user, obj.partner_id) else "buyer"
 
     def get_buyer_name(self, obj):
         return _name(obj.buyer)

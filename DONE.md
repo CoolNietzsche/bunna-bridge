@@ -517,3 +517,93 @@ cd bunna_bridge
 docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
 docker compose -f docker-compose.local.yml run --rm django pytest
 ```
+
+## 2026-11-04 — Phase 5: marketplace growth
+
+All seven Phase 5 tasks (M-1 to M-7) are built: backend, screens, demo data and tests.
+- Backend tests: 228 pass.
+- End-to-end browser test: 61 of 61 checks pass, including 10 new Phase 5 checks.
+- New backend app: `bunna_bridge/market/`. Its API is under `/api/v1/market/`.
+
+### M-1 Beersheba Select (curated programme and timed auction) — done
+- Page: `/select`. The admin creates a programme with a season, a nominations deadline and a minimum jury score (default 86).
+- **Steps:** taking nominations → jury cupping → catalogue published → auction live → closed.
+- **Nominations:** exporters and roasters nominate their own listed lots, with quantity, starting price and an optional hidden reserve. A lot is ineligible (with the reason shown) when it is not EUDR-ready or not traced to the farm.
+- **Jury:** "Send eligible lots to the jury" creates a **blind cupping session** (Phase 4). After the reveal, "Publish catalogue" ranks the lots by panel mean and selects those at or above the minimum score.
+- **Auction:** each selected lot shows the jury score, high bid, number of bids and a countdown.
+  - Bids must beat the high bid by the minimum step (default $0.10/kg).
+  - A bid in the last 3 minutes extends that lot's close by 3 minutes (stops last-second sniping).
+  - Exporters cannot bid on their own lots.
+  - Bidders see "You are the highest bidder" or "You were outbid". The page refreshes every 8 seconds.
+- **Closing:** a background task runs every 2 minutes. The winning bid becomes an accepted offer, which creates the draft contract (Phase 3). Lots below the reserve are marked unsold.
+
+### M-2 Availability states — done
+- Every lot is **Spot** (in Ethiopia, ready now), **Forward** (current harvest, not ready yet), **Afloat** (on the water) or **EU stock**, with an expected-ready or arrival date.
+- Set on the lot create and edit forms. Shown as a badge on marketplace cards. Buyers can filter by it.
+
+### M-3 EU warehouse stock — done
+- Page: `/eu-stock`.
+- **Importers** list stock of a lot they bought (an accepted offer is required): warehouse (Antwerp, Hamburg, Trieste, Le Havre or other), bag size, number of bags, price in EUR/kg, minimum bags, landing date and DDS reference. The lot's availability changes to EU stock.
+- **Buyers, roasters and importers** order by the bag. One order comes from one importer and one warehouse (a single release); the cart says so if you mix them.
+- The importer **confirms** (bags are reserved), then marks the order **released**. Either side can cancel a requested order; only the importer can cancel a confirmed one, and the bags go back into stock. Both sides are notified.
+
+### M-4 Saved searches, alerts and watchlist — done
+- On the marketplace, "Save search & alert me" saves the current filters.
+- When a lot is listed that matches, the buyer gets a notification.
+- Saved searches are listed on the watchlist page, where alerts can be switched off or the search deleted.
+- The watchlist is now stored on the server, so it follows the buyer across devices. A list saved in the browser before this change is merged in once.
+
+### M-5 Impact and transparency score — done
+- Shown on every lot page, including the marketplace. Each point is explained:
+  - farmers' share of the export price (30 points), from recorded cherry prices converted to green coffee;
+  - farmer payments on record (15);
+  - traced to the farm (20);
+  - forest-safe origin (15);
+  - women producers (10), using a new optional gender field on the producer profile;
+  - certifications (10).
+- Criteria without data are shown as "no data" and left out of the score, not counted as zero. The card says what share of the criteria the score is based on.
+
+### M-6 Exporter reliability score — done
+- Shown on the exporter storefront and on marketplace lots, next to the Phase 4 track record. Built from that record:
+  - ships on time (35 points);
+  - few accepted claims (25);
+  - pre-shipment samples approved first time (20);
+  - arrives as sampled (10);
+  - answers offers quickly (10).
+- Marked **Provisional** until the exporter has 3 contracts on Beersheba.
+
+### M-7 Education hub — done
+- Pages: `/learn` (public, no login needed) and `/learn/<name>`.
+- Kinds: origin guides, harvest updates, buyer guides and webinars (with date and video link).
+- The Beersheba admin writes and publishes articles on the site. The text is plain: a blank line starts a new paragraph and a line beginning with "## " is a heading. No HTML is accepted, so articles cannot carry harmful code.
+
+### Navigation
+- A new **Market** group in the side menu: Beersheba Select, EU Stock (buyers, roasters, importers, admin) and Learn.
+- The top bar gained Select and EU Stock for buyers, a menu for importers, and Learn for visitors.
+
+### Demo data (password `Beersheba-Demo-2026`)
+- **"Beersheba Select 2026/27"** with the auction live for two days:
+  - Kochere: jury 88.19; three bids, buyer leading at $8.10/kg.
+  - Hambela: jury 87.06; importer bid $7.00/kg.
+  - Bensa: not selected (84.31).
+- **EU stock:** the importer holds 20 × 30 kg bags of Harrar in Hamburg at €12.80/kg. The buyer has a confirmed order for 4 bags.
+- **Availability:** Bensa is Forward and Kaffa is Afloat.
+- **Saved searches:**
+  - the buyer: "Washed Yirgacheffe 86+", with alerts on;
+  - the importer: one with alerts off.
+- **Articles:** 4 (Yirgacheffe origin guide, harvest update, EUDR buying guide, a webinar).
+- **Producer genders:** recorded for the exporter's producers.
+
+### Before go-live
+- **Auction terms:** have a lawyer agree the auction terms (buyer's premium, payment deadline, what happens if a winner does not pay) before the first real auction.
+- **EU warehouse partner:** sign the first partner. Prices shown are ex-warehouse, before VAT.
+- **Impact score cut-offs:** the farmer-share bands (40–70%) and the green-coffee conversion rates (cherry 20%, dry cherry 50%, parchment 80%) are reasonable defaults. Check them with your own station data. They are in `bunna_bridge/market/scores.py`.
+
+### To run on the VPS when deploying (Docker only)
+```bash
+cd bunna_bridge
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+docker compose -f docker-compose.local.yml run --rm django pytest
+docker compose -f docker-compose.local.yml restart celerybeat celeryworker
+```
+The restart picks up the new task that closes auctions every 2 minutes.

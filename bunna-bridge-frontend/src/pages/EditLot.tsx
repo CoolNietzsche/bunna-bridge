@@ -15,6 +15,7 @@ import { AC } from "../styles/adminComponents";
 const REGIONS = ["yirgacheffe", "sidama", "guji", "jimma", "harrar", "limu", "nekemte", "other"];
 const GRADES = ["G1", "G2", "G3"];
 const PROCESSING = ["washed", "natural", "honey"];
+const AVAILABILITY: [string, string][] = [["spot", "Spot — in Ethiopia, ready now"], ["forward", "Forward — current harvest, not ready yet"], ["afloat", "Afloat — shipped, on the water"], ["eu_stock", "EU stock — landed in a European warehouse"]];
 const CHANNELS: [string, string][] = [
   ["unknown", "Not stated"],
   ["direct", "Own farm / estate"],
@@ -34,7 +35,7 @@ const STEP_LABELS: Record<Step, string> = {
 
 interface FormData {
   lot_id: string; name: string; region: string; kebele: string; farmer_id: string;
-  washing_station: string; altitude_m: string; processing: string; channel: string;
+  washing_station: string; altitude_m: string; processing: string; channel: string; availability: string; expected_ready: string;
   grade: string; varietal: string; harvest_date: string;
   volume_kg: string; price_per_kg: string; sca_score: string;
   flavor_notes: string; q_grader_name: string; q_grader_cert_id: string;
@@ -47,7 +48,7 @@ interface FormData {
 
 const EMPTY: FormData = {
   lot_id: "", name: "", region: "yirgacheffe", kebele: "", farmer_id: "",
-  washing_station: "", altitude_m: "", processing: "washed", channel: "unknown",
+  washing_station: "", altitude_m: "", processing: "washed", channel: "unknown", availability: "spot", expected_ready: "",
   grade: "G1", varietal: "Ethiopian Heirloom", harvest_date: "",
   volume_kg: "", price_per_kg: "", sca_score: "", flavor_notes: "",
   q_grader_name: "", q_grader_cert_id: "", cupping_date: "",
@@ -100,6 +101,8 @@ export default function EditLot() {
       altitude_m: String(lot.altitude_m || ""),
       processing: lot.processing,
       channel: lot.channel || "unknown",
+      availability: lot.availability || "spot",
+      expected_ready: lot.expected_ready || "",
       grade: lot.grade,
       varietal: lot.varietal || "Ethiopian Heirloom",
       harvest_date: lot.harvest_date || "",
@@ -162,6 +165,8 @@ export default function EditLot() {
         altitude_m: form.altitude_m,
         processing: form.processing,
         channel: form.channel,
+        availability: form.availability,
+        expected_ready: form.availability === "spot" ? "" : form.expected_ready,
         grade: form.grade,
         varietal: form.varietal || "Ethiopian Heirloom",
         harvest_date: form.harvest_date,
@@ -276,6 +281,8 @@ export default function EditLot() {
                 <div><label style={lbl}>Grade *</label><select style={AC.input} value={form.grade} onChange={(e) => set("grade", e.target.value)}>{GRADES.map((g) => <option key={g} value={g}>{g}</option>)}</select></div>
                 <div><label style={lbl}>Processing *</label><select style={AC.input} value={form.processing} onChange={(e) => set("processing", e.target.value)}>{PROCESSING.map((p) => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}</select></div>
                 <div><label style={lbl}>Supply channel</label><select style={AC.input} value={form.channel} onChange={(e) => set("channel", e.target.value)}>{CHANNELS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
+                <div><label style={lbl}>Availability</label><select style={AC.input} value={form.availability} onChange={(e) => set("availability", e.target.value)}>{AVAILABILITY.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
+                {form.availability !== "spot" && <div><label style={lbl}>{form.availability === "forward" ? "Expected ready" : "Expected arrival"}</label><input style={AC.input} type="date" value={form.expected_ready} onChange={(e) => set("expected_ready", e.target.value)} /></div>}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "14px" }}>
                 <Field label="Kebele" k="kebele" placeholder="e.g. Kochere" />

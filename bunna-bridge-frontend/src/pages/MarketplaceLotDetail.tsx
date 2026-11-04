@@ -5,6 +5,7 @@ import { getLot, createOffer, downloadSpecSheet, apiErrorText } from "../api/lot
 import DueDiligencePanel from "../components/trace/DueDiligencePanel";
 import PhysicalCard from "../components/quality/PhysicalCard";
 import ReliabilityCard from "../components/quality/ReliabilityCard";
+import { ImpactCard, ReliabilityScoreCard } from "../components/market/ScoreCard";
 import { startConversation } from "../api/trade";
 import type { DueDiligenceSummary } from "../api/traceability";
 import { createSampleRequest } from "../api/samples";
@@ -340,6 +341,8 @@ export default function MarketplaceLotDetail() {
 
           {lot.due_diligence?.has_sources && <TraceabilitySummary dd={lot.due_diligence} />}
           {isAuthenticated && <PhysicalCard lotId={lot.id} canRecord={false} />}
+          <ImpactCard lotId={lot.id} />
+          {isAuthenticated && lot.exporter && <ReliabilityScoreCard exporterId={lot.exporter} />}
           {isAuthenticated && lot.exporter && <ReliabilityCard exporterId={lot.exporter} name={lot.exporter_company || undefined} />}
         </div>
 

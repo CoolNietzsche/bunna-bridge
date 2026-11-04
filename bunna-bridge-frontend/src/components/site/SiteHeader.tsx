@@ -16,6 +16,7 @@ function navLinksFor(role: string | undefined, authed: boolean): NavLink[] {
     return [
       { label: "Marketplace", path: "/marketplace" },
       { label: "Origins", path: "/marketplace?tab=origins" },
+      { label: "Learn", path: "/learn" },
       { label: "How it works", path: "/#how" },
     ];
   }
@@ -40,9 +41,10 @@ function navLinksFor(role: string | undefined, authed: boolean): NavLink[] {
       return [
         { label: "Dashboard", path: "/dashboard" },
         { label: "Marketplace", path: "/marketplace" },
+        { label: "Select", path: "/select" },
+        { label: "EU Stock", path: "/eu-stock" },
         { label: "My Offers", path: "/buyer/offers" },
         { label: "Watchlist", path: "/buyer/watchlist" },
-        { label: "Samples", path: "/samples" },
       ];
     case "roaster":
       return [
@@ -52,6 +54,13 @@ function navLinksFor(role: string | undefined, authed: boolean): NavLink[] {
         { label: "My Offers", path: "/buyer/offers" },
         { label: "Watchlist", path: "/buyer/watchlist" },
         { label: "Samples", path: "/samples" },
+      ];
+    case "importer":
+      return [
+        { label: "Dashboard", path: "/dashboard" },
+        { label: "Marketplace", path: "/marketplace" },
+        { label: "EU Stock", path: "/eu-stock" },
+        { label: "My Offers & DDS", path: "/buyer/offers" },
       ];
     case "farmer":
       return [

@@ -14,12 +14,12 @@ from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.models import FloorPrice
 from bunna_bridge.lots.models import Notification
 from bunna_bridge.lots.models import Offer
-from bunna_bridge.trade.models import Contract
 from bunna_bridge.traceability.models import CherryDelivery
 from bunna_bridge.traceability.models import LotSource
 from bunna_bridge.traceability.models import Plot
 from bunna_bridge.traceability.models import Producer
 from bunna_bridge.traceability.models import ProducerConsent
+from bunna_bridge.trade.models import Contract
 from bunna_bridge.users.models import User
 
 from . import services as svc
@@ -192,6 +192,8 @@ class TestEuStock:
         assert r.status_code == 201, r.data
         order = r.data["id"]
         assert r.data["total_kg"] == "90.0" and r.data["total_eur"] == "1305.00"
+        assert r.data["side"] == "buyer"
+        assert ci.get(reverse("stock-orders")).data[0]["side"] == "partner"
         assert cr.post(reverse("stock-order-action", args=[order, "confirm"])).status_code == 400  # buyer can't confirm
         assert ci.post(reverse("stock-order-action", args=[order, "confirm"])).status_code == 200
         assert WarehouseStock.objects.get(pk=s1).bags_available == 17  # noqa: PLR2004

@@ -38,6 +38,15 @@ from bunna_bridge.lots.models import Notification
 from bunna_bridge.lots.models import Offer
 from bunna_bridge.lots.models import SampleRequest
 from bunna_bridge.lots.models import WashingStation
+from bunna_bridge.market import services as market
+from bunna_bridge.market.models import Article
+from bunna_bridge.market.models import Bid
+from bunna_bridge.market.models import SavedSearch
+from bunna_bridge.market.models import SelectEntry
+from bunna_bridge.market.models import SelectProgramme
+from bunna_bridge.market.models import StockOrder
+from bunna_bridge.market.models import WarehouseStock
+from bunna_bridge.market.models import WatchItem
 from bunna_bridge.roasting.models import RoastBatch
 from bunna_bridge.messaging.models import SmsMessage
 from bunna_bridge.quality.models import CuppingSession
@@ -70,6 +79,37 @@ from bunna_bridge.users.models import Certification
 from bunna_bridge.users.models import User
 
 DOMAIN = "demo.beersheba.et"
+
+ARTICLES = [
+    ("yirgacheffe-origin-guide", "Yirgacheffe: a buyer's origin guide", "origin", "Yirgacheffe",
+     "Altitude, kebeles, processing and what to expect in the cup from Gedeo's best-known coffee.",
+     "Yirgacheffe is a woreda in the Gedeo zone of southern Ethiopia, and the name buyers know best. Most coffee "
+     "here grows between 1,800 and 2,200 metres on small garden plots of under one hectare.\n\n"
+     "## Kebeles worth knowing\n\nKochere, Gedeb, Konga, Aricha and Idido each have a recognisable profile. "
+     "Washed Kochere tends towards jasmine, bergamot and lemon; Gedeb lots are often denser and sweeter.\n\n"
+     "## Processing\n\nWashed coffees are fermented 36 to 72 hours and dried on raised beds. Naturals dry as "
+     "whole cherry for three to four weeks and bring blueberry and strawberry notes.\n\n"
+     "## Traceability\n\nBecause farms are small, one export lot may combine cherry from hundreds of "
+     "producers. On Beersheba each lot lists its supply plots, so you can see the farms behind it."),
+    ("harvest-update-2026-27", "Harvest update 2026/27: early picking in the south", "harvest", "",
+     "Volumes, timing and early cup quality from Sidama, Gedeo and Guji as the season starts.",
+     "Picking began two to three weeks early in lower Sidama after a dry September. Higher kebeles in Gedeo and "
+     "Guji are on a normal schedule.\n\n## Volumes\n\nStations report cherry deliveries close to last year. "
+     "Expect first washed lots at the ECX and in direct trade from January.\n\n## Prices\n\nCherry prices "
+     "paid at stations are higher than last season. Check the farmers' share shown on each lot's impact score."),
+    ("eudr-buying-guide", "Buying Ethiopian coffee under the EUDR", "guide", "",
+     "What the EU deforestation rule asks of importers and how a Beersheba evidence package answers it.",
+     "From 30 December 2026 large and medium operators placing coffee on the EU market must file a due-diligence "
+     "statement showing the coffee was not grown on land deforested after 31 December 2020.\n\n"
+     "## What you need from origin\n\nGeolocation of every plot (a polygon for plots over four hectares), the "
+     "harvest period, the quantity and the producer's consent to share the data.\n\n"
+     "## What Beersheba provides\n\nEach lot carries its plots, a forest check against the 2020 baseline, a "
+     "risk assessment with sign-off and a downloadable evidence package with GeoJSON ready for TRACES."),
+    ("webinar-cupping-select", "Live: cupping the Beersheba Select lots", "webinar", "",
+     "Join the jury as they talk through the top lots of the season before the auction closes.",
+     "The jury will cup the top-ranked Select lots live from Addis Ababa and answer buyers' questions.\n\n"
+     "Sample sets are available on request to registered buyers before the session."),
+]
 PASSWORD = "Beersheba-Demo-2026"  # noqa: S105 — demo accounts only
 ASSETS = Path(__file__).parent / "demo_assets"
 DEMO_ZONE_SOURCE = "Beersheba demo zone"
@@ -134,6 +174,13 @@ class Command(BaseCommand):
         users = User.objects.filter(email__endswith=f"@{DOMAIN}")
         lots = CoffeeLot.objects.filter(exporter__in=users)
         RoastBatch.objects.filter(roaster__in=users).delete()
+        StockOrder.objects.filter(buyer__in=users).delete()
+        StockOrder.objects.filter(partner__in=users).delete()
+        WarehouseStock.objects.filter(partner__in=users).delete()
+        SelectProgramme.objects.filter(entries__lot__in=lots).delete()
+        SelectEntry.objects.filter(lot__in=lots).delete()
+        Article.objects.filter(slug__in=[a[0] for a in ARTICLES]).delete()
+        Bid.objects.filter(bidder__in=users).delete()
         RoastEquipment.objects.filter(roaster__in=users).delete()
         SampleRequest.objects.filter(lot__in=lots).delete()
         SampleRequest.objects.filter(buyer__in=users).delete()
@@ -423,6 +470,66 @@ class Command(BaseCommand):
         for j, lot in enumerate([harrar, kochere], start=1):
             SessionSample.objects.create(session=open_session, code=str(510 + j * 33), position=j, lot=lot)
 
+    def _phase5(self, admin, exporter, buyer, importer, kochere, hambela, bensa, harrar, kaffa, today):
+        """Select auction live, EU stock with an order, availability states, saved search, articles, genders."""
+        now = timezone.now()
+        # Producer gender (optional; feeds the women-producers criterion of the impact score).
+        for i, producer in enumerate(Producer.objects.filter(owner=exporter).order_by("external_ref", "name")):
+            producer.gender = ["female", "male", "female", "male", "undisclosed"][i % 5]
+            producer.save(update_fields=["gender"])
+
+        # Availability states (M-2).
+        CoffeeLot.objects.filter(pk=bensa.pk).update(availability="forward", expected_ready=today + timedelta(days=75))
+        CoffeeLot.objects.filter(pk=kaffa.pk).update(availability="afloat", expected_ready=today + timedelta(days=18))
+
+        # Beersheba Select with the auction live (M-1).
+        jury = CuppingSession.objects.filter(owner=exporter, status="revealed").first()
+        programme = SelectProgramme.objects.create(
+            name="Beersheba Select", season="2026/27", status="auction", nominations_close=today - timedelta(days=21),
+            min_jury_score=Decimal("86.00"), jury_session=jury, auction_starts=now - timedelta(hours=20),
+            auction_ends=now + timedelta(days=2), description=(
+                "The season's top washed and natural lots from Gedeo and Guji, cupped blind by a three-grader jury. "
+                "Every lot is traced to the farm with an EUDR evidence package."),
+        )
+        top = SelectEntry.objects.create(programme=programme, lot=kochere, nominated_by=exporter, status="selected",
+                                         jury_score=Decimal("88.19"), rank=1, quantity_kg=Decimal("600"),
+                                         starting_price_usd=Decimal("7.50"), reserve_price_usd=Decimal("8.00"),
+                                         closes_at=programme.auction_ends)
+        second = SelectEntry.objects.create(programme=programme, lot=hambela, nominated_by=exporter, status="selected",
+                                            jury_score=Decimal("87.06"), rank=2, quantity_kg=Decimal("300"),
+                                            starting_price_usd=Decimal("7.00"), closes_at=programme.auction_ends)
+        SelectEntry.objects.create(programme=programme, lot=bensa, nominated_by=exporter, status="not_selected",
+                                   jury_score=Decimal("84.31"), quantity_kg=Decimal("300"),
+                                   starting_price_usd=Decimal("6.50"))
+        market.place_bid(buyer, top.pk, Decimal("7.50"))
+        market.place_bid(importer, top.pk, Decimal("7.80"))
+        market.place_bid(buyer, top.pk, Decimal("8.10"))
+        market.place_bid(importer, second.pk, Decimal("7.00"))
+
+        # EU stock held by the importer on the Harrar lot it bought (M-3), and an order from the buyer.
+        dds = DdsReference.objects.filter(lot=harrar).first()
+        stock = WarehouseStock.objects.create(
+            lot=harrar, partner=importer, warehouse="hamburg", warehouse_name="Hamburg Freeport, Schuppen 52",
+            bag_kg=Decimal("30"), bags_total=20, bags_available=20, price_eur_per_kg=Decimal("12.80"), min_bags=1,
+            landed_on=today - timedelta(days=12), dds_reference=dds.reference_number if dds else "",
+        )
+        CoffeeLot.objects.filter(pk=harrar.pk).update(availability="eu_stock")
+        order = market.place_order(buyer, [(str(stock.pk), 4)], "Nordic Green Imports AB, Frihamnen 12, Stockholm")
+        market.update_order(importer, order, "confirm")
+
+        # Watchlist and a saved search with alerts (M-4).
+        WatchItem.objects.get_or_create(user=buyer, lot=hambela)
+        SavedSearch.objects.create(user=buyer, name="Washed Yirgacheffe 86+",
+                                   filters={"origin": "yirgacheffe", "process": "washed", "minScore": 86})
+        SavedSearch.objects.create(user=importer, name="EUDR-ready naturals", alert=False,
+                                   filters={"process": "natural", "compliance": "eudr"})
+
+        # Education hub (M-7).
+        for i, (slug, title, kind, region, summary, body) in enumerate(ARTICLES):
+            Article.objects.create(slug=slug, title=title, kind=kind, region=region, summary=summary, body=body,
+                                   author=admin, published_at=now - timedelta(days=3 + 9 * i),
+                                   event_at=now + timedelta(days=16) if kind == "webinar" else None)
+
     def _cup(self, lot, grader, base, confirm=True, notes=""):
         b = Decimal(str(base))
         score = CuppingScore.objects.create(
@@ -648,7 +755,7 @@ class Command(BaseCommand):
             boundary=square(36.51, 7.61), volume_kg=Decimal("900"), price_per_kg=Decimal("5.20"),
             fob_price_usd=Decimal("5.2000"),
         )
-        lot(
+        kaffa = lot(
             exporter2, lot_id="KAF-2026-0007", name="Kaffa Forest Natural", status="listed", region="other",
             kebele="Bonga", altitude_m=1750, processing="natural", grade="G2", harvest_date=date(2025, 12, 20),
             farm_location=Point(36.24, 7.27, srid=4326), volume_kg=Decimal("800"), price_per_kg=Decimal("5.90"),
@@ -712,4 +819,5 @@ class Command(BaseCommand):
         self._phase2(exporter, farmers, kochere, today)
         self._phase3(exporter, buyer, harrar, bensa, kochere, today)
         self._phase4(exporter, grader, kochere, hambela, bensa, harrar, today)
-        del roaster_lot, admin
+        self._phase5(admin, exporter, buyer, importer, kochere, hambela, bensa, harrar, kaffa, today)
+        del roaster_lot

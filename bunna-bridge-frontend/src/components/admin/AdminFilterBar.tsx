@@ -50,6 +50,13 @@ export default function AdminFilterBar({ value, onChange, origins, count }: Admi
         <option value="passport">Green Passport</option>
         <option value="export">Export-ready</option>
       </select>
+      <select aria-label="Availability" style={{ ...AC.input, width: "auto", flex: "0 1 150px" }} value={value.availability} onChange={(e) => set({ availability: e.target.value })}>
+        <option value="">Any availability</option>
+        <option value="spot">Spot</option>
+        <option value="forward">Forward / pre-harvest</option>
+        <option value="afloat">Afloat</option>
+        <option value="eu_stock">EU stock</option>
+      </select>
       <select style={{ ...AC.input, width: "auto", flex: "0 1 160px" }} value={value.cert} onChange={(e) => set({ cert: e.target.value })}>
         <option value="">Any certification</option>
         <option value="organic">Organic</option>

@@ -474,6 +474,79 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Lab analysis graded (a primary defect rules out Specialty)', phys.body[0]?.sca_green_grade === 'Premium', phys.body[0]?.sca_green_grade);
   await page.context().close();
 
+  // 23. Phase 5 — Beersheba Select: importer outbids the buyer in the live auction
+  const impT = await token('importer@demo.beersheba.et');
+  const progs = await api(impT, '/api/v1/market/select/');
+  const prog = progs.body.find(x => x.status === 'auction');
+  check('Select programme with a live auction', !!prog);
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'importer@demo.beersheba.et');
+  await page.goto(`${BASE}/select/${prog.id}`);
+  await page.waitForTimeout(1200);
+  const before = (await api(impT, `/api/v1/market/select/${prog.id}/`)).body.entries.find(x => x.lot_code === 'YRG-2026-0847');
+  await page.getByLabel('Bid for YRG-2026-0847').fill(before.next_min_bid_usd);
+  await page.getByRole('button', { name: /^Bid$/ }).first().click();
+  await page.waitForTimeout(1200);
+  const after = (await api(impT, `/api/v1/market/select/${prog.id}/`)).body.entries.find(x => x.lot_code === 'YRG-2026-0847');
+  check('Bid placed in the UI makes the importer the high bidder', after.i_am_winning && after.bids_count === before.bids_count + 1, after.high_bid_usd);
+  check('Bidding page shows the winning status', await page.locator('text=You are the highest bidder').count() > 0);
+  const low = await api(impT, `/api/v1/market/select/entries/${after.id}/bid/`, { method: 'POST', body: JSON.stringify({ price_usd_per_kg: after.high_bid_usd }) });
+  check('A bid below the next minimum is refused', low.status === 400);
+
+  // 24. EU stock: importer lists, buyer orders by the bag, importer confirms
+  await page.goto(`${BASE}/eu-stock?tab=orders`);
+  await page.waitForTimeout(1000);
+  const seededOrder = await page.locator('text=/From Sarah|Nordic Green/').count();
+  check('Importer sees the order received for EU stock', seededOrder > 0);
+  await page.context().close();
+  const rstT = await token('roaster@demo.beersheba.et');
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'roaster@demo.beersheba.et');
+  await page.goto(`${BASE}/eu-stock`);
+  await page.waitForTimeout(1200);
+  await page.getByRole('button', { name: 'More bags' }).first().click();
+  await page.getByRole('button', { name: 'More bags' }).first().click();
+  await page.getByPlaceholder('Roastery address, or collect').fill('Collect');
+  await page.getByRole('button', { name: /Request order/ }).click();
+  await page.waitForTimeout(1200);
+  const rOrders = await api(rstT, '/api/v1/market/orders/');
+  const rOrder = rOrders.body[0];
+  check('Roaster orders 2 bags of EU stock', rOrder && rOrder.status === 'requested' && rOrder.lines[0].bags === 2, rOrder?.total_eur);
+  const conf = await api(impT, `/api/v1/market/orders/${rOrder.id}/confirm/`, { method: 'POST' });
+  const stockAfter = (await api(impT, '/api/v1/market/stock/?mine=1')).body[0];
+  check('Importer confirms; bags are reserved', conf.status === 200 && stockAfter.bags_available === 14, String(stockAfter.bags_available));
+  await page.context().close();
+
+  // 25. Saved search, impact score and the learn hub
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'buyer@demo.beersheba.et');
+  await page.goto(`${BASE}/marketplace?origin=sidama`);
+  await page.waitForTimeout(1200);
+  await page.getByRole('button', { name: /Save search/ }).click();
+  await page.getByLabel('Search name').fill('Sidama lots');
+  await page.getByRole('button', { name: /^Save$/ }).click();
+  await page.waitForTimeout(900);
+  const bT = await token('buyer@demo.beersheba.et');
+  const searches = await api(bT, '/api/v1/market/saved-searches/');
+  check('Buyer saves a marketplace search with alerts', searches.body.some(x => x.name === 'Sidama lots' && x.filters.origin === 'sidama' && x.alert));
+  const kLot = await lotId(bT, 'YRG-2026-0847');
+  await page.goto(`${BASE}/marketplace/${kLot}`);
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: /Show how this is scored/ }).first().click();
+  check('Lot shows an explainable impact score', await page.locator('text=Farmers\' share of the export price').count() > 0);
+  await page.context().close();
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await page.goto(`${BASE}/learn`);
+  await page.waitForTimeout(1200);
+  await page.getByRole('link', { name: /Buying Ethiopian coffee under the EUDR/ }).click();
+  await page.waitForTimeout(1000);
+  check('Learn hub is public and renders article headings', await page.getByRole('heading', { name: 'What Beersheba provides' }).count() === 1);
+  await page.context().close();
+
   console.log(results.join('\n'));
   console.log(errs.length ? 'PAGE ERRORS: ' + JSON.stringify(errs) : 'no page errors');
   await browser.close();

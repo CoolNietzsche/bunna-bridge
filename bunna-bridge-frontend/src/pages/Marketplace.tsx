@@ -10,6 +10,7 @@ import LotCard from "../components/market/LotCard";
 import AdminFilterBar from "../components/admin/AdminFilterBar";
 import { computeOrigins, applyLotFilters, filtersFromParams, type LotFilters } from "../lib/catalog";
 import { isBuyerRole } from "../lib/utils";
+import SaveSearch from "../components/market/SaveSearch";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 
@@ -55,6 +56,7 @@ export default function Marketplace() {
         </div>
 
         <AdminFilterBar value={filters} onChange={setFilters} origins={origins} count={filtered.length} />
+        {isAuthenticated && <div style={{ margin: "-6px 0 16px" }}><SaveSearch filters={filters} /></div>}
 
         {isLoading ? (
           <div style={{ textAlign: "center", padding: "64px 0" }}>

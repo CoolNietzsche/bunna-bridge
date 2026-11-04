@@ -68,10 +68,11 @@ export interface LotFilters {
   compliance: string;  // eudr | passport | export | ""
   minAltitude: number; // 0 = any
   sort: string;        // score | price_asc | price_desc | recent
+  availability: string; // spot | forward | afloat | eu_stock | ""
 }
 
 export const defaultFilters: LotFilters = {
-  q: "", origin: "", process: "", grade: "", cert: "", compliance: "", minAltitude: 0, sort: "score",
+  q: "", origin: "", process: "", grade: "", cert: "", compliance: "", minAltitude: 0, sort: "score", availability: "",
 };
 
 const num = (v?: string | number | null) => {
@@ -94,6 +95,7 @@ export function applyLotFilters(lots: CoffeeLot[], f: LotFilters): CoffeeLot[] {
     if (f.compliance === "passport" && !l.green_passport_ready) return false;
     if (f.compliance === "export" && !l.export_ready) return false;
     if (f.minAltitude && (l.altitude_m ?? 0) < f.minAltitude) return false;
+    if (f.availability && (l.availability ?? "spot") !== f.availability) return false;
     return true;
   });
   const score = (l: CoffeeLot) => Number(l.latest_sca_score ?? l.sca_score ?? 0);
@@ -119,6 +121,7 @@ export function filtersFromParams(params: URLSearchParams): LotFilters {
   if (params.get("green_passport_ready") === "true") f.compliance = "passport";
   if (params.get("export_ready") === "true") f.compliance = "export";
   if (params.get("min_altitude")) f.minAltitude = parseInt(params.get("min_altitude")!, 10) || 0;
+  if (params.get("availability")) f.availability = params.get("availability")!;
   return f;
 }
 

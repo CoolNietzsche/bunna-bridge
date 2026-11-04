@@ -291,7 +291,7 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
     mutationFn: () => updateProducer(producer.id, {
       name: form.name, external_ref: form.external_ref, phone: form.phone, region: form.region, zone: form.zone,
       woreda: form.woreda, kebele: form.kebele, cooperative: form.cooperative, ectms_farmer_id: form.ectms_farmer_id,
-      language: form.language,
+      language: form.language, gender: form.gender,
     }),
     onSuccess: () => { setEdit(false); onChange(); },
     onError: (e) => setError(apiError(e)),
@@ -320,6 +320,11 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
                 <option value="am">Amharic</option><option value="om">Afaan Oromo</option><option value="en">English</option>
               </select>
             </Field>
+            <Field label="Gender" hint="Optional. Used only for the lot impact score.">
+              <select style={AC.input} value={form.gender ?? ""} onChange={(e) => setForm({ ...form, gender: e.target.value as Producer["gender"] })}>
+                <option value="">Not recorded</option><option value="female">Woman</option><option value="male">Man</option><option value="undisclosed">Prefer not to say</option>
+              </select>
+            </Field>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <button style={AC.btnPrimary} onClick={() => save.mutate()} disabled={save.isPending}><Check size={13} /> Save</button>
@@ -336,6 +341,8 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
           ))}
           <dt style={{ color: AT.color.textMuted }}>SMS language</dt>
           <dd style={{ margin: 0, color: AT.color.text }}>{{ am: "Amharic", om: "Afaan Oromo", en: "English" }[producer.language] ?? "—"}</dd>
+          <dt style={{ color: AT.color.textMuted }}>Gender</dt>
+          <dd style={{ margin: 0, color: AT.color.text }}>{({ female: "Woman", male: "Man", undisclosed: "Prefer not to say" } as Record<string, string>)[producer.gender ?? ""] ?? "Not recorded"}</dd>
         </dl>
       )}
     </div>

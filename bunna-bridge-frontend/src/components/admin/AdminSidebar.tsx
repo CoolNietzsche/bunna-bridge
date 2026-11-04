@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2, FileSignature, MessageSquare, Landmark, Container, CupSoda } from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2, FileSignature, MessageSquare, Landmark, Container, CupSoda, Gavel, Warehouse, BookOpen } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
@@ -103,9 +103,14 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
   const allowed = (item: NavItem) => !item.cap || caps === null || caps.includes(item.cap);
   const account: NavItem[] = [{ label: "Settings", path: "/settings", icon: <Settings size={s} /> }];
   if (caps !== null) account.unshift({ label: "Team & Compliance", path: "/settings/team", icon: <Building2 size={s} /> });
+  const market: NavItem[] = [];
+  if (["admin", "exporter", "buyer", "roaster", "importer", "qgrader"].includes(role ?? "")) market.push({ label: "Beersheba Select", path: "/select", icon: <Gavel size={s} /> });
+  if (["admin", "buyer", "roaster", "importer"].includes(role ?? "")) market.push({ label: "EU Stock", path: "/eu-stock", icon: <Warehouse size={s} /> });
+  market.push({ label: "Learn", path: "/learn", icon: <BookOpen size={s} /> });
   return [
     { title: "Overview", items: [{ label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={s} /> }] },
     { title: "Operations", items: (operations[role ?? "exporter"] ?? operations.exporter).filter(allowed) },
+    { title: "Market", items: market },
     { title: "Account", items: account },
   ];
 }

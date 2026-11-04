@@ -46,6 +46,11 @@ const ExporterStorefront = lazy(() => import("./pages/ExporterStorefront"));
 const ExporterOffers = lazy(() => import("./pages/ExporterOffers"));
 const MarketplaceLotDetail = lazy(() => import("./pages/MarketplaceLotDetail"));
 const LotStory = lazy(() => import("./pages/LotStory"));
+const Select = lazy(() => import("./pages/Select"));
+const SelectProgramme = lazy(() => import("./pages/SelectProgramme"));
+const EuStock = lazy(() => import("./pages/EuStock"));
+const Learn = lazy(() => import("./pages/Learn"));
+const LearnArticle = lazy(() => import("./pages/LearnArticle"));
 
 // Pages are code-split per route; the landing page stays in the main bundle
 // so first paint for visitors doesn't wait on a second request.
@@ -115,6 +120,11 @@ export default function App() {
             <Route path="/buyer/watchlist"      element={<ProtectedRoute><BuyerWatchlist /></ProtectedRoute>} />
             <Route path="/exporters/:id"        element={<ProtectedRoute><ExporterStorefront /></ProtectedRoute>} />
             <Route path="/offers"       element={<ProtectedRoute><ExporterOffers /></ProtectedRoute>} />
+            <Route path="/select"       element={<ProtectedRoute><Select /></ProtectedRoute>} />
+            <Route path="/select/:id"   element={<ProtectedRoute><SelectProgramme /></ProtectedRoute>} />
+            <Route path="/eu-stock"     element={<ProtectedRoute><EuStock /></ProtectedRoute>} />
+            <Route path="/learn"        element={<Learn />} />
+            <Route path="/learn/:slug"  element={<LearnArticle />} />
             <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin/licenses" element={<ProtectedRoute><LicenseReviews /></ProtectedRoute>} />
             <Route path="*"            element={<Navigate to="/" replace />} />

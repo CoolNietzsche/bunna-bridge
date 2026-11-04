@@ -16,6 +16,7 @@ import ComplianceGatesPanel from "../components/ComplianceGatesPanel";
 import SupplySources from "../components/trace/SupplySources";
 import DueDiligencePanel from "../components/trace/DueDiligencePanel";
 import LotContracts from "../components/trade/LotContracts";
+import { ImpactCard } from "../components/market/ScoreCard";
 import PhysicalCard from "../components/quality/PhysicalCard";
 import {
   ArrowLeft, MapPin, Mountain, Layers, ShieldCheck, Leaf,
@@ -344,6 +345,7 @@ export default function LotDetail() {
 
             <DueDiligencePanel lotId={lot.id} onChanged={() => { refetch(); refetchCompliance(); }} />
             {isOwner && <LotContracts lotId={lot.id} />}
+            <ImpactCard lotId={lot.id} />
             <PhysicalCard lotId={lot.id} canRecord={isOwner || user?.role === "qgrader"} />
 
             {(isOwner || lot.status !== "draft") && (

@@ -202,7 +202,7 @@ class OrderListView(APIView):
     def get(self, request):
         ids = team_ids(request.user)
         qs = StockOrder.objects.filter(Q(buyer_id__in=ids) | Q(partner_id__in=ids)).select_related("buyer", "partner")
-        return Response(OrderSerializer(qs, many=True).data)
+        return Response(OrderSerializer(qs, many=True, context={"user": request.user}).data)
 
     def post(self, request):
         try:
@@ -212,7 +212,7 @@ class OrderListView(APIView):
             return _err("Each line needs a stock id and a number of bags.")
         except svc.MarketError as exc:
             return _err(exc)
-        return Response(OrderSerializer(order).data, status=201)
+        return Response(OrderSerializer(order, context={"user": request.user}).data, status=201)
 
 
 class OrderActionView(APIView):
@@ -225,7 +225,7 @@ class OrderActionView(APIView):
             order = svc.update_order(request.user, order, action)
         except svc.MarketError as exc:
             return _err(exc)
-        return Response(OrderSerializer(order).data)
+        return Response(OrderSerializer(order, context={"user": request.user}).data)
 
 
 # ── M-4 watchlist and saved searches ─────────────────────────────────────────

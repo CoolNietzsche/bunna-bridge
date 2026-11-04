@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLots } from "../api/lots";
 import { useWatchlist } from "../hooks/useWatchlist";
 import AdminShell from "../components/admin/AdminShell";
+import SavedSearches from "../components/market/SavedSearches";
 import {
   Heart, ShieldCheck, Mountain, TrendingUp, FlaskConical, Leaf, X
 } from "lucide-react";
@@ -119,6 +120,7 @@ export default function BuyerWatchlist() {
       </div>
 
       <style>{`@media (max-width: 560px){ .ab-watch { flex-direction: column !important; } .ab-watch > div:last-child { align-items: flex-start !important; } }`}</style>
+      <SavedSearches />
     </AdminShell>
   );
 }

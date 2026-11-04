@@ -3,6 +3,7 @@ import { MapPin, ShieldCheck, Sprout, Heart, ArrowRight, Mountain, BadgeCheck, L
 import { T } from "../../styles/tokens";
 import { originGradient, titleCase, formatUsd, formatKg } from "../../lib/utils";
 import { useAuth } from "../../context/AuthContext";
+import { AVAILABILITY_LABEL } from "../../api/market";
 import type { CoffeeLot } from "../../api/lots";
 
 interface LotCardProps {
@@ -122,6 +123,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
 
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {lot.deforestation_free && lot.gps_verified && <Badge icon={<ShieldCheck size={10} />} label="Deforestation-free" />}
+          {lot.availability && lot.availability !== "spot" && <Badge label={`${AVAILABILITY_LABEL[lot.availability]}${lot.expected_ready ? ` · ${new Date(lot.expected_ready).toLocaleDateString(undefined, { month: "short", year: "numeric" })}` : ""}`} tone="neutral" />}
           {lot.eudr_dds_ready && <Badge icon={<ShieldCheck size={10} />} label="EUDR evidence" />}
           {lot.is_organic && <Badge icon={<Sprout size={10} />} label="Organic" tone="matcha" />}
           {lot.is_fair_trade && <Badge label="Fair Trade" tone="matcha" />}

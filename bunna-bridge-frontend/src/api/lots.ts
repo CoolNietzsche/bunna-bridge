@@ -72,6 +72,8 @@ export interface CoffeeLot {
   eudr_dds_generated_at?: string | null;
   eudr_dds_reference?: string;
   channel?: "direct" | "vertical" | "union" | "ecx" | "unknown";
+  availability?: "spot" | "forward" | "afloat" | "eu_stock";
+  expected_ready?: string | null;
   archived_at?: string | null;
   due_diligence?: DueDiligenceSummary;
   phyto_cert_file?: string | null;

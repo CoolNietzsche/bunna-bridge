@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import ReliabilityCard from "../components/quality/ReliabilityCard";
+import { ReliabilityScoreCard } from "../components/market/ScoreCard";
 import { useQuery } from "@tanstack/react-query";
 import api from "../api/client";
 import type { CoffeeLot } from "../api/lots";
@@ -231,7 +232,7 @@ export default function ExporterStorefront() {
         ))}
       </div>
 
-      <div style={{ marginTop: "20px" }}><ReliabilityCard exporterId={id!} /></div>
+      <div style={{ marginTop: "20px", display: "grid", gap: "16px" }}><ReliabilityScoreCard exporterId={id!} /><ReliabilityCard exporterId={id!} /></div>
 
       <style>{`@media (max-width: 640px){ .ab-storefront-hero > div { flex-direction: column; } .ab-store-row { flex-direction: column; } .ab-store-row > div:last-child { align-items: flex-start !important; flex-direction: row !important; gap: 12px !important; } }`}</style>
     </AdminShell>
