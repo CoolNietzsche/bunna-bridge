@@ -219,3 +219,117 @@ docker compose -f docker-compose.local.yml run --rm django pytest
 - E-11: load the JRC GFC2020 forest tiles on the server (`load_forest_baseline`, then `recheck_plots`).
 - E-12: check the GeoJSON property names against the official EU Information System guidance; if they differ, update `TRACES_PROPERTIES` in `traceability/geo.py`.
 - Deploy: run `migrate` on the VPS through Docker Compose (commands are in the backend section above).
+
+---
+
+## 2026-11-04 — Phase 2: origin onboarding at scale
+
+Built before deployment, as requested. Backend tests: **190 pass** (49 of them new). End-to-end browser test: **39 of 39 checks pass, no page errors** (8 of them new).
+
+### O-1 Organisations and team accounts — done
+- New app `bunna_bridge/orgs/`. Every business account (exporter, importer, buyer, roaster, cooperative) belongs to an organisation. Existing accounts got one automatically through a data migration.
+- Team roles and what each can do:
+
+  | Role | Can do |
+  |---|---|
+  | Owner, Administrator | Everything, including inviting and removing teammates |
+  | Sales | Lots, offers, samples |
+  | Quality | Lots and supply records |
+  | Logistics | Lots, documents, compliance profile, supply records |
+  | Field agent | Producers, plots, consent, deliveries — but not lots or offers |
+  | Viewer | Read-only |
+
+- Lots, producers, plots, offers, samples, washing stations and roast batches are now shared across the team. About 35 access checks were updated.
+- **Team & Compliance** page (`/settings/team`):
+  - invite by email; the app creates a join link (email sending is not connected yet, so you copy the link);
+  - change a member's role, or remove them;
+  - an organisation always keeps at least one owner.
+- Invitation page `/invite/<link>`:
+  - a new person signs up straight into the team;
+  - an existing user signs in and accepts.
+
+### O-7 Exporter compliance profile (ECTA Directive 1106/2025) — done
+- Upload the three required documents, with numbers, holder or amount, and dates:
+  - certified quality laboratory;
+  - certified taster;
+  - paid-up capital attestation.
+- Each document shows as Missing, Awaiting verification, Verified, Expired or Rejected.
+- Admins verify or reject documents on the **License Reviews** page.
+- Reminders go out 30, 7, 1 and 0 days before a document expires.
+- This profile does not block any export gate yet.
+
+### O-3 Cherry intake — done
+- **Cherry Intake** page (`/intake`), for each delivery: farmer, plot, station, form (cherry, parchment, dried cherry), receipt number, weight, price, and payment (amount, date, telebirr or bank reference).
+- Totals at the top: weight received, owed to farmers, paid.
+- **Allocate to a lot:** each plot gets its green-coffee weight added to the lot's supply sources.
+  - Default yields: cherry 5:1, dried cherry 2:1, parchment 1.25:1. You can override this with your measured out-turn.
+  - A delivery is locked once it is in a lot.
+- **Farmers see their own deliveries and payments** on My Farm, in Amharic, Afaan Oromo or English.
+
+### O-2 Cooperative / union role — done
+- A new self-service account type: **Cooperative / union**. Cooperatives can:
+  - register members and plots;
+  - record intake;
+  - use the field app.
+- **Sales to exporters** (`/supply`):
+  - the cooperative picks deliveries and offers them to an exporter;
+  - every farmer included must have given data-sharing consent;
+  - the same delivery cannot be sold twice.
+- The exporter accepts or rejects under **From Cooperatives**. Once accepted, the members' plots can be used as lot sources and the deliveries can be allocated to the exporter's lots, so the farm-level origin travels with the coffee.
+
+### O-6 SMS to farmers — done (test mode until a gateway is contracted)
+- New app `bunna_bridge/messaging/`. Farmers automatically get an SMS:
+  - receipt when coffee is delivered;
+  - confirmation when they are paid;
+  - confirmation when they give consent.
+- Messages go in the farmer's language (Amharic, Afaan Oromo or English) and are listed on the producer's page.
+- Ethiopian mobile numbers are cleaned up automatically (09…, 07…, +251…); messages without a valid number are recorded as not sent.
+- Gateways: `log` (the default — messages are stored and nothing is sent), Africa's Talking, or any HTTP gateway. These are chosen with `SMS_BACKEND` and set in `.env`.
+
+### O-8 ECTMS integration — done (file import); live lookup waits for ECTA
+- Import an ECTMS export (CSV) under **Producers & Plots → Import → ECTMS export**.
+  - Farmers are matched on their ECTMS farmer ID and farms on their ECTMS farm ID, so re-importing updates records instead of duplicating them.
+  - A "check file" step comes first.
+- A lookup client is ready, switched on by `ECTMS_API_URL` and `ECTMS_API_TOKEN`. The API shape is a guess until ECTA shares its specification (decision D3).
+
+### O-4 Offline field app — done
+- **Field App** (`/field`), designed for phones with large buttons:
+  - register a farmer;
+  - read the consent text aloud and record it (a paper form needs a photo);
+  - record the farm with "Use my location" or by walking the boundary (GPS points every 5 m, poor fixes ignored, hectares shown);
+  - take a farm photo;
+  - record cherry deliveries.
+- **Works with no network:** everything is saved on the phone and sent automatically when the connection comes back.
+  - Retrying never creates duplicates.
+  - Items that fail show the reason and can be removed.
+- The app can be added to the phone's home screen and opens without network after the first visit.
+
+### O-5 Amharic and Afaan Oromo — done (needs native-speaker review)
+- The field app and the farmer's deliveries view switch between Amharic, Afaan Oromo and English. The choice is remembered on the phone.
+- SMS texts exist in all three languages.
+- **Before go-live:** ask native speakers to review `bunna-bridge-frontend/src/i18n/am.ts`, `om.ts` and the SMS texts in `bunna_bridge/bunna_bridge/messaging/service.py`. I wrote them, and they are first drafts.
+
+### New demo accounts (password `Beersheba-Demo-2026`)
+- `sales@demo.beersheba.et` — Sales role in Highland Exports.
+- `agent@demo.beersheba.et` — Field agent in Highland Exports; open **Field App**, ideally on a phone.
+- `cooperative@demo.beersheba.et` — Sidama Highlands Union: 3 members, deliveries, and a sale offered to Highland.
+- The exporter account now also has:
+  - three teammates;
+  - an open invitation;
+  - two verified compliance documents and one awaiting review;
+  - five cherry deliveries, some paid and some unpaid.
+- `farmer@demo.beersheba.et` sees his deliveries and payments on My Farm.
+
+### To run on the VPS when deploying (Docker only)
+```bash
+cd bunna_bridge
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+docker compose -f docker-compose.local.yml run --rm django pytest
+```
+Then rebuild the frontend (`npm ci && npm run build`), because two new packages were added: `i18next` and `react-i18next`.
+
+### Still open
+- O-5: native-speaker review of the Amharic and Afaan Oromo text.
+- O-6: choose an SMS gateway, then set `SMS_BACKEND` and its keys on the server.
+- O-8: ECTMS API access from ECTA.
+- Team invitations and expiry reminders go out as in-app notifications only, because no email provider is connected yet (roadmap item 1.11).

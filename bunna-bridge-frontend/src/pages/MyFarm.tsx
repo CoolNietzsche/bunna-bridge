@@ -1,3 +1,4 @@
+import MyDeliveries from "../components/trace/MyDeliveries";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -314,6 +315,8 @@ export default function MyFarm() {
           onSaved={() => queryClient.invalidateQueries({ queryKey: ["farmer-profile"] })}
         />
       </div>
+
+      <MyDeliveries />
 
       <style>{`
         @media (max-width: 860px) { .ab-farm-grid { grid-template-columns: 1fr !important; } }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { login as apiLogin, logout as apiLogout, clearAuthStorage } from "../api/auth";
+import { login as apiLogin, logout as apiLogout, clearAuthStorage, getMe } from "../api/auth";
 import type { LoginCredentials, UserProfile } from "../api/auth";
 
 interface AuthContextType {
@@ -26,6 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(userData);
         setIsAuthenticated(true);
         setUser(parsed);
+        // Refresh the stored profile (team role, organisation) in the background when online.
+        if (navigator.onLine) {
+          getMe()
+            .then((fresh) => {
+              const merged = { ...parsed, ...fresh, id: String(fresh.id) };
+              localStorage.setItem("user_data", JSON.stringify(merged));
+              setUser(merged);
+            })
+            .catch(() => undefined);
+        }
       } catch {
         clearAuthStorage();
       }

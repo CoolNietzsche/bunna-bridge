@@ -39,7 +39,14 @@ from bunna_bridge.lots.models import Offer
 from bunna_bridge.lots.models import SampleRequest
 from bunna_bridge.lots.models import WashingStation
 from bunna_bridge.roasting.models import RoastBatch
+from bunna_bridge.messaging.models import SmsMessage
+from bunna_bridge.orgs.models import ComplianceDocument
+from bunna_bridge.orgs.models import Invitation
+from bunna_bridge.orgs.models import Membership
+from bunna_bridge.orgs.models import Organization
+from bunna_bridge.traceability.models import CherryDelivery
 from bunna_bridge.traceability.models import DdsReference
+from bunna_bridge.traceability.models import SupplyTransfer
 from bunna_bridge.traceability.models import LotSource
 from bunna_bridge.traceability.models import Plot
 from bunna_bridge.traceability.models import Producer
@@ -121,6 +128,10 @@ class Command(BaseCommand):
         CuppingScore.objects.filter(lot__in=lots).delete()
         ComplianceEvent.objects.filter(lot__in=lots).delete()
         DdsReference.objects.filter(lot__in=lots).delete()
+        SupplyTransfer.objects.filter(seller__in=users).delete()
+        SupplyTransfer.objects.filter(buyer__in=users).delete()
+        SmsMessage.objects.filter(producer__owner__in=users).delete()
+        CherryDelivery.objects.filter(owner__in=users).delete()
         LotSource.objects.filter(lot__in=lots).delete()
         Offer.objects.filter(lot__in=lots).delete()
         lots.delete()
@@ -129,8 +140,11 @@ class Command(BaseCommand):
         Notification.objects.filter(recipient__in=users).delete()
         DeforestationZone.objects.filter(source=DEMO_ZONE_SOURCE).delete()
         FloorPrice.objects.filter(source__startswith="Demo").delete()
+        orgs = Organization.objects.filter(memberships__user__in=users).distinct()
         count = users.count()
+        org_ids = list(orgs.values_list("pk", flat=True))
         users.delete()
+        Organization.objects.filter(pk__in=org_ids).delete()
         self.stdout.write(f"Removed {count} demo users and their data.")
 
     # ── helpers ────────────────────────────────────────────────────────────
@@ -194,6 +208,73 @@ class Command(BaseCommand):
         lot.refresh_from_db()
         return lot
 
+    def _phase2(self, exporter, farmers, kochere, today):
+        """Teams, ECTA compliance documents, cherry intake with payments, and a cooperative sale."""
+        org = exporter.membership.organization
+        # Teammates join through invitations, as they would in the app.
+        for key, first, last, role in [
+            ("sales", "Hanna", "Tadesse", Membership.Role.SALES),
+            ("agent", "Bekele", "Girma", Membership.Role.FIELD_AGENT),
+        ]:
+            mate = User(username=f"{key}-demo", email=f"{key}@{DOMAIN}", role="exporter", first_name=first,
+                        last_name=last, company_name=org.name, country="Ethiopia")
+            mate.set_password(self.password)
+            mate._skip_org_creation = True  # noqa: SLF001
+            mate.save()
+            Membership.objects.create(organization=org, user=mate, role=role)
+        Invitation.objects.create(organization=org, email=f"logistics@{DOMAIN}", role=Membership.Role.LOGISTICS,
+                                  invited_by=exporter)
+        # ECTA Directive 1106/2025 documents: two verified, the taster awaiting review.
+        for kind, extra, verified in [
+            ("lab_certificate", {"holder_name": "Highland Exports QC laboratory", "number": "ECTA-LAB-0412"}, True),
+            ("capital_attestation", {"amount_birr": Decimal("15000000"), "number": "AUD-2026-118"}, True),
+            ("taster_certificate", {"holder_name": "Tigist Bekele", "number": "ECTA-TST-2291"}, False),
+        ]:
+            doc = ComplianceDocument(organization=org, kind=kind, uploaded_by=exporter,
+                                     issued_on=today - timedelta(days=200), expires_on=today + timedelta(days=500),
+                                     verified_at=timezone.now() if verified else None, **extra)
+            doc.file.save(f"{kind}.pdf", demo_pdf(kind.replace("_", " ").title(), org.name), save=False)
+            doc.save()
+        # Farmer Abebe has a login: link it so he can see his deliveries and payments.
+        abebe = Producer.objects.get(owner=exporter, external_ref="KOC-001")
+        abebe.user = farmers["farmer"]
+        abebe.phone = "0911234567"
+        abebe.save()
+        station = kochere.washing_station_facility
+        for i, (ref, kg, paid) in enumerate([("KOC-001", "420", True), ("KOC-002", "310", True), ("KOC-003", "260", False),
+                                             ("KOC-004", "390", False), ("KOC-001", "150", False)], start=1):
+            producer = Producer.objects.get(owner=exporter, external_ref=ref)
+            CherryDelivery.objects.create(
+                owner=exporter, station=station, producer=producer, plot=producer.plots.first(), form="cherry",
+                receipt_number=f"KWS-26-{i:04d}", delivered_on=today - timedelta(days=12 - i),
+                weight_kg=Decimal(kg), price_per_kg_etb=Decimal("118.00"),
+                amount_paid_etb=(Decimal(kg) * Decimal("118.00")) if paid else None,
+                paid_on=(today - timedelta(days=10 - i)) if paid else None,
+                payment_reference=f"TB{9310 + i}" if paid else "", recorded_by=exporter,
+            )
+        # A cooperative union with members, deliveries and an open sale to the exporter.
+        coop = self._user("cooperative", "cooperative", "Desta", "Lemma", company_name="Sidama Highlands Union",
+                          phone="+251 916 000 222")
+        coop_deliveries = []
+        for n, (name, lng, lat) in enumerate([("Worku Abate", 38.452, 6.861), ("Meseret Dagne", 38.461, 6.866),
+                                               ("Tsegaye Bulcha", 38.447, 6.874)], start=1):
+            member = Producer.objects.create(owner=coop, external_ref=f"SHU-{n:03d}", name=name, kebele="Bensa",
+                                             woreda="Bensa", region="Sidama", phone=f"09160000{n:02d}",
+                                             language="am" if n != 2 else "om", created_by=coop)
+            ProducerConsent.objects.create(producer=member, purpose="eudr_sharing", method="witnessed", captured_by=coop)
+            plot = Plot.objects.create(producer=member, name="Home garden", location=Point(lng, lat, srid=4326),
+                                       declared_area_ha=Decimal("1.4"), land_tenure="owned", created_by=coop)
+            coop_deliveries.append(CherryDelivery.objects.create(
+                owner=coop, producer=member, plot=plot, form="parchment", receipt_number=f"SHU-26-{n:04d}",
+                delivered_on=today - timedelta(days=6), weight_kg=Decimal("600"), price_per_kg_etb=Decimal("310"),
+                amount_paid_etb=Decimal("186000"), paid_on=today - timedelta(days=5), payment_reference=f"CBE-77{n}",
+                recorded_by=coop,
+            ))
+        sale = SupplyTransfer.objects.create(seller=coop, buyer=exporter, reference="SHU-2026-007", form="parchment",
+                                             quantity_kg=Decimal("1800"), price_per_kg_etb=Decimal("335"),
+                                             notes="Washed Bensa parchment, 11.5% moisture.", created_by=coop)
+        sale.deliveries.set(coop_deliveries)
+
     def _cup(self, lot, grader, base, confirm=True, notes=""):
         b = Decimal(str(base))
         score = CuppingScore.objects.create(
@@ -226,6 +307,7 @@ class Command(BaseCommand):
                    farm_region="Yirgacheffe", farm_kebele="Kochere", cooperative="Kochere Farmers Coop",
                    farm_altitude_m=1950, farm_size_ha=Decimal("3.20"))
         self._user("qgrader", "qgrader", "Tigist", "Bekele", company_name="Licensed Q Arabica Grader (demo)")
+        self._user("cooperative", "cooperative", "Desta", "Lemma", company_name="Sidama Highlands Union (demo)")
 
     def _create(self):
         today = timezone.localdate()
@@ -479,4 +561,5 @@ class Command(BaseCommand):
         RoastBatchLot.objects.create(batch=batch, lot=harrar, quantity_kg=Decimal("10"))
         RoastBatch.objects.create(batch_code="AMR-0916", roaster=roaster, equipment=drum, status="queued",
                                   roast_level="medium")
+        self._phase2(exporter, farmers, kochere, today)
         del roaster_lot, admin

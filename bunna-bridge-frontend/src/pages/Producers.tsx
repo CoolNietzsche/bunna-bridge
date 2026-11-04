@@ -8,7 +8,7 @@ import type { MapPlot } from "../components/PlotMap";
 import { ErrorNote, Field, Muted, Pill } from "../components/trace/ui";
 import { grid } from "../components/trace/styles";
 import {
-  apiError, createProducer, downloadRecordsExport, getPlots, getProducers, importPlots, importProducers,
+  apiError, createProducer, downloadRecordsExport, getPlots, getProducers, importEctms, importPlots, importProducers,
 } from "../api/traceability";
 import type { ImportResult, Producer } from "../api/traceability";
 import { AT } from "../styles/adminTokens";
@@ -179,7 +179,7 @@ export default function Producers() {
 }
 
 function ImportPanel({ onDone }: { onDone: () => void }) {
-  const [kind, setKind] = useState<"producers" | "plots">("producers");
+  const [kind, setKind] = useState<"producers" | "plots" | "ectms">("producers");
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState("");
@@ -189,7 +189,8 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
     if (!file) return;
     setBusy(true); setError(""); setResult(null);
     try {
-      const r = kind === "producers" ? await importProducers(file, dryRun) : await importPlots(file, dryRun);
+      const r = kind === "producers" ? await importProducers(file, dryRun)
+        : kind === "ectms" ? await importEctms(file, dryRun) : await importPlots(file, dryRun);
       setResult(r);
       if (r.saved) onDone();
     } catch (e) {
@@ -210,9 +211,15 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
     <div style={{ ...AC.card, ...AC.cardPad, marginBottom: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "12px" }}>
         <p style={AC.cardTitle}>Bulk import</p>
-        <div style={{ display: "flex", gap: "4px" }}>{tab("producers", "Supplier list (CSV)")}{tab("plots", "Plot maps")}</div>
+        <div style={{ display: "flex", gap: "4px" }}>{tab("producers", "Supplier list (CSV)")}{tab("plots", "Plot maps")}{tab("ectms", "ECTMS export")}</div>
       </div>
-      {kind === "producers" ? (
+      {kind === "ectms" ? (
+        <Muted style={{ marginBottom: "12px" }}>
+          A CSV exported from ECTA's Coffee Traceability and Management System (ECTMS). Needs a <b>FarmerID</b> and
+          farmer name; FarmID, kebele, woreda, latitude/longitude, area and a polygon (WKT or GeoJSON) are used when
+          present. Re-importing updates existing farmers and farms instead of duplicating them.
+        </Muted>
+      ) : kind === "producers" ? (
         <Muted style={{ marginBottom: "12px" }}>
           A CSV with a <b>name</b> column. Optional: external_ref, phone, region, zone, woreda, kebele, cooperative,
           ectms_farmer_id, latitude, longitude, area_ha, land_tenure, consent (yes/no), consent_method. Rows with
@@ -229,7 +236,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
         <label style={{ ...AC.btnGhost, cursor: "pointer" }}>
           <FileUp size={14} /> {file ? file.name : "Choose file"}
-          <input type="file" hidden accept={kind === "producers" ? ".csv" : ".geojson,.json,.kml,.kmz,.zip"} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setResult(null); }} />
+          <input type="file" hidden accept={kind === "plots" ? ".geojson,.json,.kml,.kmz,.zip" : ".csv"} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setResult(null); }} />
         </label>
         <button style={AC.btnGhost} disabled={!file || busy} onClick={() => run(true)}>Check file</button>
         <button style={AC.btnPrimary} disabled={!file || busy} onClick={() => run(false)}>{busy ? "Working…" : "Import"}</button>
@@ -240,6 +247,7 @@ function ImportPanel({ onDone }: { onDone: () => void }) {
             {result.saved ? "Imported: " : result.errors.length ? "Nothing was saved. " : "Check passed — ready to import: "}
             {result.producers_created} new producer(s)
             {result.producers_updated ? `, ${result.producers_updated} updated` : ""}, {result.plots_created} plot(s)
+            {result.plots_updated ? ` (${result.plots_updated} updated)` : ""}
             {result.consents_recorded ? `, ${result.consents_recorded} consent record(s)` : ""}.
           </p>
           {result.errors.length > 0 && (

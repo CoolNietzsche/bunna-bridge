@@ -146,6 +146,7 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "last_name":    user.last_name,
                 "company_name": user.company_name,
                 "is_verified":  user.is_verified,
+                "organization": UserSerializer().get_organization(user),
             },
         }
 

@@ -20,6 +20,11 @@ const Certifications = lazy(() => import("./pages/Certifications"));
 const WashingStations = lazy(() => import("./pages/WashingStations"));
 const Producers = lazy(() => import("./pages/Producers"));
 const ProducerDetail = lazy(() => import("./pages/ProducerDetail"));
+const Team = lazy(() => import("./pages/Team"));
+const InviteAccept = lazy(() => import("./pages/InviteAccept"));
+const Intake = lazy(() => import("./pages/Intake"));
+const Supply = lazy(() => import("./pages/Supply"));
+const FieldApp = lazy(() => import("./pages/FieldApp"));
 const RoastEquipmentPage = lazy(() => import("./pages/RoastEquipment"));
 const RoastBatches = lazy(() => import("./pages/RoastBatches"));
 const LotPipeline = lazy(() => import("./pages/LotPipeline"));
@@ -80,6 +85,11 @@ export default function App() {
             <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
             <Route path="/roastery" element={<ProtectedRoute><MyRoastery /></ProtectedRoute>} />
             <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
+            <Route path="/settings/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+            <Route path="/invite/:token" element={<InviteAccept />} />
+            <Route path="/field" element={<ProtectedRoute><FieldApp /></ProtectedRoute>} />
+            <Route path="/intake" element={<ProtectedRoute><Intake /></ProtectedRoute>} />
+            <Route path="/supply" element={<ProtectedRoute><Supply /></ProtectedRoute>} />
             <Route path="/producers" element={<ProtectedRoute><Producers /></ProtectedRoute>} />
             <Route path="/producers/:id" element={<ProtectedRoute><ProducerDetail /></ProtectedRoute>} />
             <Route path="/washing-stations" element={<ProtectedRoute><WashingStations /></ProtectedRoute>} />

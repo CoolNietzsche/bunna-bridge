@@ -31,7 +31,7 @@ export default function SupplySources({ lot, onChanged }: { lot: CoffeeLot; onCh
   const [receipt, setReceipt] = useState("");
   const [error, setError] = useState("");
 
-  const { data: plots = [] } = useQuery({ queryKey: ["plots", "picker", search], queryFn: () => getPlots({ search }), enabled: adding });
+  const { data: plots = [] } = useQuery({ queryKey: ["plots", "picker", search], queryFn: () => getPlots({ search, available: "1" }), enabled: adding });
   const used = new Set(sources.map((s) => s.plot));
   const choices = plots.filter((p) => !used.has(p.id));
 

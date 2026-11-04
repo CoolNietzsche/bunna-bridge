@@ -1,3 +1,4 @@
+import ComplianceReviews from "../components/trace/ComplianceReviews";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, Clock, FileText, ShieldOff, AlertTriangle } from "lucide-react";
 import AdminShell from "../components/admin/AdminShell";
@@ -99,6 +100,7 @@ export default function LicenseReviews() {
           {data?.map((item) => <Row key={item.id} item={item} />)}
         </div>
       )}
+      {user?.role === "admin" && <ComplianceReviews />}
     </AdminShell>
   );
 }

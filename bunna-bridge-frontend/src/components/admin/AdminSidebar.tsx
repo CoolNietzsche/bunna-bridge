@@ -4,16 +4,16 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users } from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
 
-interface NavItem { label: string; path: string; icon: ReactNode; }
+interface NavItem { label: string; path: string; icon: ReactNode; cap?: string; }
 interface NavGroup { title: string; items: NavItem[]; }
 
 /** Real, role-scoped back-office navigation. */
-function groupsFor(role: string | undefined): NavGroup[] {
+function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] {
   const s = 16;
   const operations: Record<string, NavItem[]> = {
     admin: [
@@ -31,8 +31,11 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
       { label: "Producers & Plots", path: "/producers", icon: <Users size={s} /> },
+      { label: "Cherry Intake", path: "/intake", icon: <Scale size={s} /> },
+      { label: "From Cooperatives", path: "/supply", icon: <Truck size={s} /> },
+      { label: "Field App", path: "/field", icon: <Smartphone size={s} />, cap: "manage_supply" },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
-      { label: "Offers", path: "/offers", icon: <Inbox size={s} /> },
+      { label: "Offers", path: "/offers", icon: <Inbox size={s} />, cap: "manage_offers" },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
       { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
     ],
@@ -49,6 +52,7 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "My Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Producers & Plots", path: "/producers", icon: <Users size={s} /> },
+      { label: "Cherry Intake", path: "/intake", icon: <Scale size={s} /> },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers Received", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
@@ -63,16 +67,26 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
+    cooperative: [
+      { label: "Members & Plots", path: "/producers", icon: <Users size={s} /> },
+      { label: "Cherry Intake", path: "/intake", icon: <Scale size={s} /> },
+      { label: "Sales to Exporters", path: "/supply", icon: <Truck size={s} /> },
+      { label: "Field App", path: "/field", icon: <Smartphone size={s} />, cap: "manage_supply" },
+      { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
+    ],
     farmer: [
       { label: "My Farm", path: "/farm", icon: <Sprout size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
     ],
     qgrader: [{ label: "Lots to Cup", path: "/lots", icon: <Package size={s} /> }],
   };
+  const allowed = (item: NavItem) => !item.cap || caps === null || caps.includes(item.cap);
+  const account: NavItem[] = [{ label: "Settings", path: "/settings", icon: <Settings size={s} /> }];
+  if (caps !== null) account.unshift({ label: "Team & Compliance", path: "/settings/team", icon: <Building2 size={s} /> });
   return [
     { title: "Overview", items: [{ label: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={s} /> }] },
-    { title: "Operations", items: operations[role ?? "exporter"] ?? operations.exporter },
-    { title: "Account", items: [{ label: "Settings", path: "/settings", icon: <Settings size={s} /> }] },
+    { title: "Operations", items: (operations[role ?? "exporter"] ?? operations.exporter).filter(allowed) },
+    { title: "Account", items: account },
   ];
 }
 
@@ -87,7 +101,7 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const groups = groupsFor(user?.role);
+  const groups = groupsFor(user?.role, user?.organization ? user.organization.capabilities : null);
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
 
   const go = (path: string) => { navigate(path); onMobileClose(); };
@@ -136,7 +150,7 @@ export default function AdminSidebar({ collapsed, onCollapse, mobileOpen, onMobi
               )}
               <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
                 {group.items.map((item) => {
-                  const active = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
+                  const active = location.pathname === item.path || (location.pathname.startsWith(item.path + "/") && !groups.some((g) => g.items.some((o) => o.path !== item.path && o.path.startsWith(item.path + "/") && location.pathname.startsWith(o.path))));
                   const hovered = hoveredPath === item.path;
                   return (
                     <li key={item.path}>

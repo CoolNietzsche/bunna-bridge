@@ -244,6 +244,101 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Public story hides producer names', (await page.locator('text=/Gara Muleta Estate/').count()) === 0);
   await page.context().close();
 
+  // 12. Phase 2 — team invitation: owner invites, teammate registers from the link and shares the lots
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'exporter@demo.beersheba.et');
+  await page.goto(BASE + '/settings/team');
+  await page.waitForTimeout(800);
+  await page.getByLabel('Email', { exact: true }).fill('e2e-mate@example.com');
+  await page.getByRole('button', { name: /Create invitation/ }).click();
+  await page.waitForTimeout(800);
+  const org = await api(expT, '/api/v1/orgs/me/');
+  const inv = org.body.invitations.find(i => i.email === 'e2e-mate@example.com');
+  check('Owner creates an invitation in the UI', !!inv);
+  const mateCtx = await newPage();
+  await mateCtx.goto(`${BASE}/invite/${inv?.token}`);
+  await mateCtx.getByRole('button', { name: /Create your account/ }).click();
+  await mateCtx.waitForURL(/register\?invite=/);
+  const mInputs = mateCtx.locator('form input');
+  await mInputs.nth(0).fill('Team'); await mInputs.nth(1).fill('Mate');
+  await mInputs.nth(3).fill('e2e-mate');
+  const mpw = mateCtx.locator('input[type=password]');
+  await mpw.nth(0).fill('Highland-Coffee-2026!'); await mpw.nth(1).fill('Highland-Coffee-2026!');
+  await mateCtx.click('button[type=submit]');
+  await mateCtx.waitForURL(/login/, { timeout: 8000 }).catch(() => {});
+  const mateT = await fetch(API + '/api/auth/token/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'e2e-mate@example.com', password: 'Highland-Coffee-2026!' }) }).then(r => r.json());
+  check('Invited teammate joins the organisation', mateT.user?.organization?.name === 'Highland Exports PLC', mateT.user?.organization?.team_role);
+  const mateLots = await api(mateT, '/api/v1/lots/?page_size=50');
+  check('Teammate sees the team\'s lots', (mateLots.body.results || []).some(l => l.lot_id === 'YRG-2026-0847'));
+  await mateCtx.context().close();
+
+  // 13. Cherry intake: record a delivery with payment; producer gets an SMS receipt
+  await page.goto(BASE + '/intake');
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Record delivery/ }).click();
+  const prodSel = page.getByLabel('Producer');
+  await prodSel.selectOption({ label: 'Mulu Gebre (KOC-002)' });
+  await page.getByLabel('Receipt no.').fill('E2E-0001');
+  await page.getByLabel('Weight (kg)').fill('100');
+  await page.getByLabel('Price (ETB/kg)').fill('120');
+  await page.getByLabel(/Paid now/).fill('12000');
+  await page.getByRole('button', { name: /Save and next/ }).click();
+  await page.waitForTimeout(1200);
+  const dl2 = await api(expT, '/api/v1/traceability/deliveries/?search=E2E-0001');
+  check('Delivery and payment recorded from the UI', dl2.body.results?.[0]?.amount_paid_etb?.startsWith('12000'));
+
+  // 14. Cooperative sale accepted, then its delivery allocated to a lot
+  await page.goto(BASE + '/supply');
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /^Accept$/ }).click();
+  await page.waitForTimeout(1000);
+  const avail = await api(expT, '/api/v1/traceability/plots/?available=1&page_size=200');
+  check('Accepted cooperative sale makes member plots usable', (avail.body.results || []).some(p => p.producer_name === 'Worku Abate'));
+  await page.context().close();
+
+  // 15. Field app works offline: register a farmer with no network, sync when back online
+  const fctx = await browser.newContext({ viewport: { width: 390, height: 844 }, geolocation: { latitude: 6.33, longitude: 38.22 }, permissions: ['geolocation'] });
+  const fpage = await fctx.newPage();
+  fpage.on('pageerror', e => errs.push(String(e)));
+  const agentT = await token('agent@demo.beersheba.et');
+  await fpage.goto(BASE + '/login');
+  await fpage.evaluate(t => { localStorage.setItem('access_token', t.access); localStorage.setItem('refresh_token', t.refresh); localStorage.setItem('user_data', JSON.stringify(t.user)); }, agentT);
+  await fpage.goto(BASE + '/field');
+  await fpage.waitForTimeout(1500);
+  await fctx.setOffline(true);
+  await fpage.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await fpage.getByRole('button', { name: /Register a farmer/ }).click();
+  await fpage.getByLabel('Full name').fill('Offline Farmer E2E');
+  await fpage.getByLabel('Mobile number').fill('0912345678');
+  await fpage.getByRole('button', { name: /^Next$/ }).click();
+  await fpage.getByLabel('The farmer agrees').check();
+  await fpage.getByRole('button', { name: /^Next$/ }).click();
+  await fpage.getByLabel('Size (hectares)').fill('1.2');
+  await fpage.getByRole('button', { name: /Use my location/ }).click();
+  await fpage.waitForTimeout(800);
+  await fpage.getByRole('button', { name: /^Save$/ }).click();
+  await fpage.waitForTimeout(600);
+  const waiting = await fpage.locator('text=/items waiting to sync/').count();
+  check('Field app queues a farmer, consent and plot while offline', waiting > 0);
+  await fctx.setOffline(false);
+  await fpage.evaluate(() => window.dispatchEvent(new Event('online')));
+  await fpage.waitForTimeout(2500);
+  const synced = await api(expT, '/api/v1/traceability/producers/?search=Offline%20Farmer%20E2E');
+  const sp = (synced.body.results || [])[0];
+  check('Queued items sync when back online', !!sp && sp.plots_count === 1 && sp.eudr_consent === true, JSON.stringify(sp && { plots: sp.plots_count, consent: sp.eudr_consent }));
+  await fpage.getByLabel('Language').selectOption('am');
+  check('Field app switches to Amharic', (await fpage.locator('text=አርሶ አደር መዝግብ').count()) > 0);
+  await fctx.close();
+
+  // 16. Farmer sees their own deliveries and payments
+  page = await newPage();
+  await loginUI(page, 'farmer@demo.beersheba.et');
+  await page.goto(BASE + '/farm');
+  await page.waitForTimeout(1200);
+  check('Farmer sees deliveries and payments', (await page.locator('text=KWS-26-0001').count()) > 0);
+  await page.context().close();
+
   console.log(results.join('\n'));
   console.log(errs.length ? 'PAGE ERRORS: ' + JSON.stringify(errs) : 'no page errors');
   await browser.close();

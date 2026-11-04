@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { register } from "../api/auth";
 import { ArrowRight } from "lucide-react";
 import AuthBrandPanel from "../components/site/AuthBrandPanel";
@@ -11,13 +11,17 @@ const ROLES = [
   { value: "buyer", label: "Buyer", desc: "I source green coffee for trade or resale" },
   { value: "importer", label: "EU importer", desc: "I place coffee on the EU market and file the EUDR DDS" },
   { value: "roaster", label: "Roaster", desc: "I roast and sell specialty coffee" },
+  { value: "cooperative", label: "Cooperative / union", desc: "We collect members' coffee and sell to exporters" },
   { value: "farmer", label: "Farmer", desc: "I grow coffee in Ethiopia" },
 ];
 
 export default function Register() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const invite = params.get("invite") ?? "";
+  const inviteOrg = params.get("org") ?? "";
   const [form, setForm] = useState({
-    email: "", username: "", password: "", password2: "",
+    email: params.get("email") ?? "", username: "", password: "", password2: "",
     first_name: "", last_name: "", role: "exporter",
     company_name: "", phone: "", country: "",
   });
@@ -30,7 +34,7 @@ export default function Register() {
     if (form.password !== form.password2) { setError("Passwords do not match."); return; }
     setLoading(true); setError("");
     try {
-      await register(form);
+      await register(invite ? { ...form, invite_token: invite } : form);
       navigate("/login?registered=1");
     } catch (err: unknown) {
       const e = err as { response?: { data?: Record<string, string[] | string> } };
@@ -48,7 +52,8 @@ export default function Register() {
   const companyLabel = form.role === "roaster" ? "Roastery name"
     : form.role === "buyer" || form.role === "importer" ? "Company name"
     : form.role === "exporter" ? "Export company name"
-    : form.role === "farmer" ? "Cooperative / farm name" : "Organization";
+    : form.role === "farmer" ? "Cooperative / farm name"
+    : form.role === "cooperative" ? "Cooperative or union name" : "Organization";
 
   return (
     <div className="bb-auth" style={{ minHeight: "100vh", display: "grid", gridTemplateColumns: "1.05fr 1fr", background: T.color.paper }}>
@@ -59,12 +64,15 @@ export default function Register() {
           <Link to="/" style={{ fontFamily: T.font.sans, fontSize: "0.82rem", color: T.color.textMuted, textDecoration: "none" }}>← Back home</Link>
 
           <h1 style={{ fontFamily: T.font.display, fontSize: "2.2rem", fontWeight: 700, color: T.color.ink, margin: "20px 0 6px", letterSpacing: "-0.03em" }}>Create your account</h1>
-          <p style={{ fontFamily: T.font.sans, fontSize: "0.95rem", color: T.color.textMuted, margin: "0 0 24px" }}>Join the Beersheba coffee network.</p>
+          <p style={{ fontFamily: T.font.sans, fontSize: "0.95rem", color: T.color.textMuted, margin: "0 0 24px" }}>
+            {invite ? `You are joining ${inviteOrg || "your team"} on Beersheba.` : "Join the Beersheba coffee network."}
+          </p>
 
           {error && <div style={{ ...CS.errorBanner, marginBottom: "16px" }}>{error}</div>}
 
           <form onSubmit={handleSubmit}>
             {/* Role */}
+            {!invite && (<>
             <p style={CS.label}>I am a…</p>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "20px" }}>
               {ROLES.map((r) => {
@@ -84,15 +92,16 @@ export default function Register() {
             <p style={{ fontFamily: T.font.sans, fontSize: "0.78rem", color: T.color.textFaint, margin: "-10px 0 20px" }}>
               Licensed Q-graders are onboarded by the Beersheba team — email us to get a grading account.
             </p>
+            </>)}
 
             <Row>
               <Field label="First name"><input style={CS.input} value={form.first_name} onChange={(e) => set("first_name", e.target.value)} placeholder="Abebe" /></Field>
               <Field label="Last name"><input style={CS.input} value={form.last_name} onChange={(e) => set("last_name", e.target.value)} placeholder="Girma" /></Field>
             </Row>
 
-            <Field label="Email *"><input style={CS.input} type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" /></Field>
+            <Field label="Email *"><input style={CS.input} type="email" required readOnly={!!invite} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" /></Field>
             <Field label="Username *"><input style={CS.input} required value={form.username} onChange={(e) => set("username", e.target.value)} placeholder="username" /></Field>
-            <Field label={companyLabel}><input style={CS.input} value={form.company_name} onChange={(e) => set("company_name", e.target.value)} placeholder="e.g. Nordic Roasters" /></Field>
+            {!invite && <Field label={companyLabel}><input style={CS.input} value={form.company_name} onChange={(e) => set("company_name", e.target.value)} placeholder="e.g. Nordic Roasters" /></Field>}
 
             <Row>
               <Field label="Country"><input style={CS.input} value={form.country} onChange={(e) => set("country", e.target.value)} placeholder="Ethiopia" /></Field>

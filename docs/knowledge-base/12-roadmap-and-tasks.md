@@ -64,6 +64,13 @@ The aggregation backbone and the importer evidence package. This is the product-
 
 ## Phase 2 — Origin onboarding at scale (Jan–Mar 2027)
 
+> **Status 2026-11-04: built early, before deployment.** O-1 to O-7 are done (backend, UI and tests). Three parts still need outside input before go-live:
+> - **O-5:** native speakers must review the Amharic and Afaan Oromo text.
+> - **O-6:** real SMS sending needs a contract with an SMS gateway; until then messages are only logged.
+> - **O-8:** ECTMS works through file import today; live lookup needs API access from ECTA.
+>
+> Details are in [/DONE.md](../../DONE.md).
+
 | ID | Task | Size | Notes |
 |---|---|---|---|
 | O-1 | **Organisations and team accounts**: company → members with roles (owner, sales, QC, logistics, field agent); all lots/contracts owned by the organisation | L | Required by exporters, importers, cooperatives |

@@ -8,6 +8,7 @@ export interface Producer {
   external_ref: string;
   name: string;
   phone: string;
+  language: "am" | "om" | "en";
   region: string;
   zone: string;
   woreda: string;
@@ -159,6 +160,7 @@ export interface ImportResult {
   producers_created: number;
   producers_updated?: number;
   plots_created: number;
+  plots_updated?: number;
   consents_recorded?: number;
   errors: { row: number; error: string }[];
 }
@@ -186,7 +188,7 @@ export const recordConsent = async (producerId: string, form: FormData): Promise
   })).data;
 
 // ── Plots ──
-export const getPlots = async (params: { producer?: string; search?: string } = {}): Promise<Plot[]> =>
+export const getPlots = async (params: { producer?: string; search?: string; available?: string } = {}): Promise<Plot[]> =>
   list<Plot>((await api.get("/v1/traceability/plots/", { params })).data);
 export const createPlot = async (input: Partial<Plot>): Promise<Plot> =>
   (await api.post("/v1/traceability/plots/", input)).data;
@@ -212,6 +214,8 @@ const upload = async (url: string, file: File, dryRun: boolean, extra: Record<st
 };
 export const importProducers = (file: File, dryRun: boolean) =>
   upload("/v1/traceability/producers/import/", file, dryRun);
+export const importEctms = (file: File, dryRun: boolean) =>
+  upload("/v1/traceability/ectms/import/", file, dryRun);
 export const importPlots = (file: File, dryRun: boolean, producer?: string) =>
   upload("/v1/traceability/plots/import/", file, dryRun, producer ? { producer } : {});
 

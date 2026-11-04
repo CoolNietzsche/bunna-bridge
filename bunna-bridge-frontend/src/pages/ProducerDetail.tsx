@@ -13,6 +13,7 @@ import {
   updateProducer,
 } from "../api/traceability";
 import type { Plot, Producer } from "../api/traceability";
+import { formatEtb, getDeliveries, getProducerSms } from "../api/supply";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
 
@@ -79,6 +80,7 @@ export default function ProducerDetail() {
         <div style={{ display: "grid", gap: "20px" }}>
           <ConsentCard producer={producer} onChange={refresh} />
           <ProfileCard producer={producer} onChange={refresh} />
+          <ActivityCard producerId={producer.id} />
         </div>
       </div>
     </AdminShell>
@@ -289,6 +291,7 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
     mutationFn: () => updateProducer(producer.id, {
       name: form.name, external_ref: form.external_ref, phone: form.phone, region: form.region, zone: form.zone,
       woreda: form.woreda, kebele: form.kebele, cooperative: form.cooperative, ectms_farmer_id: form.ectms_farmer_id,
+      language: form.language,
     }),
     onSuccess: () => { setEdit(false); onChange(); },
     onError: (e) => setError(apiError(e)),
@@ -312,6 +315,11 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
                 <input style={AC.input} value={(form[k] as string) ?? ""} onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
               </Field>
             ))}
+            <Field label="SMS language">
+              <select style={AC.input} value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value as Producer["language"] })}>
+                <option value="am">Amharic</option><option value="om">Afaan Oromo</option><option value="en">English</option>
+              </select>
+            </Field>
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <button style={AC.btnPrimary} onClick={() => save.mutate()} disabled={save.isPending}><Check size={13} /> Save</button>
@@ -326,8 +334,40 @@ function ProfileCard({ producer, onChange }: { producer: Producer; onChange: () 
               <dd style={{ margin: 0, color: AT.color.text }}>{(producer[k] as string) || "—"}</dd>
             </div>
           ))}
+          <dt style={{ color: AT.color.textMuted }}>SMS language</dt>
+          <dd style={{ margin: 0, color: AT.color.text }}>{{ am: "Amharic", om: "Afaan Oromo", en: "English" }[producer.language] ?? "—"}</dd>
         </dl>
       )}
+    </div>
+  );
+}
+
+function ActivityCard({ producerId }: { producerId: string }) {
+  const { data: deliveries } = useQuery({ queryKey: ["deliveries", "producer", producerId], queryFn: () => getDeliveries({ producer: producerId }) });
+  const { data: sms = [] } = useQuery({ queryKey: ["sms", producerId], queryFn: () => getProducerSms(producerId) });
+  const rows = deliveries?.results ?? [];
+  return (
+    <div style={{ ...AC.card, ...AC.cardPad }}>
+      <p style={{ ...AC.cardTitle, marginBottom: "6px" }}>Deliveries and messages</p>
+      {rows.length === 0 ? <Muted style={{ marginBottom: "10px" }}>No deliveries recorded.</Muted> : (
+        <>
+          <Muted style={{ marginBottom: "8px" }}>
+            {Number(deliveries?.summary.weight_kg ?? 0).toLocaleString()} kg delivered · {formatEtb(deliveries?.summary.paid_etb)} paid of {formatEtb(deliveries?.summary.due_etb)}
+          </Muted>
+          {rows.slice(0, 6).map((d) => (
+            <p key={d.id} style={{ fontFamily: AT.font.sans, fontSize: "0.8rem", color: AT.color.textSecondary, margin: "0 0 4px" }}>
+              {formatDate(d.delivered_on)} · {d.receipt_number} · {Number(d.weight_kg).toLocaleString()} kg · {Number(d.amount_paid_etb || 0) > 0 ? `paid ${formatEtb(d.amount_paid_etb)}` : "unpaid"}
+            </p>
+          ))}
+        </>
+      )}
+      <p style={{ fontFamily: AT.font.sans, fontWeight: 600, fontSize: "0.8rem", margin: "12px 0 6px", color: AT.color.text }}>SMS sent</p>
+      {sms.length === 0 ? <Muted>None yet. Receipts, payments and consent confirmations are sent automatically when a phone number is on file.</Muted> : sms.slice(0, 5).map((m) => (
+        <div key={m.id} style={{ marginBottom: "8px" }}>
+          <Muted>{formatDate(m.created_at)} · {m.kind_label} · {m.status === "sent" ? "sent" : m.status === "skipped" ? "not sent (no valid mobile number)" : m.status}</Muted>
+          <p style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text, margin: "2px 0 0" }}>{m.body}</p>
+        </div>
+      ))}
     </div>
   );
 }

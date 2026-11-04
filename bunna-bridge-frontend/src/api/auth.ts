@@ -9,7 +9,7 @@ export interface UserProfile {
   id: string;
   email: string;
   username: string;
-  role: "admin" | "exporter" | "buyer" | "farmer" | "qgrader" | "roaster";
+  role: "admin" | "exporter" | "buyer" | "importer" | "cooperative" | "farmer" | "qgrader" | "roaster";
   company_name: string;
   is_verified: boolean;
   first_name?: string;
@@ -17,6 +17,13 @@ export interface UserProfile {
   ecta_license_file?: string | null;
   ecta_license_number?: string | null;
   ecta_license_expiry?: string | null;
+  organization?: {
+    id: string;
+    name: string;
+    kind: string;
+    team_role: string;
+    capabilities: string[];
+  } | null;
 }
 
 export interface AuthTokens {
@@ -36,6 +43,7 @@ export interface RegisterData {
   company_name?: string;
   phone?: string;
   country?: string;
+  invite_token?: string;
 }
 
 export const login = async (creds: LoginCredentials): Promise<AuthTokens> => {
