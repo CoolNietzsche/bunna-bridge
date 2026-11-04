@@ -8,6 +8,8 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    organization = serializers.SerializerMethodField()
+
     class Meta:
         model  = User
         fields = [
@@ -22,26 +24,43 @@ class UserSerializer(serializers.ModelSerializer):
             "roastery_type", "roastery_monthly_capacity_kg",
             "roastery_roast_styles", "roastery_preferred_origins",
             "roastery_established_year", "roastery_website",
+            "organization",
         ]
         # role is fixed at registration (qgrader/admin are assigned by staff);
         # verification fields are set by staff only.
         read_only_fields = ["id", "date_joined", "is_verified", "farm_id", "role", "ecta_license_verified_at"]
 
+    def get_organization(self, obj):
+        from bunna_bridge.orgs.access import CAPABILITIES
+        from bunna_bridge.orgs.access import membership_of
 
-SELF_SERVICE_ROLES = ["exporter", "buyer", "importer", "farmer", "roaster"]
+        m = membership_of(obj)
+        if m is None:
+            return None
+        return {
+            "id": str(m.organization_id),
+            "name": m.organization.name,
+            "kind": m.organization.kind,
+            "team_role": m.role,
+            "capabilities": sorted(c for c, roles in CAPABILITIES.items() if m.role in roles),
+        }
+
+
+SELF_SERVICE_ROLES = ["exporter", "buyer", "importer", "farmer", "roaster", "cooperative"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password  = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True)
     role      = serializers.ChoiceField(choices=SELF_SERVICE_ROLES, default="exporter")
+    invite_token = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model  = User
         fields = [
             "email", "username", "password", "password2",
             "first_name", "last_name", "role",
-            "company_name", "phone", "country",
+            "company_name", "phone", "country", "invite_token",
         ]
 
     def validate_email(self, value):
@@ -60,10 +79,36 @@ class RegisterSerializer(serializers.ModelSerializer):
             validate_password(attrs["password"], user=candidate)
         except DjangoValidationError as exc:
             raise serializers.ValidationError({"password": list(exc.messages)}) from exc
+        token = attrs.pop("invite_token", "") or ""
+        if token:
+            from bunna_bridge.orgs.models import Invitation
+
+            invitation = Invitation.objects.filter(token=token).select_related("organization").first()
+            if invitation is None or not invitation.is_open:
+                raise serializers.ValidationError({"invite_token": "This invitation is no longer valid."})
+            if invitation.email.lower() != attrs.get("email", "").lower():
+                raise serializers.ValidationError({"email": "Use the email address the invitation was sent to."})
+            attrs["role"] = invitation.organization.kind
+            attrs["company_name"] = invitation.organization.name
+            self._invitation = invitation
         return attrs
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        from django.db import transaction
+
+        invitation = getattr(self, "_invitation", None)
+        password = validated_data.pop("password")
+        with transaction.atomic():
+            user = User(**validated_data)
+            user.set_password(password)
+            if invitation is not None:
+                user._skip_org_creation = True  # noqa: SLF001 - joins the inviting organisation
+            user.save()
+            if invitation is not None:
+                from bunna_bridge.orgs.services import accept_invitation
+
+                accept_invitation(invitation, user)
+        return user
 
 
 class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):

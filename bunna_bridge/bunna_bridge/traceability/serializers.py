@@ -3,6 +3,10 @@ import json
 from django.contrib.gis.geos import GEOSException
 from rest_framework import serializers
 
+from bunna_bridge.orgs.access import same_team
+from bunna_bridge.orgs.access import team_ids
+
+from .access import plot_available_to
 from .geo import geometry_from_geojson
 from .geo import plot_geolocation_problem
 from .geo import validate_plot_geometry
@@ -125,7 +129,7 @@ class ProducerSerializer(serializers.ModelSerializer):
         owner = self.context["request"].user
         if self.instance is not None:
             owner = self.instance.owner
-        qs = Producer.objects.filter(owner=owner, external_ref=value)
+        qs = Producer.objects.filter(owner_id__in=team_ids(owner), external_ref=value)
         if self.instance is not None:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
@@ -206,7 +210,7 @@ class PlotSerializer(serializers.ModelSerializer):
         if not (
             user.is_staff
             or getattr(user, "role", None) == "admin"
-            or producer.owner_id == user.id
+            or same_team(user, producer.owner_id)
         ):
             raise serializers.ValidationError("Producer not found.")
         return producer
@@ -275,7 +279,7 @@ class LotSourceSerializer(serializers.ModelSerializer):
         lot = self.context["lot"]
         if plot.archived_at is not None:
             raise serializers.ValidationError("This plot is archived.")
-        if plot.producer.owner_id != lot.exporter_id:
+        if not plot_available_to(plot, lot.exporter):
             raise serializers.ValidationError(
                 "Plot not found among your registered producers.",
             )

@@ -7,6 +7,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied
+
+from bunna_bridge.orgs.access import can
+from bunna_bridge.orgs.access import team_ids
+
 from .models import Offer, CoffeeLot, Notification
 from .serializers import OfferSerializer
 from .signals import create_lot_status_notification
@@ -70,17 +75,19 @@ class OfferListCreateView(generics.ListCreateAPIView):
             # Dual-role: offers they made as a buyer, plus offers received
             # on lots they own/export.
             return Offer.objects.filter(
-                Q(buyer=user) | Q(lot__exporter=user)
+                Q(buyer_id__in=team_ids(user)) | Q(lot__exporter_id__in=team_ids(user))
             ).select_related("lot", "buyer")
         if role in ("buyer", "importer"):
-            return Offer.objects.filter(buyer=user).select_related("lot", "buyer")
+            return Offer.objects.filter(buyer_id__in=team_ids(user)).select_related("lot", "buyer")
         if role == "admin" or user.is_staff:
             return Offer.objects.select_related("lot", "buyer")
         if role == "exporter":
-            return Offer.objects.filter(lot__exporter=user).select_related("lot", "buyer")
+            return Offer.objects.filter(lot__exporter_id__in=team_ids(user)).select_related("lot", "buyer")
         return Offer.objects.none()
 
     def perform_create(self, serializer):
+        if not can(self.request.user, "manage_offers"):
+            raise PermissionDenied("Your team role cannot make offers.")
         offer = serializer.save(buyer=self.request.user)
         Notification.objects.create(
             recipient=offer.lot.exporter, notification_type="offer",
@@ -100,8 +107,8 @@ class OfferDetailView(generics.RetrieveAPIView):
     def get_queryset(self):
         user = self.request.user
         return (
-            Offer.objects.filter(buyer=user) |
-            Offer.objects.filter(lot__exporter=user)
+            Offer.objects.filter(buyer_id__in=team_ids(user)) |
+            Offer.objects.filter(lot__exporter_id__in=team_ids(user))
         ).select_related("lot", "buyer")
 
 
@@ -111,7 +118,11 @@ class OfferRespondView(APIView):
 
     @transaction.atomic
     def post(self, request, pk):
-        offer = get_object_or_404(Offer.objects.select_for_update(), pk=pk, lot__exporter=request.user)
+        if not can(request.user, "manage_offers"):
+            return Response({"detail": "Your team role cannot respond to offers."}, status=403)
+        offer = get_object_or_404(
+            Offer.objects.select_for_update(), pk=pk, lot__exporter_id__in=team_ids(request.user),
+        )
         action = request.data.get("action")
 
         if offer.status not in ("pending", "countered"):
@@ -191,7 +202,7 @@ class OfferWithdrawView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
-        offer = get_object_or_404(Offer, pk=pk, buyer=request.user)
+        offer = get_object_or_404(Offer, pk=pk, buyer_id__in=team_ids(request.user))
         if offer.status not in ("pending", "countered"):
             return Response(
                 {"detail": "Cannot withdraw — offer is already resolved."},
@@ -215,7 +226,7 @@ class OfferAcceptCounterView(APIView):
 
     @transaction.atomic
     def post(self, request, pk):
-        offer = get_object_or_404(Offer.objects.select_for_update(), pk=pk, buyer=request.user)
+        offer = get_object_or_404(Offer.objects.select_for_update(), pk=pk, buyer_id__in=team_ids(request.user))
         if offer.status != "countered":
             return Response(
                 {"detail": "No counter-offer to accept."},

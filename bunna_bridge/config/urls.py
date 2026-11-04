@@ -18,6 +18,7 @@ urlpatterns = [
     path("api/v1/", include("bunna_bridge.lots.urls")),
     path("api/v1/", include("bunna_bridge.roasting.urls")),
     path("api/v1/", include("bunna_bridge.traceability.urls")),
+    path("api/v1/", include("bunna_bridge.orgs.urls")),
     path("api/v1/auth/", include("bunna_bridge.users.api_urls")),
     # ── Pages ──
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),

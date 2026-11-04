@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from bunna_bridge.orgs.access import same_team
+from bunna_bridge.orgs.access import team_ids
+
 from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.models import Offer
 
@@ -34,8 +37,8 @@ def _lot_is_available_to_roaster(lot, roaster):
     has no post-purchase ownership transfer, so "accepted offer" is the only
     signal that a roaster legitimately holds some of that lot's coffee.
     """
-    return lot.exporter_id == roaster.id or Offer.objects.filter(
-        buyer=roaster, lot=lot, status="accepted",
+    return same_team(roaster, lot.exporter_id) or Offer.objects.filter(
+        buyer_id__in=team_ids(roaster), lot=lot, status="accepted",
     ).exists()
 
 

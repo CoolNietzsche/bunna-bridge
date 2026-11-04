@@ -27,6 +27,8 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import Polygon
 from django.db import transaction
 
+from bunna_bridge.orgs.access import team_ids
+
 from .geo import geometry_from_geojson
 from .geo import validate_plot_geometry
 from .models import Plot
@@ -69,12 +71,12 @@ def _dec(value, field, errors, row):
 
 def _find_producer(owner, ref, name):
     if ref:
-        found = Producer.objects.filter(owner=owner, external_ref=ref).first()
+        found = Producer.objects.filter(owner_id__in=team_ids(owner), external_ref=ref).first()
         if found:
             return found
     if name:
         return Producer.objects.filter(
-            owner=owner, name__iexact=name, archived_at__isnull=True,
+            owner_id__in=team_ids(owner), name__iexact=name, archived_at__isnull=True,
         ).first()
     return None
 
@@ -335,7 +337,7 @@ def import_plots_file(upload, owner, dry_run=False, producer_id=None):
 
     fixed = None
     if producer_id:
-        fixed = Producer.objects.filter(owner=owner, pk=producer_id).first()
+        fixed = Producer.objects.filter(owner_id__in=team_ids(owner), pk=producer_id).first()
         if fixed is None:
             result["errors"].append({"row": 0, "error": "Producer not found."})
             return result

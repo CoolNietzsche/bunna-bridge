@@ -77,6 +77,22 @@ def daily_compliance_refresh():
         )
         alerts += 1
 
+    from bunna_bridge.orgs.models import ComplianceDocument
+
+    for doc in ComplianceDocument.objects.filter(expires_on__in=list(alert_dates)).select_related("organization"):
+        owner = doc.organization.owner
+        if owner is None:
+            continue
+        days = alert_dates[doc.expires_on]
+        _alert(
+            owner,
+            f"{doc.get_kind_display()} {_expiry_phrase(days)}",
+            f"Your {doc.get_kind_display().lower()} {_expiry_phrase(days)} ({doc.expires_on:%d %b %Y}). "
+            "ECTA Directive 1106/2025 requires it to stay valid — upload the renewal under Team & compliance.",
+            "/settings/team",
+        )
+        alerts += 1
+
     for cert in Certification.objects.select_related("holder"):
         _recompute_lot_badge(cert.holder, cert.cert_type)
         if cert.expiry_date in alert_dates:

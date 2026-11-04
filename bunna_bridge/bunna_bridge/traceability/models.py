@@ -483,3 +483,102 @@ class ForestBaseline2020(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["source"])]
+
+
+class CherryDelivery(models.Model):
+    """
+    One delivery of cherry (or parchment) by a producer to a washing station
+    or cooperative (roadmap O-3). Recording what each farmer delivered and was
+    paid links plots to lots and makes payments transparent to the farmer.
+    """
+
+    class Form(models.TextChoices):
+        CHERRY = "cherry", "Red cherry"
+        PARCHMENT = "parchment", "Parchment"
+        DRY_CHERRY = "dry_cherry", "Dried cherry"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="cherry_deliveries_received",
+        help_text="The exporter, station or cooperative account that received the coffee.",
+    )
+    station = models.ForeignKey(
+        "lots.WashingStation", on_delete=models.SET_NULL, null=True, blank=True, related_name="deliveries",
+    )
+    producer = models.ForeignKey(Producer, on_delete=models.PROTECT, related_name="deliveries")
+    plot = models.ForeignKey(Plot, on_delete=models.PROTECT, null=True, blank=True, related_name="deliveries")
+    form = models.CharField(max_length=12, choices=Form.choices, default=Form.CHERRY)
+    receipt_number = models.CharField(max_length=60)
+    delivered_on = models.DateField()
+    weight_kg = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_kg_etb = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    amount_paid_etb = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    paid_on = models.DateField(null=True, blank=True)
+    payment_reference = models.CharField(max_length=80, blank=True, help_text="Mobile-money or bank reference.")
+    lot = models.ForeignKey(
+        "lots.CoffeeLot", on_delete=models.SET_NULL, null=True, blank=True, related_name="cherry_deliveries",
+        help_text="Lot this delivery was processed into.",
+    )
+    green_equivalent_kg = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Green-coffee weight credited to the lot when allocated.",
+    )
+    notes = models.CharField(max_length=300, blank=True)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-delivered_on", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["owner", "receipt_number"], name="unique_receipt_per_owner"),
+        ]
+
+    def __str__(self):
+        return f"{self.receipt_number} {self.producer} {self.weight_kg} kg"
+
+    @property
+    def amount_due_etb(self):
+        if self.price_per_kg_etb is None:
+            return None
+        return (self.weight_kg * self.price_per_kg_etb).quantize(self.weight_kg)
+
+
+class SupplyTransfer(models.Model):
+    """
+    A cooperative or union sells coffee to an exporter (roadmap O-2). The
+    deliveries in the transfer carry their producers and plots with them, so
+    once the exporter accepts, those plots can be used as lot sources.
+    """
+
+    class Status(models.TextChoices):
+        OFFERED = "offered", "Offered"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+        CANCELLED = "cancelled", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="supply_sold")
+    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="supply_bought")
+    reference = models.CharField(max_length=60)
+    deliveries = models.ManyToManyField(CherryDelivery, related_name="transfers")
+    form = models.CharField(max_length=12, choices=CherryDelivery.Form.choices, default=CherryDelivery.Form.PARCHMENT)
+    quantity_kg = models.DecimalField(max_digits=12, decimal_places=2)
+    price_per_kg_etb = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notes = models.CharField(max_length=300, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OFFERED)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+    responded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.reference}: {self.seller} → {self.buyer} ({self.status})"

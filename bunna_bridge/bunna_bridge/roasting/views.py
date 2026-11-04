@@ -1,4 +1,5 @@
 from django.db.models import Q
+from bunna_bridge.orgs.access import team_ids
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
 
@@ -100,8 +101,8 @@ class AvailableLotsView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         accepted_lot_ids = Offer.objects.filter(
-            buyer=user, status="accepted",
+            buyer_id__in=team_ids(user), status="accepted",
         ).values_list("lot_id", flat=True)
         return CoffeeLot.objects.filter(
-            Q(exporter=user) | Q(id__in=accepted_lot_ids)
+            Q(exporter_id__in=team_ids(user)) | Q(id__in=accepted_lot_ids)
         ).distinct()

@@ -18,6 +18,8 @@ def _region_code(text):
 # Roles that buy green coffee on the marketplace. Importers are buyers who
 # also place the coffee on the EU market and file the EUDR DDS.
 BUYER_ROLES = ("buyer", "importer")
+# Roles that register producers and source coffee from farms.
+SUPPLY_ROLES = ("exporter", "roaster", "cooperative")
 
 
 class User(AbstractUser):
@@ -29,6 +31,7 @@ class User(AbstractUser):
         FARMER   = "farmer",   "Farmer"
         QGRADER  = "qgrader",  "Q-Grader"
         ROASTER  = "roaster",  "Roaster"
+        COOPERATIVE = "cooperative", "Cooperative / union"
 
     class RoasteryType(models.TextChoices):
         MICRO      = "micro",      "Micro-roastery (under 500kg/month)"

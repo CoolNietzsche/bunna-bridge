@@ -11,6 +11,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from bunna_bridge.orgs.access import can
+from bunna_bridge.orgs.access import same_team
+from bunna_bridge.orgs.access import team_ids
+
 from .models import CoffeeLot, CuppingScore, SampleRequest, WashingStation, Notification
 from .serializers import (
     CoffeeLotListSerializer, CoffeeLotDetailSerializer,
@@ -39,7 +43,7 @@ def visible_lots(user, base=None):
     role = getattr(user, "role", None)
     if role in ("exporter", "roaster"):
         # Own lots (any status) plus the public marketplace.
-        return qs.filter(Q(exporter=user) | Q(status__in=MARKETPLACE_STATUSES))
+        return qs.filter(Q(exporter_id__in=team_ids(user)) | Q(status__in=MARKETPLACE_STATUSES))
     if role == "farmer":
         return qs.filter(Q(farmer=user) | Q(status__in=MARKETPLACE_STATUSES))
     if role == "qgrader":
@@ -50,7 +54,7 @@ def visible_lots(user, base=None):
 
 def owned_lot_or_404(request, lot_pk):
     lot = get_object_or_404(CoffeeLot.objects.select_related("exporter", "farmer"), pk=lot_pk)
-    if not (is_admin(request.user) or lot.exporter_id == request.user.id):
+    if not (is_admin(request.user) or same_team(request.user, lot.exporter_id)):
         # 404 rather than 403 so lot existence isn't disclosed.
         from django.http import Http404
         raise Http404
@@ -74,6 +78,8 @@ class CanManageLotOrReadOnly(permissions.BasePermission):
             return False
         if request.method in permissions.SAFE_METHODS:
             return True
+        if not can(request.user, "manage_lots"):
+            return False
         return (
             getattr(request.user, "role", None) in ("exporter", "roaster", "admin")
             or request.user.is_staff
@@ -84,7 +90,7 @@ class CanManageLotOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         return (
-            obj.exporter_id == request.user.id
+            same_team(request.user, obj.exporter_id)
             or getattr(request.user, "role", None) == "admin"
             or request.user.is_staff
             or request.user.is_superuser
@@ -96,7 +102,7 @@ class WashingStationListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return WashingStation.objects.filter(owner=self.request.user)
+        return WashingStation.objects.filter(owner_id__in=team_ids(self.request.user))
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -107,7 +113,7 @@ class WashingStationDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return WashingStation.objects.filter(owner=self.request.user)
+        return WashingStation.objects.filter(owner_id__in=team_ids(self.request.user))
 
 
 class CoffeeLotViewSet(viewsets.ModelViewSet):
@@ -144,7 +150,7 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
         # own lots and the marketplace (they source and sell).
         role = getattr(user, "role", None) if user.is_authenticated else None
         if role == "exporter" and not is_admin(user):
-            return qs.filter(exporter=user)
+            return qs.filter(exporter_id__in=team_ids(user))
         if role == "farmer":
             return qs.filter(farmer=user)
         return qs
@@ -237,7 +243,7 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
 
         if request.method == "GET":
             scores = lot.cupping_scores.select_related("grader").all()
-            if not (is_admin(request.user) or lot.exporter_id == request.user.id):
+            if not (is_admin(request.user) or same_team(request.user, lot.exporter_id)):
                 scores = scores.filter(Q(status="confirmed") | Q(grader=request.user))
             return Response(CuppingScoreSerializer(scores, many=True).data)
 
@@ -302,7 +308,7 @@ class CuppingScoreViewSet(viewsets.ReadOnlyModelViewSet):
         visible = visible_lots(user).values("pk")
         return qs.filter(
             Q(grader=user)
-            | Q(lot__exporter=user)
+            | Q(lot__exporter_id__in=team_ids(user))
             | Q(status="confirmed", lot__in=visible)
         ).distinct()
 
@@ -408,13 +414,13 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
             # Dual-role: sees requests they made as a buyer, plus requests
             # made on lots they own/export.
             return SampleRequest.objects.filter(
-                Q(buyer=user) | Q(lot__exporter=user)
+                Q(buyer_id__in=team_ids(user)) | Q(lot__exporter_id__in=team_ids(user))
             ).select_related("lot","buyer")
         if role in ("buyer", "importer"):
-            return SampleRequest.objects.filter(buyer=user).select_related("lot","buyer")
+            return SampleRequest.objects.filter(buyer_id__in=team_ids(user)).select_related("lot","buyer")
         if role == "exporter":
             return SampleRequest.objects.filter(
-                lot__exporter=user
+                lot__exporter_id__in=team_ids(user)
             ).select_related("lot","buyer")
         return SampleRequest.objects.none()
 
@@ -445,7 +451,7 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
     def respond(self, request, pk=None):
         sample = self.get_object()
         role   = getattr(request.user, "role", "")
-        is_lot_owner = sample.lot.exporter_id == request.user.id
+        is_lot_owner = same_team(request.user, sample.lot.exporter_id)
         if not (is_lot_owner or role == "admin" or request.user.is_staff):
             return Response({"detail": "Only the lot's exporter can respond."}, status=403)
 
@@ -479,7 +485,7 @@ class LotStatusUpdateView(viewsets.ViewSet):
             return Response({"detail": "Lot not found."}, status=404)
 
         admin = is_admin(request.user)
-        if not admin and lot.exporter_id != request.user.id:
+        if not admin and not same_team(request.user, lot.exporter_id):
             return Response({"detail": "Not your lot."}, status=403)
 
         serializer = LotStatusUpdateSerializer(data=request.data)
@@ -687,11 +693,11 @@ class LotDocumentDownloadView(APIView):
             return Response({"detail": "Unknown document field."}, status=404)
 
         lot = get_object_or_404(CoffeeLot, pk=lot_pk)
-        is_owner = is_admin(request.user) or lot.exporter_id == request.user.id
+        is_owner = is_admin(request.user) or same_team(request.user, lot.exporter_id)
         # The EU importer needs the DDS: a buyer whose offer was accepted may
         # download the stored statement (but no other compliance document).
         is_contracted_buyer = field_name == "eudr_dds_file" and lot.offers.filter(
-            buyer=request.user, status="accepted",
+            buyer_id__in=team_ids(request.user), status="accepted",
         ).exists()
         if not (is_owner or is_contracted_buyer):
             from django.http import Http404
@@ -720,7 +726,7 @@ class LotPhotosView(APIView):
     def _check_owner(self, request, lot):
         if not (
             is_admin(request.user)
-            or lot.exporter_id == request.user.id
+            or same_team(request.user, lot.exporter_id)
             or lot.farmer_id == request.user.id
         ):
             return Response({"detail": "Not allowed."}, status=403)

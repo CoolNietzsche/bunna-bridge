@@ -2,6 +2,8 @@ import json
 
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework import serializers
+from bunna_bridge.orgs.access import same_team
+
 from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation, ComplianceEvent
 from .models import GATE_FIELDS
 
@@ -150,7 +152,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         user = self._request_user()
         if value is None or user is None:
             return value
-        if value.owner_id != user.id and not (user.is_staff or getattr(user, "role", "") == "admin"):
+        if not same_team(user, value.owner_id) and not (user.is_staff or getattr(user, "role", "") == "admin"):
             raise serializers.ValidationError("You can only link your own washing stations.")
         return value
 
@@ -250,7 +252,7 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
         return bool(user) and bool(user.is_authenticated) and (
             getattr(user, "role", None) == "admin"
             or getattr(user, "is_staff", False)
-            or instance.exporter_id == getattr(user, "id", None)
+            or same_team(user, instance.exporter_id)
         )
 
     def get_cupping_scores(self, obj):
@@ -411,7 +413,7 @@ class SampleRequestSerializer(serializers.ModelSerializer):
         user = self.context["request"].user
         if lot.status != "listed":
             raise serializers.ValidationError("Samples can only be requested for lots listed on the marketplace.")
-        if lot.exporter_id == user.id:
+        if same_team(user, lot.exporter_id):
             raise serializers.ValidationError("You cannot request a sample of your own lot.")
         return lot
 
@@ -467,7 +469,7 @@ class OfferSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"lot": "This field is required."})
         if lot.status != "listed":
             raise serializers.ValidationError({"lot": "This lot is not open for offers."})
-        if lot.exporter_id == user.id:
+        if same_team(user, lot.exporter_id):
             raise serializers.ValidationError({"lot": "You cannot make an offer on your own lot."})
         qty = attrs.get("quantity_kg")
         if qty is not None:

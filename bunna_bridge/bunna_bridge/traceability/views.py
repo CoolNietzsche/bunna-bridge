@@ -30,6 +30,9 @@ from rest_framework.views import APIView
 from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.models import Notification
 from bunna_bridge.lots.views import is_admin
+from bunna_bridge.orgs.access import can
+from bunna_bridge.orgs.access import same_team
+from bunna_bridge.orgs.access import team_ids
 from bunna_bridge.lots.views import owned_lot_or_404
 
 from . import due_diligence as dd
@@ -50,7 +53,7 @@ from .serializers import ProducerSerializer
 from .serializers import SignOffSerializer
 
 # Roles that register producers and build lots.
-SUPPLY_ROLES = ("exporter", "roaster", "admin")
+SUPPLY_ROLES = ("exporter", "roaster", "cooperative", "admin")
 
 
 class CanManageSupply(permissions.BasePermission):
@@ -58,11 +61,15 @@ class CanManageSupply(permissions.BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return bool(
+        if not (
             user
             and user.is_authenticated
-            and (getattr(user, "role", None) in SUPPLY_ROLES or is_admin(user)),
-        )
+            and (getattr(user, "role", None) in SUPPLY_ROLES or is_admin(user))
+        ):
+            return False
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return is_admin(user) or can(user, "manage_supply")
 
 
 def _truthy(value):
@@ -81,7 +88,7 @@ class ProducerListCreateView(generics.ListCreateAPIView):
         qs = (
             Producer.objects.all()
             if is_admin(user)
-            else Producer.objects.filter(owner=user)
+            else Producer.objects.filter(owner_id__in=team_ids(user))
         )
         if not _truthy(self.request.query_params.get("archived", "")):
             qs = qs.filter(archived_at__isnull=True)
@@ -115,7 +122,7 @@ class ProducerDetailView(generics.RetrieveUpdateDestroyAPIView):
         return (
             Producer.objects.all()
             if is_admin(user)
-            else Producer.objects.filter(owner=user)
+            else Producer.objects.filter(owner_id__in=team_ids(user))
         )
 
     def destroy(self, request, *args, **kwargs):
@@ -140,7 +147,7 @@ class ProducerConsentView(generics.ListCreateAPIView):
         qs = (
             Producer.objects.all()
             if is_admin(user)
-            else Producer.objects.filter(owner=user)
+            else Producer.objects.filter(owner_id__in=team_ids(user))
         )
         return get_object_or_404(qs, pk=self.kwargs["pk"])
 
@@ -185,7 +192,7 @@ class ProducerImportView(APIView):
 
 def _plots_for(user):
     qs = Plot.objects.select_related("producer")
-    return qs if is_admin(user) else qs.filter(producer__owner=user)
+    return qs if is_admin(user) else qs.filter(producer__owner_id__in=team_ids(user))
 
 
 class PlotListCreateView(generics.ListCreateAPIView):
@@ -391,13 +398,13 @@ class ConvertLegacyLotView(APIView):
 
 
 def _contracted_buyer(lot, user):
-    return lot.offers.filter(buyer=user, status="accepted").first()
+    return lot.offers.filter(buyer_id__in=team_ids(user), status="accepted").first()
 
 
 def _lot_for_due_diligence(request, lot_pk):
     """(lot, is_owner). Owners/admins get everything; contracted buyers get packages + references."""
     lot = get_object_or_404(CoffeeLot.objects.select_related("exporter"), pk=lot_pk)
-    if is_admin(request.user) or lot.exporter_id == request.user.id:
+    if is_admin(request.user) or same_team(request.user, lot.exporter_id):
         return lot, True
     if _contracted_buyer(lot, request.user) is not None:
         return lot, False
@@ -647,7 +654,7 @@ class RecordsExportView(APIView):
             "plot__producer__name",
         )
         if not is_admin(request.user):
-            sources = sources.filter(lot__exporter=request.user)
+            sources = sources.filter(lot__exporter_id__in=team_ids(request.user))
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = (
             f'attachment; filename="beersheba-eudr-records-{timezone.localdate():%Y%m%d}.csv"'
