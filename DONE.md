@@ -333,3 +333,108 @@ Then rebuild the frontend (`npm ci && npm run build`), because two new packages 
 - O-6: choose an SMS gateway, then set `SMS_BACKEND` and its keys on the server.
 - O-8: ECTMS API access from ECTA.
 - Team invitations and expiry reminders go out as in-app notifications only, because no email provider is connected yet (roadmap item 1.11).
+
+---
+
+## 2026-11-04 — Phase 3: trade execution
+
+Built before deployment, as requested. Backend tests: **208 pass** (18 of them new). End-to-end browser test: **46 of 46 checks pass, no page errors** (7 of them new).
+
+New Django app: `bunna_bridge/trade/`. New screens: **Contracts**, **Contract detail**, **Messages**, and **Minimum Prices** (admin).
+
+### T-1 Contracts — done
+- An accepted offer now creates a **draft contract** automatically, numbered `BB-2026-0001` and so on.
+- Terms the exporter's sales team sets:
+  - quantity (shown in 60 kg bags) and price;
+  - Incoterm (FOB Djibouti by default; also FCA, CFR, CIF, DAP);
+  - shipment period;
+  - payment terms (cash against documents, letter of credit, advance, or part advance);
+  - general terms (ECF, GCA or custom), quality specification, destination;
+  - whether a pre-shipment sample is required.
+- **Signing:** the exporter signs and sends; the buyer countersigns.
+  - Each signature records the exact terms as a fingerprint.
+  - If the terms change after sending, both signatures are cancelled and the buyer must review again.
+  - A buyer signing an out-of-date version is refused.
+- **Contract PDF** with parties, goods, price, delivery, payment, the EUDR division of roles, and the signatures with their fingerprint.
+- **Cancelling:** possible before both parties sign. The quantity goes back to the lot and the lot returns to the marketplace. After both have signed, cancelling needs the Beersheba team.
+
+### T-2 ECTA contract registration — done
+- Minimum prices can now be set **per region**, as well as grade, process and validity period. The most specific rule wins (region first, then grade, then process).
+- **Minimum Prices** admin page (`/admin/floor-prices`): import the ECTA table from CSV (with a check-only step), export the current table, and view all rules.
+- The contract page shows whether the price meets the ECTA minimum for the coffee's grade, process and region on the signing date.
+- **Registration is blocked below the minimum.** The ECTA registration number, date and the minimum that applied are recorded on the contract.
+
+### T-3 Samples and claims — done
+- The exporter records samples sent (pre-shipment, arrival or type) with courier and tracking number.
+- The buyer marks a sample received, approved or rejected, with cup score, moisture and notes; a rejection needs a reason.
+- **Loading is blocked** until the buyer approves the pre-shipment sample, if the contract requires one.
+- **Claims** after shipment (quality, weight, moisture, delay):
+  - the buyer raises a claim with evidence;
+  - the exporter accepts or rejects it, giving a reason;
+  - either side marks it settled;
+  - an accepted claim reduces the amount due.
+
+### T-4 Shipments — done
+- New self-service account type: **Freight forwarder**. The exporter assigns one to a shipment by email, and the forwarder then sees that contract under **Shipments**.
+- Shipment details: booking, container, seal, shipping line, vessel, voyage, bill of lading, ports, bags, net weight, departure and arrival dates.
+- Milestones: booked, stuffed, trucked, at Djibouti, customs cleared, loaded, departed, transshipped, arrived, delivered, delayed.
+  - The exporter's team or the forwarder records them.
+  - Both buyer and exporter are notified of each one.
+- When the vessel departs, the contract becomes **Shipped**, and the lot becomes **Exported** if all its gates pass. When delivered, the contract is **Completed**.
+
+### T-5 Export document checklist — done
+- Each shipment gets a checklist, with who is responsible for each document:
+
+  | Document | Responsible |
+  |---|---|
+  | ECTA quality certificate | Exporter |
+  | Phytosanitary certificate | Exporter |
+  | Certificate of origin | Exporter |
+  | ICO marks | Exporter |
+  | Commercial invoice | Exporter |
+  | Packing list | Exporter |
+  | Customs declaration | Forwarder |
+  | Bill of lading | Forwarder |
+  | Weight certificate | Forwarder |
+
+- Upload, mark as not needed, or download each document. The buyer checks each one or asks for a correction.
+- Loading is blocked until the ECTA quality certificate, phytosanitary certificate and certificate of origin are uploaded and none needs correction.
+
+### T-6 Payments and FX — done
+- The exporter records each payment received (advance, balance, letter of credit, adjustment) with bank, reference and date.
+- For each payment, the exporter also records the **NBE conversion**: USD converted, the bank's rate, and the date.
+- The contract shows:
+  - contract value, accepted claims, received, outstanding;
+  - converted to Birr, average rate, and USD kept;
+  - a flag showing whether the **50% conversion rule** is met, and the shortfall if not.
+- The buyer sees the same summary.
+
+### T-7 Messaging — done
+- One conversation per lot between a buyer and the exporter's whole team. Buyers start it with **Message the exporter** on any marketplace lot.
+- The **Messages** page shows an inbox with unread counts and the conversation, including file attachments.
+- The contract page shows the conversation for that contract.
+- New messages also create an in-app notification; email waits for item 1.11.
+
+### New demo data (password `Beersheba-Demo-2026`)
+- `forwarder@demo.beersheba.et` — Red Sea Freight Logistics, the forwarder on the Harrar shipment.
+- **Harrar contract** with Hamburg Green Coffee:
+  - signed and registered with ECTA;
+  - pre-shipment sample approved;
+  - container at sea on the Maersk Gironde, with milestones from booking to departure;
+  - most documents uploaded, some already checked by the buyer;
+  - 30% advance received, half of it converted to Birr.
+- **Bensa contract** with Nordic Green Imports: the exporter has signed; log in as `buyer@demo.beersheba.et` to countersign it.
+- A buyer–exporter conversation about Kochere.
+- A region-specific minimum price: Yirgacheffe G1 washed, $5.60/kg.
+
+### To run on the VPS when deploying (Docker only)
+```bash
+cd bunna_bridge
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+docker compose -f docker-compose.local.yml run --rm django pytest
+```
+
+### Still open
+- Import the real ECTA minimum-price tables (Minimum Prices page, or CSV).
+- Email delivery for notifications and messages (roadmap 1.11).
+- Electronic signatures are simple click-to-sign records with a terms fingerprint. If a buyer or bank needs a qualified e-signature (for example eIDAS in the EU), that requires an integration partner.

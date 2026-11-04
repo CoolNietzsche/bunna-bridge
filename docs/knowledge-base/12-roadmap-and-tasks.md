@@ -86,6 +86,12 @@ The aggregation backbone and the importer evidence package. This is the product-
 
 ## Phase 3 — Trade execution (Jan–Mar 2027)
 
+> **Status 2026-11-04: built early, before deployment.** T-1 to T-7 are done (backend, UI and tests). Two things still need outside input:
+> - **Real ECTA minimum-price tables:** they need to be imported. The import tool is under Minimum Prices.
+> - **Email delivery** for notifications (roadmap item 1.11): until it is connected, notifications appear only inside the app.
+>
+> Details are in [/DONE.md](../../DONE.md).
+
 | ID | Task | Size | Notes |
 |---|---|---|---|
 | T-1 | **Contract model** from accepted offers: incoterm (FOB Djibouti default), price, quantity, shipment period, payment terms (CAD/LC/advance), ECF/GCA terms reference; PDF contract | L | Replaces "offer accepted = deal" |

@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation, useSearchParams } from "react-rout
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLot, createOffer, downloadSpecSheet, apiErrorText } from "../api/lots";
 import DueDiligencePanel from "../components/trace/DueDiligencePanel";
+import { startConversation } from "../api/trade";
 import type { DueDiligenceSummary } from "../api/traceability";
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
@@ -11,7 +12,7 @@ import LotPhotoGallery from "../components/LotPhotoGallery";
 import {
   ShieldCheck, Mountain, FlaskConical, TrendingUp,
   ArrowLeft, CheckCircle, XCircle,
-  MapPin, Calendar, X, FileText, Building2, Sprout, Share2,
+  MapPin, Calendar, X, FileText, Building2, Sprout, Share2, MessageSquare,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
 import { AC } from "../styles/adminComponents";
@@ -357,6 +358,14 @@ export default function MarketplaceLotDetail() {
               {showTransactButtons && !showSample && (
                 <button onClick={() => requireAuth("sample", () => setShowSample(true))} style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}>
                   <FlaskConical size={15} /> Request a sample
+                </button>
+              )}
+              {canTransact && (
+                <button
+                  onClick={async () => { const conv = await startConversation(lot.id); navigate(`/messages?c=${conv.id}`); }}
+                  style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}
+                >
+                  <MessageSquare size={15} /> Message the exporter
                 </button>
               )}
               <button onClick={() => downloadSpecSheet(lot.id, lot.lot_id)} style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}>

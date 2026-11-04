@@ -216,17 +216,23 @@ class ConversationSerializer(serializers.ModelSerializer):
     contract_number = serializers.CharField(source="contract.number", read_only=True, default=None)
     last_message = serializers.SerializerMethodField()
     unread = serializers.SerializerMethodField()
+    my_side = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
         fields = ["id", "lot", "lot_code", "lot_name", "buyer_name", "seller_name", "contract", "contract_number",
-                  "last_message", "last_message_at", "unread"]
+                  "last_message", "last_message_at", "unread", "my_side"]
 
     def get_buyer_name(self, obj):
         return _name(obj.buyer)
 
     def get_seller_name(self, obj):
         return _name(obj.lot.exporter)
+
+    def get_my_side(self, obj):
+        from bunna_bridge.orgs.access import same_team
+
+        return "buyer" if same_team(self.context["request"].user, obj.buyer_id) else "seller"
 
     def get_last_message(self, obj):
         m = obj.messages.order_by("-created_at").first()

@@ -9,7 +9,7 @@ export interface UserProfile {
   id: string;
   email: string;
   username: string;
-  role: "admin" | "exporter" | "buyer" | "importer" | "cooperative" | "farmer" | "qgrader" | "roaster";
+  role: "admin" | "exporter" | "buyer" | "importer" | "cooperative" | "forwarder" | "farmer" | "qgrader" | "roaster";
   company_name: string;
   is_verified: boolean;
   first_name?: string;

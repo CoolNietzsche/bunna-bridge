@@ -25,6 +25,10 @@ const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const Intake = lazy(() => import("./pages/Intake"));
 const Supply = lazy(() => import("./pages/Supply"));
 const FieldApp = lazy(() => import("./pages/FieldApp"));
+const Contracts = lazy(() => import("./pages/Contracts"));
+const ContractDetail = lazy(() => import("./pages/ContractDetail"));
+const Messages = lazy(() => import("./pages/Messages"));
+const FloorPrices = lazy(() => import("./pages/FloorPrices"));
 const RoastEquipmentPage = lazy(() => import("./pages/RoastEquipment"));
 const RoastBatches = lazy(() => import("./pages/RoastBatches"));
 const LotPipeline = lazy(() => import("./pages/LotPipeline"));
@@ -87,6 +91,10 @@ export default function App() {
             <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
             <Route path="/settings/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
             <Route path="/invite/:token" element={<InviteAccept />} />
+            <Route path="/contracts" element={<ProtectedRoute><Contracts /></ProtectedRoute>} />
+            <Route path="/contracts/:id" element={<ProtectedRoute><ContractDetail /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/admin/floor-prices" element={<ProtectedRoute><FloorPrices /></ProtectedRoute>} />
             <Route path="/field" element={<ProtectedRoute><FieldApp /></ProtectedRoute>} />
             <Route path="/intake" element={<ProtectedRoute><Intake /></ProtectedRoute>} />
             <Route path="/supply" element={<ProtectedRoute><Supply /></ProtectedRoute>} />

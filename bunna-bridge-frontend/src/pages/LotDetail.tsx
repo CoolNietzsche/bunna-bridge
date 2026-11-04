@@ -15,6 +15,7 @@ import LotPhotos from "../components/LotPhotos";
 import ComplianceGatesPanel from "../components/ComplianceGatesPanel";
 import SupplySources from "../components/trace/SupplySources";
 import DueDiligencePanel from "../components/trace/DueDiligencePanel";
+import LotContracts from "../components/trade/LotContracts";
 import {
   ArrowLeft, MapPin, Mountain, Layers, ShieldCheck, Leaf,
   Pencil, FlaskConical, Package, Users, Globe, BadgeCheck, Share2,
@@ -341,6 +342,7 @@ export default function LotDetail() {
             />
 
             <DueDiligencePanel lotId={lot.id} onChanged={() => { refetch(); refetchCompliance(); }} />
+            {isOwner && <LotContracts lotId={lot.id} />}
 
             {(isOwner || lot.status !== "draft") && (
               <div style={{ display: "grid", gridTemplateColumns: isOwner ? "1fr 1fr" : "1fr", gap: "8px" }}>

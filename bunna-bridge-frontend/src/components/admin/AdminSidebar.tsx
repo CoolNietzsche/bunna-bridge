@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2 } from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2, FileSignature, MessageSquare, Landmark, Container } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
@@ -18,6 +18,8 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
   const operations: Record<string, NavItem[]> = {
     admin: [
       { label: "License Reviews", path: "/admin/licenses", icon: <BadgeCheck size={s} /> },
+      { label: "Minimum Prices", path: "/admin/floor-prices", icon: <Landmark size={s} /> },
+      { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
       { label: "Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
@@ -36,12 +38,16 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "Field App", path: "/field", icon: <Smartphone size={s} />, cap: "manage_supply" },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers", path: "/offers", icon: <Inbox size={s} />, cap: "manage_offers" },
+      { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
+      { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
       { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
     ],
     buyer: [
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
+      { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
+      { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
@@ -55,6 +61,8 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "Cherry Intake", path: "/intake", icon: <Scale size={s} /> },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers Received", path: "/offers", icon: <Inbox size={s} /> },
+      { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
+      { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
@@ -64,6 +72,8 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
     importer: [
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers & DDS", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
+      { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
+      { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
@@ -73,6 +83,9 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "Sales to Exporters", path: "/supply", icon: <Truck size={s} /> },
       { label: "Field App", path: "/field", icon: <Smartphone size={s} />, cap: "manage_supply" },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
+    ],
+    forwarder: [
+      { label: "Shipments", path: "/contracts", icon: <Container size={s} /> },
     ],
     farmer: [
       { label: "My Farm", path: "/farm", icon: <Sprout size={s} /> },

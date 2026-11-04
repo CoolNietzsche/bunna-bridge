@@ -339,6 +339,82 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Farmer sees deliveries and payments', (await page.locator('text=KWS-26-0001').count()) > 0);
   await page.context().close();
 
+  // 17. Phase 3 — contract: buyer countersigns in the UI, exporter registers it with ECTA
+  const buyerContracts = await api(buyerT, '/api/v1/trade/contracts/');
+  const bensaC = buyerContracts.body.find(c => c.lot_code === 'SDM-2026-0213');
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'buyer@demo.beersheba.et');
+  await page.goto(`${BASE}/contracts/${bensaC.id}`);
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: /Countersign contract/ }).click();
+  await page.waitForTimeout(1000);
+  let bc = await api(buyerT, `/api/v1/trade/contracts/${bensaC.id}/`);
+  check('Buyer countersigns the contract in the UI', bc.body.status === 'signed', bc.body.status);
+
+  // 19. Messages: buyer writes to the exporter from a marketplace lot
+  const yrgLot = await lotId(buyerT, 'YRG-2026-0847');
+  await page.goto(`${BASE}/marketplace/${yrgLot}`);
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: /Message the exporter/ }).click();
+  await page.waitForURL(/messages\?c=/, { timeout: 8000 });
+  await page.getByLabel('Message').fill('E2E: is the March slot still free?');
+  await page.getByRole('button', { name: 'Send' }).click();
+  await page.waitForTimeout(800);
+  await page.context().close();
+  const inbox = await api(expT, '/api/v1/trade/conversations/');
+  check('Exporter receives the buyer message', inbox.body.unread >= 1 && inbox.body.results.some(c => c.last_message.includes('March slot')));
+
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'exporter@demo.beersheba.et');
+  await page.goto(`${BASE}/contracts/${bensaC.id}`);
+  await page.waitForTimeout(1000);
+  await page.getByLabel('ECTA registration no.').fill('ECTA/CR/E2E/001');
+  await page.getByRole('button', { name: /Record registration/ }).click();
+  await page.waitForTimeout(1000);
+  bc = await api(expT, `/api/v1/trade/contracts/${bensaC.id}/`);
+  check('Exporter records the ECTA registration', bc.body.status === 'registered' && bc.body.ecta_registration_number === 'ECTA/CR/E2E/001');
+
+  // 18. Shipment with a forwarder; forwarder posts a milestone; loading blocked without an approved sample
+  await page.getByRole('button', { name: /Book shipment/ }).click();
+  await page.getByLabel(/Forwarder's email/).fill('forwarder@demo.beersheba.et');
+  await page.getByLabel('Container no.').fill('MSKU 9990001');
+  await page.getByRole('button', { name: /Create shipment/ }).click();
+  await page.waitForTimeout(1000);
+  const ships = await api(expT, `/api/v1/trade/contracts/${bensaC.id}/shipments/`);
+  check('Shipment created with the export document checklist', ships.body[0]?.documents?.length === 9, String(ships.body[0]?.documents?.length));
+  // Payment received + NBE conversion recorded in the UI
+  await page.getByRole('button', { name: /Payment received/ }).click();
+  await page.getByLabel('Amount (USD)').fill('1000');
+  await page.getByRole('button', { name: /^Save$/ }).click();
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Record conversion/ }).click();
+  await page.getByLabel('Rate (ETB/USD)').fill('155');
+  await page.getByRole('button', { name: /^Save$/ }).click();
+  await page.waitForTimeout(800);
+  const pay = await api(expT, `/api/v1/trade/contracts/${bensaC.id}/payments/`);
+  check('Payment and 50% NBE conversion recorded', pay.body.summary.received_usd === '1000.00' && pay.body.summary.nbe_conversion_ok === true, JSON.stringify(pay.body.summary.converted_etb));
+  await page.context().close();
+
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'forwarder@demo.beersheba.et');
+  await page.goto(`${BASE}/contracts/${bensaC.id}`);
+  await page.waitForTimeout(1000);
+  await page.getByLabel('Milestone').selectOption('stuffed');
+  await page.getByLabel('Location').fill('Addis Ababa');
+  await page.getByRole('button', { name: /Add milestone/ }).click();
+  await page.waitForTimeout(800);
+  await page.getByLabel('Milestone').selectOption('loaded');
+  await page.getByRole('button', { name: /Add milestone/ }).click();
+  await page.waitForTimeout(800);
+  const blocked = await page.locator('text=/pre-shipment sample/').count();
+  const ships2 = await api(expT, `/api/v1/trade/contracts/${bensaC.id}/shipments/`);
+  check('Forwarder records a milestone', ships2.body[0].events.some(e => e.kind === 'stuffed'));
+  check('Loading is blocked until the buyer approves the pre-shipment sample', blocked > 0 && !ships2.body[0].events.some(e => e.kind === 'loaded'));
+  await page.context().close();
+
   console.log(results.join('\n'));
   console.log(errs.length ? 'PAGE ERRORS: ' + JSON.stringify(errs) : 'no page errors');
   await browser.close();

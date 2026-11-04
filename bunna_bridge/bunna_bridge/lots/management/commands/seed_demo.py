@@ -47,6 +47,13 @@ from bunna_bridge.orgs.models import Organization
 from bunna_bridge.traceability.models import CherryDelivery
 from bunna_bridge.traceability.models import DdsReference
 from bunna_bridge.traceability.models import SupplyTransfer
+from bunna_bridge.trade.models import Contract
+from bunna_bridge.trade.models import ContractSample
+from bunna_bridge.trade.models import Conversation
+from bunna_bridge.trade.models import Message
+from bunna_bridge.trade.models import Payment
+from bunna_bridge.trade.models import ShipmentDocument
+from bunna_bridge.trade.models import ShipmentEvent
 from bunna_bridge.traceability.models import LotSource
 from bunna_bridge.traceability.models import Plot
 from bunna_bridge.traceability.models import Producer
@@ -128,6 +135,12 @@ class Command(BaseCommand):
         CuppingScore.objects.filter(lot__in=lots).delete()
         ComplianceEvent.objects.filter(lot__in=lots).delete()
         DdsReference.objects.filter(lot__in=lots).delete()
+        Conversation.objects.filter(lot__in=lots).delete()
+        for contract in Contract.objects.filter(lot__in=lots):
+            contract.payments.all().delete()
+            for shipment in contract.shipments.all():
+                shipment.delete()
+            contract.delete()
         SupplyTransfer.objects.filter(seller__in=users).delete()
         SupplyTransfer.objects.filter(buyer__in=users).delete()
         SmsMessage.objects.filter(producer__owner__in=users).delete()
@@ -274,6 +287,79 @@ class Command(BaseCommand):
                                              quantity_kg=Decimal("1800"), price_per_kg_etb=Decimal("335"),
                                              notes="Washed Bensa parchment, 11.5% moisture.", created_by=coop)
         sale.deliveries.set(coop_deliveries)
+
+    def _phase3(self, exporter, buyer, harrar, bensa, kochere, today):
+        """Contracts at different stages, a shipment at sea with a forwarder, payments and a conversation."""
+        from datetime import datetime
+
+        from bunna_bridge.trade import services as trade
+
+        FloorPrice.objects.create(region="yirgacheffe", grade="G1", processing="washed",
+                                  min_price_usd_per_kg=Decimal("5.60"), valid_from=date(2026, 9, 1),
+                                  source="Demo floor — Yirgacheffe G1 washed")
+        forwarder = self._user("forwarder", "forwarder", "Ahmed", "Ali", company_name="Red Sea Freight Logistics",
+                               phone="+251 911 555 010")
+        importer = User.objects.get(email=f"importer@{DOMAIN}")
+        sales = User.objects.get(email=f"sales@{DOMAIN}")
+
+        # Harrar: signed, registered, PSS approved, shipped and at sea, 30% advance received and converted.
+        c = Contract.objects.get(lot=harrar, buyer=importer)
+        c.shipment_from, c.shipment_to = today - timedelta(days=20), today + timedelta(days=10)
+        c.payment_terms, c.advance_percent, c.destination = "advance_cad", Decimal("30"), "Hamburg"
+        c.save()
+        trade.send_for_signature(exporter, c)
+        trade.buyer_sign(importer, c, c.terms_hash)
+        trade.register_with_ecta(exporter, c, "ECTA/CR/2026/04117", today - timedelta(days=18))
+        ContractSample.objects.create(contract=c, kind="pss", status="approved", sent_on=today - timedelta(days=16),
+                                      courier="DHL", tracking_number="DHL 4471 0092", cup_score=Decimal("86.25"),
+                                      moisture_pct=Decimal("10.8"), buyer_notes="Clean, blueberry and cacao — approved.",
+                                      created_by=exporter, decided_by=importer, decided_at=timezone.now())
+        shipment = trade.create_shipment(exporter, c, {
+            "forwarder": forwarder, "booking_number": "MAEU 2611874", "container_number": "MSKU 7134220",
+            "seal_number": "ML-ET 448120", "shipping_line": "Maersk", "vessel": "Maersk Gironde", "voyage": "247N",
+            "port_of_discharge": "Hamburg", "bags": c.bags, "net_weight_kg": c.quantity_kg,
+            "etd": today - timedelta(days=4), "eta": today + timedelta(days=17),
+        })
+        for doc in shipment.documents.all():
+            if doc.kind in ("ecta_quality", "phyto", "origin", "ico_marks", "invoice", "packing", "customs", "bl"):
+                doc.file.save(f"{doc.kind}.pdf", demo_pdf(doc.get_kind_display(), c.number), save=False)
+                doc.status = "approved" if doc.kind in ("phyto", "origin", "invoice") else "uploaded"
+                doc.number = f"{doc.kind.upper()}-{c.number[-4:]}"
+                doc.uploaded_by = forwarder if doc.responsible == "forwarder" else exporter
+                doc.uploaded_at = timezone.now()
+                doc.save()
+        for days, kind, place in [(12, "booked", "Addis Ababa"), (9, "stuffed", "Highland warehouse, Addis Ababa"),
+                                  (8, "trucked", "Modjo dry port"), (6, "at_port", "Djibouti"),
+                                  (5, "customs", "Djibouti"), (4, "loaded", "Djibouti"), (4, "departed", "Djibouti")]:
+            ShipmentEvent.objects.create(shipment=shipment, kind=kind, location=place, recorded_by=forwarder,
+                                         happened_at=timezone.make_aware(datetime.combine(today - timedelta(days=days),
+                                                                                          datetime.min.time().replace(hour=10))))
+        c.status = "shipped"
+        c.save()
+        Payment.objects.create(contract=c, kind="advance", amount_usd=(c.value_usd * Decimal("0.30")).quantize(Decimal("0.01")),
+                               received_on=today - timedelta(days=15), bank="Commercial Bank of Ethiopia",
+                               reference="SWIFT 26CBE88412",
+                               converted_usd=(c.value_usd * Decimal("0.15")).quantize(Decimal("0.01")),
+                               rate_etb_per_usd=Decimal("154.80"), converted_on=today - timedelta(days=14),
+                               recorded_by=exporter)
+
+        # Bensa: terms agreed by the exporter, waiting for the buyer's countersignature.
+        b = Contract.objects.get(lot=bensa, buyer=buyer)
+        b.shipment_from, b.shipment_to = today + timedelta(days=45), today + timedelta(days=75)
+        b.payment_terms, b.destination = "cad", "Gothenburg"
+        b.save()
+        trade.send_for_signature(sales, b)
+
+        # A buyer asking the exporter about Kochere.
+        conv = Conversation.objects.create(lot=kochere, buyer=buyer)
+        for sender, body in [
+            (buyer, "Hi Dawit — could you ship 600 kg of Kochere in March, and send a type sample first?"),
+            (sales, "Hello Sarah, yes. March loading from Djibouti works. Type sample goes out with DHL on Monday."),
+            (buyer, "Perfect. We will make an offer once we have cupped it."),
+        ]:
+            Message.objects.create(conversation=conv, sender=sender, body=body)
+        conv.last_message_at = timezone.now()
+        conv.save()
 
     def _cup(self, lot, grader, base, confirm=True, notes=""):
         b = Decimal(str(base))
@@ -562,4 +648,5 @@ class Command(BaseCommand):
         RoastBatch.objects.create(batch_code="AMR-0916", roaster=roaster, equipment=drum, status="queued",
                                   roast_level="medium")
         self._phase2(exporter, farmers, kochere, today)
+        self._phase3(exporter, buyer, harrar, bensa, kochere, today)
         del roaster_lot, admin

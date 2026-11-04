@@ -13,6 +13,7 @@ const ROLES = [
   { value: "roaster", label: "Roaster", desc: "I roast and sell specialty coffee" },
   { value: "cooperative", label: "Cooperative / union", desc: "We collect members' coffee and sell to exporters" },
   { value: "farmer", label: "Farmer", desc: "I grow coffee in Ethiopia" },
+  { value: "forwarder", label: "Freight forwarder", desc: "I move export containers to Djibouti and beyond" },
 ];
 
 export default function Register() {
