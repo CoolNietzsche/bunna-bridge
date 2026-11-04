@@ -115,7 +115,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "nbe_fx_declaration_file",
             "customs_declaration_file", "customs_declaration_id",
             # supply chain
-            "channel", "archived_at",
+            "channel", "archived_at", "availability", "expected_ready",
         ]
         # Every gate is derived in CoffeeLot.save() (lots/compliance.py), so
         # none are writable. `status` only changes through the status endpoint

@@ -57,6 +57,11 @@ class Producer(models.Model):
     )
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=30, blank=True)
+    gender = models.CharField(
+        max_length=12, blank=True,
+        choices=[("female", "Woman"), ("male", "Man"), ("undisclosed", "Prefer not to say")],
+        help_text="Optional — used only for the lot impact score (share of women producers).",
+    )
     language = models.CharField(
         max_length=2, choices=[("am", "Amharic"), ("om", "Afaan Oromo"), ("en", "English")], default="am",
         help_text="Language for SMS and printed receipts.",

@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/v1/", include("bunna_bridge.messaging.urls")),
     path("api/v1/", include("bunna_bridge.trade.urls")),
     path("api/v1/", include("bunna_bridge.quality.urls")),
+    path("api/v1/", include("bunna_bridge.market.urls")),
     path("api/v1/auth/", include("bunna_bridge.users.api_urls")),
     # ── Pages ──
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),

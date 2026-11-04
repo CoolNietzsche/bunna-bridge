@@ -93,6 +93,7 @@ class ProducerSerializer(serializers.ModelSerializer):
             "name",
             "phone",
             "language",
+            "gender",
             "region",
             "zone",
             "woreda",

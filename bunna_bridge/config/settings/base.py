@@ -100,6 +100,7 @@ LOCAL_APPS = [
     "bunna_bridge.messaging",
     "bunna_bridge.trade",
     "bunna_bridge.quality",
+    "bunna_bridge.market",
 
     # Your stuff: custom apps go here
 ]
@@ -327,6 +328,11 @@ CELERY_BEAT_SCHEDULE = {
         # Re-derive gates (expiries, license, floor price, cert badges) and send expiry alerts.
         "task": "bunna_bridge.lots.tasks.daily_compliance_refresh",
         "schedule": crontab(hour=6, minute=17),
+    },
+    "close-select-auctions": {
+        # Beersheba Select: close auction lots whose time has passed (views also close them on read).
+        "task": "bunna_bridge.market.tasks.close_due_auctions",
+        "schedule": crontab(minute="*/2"),
     },
 }
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#worker-send-task-events

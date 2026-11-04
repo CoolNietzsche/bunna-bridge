@@ -241,6 +241,18 @@ class CoffeeLot(models.Model):
         help_text="Archived lots are hidden but kept for the 5-year EUDR record-keeping period.",
     )
 
+    # ── Availability (roadmap M-2) ───────────────────────────────────────────
+    AVAILABILITY_CHOICES = [
+        ("spot", "Spot — ready in Ethiopia"),
+        ("forward", "Forward — pre-harvest or pre-shipment"),
+        ("afloat", "Afloat — on the water"),
+        ("eu_stock", "In EU warehouse"),
+    ]
+    availability = models.CharField(max_length=10, choices=AVAILABILITY_CHOICES, default="spot")
+    expected_ready = models.DateField(
+        null=True, blank=True, help_text="Forward lots: when the coffee is expected ready to ship.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
