@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import ectms
+from . import field_sync
 from . import supply_views
 from . import views
 
@@ -107,6 +108,7 @@ urlpatterns = [
          name="transfer-cancel"),
     path("traceability/ectms/import/", ectms.EctmsImportView.as_view(), name="ectms-import"),
     path("traceability/ectms/farms/<str:farm_id>/", ectms.EctmsLookupView.as_view(), name="ectms-lookup"),
+    path("traceability/field-sync/", field_sync.FieldSyncView.as_view(), name="field-sync"),
     path("traceability/exporters/", supply_views.ExporterChoicesView.as_view(), name="exporter-choices"),
     path("lots/<uuid:lot_pk>/allocate-deliveries/", supply_views.AllocateDeliveriesView.as_view(),
          name="lot-allocate-deliveries"),

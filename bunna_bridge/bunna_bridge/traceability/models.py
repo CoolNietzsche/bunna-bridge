@@ -161,6 +161,13 @@ class Plot(models.Model):
         max_length=20, choices=Tenure.choices, default=Tenure.OTHER,
     )
     notes = models.TextField(blank=True)
+    photo = models.FileField(
+        upload_to="traceability/plots/",
+        null=True,
+        blank=True,
+        validators=[document_extension_validator, validate_document_size],
+        help_text="Field photo of the plot (taken by the field agent).",
+    )
 
     deforestation_status = models.CharField(
         max_length=10,
@@ -586,3 +593,17 @@ class SupplyTransfer(models.Model):
 
     def __str__(self):
         return f"{self.reference}: {self.seller} → {self.buyer} ({self.status})"
+
+
+class FieldSyncRecord(models.Model):
+    """
+    Idempotency record for the offline field app (roadmap O-4). Each queued
+    item carries a UUID generated on the phone; re-sending it after a dropped
+    connection returns the record created the first time.
+    """
+
+    client_id = models.UUIDField(unique=True)
+    kind = models.CharField(max_length=20)
+    object_id = models.CharField(max_length=64)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)

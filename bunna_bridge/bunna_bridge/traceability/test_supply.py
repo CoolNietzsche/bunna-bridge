@@ -204,3 +204,52 @@ class TestCooperativeSupply:
         }, format="json")
         assert r.status_code == 201, r.data
         assert User.objects.get(email="coop@example.com").membership.organization.kind == "cooperative"
+
+
+class TestFieldSync:
+    PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+
+    def test_offline_batch_with_client_refs_is_idempotent(self, tmp_path):
+        import uuid
+
+        from django.test import override_settings
+
+        exp = make_user("exporter")
+        pid, plid, cid, did = (str(uuid.uuid4()) for _ in range(4))
+        items = [
+            {"client_id": pid, "type": "producer", "data": {"name": "Field Farmer", "phone": "0911000000"}},
+            {"client_id": plid, "type": "plot", "data": {
+                "producer": f"client:{pid}", "location": {"type": "Point", "coordinates": [38.3, 6.2]},
+                "declared_area_ha": "1.1", "photo": self.PNG}},
+            {"client_id": cid, "type": "consent", "data": {
+                "producer": f"client:{pid}", "purpose": "eudr_sharing", "method": "paper", "evidence": self.PNG}},
+            {"client_id": did, "type": "delivery", "data": {
+                "producer": f"client:{pid}", "plot": f"client:{plid}", "receipt_number": "F-1",
+                "delivered_on": "2026-11-03", "weight_kg": "40"}},
+        ]
+        with override_settings(MEDIA_ROOT=tmp_path):
+            r = client_for(exp).post(reverse("field-sync"), {"items": items}, format="json")
+            assert [x["status"] for x in r.data["results"]] == ["created"] * 4, r.data
+            again = client_for(exp).post(reverse("field-sync"), {"items": items}, format="json")
+        assert [x["status"] for x in again.data["results"]] == ["duplicate"] * 4
+        producer = Producer.objects.get(name="Field Farmer")
+        assert producer.current_consent("eudr_sharing")
+        assert producer.plots.get().photo
+        assert CherryDelivery.objects.get(receipt_number="F-1").plot == producer.plots.get()
+
+    def test_bad_item_does_not_block_others(self):
+        import uuid
+
+        exp = make_user("exporter")
+        items = [
+            {"client_id": str(uuid.uuid4()), "type": "plot", "data": {"producer": "client:" + str(uuid.uuid4())}},
+            {"client_id": str(uuid.uuid4()), "type": "producer", "data": {"name": "OK"}},
+            {"client_id": "not-a-uuid", "type": "producer", "data": {"name": "X"}},
+        ]
+        r = client_for(exp).post(reverse("field-sync"), {"items": items}, format="json")
+        assert [x["status"] for x in r.data["results"]] == ["error", "created", "error"]
+
+    def test_viewer_cannot_sync(self):
+        exp = make_user("buyer")
+        r = client_for(exp).post(reverse("field-sync"), {"items": [{"client_id": "x"}]}, format="json")
+        assert r.status_code == 403
