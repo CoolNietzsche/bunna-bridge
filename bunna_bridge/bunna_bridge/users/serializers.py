@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-SELF_SERVICE_ROLES = ["exporter", "buyer", "importer", "farmer", "roaster", "cooperative"]
+SELF_SERVICE_ROLES = ["exporter", "buyer", "importer", "farmer", "roaster", "cooperative", "forwarder"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

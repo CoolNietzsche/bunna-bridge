@@ -72,6 +72,7 @@ class FloorPrice(models.Model):
 
     grade      = models.CharField(max_length=5, blank=True, help_text="Blank = any grade.")
     processing = models.CharField(max_length=20, blank=True, help_text="Blank = any processing.")
+    region     = models.CharField(max_length=50, blank=True, help_text="Blank = any region (uses the lot's region codes).")
     min_price_usd_per_kg = models.DecimalField(max_digits=8, decimal_places=2)
     valid_from = models.DateField()
     valid_to   = models.DateField(null=True, blank=True)
@@ -83,7 +84,7 @@ class FloorPrice(models.Model):
         verbose_name = "Floor Price"
 
     def __str__(self):
-        scope = f"{self.grade or 'any grade'} / {self.processing or 'any process'}"
+        scope = f"{self.grade or 'any grade'} / {self.processing or 'any process'} / {self.region or 'any region'}"
         return f"{scope}: ${self.min_price_usd_per_kg}/kg from {self.valid_from}"
 
 

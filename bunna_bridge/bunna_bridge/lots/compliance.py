@@ -49,30 +49,27 @@ def exporter_license_status(user):
     return True, f"Verified, valid until {user.ecta_license_expiry:%d %b %Y}."
 
 
-def applicable_floor_price(lot):
+def applicable_floor_price(lot, on_date=None):
+    """
+    The minimum export price that applies to `lot` on `on_date` (default today).
+    A blank grade, processing or region matches anything; the most specific
+    active row wins (region > grade > processing), newest first on ties.
+    """
     from .models import FloorPrice
 
-    today = _today()
+    day = on_date or _today()
     candidates = (
-        FloorPrice.objects.filter(valid_from__lte=today)
-        .filter(
-            Q(valid_to__isnull=True) | Q(valid_to__gte=today),
-        )
-        .filter(
-            Q(grade="") | Q(grade=lot.grade),
-        )
-        .filter(
-            Q(processing="") | Q(processing=lot.processing),
-        )
+        FloorPrice.objects.filter(valid_from__lte=day)
+        .filter(Q(valid_to__isnull=True) | Q(valid_to__gte=day))
+        .filter(Q(grade="") | Q(grade=lot.grade))
+        .filter(Q(processing="") | Q(processing=lot.processing))
+        .filter(Q(region="") | Q(region=lot.region))
     )
-    # Most specific match wins: grade+processing > grade > processing > generic.
     best = None
     best_rank = -1
     for fp in candidates:
-        rank = (2 if fp.grade else 0) + (1 if fp.processing else 0)
-        if rank > best_rank or (
-            rank == best_rank and best and fp.valid_from > best.valid_from
-        ):
+        rank = (4 if fp.region else 0) + (2 if fp.grade else 0) + (1 if fp.processing else 0)
+        if rank > best_rank or (rank == best_rank and best and fp.valid_from > best.valid_from):
             best, best_rank = fp, rank
     return best
 

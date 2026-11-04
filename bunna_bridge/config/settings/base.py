@@ -98,6 +98,7 @@ LOCAL_APPS = [
     "bunna_bridge.traceability",
     "bunna_bridge.orgs",
     "bunna_bridge.messaging",
+    "bunna_bridge.trade",
 
     # Your stuff: custom apps go here
 ]

@@ -6,7 +6,7 @@ from .models import Membership
 from .models import Organization
 
 # Account types that represent a business and get an organisation.
-ORG_ROLES = {"exporter", "importer", "buyer", "roaster", "cooperative"}
+ORG_ROLES = {"exporter", "importer", "buyer", "roaster", "cooperative", "forwarder"}
 
 
 def create_personal_org(user):

@@ -27,6 +27,7 @@ class Organization(models.Model):
         BUYER = "buyer", "Buyer"
         ROASTER = "roaster", "Roaster"
         COOPERATIVE = "cooperative", "Cooperative / union"
+        FORWARDER = "forwarder", "Freight forwarder"
         PLATFORM = "platform", "Platform"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

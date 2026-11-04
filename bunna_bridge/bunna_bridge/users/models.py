@@ -32,6 +32,7 @@ class User(AbstractUser):
         QGRADER  = "qgrader",  "Q-Grader"
         ROASTER  = "roaster",  "Roaster"
         COOPERATIVE = "cooperative", "Cooperative / union"
+        FORWARDER = "forwarder", "Freight forwarder"
 
     class RoasteryType(models.TextChoices):
         MICRO      = "micro",      "Micro-roastery (under 500kg/month)"
