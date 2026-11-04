@@ -18,6 +18,8 @@ const MyFarm = lazy(() => import("./pages/MyFarm"));
 const MyRoastery = lazy(() => import("./pages/MyRoastery"));
 const Certifications = lazy(() => import("./pages/Certifications"));
 const WashingStations = lazy(() => import("./pages/WashingStations"));
+const Producers = lazy(() => import("./pages/Producers"));
+const ProducerDetail = lazy(() => import("./pages/ProducerDetail"));
 const RoastEquipmentPage = lazy(() => import("./pages/RoastEquipment"));
 const RoastBatches = lazy(() => import("./pages/RoastBatches"));
 const LotPipeline = lazy(() => import("./pages/LotPipeline"));
@@ -78,6 +80,8 @@ export default function App() {
             <Route path="/farm" element={<ProtectedRoute><MyFarm /></ProtectedRoute>} />
             <Route path="/roastery" element={<ProtectedRoute><MyRoastery /></ProtectedRoute>} />
             <Route path="/certifications" element={<ProtectedRoute><Certifications /></ProtectedRoute>} />
+            <Route path="/producers" element={<ProtectedRoute><Producers /></ProtectedRoute>} />
+            <Route path="/producers/:id" element={<ProtectedRoute><ProducerDetail /></ProtectedRoute>} />
             <Route path="/washing-stations" element={<ProtectedRoute><WashingStations /></ProtectedRoute>} />
             <Route path="/roast-equipment" element={<ProtectedRoute><RoastEquipmentPage /></ProtectedRoute>} />
             <Route path="/roast-batches" element={<ProtectedRoute><RoastBatches /></ProtectedRoute>} />

@@ -21,7 +21,7 @@ interface Props {
 const GATE_SHORT: Record<string, string> = {
   gps_verified: "GPS",
   deforestation_free: "Deforestation",
-  eudr_dds_ready: "DDS",
+  eudr_dds_ready: "Due diligence",
   phyto_cert_uploaded: "Phyto",
   ecta_license_active: "ECTA",
   nbe_fx_declared: "NBE",
@@ -157,13 +157,13 @@ export default function ComplianceGatesPanel({ lot, compliance, isOwner, onChang
       {isOwner && (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "18px" }}>
           <button
-            onClick={() => run("dds", () => downloadEudrDds(lot.id), "Due Diligence Statement generated and stored on the lot.")}
+            onClick={() => run("dds", () => downloadEudrDds(lot.id), "Due-diligence summary PDF downloaded.")}
             disabled={!ddsAllowed || busy !== null}
-            title={ddsAllowed ? undefined : "Needs a farm location that passed the deforestation check."}
-            style={{ ...AC.btnPrimary, width: "100%", justifyContent: "center", opacity: ddsAllowed ? 1 : 0.5, cursor: ddsAllowed ? "pointer" : "not-allowed" }}
+            title={ddsAllowed ? "One-page summary for buyers. The importer's evidence package is under EUDR due diligence." : "Needs a farm location that passed the deforestation check."}
+            style={{ ...AC.btnGhost, width: "100%", justifyContent: "center", opacity: ddsAllowed ? 1 : 0.5, cursor: ddsAllowed ? "pointer" : "not-allowed" }}
           >
             <Download size={14} />
-            {busy === "dds" ? "Generating…" : lot.eudr_dds_ready ? "Regenerate EUDR DDS (PDF)" : "Generate EUDR DDS (PDF)"}
+            {busy === "dds" ? "Generating…" : "Download summary (PDF)"}
           </button>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
             <button

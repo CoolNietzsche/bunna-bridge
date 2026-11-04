@@ -38,6 +38,8 @@ Sizes: **S** ≤ 1 day · **M** 2–4 days · **L** 1–2 weeks · **XL** > 2 we
 
 ## Phase 1 — EUDR-ready lots (Nov–Dec 2026, before 30 Dec)
 
+> **Status 2026-11-04: built.** E-1 to E-10 and E-13 are done (backend, UI and tests). E-11 is built in code, but the JRC 2020 forest data still has to be loaded on the server. E-12 is partly done: the GeoJSON property names still need checking against the official EU guidance. Details are in [/DONE.md](../../DONE.md).
+
 The aggregation backbone and the importer evidence package. This is the product-defining phase.
 
 | ID | Task | User(s) | Size | Depends | Acceptance |

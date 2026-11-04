@@ -154,3 +154,68 @@ cd bunna_bridge
 docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
 docker compose -f docker-compose.local.yml run --rm django pytest
 ```
+
+---
+
+## 2026-11-04 — Phase 1 frontend, end-to-end tests, demo data
+
+### New screens
+- **Producers & Plots** (`/producers`), in the sidebar for exporters, roasters and admins:
+  - summary tiles: producers, consent given, plots mapped, polygons, plots clear, plots needing attention;
+  - a map of every plot, coloured by forest-loss check result;
+  - a searchable producer table;
+  - **Bulk import**: supplier-list CSV, or plot maps as GeoJSON / KML / KMZ / zipped Shapefile. "Check file" runs a dry run and lists errors by row number;
+  - **Records export**: a CSV covering 5 years of records.
+- **Producer detail** (`/producers/:id`):
+  - Plots: click the map to add a GPS point, type a GPS reading, or click the corners to draw a polygon. Plots over 4 ha are blocked unless drawn as a polygon. Each plot shows its forest-check result and can be re-checked or archived.
+  - Consent: record or withdraw consent per purpose and method; paper consent needs the signed-form photo.
+  - Editable producer details, and archiving.
+
+### Lot page (exporter)
+- **Supply sources** card:
+  - a map of the plots in the lot;
+  - per plot: kg, location validity, forest check, consent;
+  - percentage of the lot's kg that is traced to plots;
+  - add a plot from the registry, or "Use current farm location as a plot" for older lots.
+- **EUDR due diligence** card:
+  - a 5-step checklist: plots, risks, sign-off, evidence package, DDS filed by the importer;
+  - risk register: record a mitigation with evidence, or accept a medium/low risk with a justification; add a manual risk;
+  - sign off the conclusion, generate or regenerate the evidence package, download the ZIPs, see the importer's DDS reference.
+- The export-readiness panel:
+  - the gate is relabelled "Due diligence";
+  - the old "Generate EUDR DDS" button is now "Download summary (PDF)". The PDF itself is retitled "EUDR due-diligence summary".
+- Create and edit lot forms have a **Supply channel** field.
+
+### Marketplace, importer and public pages
+- New self-service sign-up option **EU importer**, with its own role badge and sidebar.
+- Marketplace lot page:
+  - a **Traceability** summary (counts only, no personal data);
+  - a buyer or importer with an accepted offer gets the **EUDR due diligence** card: download the package and record the DDS reference and verification number;
+  - the old "Download EUDR DDS" button is removed.
+- Public lot story (`/story/:id`): a **Traceable to the farm** section with kg traced, plots, producers and four checks. It contains no producer names and no plot locations.
+
+### Demo accounts (password `Beersheba-Demo-2026`)
+- New: `importer@demo.beersheba.et` — Hamburg Green Coffee GmbH, which filed the DDS for the Harrar lot.
+- For a walk-through, log in as `exporter@demo.beersheba.et` and open:
+  - **Producers & Plots**;
+  - lot YRG-2026-0847 (6 smallholders, evidence ready);
+  - GUJ-2026-0311 (high risk open: one producer without consent);
+  - SDM-2026-0213 (ready to sign off).
+
+### Verification
+- Backend: **141 tests pass**.
+- Frontend: `tsc -b` and `npm run build` succeed.
+- New files pass ESLint. The two remaining ESLint errors were already in `MarketplaceLotDetail.tsx` before this work.
+- `scripts/e2e-smoke.js` now has **31 checks, all passing, with no page errors**. 12 of them are new for Phase 1:
+  - producer, plot and consent created in the UI;
+  - swapped latitude/longitude rejected;
+  - sign-off refused while a high risk is open;
+  - evidence package generated, then the lot exported;
+  - importer downloads the ZIP and sees the DDS reference;
+  - a buyer without an accepted offer is refused;
+  - the public story shows the trust profile and hides producer names.
+
+### Still open (needs the server or outside input)
+- E-11: load the JRC GFC2020 forest tiles on the server (`load_forest_baseline`, then `recheck_plots`).
+- E-12: check the GeoJSON property names against the official EU Information System guidance; if they differ, update `TRACES_PROPERTIES` in `traceability/geo.py`.
+- Deploy: run `migrate` on the VPS through Docker Compose (commands are in the backend section above).

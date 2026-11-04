@@ -5,7 +5,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import QRCode from "qrcode";
 import {
-  MapPin, ShieldCheck, QrCode, Coffee,
+  MapPin, ShieldCheck, QrCode, Coffee, CheckCircle2, Circle,
 } from "lucide-react";
 import { getLotStory } from "../api/lots";
 import FarmMapDisplay from "../components/FarmMapDisplay";
@@ -153,6 +153,28 @@ export default function LotStory() {
             </div>
           ))}
         </div>
+
+        {lot.trust_profile && lot.trust_profile.plots_mapped > 0 && (
+          <div style={{ ...card, marginBottom: "20px" }}>
+            <p style={label}>Traceable to the farm</p>
+            <p style={{ fontFamily: AT.font.sans, fontSize: "0.95rem", color: AT.color.text, margin: "0 0 12px", lineHeight: 1.5 }}>
+              {Number(lot.trust_profile.traced_kg).toLocaleString()} kg traced to {lot.trust_profile.plots_mapped} mapped plot{lot.trust_profile.plots_mapped === 1 ? "" : "s"} from {lot.trust_profile.producers} producer{lot.trust_profile.producers === 1 ? "" : "s"}.
+            </p>
+            {([
+              ["Every plot clear of forest loss after 2020", lot.trust_profile.plots_deforestation_clear === lot.trust_profile.plots_mapped],
+              ["Exporter's ECTA licence verified", lot.trust_profile.exporter_licence_verified],
+              ["Risk assessment signed off", !!lot.trust_profile.risk_assessment_signed_at],
+              ["EU due-diligence statement filed by the importer", lot.trust_profile.dds_filed_by_importer],
+            ] as [string, boolean][]).map(([text, ok]) => (
+              <p key={text} style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: AT.font.sans, fontSize: "0.84rem", color: ok ? AT.color.text : AT.color.textMuted, margin: "0 0 6px" }}>
+                {ok ? <CheckCircle2 size={15} color={AT.color.green} /> : <Circle size={15} color={AT.color.textDisabled} />} {text}
+              </p>
+            ))}
+            <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: "10px 0 0" }}>
+              Supply channel: {lot.trust_profile.supply_channel}. Producer names and exact plot locations are shared only with the buyer, with each producer's consent.
+            </p>
+          </div>
+        )}
 
         {(lot.tasting_notes || lot.flavor_notes) && (
           <blockquote style={{ borderLeft: `3px solid ${AT.color.primary}`, paddingLeft: "16px", marginBottom: "20px", marginLeft: 0, fontFamily: AT.font.sans, fontSize: "1.05rem", fontStyle: "italic", color: AT.color.text, opacity: 0.85 }}>

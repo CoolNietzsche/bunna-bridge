@@ -122,7 +122,7 @@ export default function LotCard({ lot, showWatch = false, isWatched = false, onT
 
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {lot.deforestation_free && lot.gps_verified && <Badge icon={<ShieldCheck size={10} />} label="Deforestation-free" />}
-          {lot.eudr_dds_ready && <Badge icon={<ShieldCheck size={10} />} label="EUDR DDS" />}
+          {lot.eudr_dds_ready && <Badge icon={<ShieldCheck size={10} />} label="EUDR evidence" />}
           {lot.is_organic && <Badge icon={<Sprout size={10} />} label="Organic" tone="matcha" />}
           {lot.is_fair_trade && <Badge label="Fair Trade" tone="matcha" />}
           <Badge label={`${lot.compliance_score ?? 0}/7 gates`} tone="neutral" />

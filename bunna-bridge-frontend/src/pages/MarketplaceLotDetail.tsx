@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLot, createOffer, downloadSpecSheet, apiErrorText } from "../api/lots";
-import { viewLotDocument } from "../api/docs";
+import DueDiligencePanel from "../components/trace/DueDiligencePanel";
+import type { DueDiligenceSummary } from "../api/traceability";
 import { createSampleRequest } from "../api/samples";
 import { useAuth } from "../context/AuthContext";
 import AppShell from "../components/AppShell";
 import LotPhotoGallery from "../components/LotPhotoGallery";
 import {
   ShieldCheck, Mountain, FlaskConical, TrendingUp,
-  ArrowLeft, CheckCircle, XCircle, Download,
+  ArrowLeft, CheckCircle, XCircle,
   MapPin, Calendar, X, FileText, Building2, Sprout, Share2,
 } from "lucide-react";
 import { AT } from "../styles/adminTokens";
@@ -53,6 +54,32 @@ function GateRow({ label, passed }: { label: string; passed: boolean; key?: stri
         {passed ? "PASS" : "PENDING"}
       </span>
     </div>
+  );
+}
+
+// ── Traceability summary (no personal data) ─────────────────────────────────
+function TraceabilitySummary({ dd }: { dd: DueDiligenceSummary }) {
+  const rows: [string, string][] = [
+    ["Producers", String(dd.producers)],
+    ["Plots mapped", `${dd.plots} (${dd.polygons} polygon, ${dd.points} point)`],
+    ["Clear of forest loss after 2020", `${dd.plots_clear} of ${dd.plots}`],
+    ["Traced to plots", `${Number(dd.traced_kg).toLocaleString()} kg`],
+    ["Risk assessment", dd.signed_off_at ? `Signed ${new Date(dd.signed_off_at).toLocaleDateString()}` : "In progress"],
+    ["Importer evidence package", dd.package_generated_at ? "Ready" : "Not yet"],
+  ];
+  return (
+    <section style={{ ...AC.card, ...AC.cardPad }}>
+      <p style={{ ...AC.eyebrow, marginBottom: "8px" }}>Traceability</p>
+      {rows.map(([k, v]) => (
+        <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: "12px", padding: "7px 0", borderBottom: `1px solid ${AT.color.borderLight}` }}>
+          <span style={{ fontFamily: AT.font.sans, fontSize: "0.78rem", color: AT.color.textMuted }}>{k}</span>
+          <span style={{ fontFamily: AT.font.sans, fontSize: "0.82rem", color: AT.color.text, fontWeight: 500, textAlign: "right" }}>{v}</span>
+        </div>
+      ))}
+      <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: "10px 0 0" }}>
+        Once your offer is accepted you can download the full evidence package for your EUDR Due Diligence Statement.
+      </p>
+    </section>
   );
 }
 
@@ -136,7 +163,6 @@ export default function MarketplaceLotDetail() {
   const qc = useQueryClient();
 
   const [showOffer, setShowOffer] = useState(false);
-  const [ddsError, setDdsError] = useState("");
   const [showSample, setShowSample] = useState(false);
   const [sampleDone, setSampleDone] = useState(false);
   const [sampleNote, setSampleNote] = useState("");
@@ -201,7 +227,7 @@ export default function MarketplaceLotDetail() {
     { label: "ECTA export license active", passed: lot.ecta_license_active },
     { label: "NBE FX declaration filed", passed: lot.nbe_fx_declared },
     { label: "CTA floor price met", passed: lot.cta_floor_met },
-    { label: "EUDR DDS ready", passed: lot.eudr_dds_ready },
+    { label: "EUDR due-diligence evidence", passed: lot.eudr_dds_ready },
   ];
 
   return (
@@ -308,6 +334,8 @@ export default function MarketplaceLotDetail() {
             </div>
             {gates.map((g) => <GateRow key={g.label} label={g.label} passed={g.passed} />)}
           </section>
+
+          {lot.due_diligence?.has_sources && <TraceabilitySummary dd={lot.due_diligence} />}
         </div>
 
         {/* Right — action panel */}
@@ -330,21 +358,6 @@ export default function MarketplaceLotDetail() {
                 <button onClick={() => requireAuth("sample", () => setShowSample(true))} style={{ ...AC.btnGhost, width: "100%", justifyContent: "center" }}>
                   <FlaskConical size={15} /> Request a sample
                 </button>
-              )}
-              {lot.eudr_dds_ready && isAuthenticated && (
-                <button
-                  onClick={async () => {
-                    setDdsError("");
-                    try { await viewLotDocument(lot.id, "eudr_dds_file"); }
-                    catch { setDdsError("The DDS is shared with the buyer once their offer is accepted."); }
-                  }}
-                  style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}
-                >
-                  <Download size={14} /> Download EUDR DDS
-                </button>
-              )}
-              {ddsError && (
-                <p style={{ fontFamily: AT.font.sans, fontSize: "0.74rem", color: AT.color.textMuted, margin: 0, textAlign: "center" }}>{ddsError}</p>
               )}
               <button onClick={() => downloadSpecSheet(lot.id, lot.lot_id)} style={{ ...AC.btnSm, width: "100%", justifyContent: "center", padding: "10px" }}>
                 <FileText size={14} /> Download spec sheet
@@ -378,6 +391,8 @@ export default function MarketplaceLotDetail() {
               </div>
             )}
           </div>
+
+          {isAuthenticated && <DueDiligencePanel lotId={lot.id} />}
 
           <div style={{ ...AC.card, ...AC.cardPad }}>
             <p style={AC.eyebrow}>Lot details</p>

@@ -15,6 +15,13 @@ import { AC } from "../styles/adminComponents";
 const REGIONS = ["yirgacheffe", "sidama", "guji", "jimma", "harrar", "limu", "nekemte", "other"];
 const GRADES = ["G1", "G2", "G3"];
 const PROCESSING = ["washed", "natural", "honey"];
+const CHANNELS: [string, string][] = [
+  ["unknown", "Not stated"],
+  ["direct", "Own farm / estate"],
+  ["vertical", "Own washing station, registered suppliers"],
+  ["union", "Cooperative union"],
+  ["ecx", "Bought through ECX"],
+];
 
 type Step = "origin" | "quality" | "compliance" | "review";
 const STEPS: Step[] = ["origin", "quality", "compliance", "review"];
@@ -27,7 +34,7 @@ const STEP_LABELS: Record<Step, string> = {
 
 interface FormData {
   lot_id: string; name: string; region: string; kebele: string; farmer_id: string;
-  washing_station: string; washing_station_facility_id: string; altitude_m: string; processing: string;
+  washing_station: string; washing_station_facility_id: string; altitude_m: string; processing: string; channel: string;
   grade: string; varietal: string; harvest_date: string;
   volume_kg: string; price_per_kg: string; sca_score: string;
   flavor_notes: string; q_grader_name: string; q_grader_cert_id: string;
@@ -39,7 +46,7 @@ interface FormData {
 
 const EMPTY: FormData = {
   lot_id: "", name: "", region: "yirgacheffe", kebele: "", farmer_id: "",
-  washing_station: "", washing_station_facility_id: "", altitude_m: "", processing: "washed",
+  washing_station: "", washing_station_facility_id: "", altitude_m: "", processing: "washed", channel: "unknown",
   grade: "G1", varietal: "Ethiopian Heirloom", harvest_date: "",
   volume_kg: "", price_per_kg: "", sca_score: "", flavor_notes: "",
   q_grader_name: "", q_grader_cert_id: "", cupping_date: "",
@@ -99,7 +106,7 @@ export default function CreateLot() {
         lot_id: form.lot_id, name: form.name, region: form.region,
         kebele: form.kebele, washing_station: form.washing_station,
         washing_station_facility: form.washing_station_facility_id || null,
-        altitude_m: parseInt(form.altitude_m), processing: form.processing,
+        altitude_m: parseInt(form.altitude_m), processing: form.processing, channel: form.channel,
         grade: form.grade, varietal: form.varietal || "Ethiopian Heirloom",
         harvest_date: form.harvest_date,
         volume_kg: parseFloat(form.volume_kg),
@@ -203,6 +210,12 @@ export default function CreateLot() {
                   <label style={lbl}>Processing *</label>
                   <select style={AC.input} value={form.processing} onChange={(e) => set("processing", e.target.value)}>
                     {PROCESSING.map((p) => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={lbl}>Supply channel</label>
+                  <select style={AC.input} value={form.channel} onChange={(e) => set("channel", e.target.value)}>
+                    {CHANNELS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
                 </div>
               </div>

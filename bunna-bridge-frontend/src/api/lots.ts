@@ -1,3 +1,4 @@
+import type { DueDiligenceSummary } from "./traceability";
 import type { GeoPolygon } from './boundary';
 import type { LotCertification } from '../lib/certifications';
 import api from "./client";
@@ -70,6 +71,9 @@ export interface CoffeeLot {
   exporter_verified?: boolean;
   eudr_dds_generated_at?: string | null;
   eudr_dds_reference?: string;
+  channel?: "direct" | "vertical" | "union" | "ecx" | "unknown";
+  archived_at?: string | null;
+  due_diligence?: DueDiligenceSummary;
   phyto_cert_file?: string | null;
   phyto_cert_expiry?: string | null;
   ecex_permit_file?: string | null;
@@ -100,7 +104,23 @@ export interface ComplianceEvent {
   hash: string;
 }
 
+export interface TrustProfile {
+  exporter_licence_verified: boolean;
+  supply_channel: string;
+  producers: number;
+  plots_mapped: number;
+  plots_with_polygon: number;
+  plots_deforestation_clear: number;
+  traced_kg: string;
+  risk_assessment_signed_at: string | null;
+  evidence_package_at: string | null;
+  dds_filed_by_importer: boolean;
+  deforestation_free: boolean;
+  geolocated: boolean;
+}
+
 export interface PublicLotStory {
+  trust_profile?: TrustProfile;
   id: string;
   lot_id: string;
   name: string;

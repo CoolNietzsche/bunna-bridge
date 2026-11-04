@@ -63,7 +63,7 @@ export function formatKg(value?: string | number | null): string {
  * so the two roles don't drift out of sync across the many gated actions.
  */
 export function isBuyerRole(role?: string | null): boolean {
-  return role === "buyer" || role === "roaster";
+  return role === "buyer" || role === "importer" || role === "roaster";
 }
 
 /** Initials for avatars. */

@@ -111,8 +111,8 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   const lim = await lotId(expT, 'LIM-2026-0120');
   await page.goto(`${BASE}/lots/${lim}`);
   await page.waitForTimeout(1200);
-  const ddsBtn = page.getByRole('button', { name: /Generate EUDR DDS/ });
-  check('DDS button disabled for a lot that overlaps forest loss', await ddsBtn.isDisabled());
+  const ddsBtn = page.getByRole('button', { name: /Download summary \(PDF\)/ });
+  check('Summary PDF disabled for a lot that overlaps forest loss', await ddsBtn.isDisabled());
   check('Failing deforestation gate explains why', (await page.locator('text=/overlaps forest loss/').count()) > 0);
 
   const yrg = await lotId(expT, 'YRG-2026-0847');
@@ -120,9 +120,9 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   await page.waitForTimeout(1200);
   const [dl] = await Promise.all([
     page.waitForEvent('download', { timeout: 10000 }).catch(() => null),
-    page.getByRole('button', { name: /EUDR DDS/ }).click(),
+    page.getByRole('button', { name: /Download summary \(PDF\)/ }).click(),
   ]);
-  check('Exporter downloads a generated DDS PDF', !!dl && dl.suggestedFilename().endsWith('.pdf'), dl?.suggestedFilename());
+  check('Exporter downloads the due-diligence summary PDF', !!dl && dl.suggestedFilename().endsWith('.pdf'), dl?.suggestedFilename());
   await page.getByRole('button', { name: /Compliance audit trail/ }).click();
   await page.waitForTimeout(800);
   check('Audit trail shows an intact hash chain', (await page.locator('text=/Hash chain intact/').count()) > 0);
@@ -136,10 +136,18 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   const body = await resp.json();
   check('Settlement uses the rate typed by the user', body.nbe_rate === 100, `rate=${body.nbe_rate}`);
 
-  // 6. Export path: Bensa (contracted, 7/7) can be exported from the panel
+  // 6. Export path: Bensa (contracted, mapped, consented) — sign off the risk
+  // assessment and generate the importer's evidence package in the UI, then export.
   const sdm = await lotId(expT, 'SDM-2026-0213');
   await page.goto(`${BASE}/lots/${sdm}`);
   await page.waitForTimeout(1200);
+  check('Export locked before due diligence is complete',
+    await page.getByRole('button', { name: /Export locked/ }).isDisabled());
+  await page.getByRole('button', { name: /Sign off risk assessment/ }).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: /Generate evidence package/ }).click();
+  await page.waitForTimeout(1500);
+  check('Evidence package generated from the lot page', (await page.locator('text=/Evidence ready/').count()) > 0);
   await page.getByRole('button', { name: /Mark as exported/ }).click();
   await page.waitForTimeout(1200);
   const sdmAfter = await api(expT, `/api/v1/lots/${sdm}/`);
@@ -179,6 +187,62 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Registering as admin is refused', reg.status === 400);
   const meEsc = await api(buyerT, '/api/v1/auth/me/', { method: 'PATCH', body: JSON.stringify({ role: 'admin' }) });
   check('PATCH /me cannot change role', meEsc.body.role === 'buyer');
+
+  // 10. Phase 1 traceability: register a producer + plot + consent in the UI
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'exporter@demo.beersheba.et');
+  await page.goto(BASE + '/producers');
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Add producer/ }).click();
+  await page.getByLabel('Name', { exact: true }).fill('E2E Producer');
+  await page.getByLabel(/Your reference/).fill('E2E-001');
+  await page.getByRole('button', { name: /Save and add plots/ }).click();
+  await page.waitForURL(/producers\/[0-9a-f-]+/, { timeout: 8000 });
+  await page.getByRole('button', { name: /Add point/ }).click();
+  await page.getByLabel('Latitude').fill('6.33');
+  await page.getByLabel('Longitude').fill('38.22');
+  await page.getByLabel(/Area stated/).fill('1.5');
+  await page.getByRole('button', { name: /Save plot/ }).click();
+  await page.waitForTimeout(1200);
+  const prods = await api(expT, '/api/v1/traceability/producers/?search=E2E-001');
+  const prod = (prods.body.results || prods.body)[0];
+  check('Producer created from the UI', !!prod && prod.plots_count === 1, `plots=${prod?.plots_count}`);
+  const plots = await api(expT, `/api/v1/traceability/plots/?producer=${prod?.id}`);
+  const plot = (plots.body.results || plots.body)[0];
+  check('Plot saved and checked against forest-loss data', plot && plot.deforestation_status === 'clear', plot?.deforestation_status);
+  await page.getByRole('button', { name: /^Record$/ }).click();
+  await page.getByRole('button', { name: /^Save$/ }).click();
+  await page.waitForTimeout(1000);
+  check('Consent recorded from the UI', (await page.locator('text=/EUDR consent given/').count()) > 0);
+  const swapped = await api(expT, '/api/v1/traceability/plots/', { method: 'POST', body: JSON.stringify({ producer: prod?.id, location: { type: 'Point', coordinates: [6.33, 38.22] } }) });
+  check('Swapped lat/lng is rejected', swapped.status === 400);
+  const guj2 = await lotId(expT, 'GUJ-2026-0311');
+  const so = await api(expT, `/api/v1/lots/${guj2}/sign-off/`, { method: 'POST', body: JSON.stringify({ conclusion: 'x' }) });
+  check('Sign-off refused while a high risk (missing consent) is open', so.status === 400);
+  await page.context().close();
+
+  // 11. EU importer: evidence package + DDS reference; public trust profile
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'importer@demo.beersheba.et');
+  const harT = await token('importer@demo.beersheba.et');
+  const har = await lotId(harT, 'HAR-2025-0098');
+  await page.goto(`${BASE}/marketplace/${har}`);
+  await page.waitForTimeout(1500);
+  const [zip] = await Promise.all([
+    page.waitForEvent('download', { timeout: 10000 }).catch(() => null),
+    page.getByRole('button', { name: /Download package/ }).first().click(),
+  ]);
+  check('Importer downloads the evidence package ZIP', !!zip && zip.suggestedFilename().endsWith('.zip'), zip?.suggestedFilename());
+  check('Recorded DDS reference is shown', (await page.locator('text=26DEHH4Q7N2Z81').count()) > 0);
+  const notImp = await api(buyerT, `/api/v1/lots/${har}/due-diligence/`);
+  check('Buyer without an accepted offer cannot see the evidence', notImp.status === 404);
+  await page.goto(`${BASE}/story/${har}`);
+  await page.waitForTimeout(1200);
+  check('Public story shows the traceability profile', (await page.locator('text=/Traceable to the farm/').count()) > 0);
+  check('Public story hides producer names', (await page.locator('text=/Gara Muleta Estate/').count()) === 0);
+  await page.context().close();
 
   console.log(results.join('\n'));
   console.log(errs.length ? 'PAGE ERRORS: ' + JSON.stringify(errs) : 'no page errors');

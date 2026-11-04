@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck } from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
@@ -21,6 +21,7 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
+      { label: "Producers & Plots", path: "/producers", icon: <Users size={s} /> },
       { label: "Offers", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
@@ -29,6 +30,7 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
+      { label: "Producers & Plots", path: "/producers", icon: <Users size={s} /> },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
@@ -46,6 +48,7 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Roast Equipment", path: "/roast-equipment", icon: <Wrench size={s} /> },
       { label: "My Lots", path: "/lots", icon: <Package size={s} /> },
       { label: "Pipeline", path: "/pipeline", icon: <GitBranch size={s} /> },
+      { label: "Producers & Plots", path: "/producers", icon: <Users size={s} /> },
       { label: "Washing Stations", path: "/washing-stations", icon: <Droplets size={s} /> },
       { label: "Offers Received", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
@@ -53,6 +56,12 @@ function groupsFor(role: string | undefined): NavGroup[] {
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
       { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
+    ],
+    importer: [
+      { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
+      { label: "My Offers & DDS", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
+      { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
+      { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
     farmer: [
       { label: "My Farm", path: "/farm", icon: <Sprout size={s} /> },

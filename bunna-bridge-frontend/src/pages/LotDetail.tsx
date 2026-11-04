@@ -13,6 +13,8 @@ import SettlementWidget from "../components/SettlementWidget";
 import LotDocuments from "../components/LotDocuments";
 import LotPhotos from "../components/LotPhotos";
 import ComplianceGatesPanel from "../components/ComplianceGatesPanel";
+import SupplySources from "../components/trace/SupplySources";
+import DueDiligencePanel from "../components/trace/DueDiligencePanel";
 import {
   ArrowLeft, MapPin, Mountain, Layers, ShieldCheck, Leaf,
   Pencil, FlaskConical, Package, Users, Globe, BadgeCheck, Share2,
@@ -121,7 +123,7 @@ export default function LotDetail() {
     { icon: <Globe size={13} />, label: "Geolocated", active: lot.gps_verified },
     { icon: <Leaf size={13} />, label: "Deforestation-free", active: lot.deforestation_free },
     { icon: <FlaskConical size={13} />, label: "Q-grader verified", active: qVerified },
-    { icon: <BadgeCheck size={13} />, label: "EUDR statement", active: lot.eudr_dds_ready },
+    { icon: <BadgeCheck size={13} />, label: "EUDR evidence", active: lot.eudr_dds_ready },
     { icon: <ShieldCheck size={13} />, label: "Export-ready", active: lot.export_ready },
   ];
 
@@ -288,6 +290,10 @@ export default function LotDetail() {
               </div>
             </div>
 
+            {isOwner && (
+              <SupplySources lot={lot} onChanged={() => { refetch(); refetchCompliance(); }} />
+            )}
+
             <div style={card}>
               <CuppingHistory lotId={lot.id} />
             </div>
@@ -333,6 +339,8 @@ export default function LotDetail() {
               lot={lot} compliance={compliance} isOwner={isOwner}
               onChanged={() => { refetch(); refetchCompliance(); }}
             />
+
+            <DueDiligencePanel lotId={lot.id} onChanged={() => { refetch(); refetchCompliance(); }} />
 
             {(isOwner || lot.status !== "draft") && (
               <div style={{ display: "grid", gridTemplateColumns: isOwner ? "1fr 1fr" : "1fr", gap: "8px" }}>

@@ -116,7 +116,7 @@ def generate_dds_pdf(lot) -> bytes:
         rightMargin=18 * mm,
         topMargin=18 * mm,
         bottomMargin=18 * mm,
-        title=f"EUDR DDS {lot.lot_id}",
+        title=f"EUDR due-diligence summary {lot.lot_id}",
         author="Beersheba",
     )
     exporter = lot.exporter
@@ -124,7 +124,7 @@ def generate_dds_pdf(lot) -> bytes:
 
     story = [
         Paragraph("BEERSHEBA", S_SECTION),
-        Paragraph("EUDR Due Diligence Statement", S_TITLE),
+        Paragraph("EUDR due-diligence summary", S_TITLE),
         Paragraph(
             f"Regulation (EU) 2023/1115 &middot; Lot {lot.lot_id} &middot; Cut-off date 31 December 2020",
             S_SUBTITLE,
@@ -233,7 +233,7 @@ def generate_dds_pdf(lot) -> bytes:
     gate_rows = []
     for g in gate_report(lot):
         if g["gate"] == "eudr_dds_ready":
-            continue  # this document is the DDS
+            continue  # shown separately as the evidence package
         gate_rows.append(
             [
                 Paragraph(g["label"], S_BODY),

@@ -569,7 +569,7 @@ class EudrDdsView(viewsets.ViewSet):
 
         pdf = generate_dds_pdf(lot)
         now = timezone.now()
-        filename = f"EUDR-DDS-{lot.lot_id}-{timezone.localtime(now):%Y%m%d}.pdf"
+        filename = f"EUDR-summary-{lot.lot_id}-{timezone.localtime(now):%Y%m%d}.pdf"
         lot.eudr_dds_file.save(filename, ContentFile(pdf), save=False)
         lot.eudr_dds_generated_at = now
         lot.save(actor=request.user)
