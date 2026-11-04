@@ -179,7 +179,8 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         return [s for s in obj.cupping_scores.all() if s.status == "confirmed"]
 
     def get_sca_verified(self, obj):
-        return bool(self._confirmed_scores(obj))
+        from bunna_bridge.quality.services import latest_confirmed
+        return bool(self._confirmed_scores(obj)) or latest_confirmed(obj) is not None
 
     def get_farmer_name(self, obj):
         if not obj.farmer_id:
@@ -193,9 +194,10 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         return obj.is_eudr_ready()
 
     def get_latest_sca_score(self, obj):
-        confirmed = self._confirmed_scores(obj)
-        if confirmed:
-            return confirmed[0].total_score
+        from bunna_bridge.quality.services import latest_confirmed
+        latest = latest_confirmed(obj)
+        if latest:
+            return latest["score"]
         return float(obj.sca_score) if obj.sca_score is not None else None
 
     def get_certifications(self, obj):
@@ -348,15 +350,17 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
         return obj.compliance_score()
 
     def get_latest_sca_score(self, obj):
-        score = obj.cupping_scores.filter(status="confirmed").first()
-        if score:
-            return score.total_score
+        from bunna_bridge.quality.services import latest_confirmed
+        latest = latest_confirmed(obj)
+        if latest:
+            return latest["score"]
         return float(obj.sca_score) if obj.sca_score is not None else None
 
     def get_latest_q_grader(self, obj):
-        score = obj.cupping_scores.filter(status="confirmed").first()
-        if score:
-            return score.grader.get_full_name() or score.grader.email
+        from bunna_bridge.quality.services import latest_confirmed
+        latest = latest_confirmed(obj)
+        if latest:
+            return latest["grader"]
         return obj.q_grader_name or None
 
     def get_boundary_geojson(self, obj):
