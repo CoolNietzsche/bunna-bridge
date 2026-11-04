@@ -97,6 +97,7 @@ LOCAL_APPS = [
     "bunna_bridge.roasting",
     "bunna_bridge.traceability",
     "bunna_bridge.orgs",
+    "bunna_bridge.messaging",
 
     # Your stuff: custom apps go here
 ]
@@ -470,3 +471,20 @@ JAZZMIN_UI_TWEAKS = {
         "success":   "btn-success",
     },
 }
+
+
+# SMS (roadmap O-6) — see bunna_bridge/messaging/backends.py
+# ------------------------------------------------------------------------------
+SMS_ENABLED = env.bool("SMS_ENABLED", default=True)
+SMS_BACKEND = env("SMS_BACKEND", default="log")  # log | africastalking | http
+SMS_ASYNC = env.bool("SMS_ASYNC", default=False)  # True: send through Celery
+SMS_SENDER_ID = env("SMS_SENDER_ID", default="")
+SMS_AT_USERNAME = env("SMS_AT_USERNAME", default="")
+SMS_AT_API_KEY = env("SMS_AT_API_KEY", default="")
+SMS_HTTP_URL = env("SMS_HTTP_URL", default="")
+SMS_HTTP_TOKEN = env("SMS_HTTP_TOKEN", default="")
+
+# ECTMS (Ethiopian Coffee Traceability and Management System) — roadmap O-8.
+# Leave empty until ECTA provides API access; CSV import works without it.
+ECTMS_API_URL = env("ECTMS_API_URL", default="")
+ECTMS_API_TOKEN = env("ECTMS_API_TOKEN", default="")

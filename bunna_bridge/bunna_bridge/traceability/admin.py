@@ -1,5 +1,6 @@
 from django.contrib.gis import admin
 
+from .models import CherryDelivery
 from .models import DdsReference
 from .models import EvidencePackage
 from .models import ForestBaseline2020
@@ -10,6 +11,7 @@ from .models import Plot
 from .models import Producer
 from .models import ProducerConsent
 from .models import RiskSignOff
+from .models import SupplyTransfer
 
 
 class PlotInline(admin.TabularInline):
@@ -108,3 +110,16 @@ class DdsReferenceAdmin(admin.ModelAdmin):
 class ForestBaselineAdmin(admin.ModelAdmin):
     list_display = ["id", "source", "tile"]
     list_filter = ["source"]
+
+
+@admin.register(CherryDelivery)
+class CherryDeliveryAdmin(admin.ModelAdmin):
+    list_display = ["receipt_number", "producer", "weight_kg", "delivered_on", "amount_paid_etb", "lot"]
+    search_fields = ["receipt_number", "producer__name"]
+    list_filter = ["form"]
+
+
+@admin.register(SupplyTransfer)
+class SupplyTransferAdmin(admin.ModelAdmin):
+    list_display = ["reference", "seller", "buyer", "quantity_kg", "status", "created_at"]
+    list_filter = ["status"]

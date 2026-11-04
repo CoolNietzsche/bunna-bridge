@@ -200,8 +200,14 @@ class PlotListCreateView(generics.ListCreateAPIView):
     permission_classes = [CanManageSupply]
 
     def get_queryset(self):
-        qs = _plots_for(self.request.user)
         params = self.request.query_params
+        if _truthy(params.get("available", "")):
+            # Plots usable as lot sources: own team's plus those bought from cooperatives.
+            from .access import available_plots
+
+            qs = available_plots(self.request.user, Plot.objects.select_related("producer"))
+        else:
+            qs = _plots_for(self.request.user)
         if not _truthy(params.get("archived", "")):
             qs = qs.filter(archived_at__isnull=True)
         if params.get("producer"):

@@ -1,5 +1,7 @@
 from django.urls import path
 
+from . import ectms
+from . import supply_views
 from . import views
 
 urlpatterns = [
@@ -95,4 +97,17 @@ urlpatterns = [
         views.DdsReferenceCreateView.as_view(),
         name="lot-dds-references",
     ),
+    path("traceability/deliveries/", supply_views.DeliveryListCreateView.as_view(), name="delivery-list"),
+    path("traceability/deliveries/<uuid:pk>/", supply_views.DeliveryDetailView.as_view(), name="delivery-detail"),
+    path("traceability/my-deliveries/", supply_views.MyDeliveriesView.as_view(), name="my-deliveries"),
+    path("traceability/transfers/", supply_views.TransferListCreateView.as_view(), name="transfer-list"),
+    path("traceability/transfers/<uuid:pk>/respond/", supply_views.TransferRespondView.as_view(),
+         name="transfer-respond"),
+    path("traceability/transfers/<uuid:pk>/cancel/", supply_views.TransferCancelView.as_view(),
+         name="transfer-cancel"),
+    path("traceability/ectms/import/", ectms.EctmsImportView.as_view(), name="ectms-import"),
+    path("traceability/ectms/farms/<str:farm_id>/", ectms.EctmsLookupView.as_view(), name="ectms-lookup"),
+    path("traceability/exporters/", supply_views.ExporterChoicesView.as_view(), name="exporter-choices"),
+    path("lots/<uuid:lot_pk>/allocate-deliveries/", supply_views.AllocateDeliveriesView.as_view(),
+         name="lot-allocate-deliveries"),
 ]

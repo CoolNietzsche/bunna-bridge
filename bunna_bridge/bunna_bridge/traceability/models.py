@@ -57,6 +57,10 @@ class Producer(models.Model):
     )
     name = models.CharField(max_length=200)
     phone = models.CharField(max_length=30, blank=True)
+    language = models.CharField(
+        max_length=2, choices=[("am", "Amharic"), ("om", "Afaan Oromo"), ("en", "English")], default="am",
+        help_text="Language for SMS and printed receipts.",
+    )
     region = models.CharField(max_length=100, blank=True)
     zone = models.CharField(max_length=100, blank=True)
     woreda = models.CharField(max_length=100, blank=True)

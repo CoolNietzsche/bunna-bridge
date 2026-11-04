@@ -92,6 +92,7 @@ class ProducerSerializer(serializers.ModelSerializer):
             "external_ref",
             "name",
             "phone",
+            "language",
             "region",
             "zone",
             "woreda",
