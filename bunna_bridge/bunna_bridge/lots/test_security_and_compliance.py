@@ -737,7 +737,11 @@ class TestComplianceEngine:
                 == 200
             )
             lot.refresh_from_db()
-            assert lot.eudr_dds_ready is True
+            assert lot.eudr_dds_file
+            # A summary PDF alone never passes the due-diligence gate: that
+            # needs registered plots, a signed-off risk register and an
+            # evidence package (bunna_bridge/traceability/tests.py).
+            assert lot.eudr_dds_ready is False
             lot.boundary = Polygon(
                 ((38.1, 6.1), (38.1, 6.11), (38.11, 6.11), (38.1, 6.1)), srid=4326,
             )
@@ -745,12 +749,11 @@ class TestComplianceEngine:
         assert lot.eudr_dds_ready is False
         assert not lot.eudr_dds_file
 
-    def test_full_export_path(self, tmp_path):
+    def test_legacy_lot_cannot_be_exported_without_due_diligence(self, tmp_path):
         FloorPrice.objects.create(
             min_price_usd_per_kg=Decimal("4.00"), valid_from=date(2026, 1, 1),
         )
         exp = verified_exporter()
-        buyer = make_user("buyer")
         with override_settings(MEDIA_ROOT=tmp_path):
             lot = make_lot(
                 exp,
@@ -758,32 +761,14 @@ class TestComplianceEngine:
                 deforestation_free=True,
                 phyto_cert_file=pdf(),
                 nbe_fx_declaration_file=pdf("nbe.pdf"),
+                status="contracted",
             )
             c = client_for(exp)
             assert c.get(reverse("lot-eudr-dds", args=[lot.pk])).status_code == 200
-            offer = Offer.objects.create(
-                lot=lot,
-                buyer=buyer,
-                quantity_kg=Decimal("100"),
-                price_per_kg_usd=Decimal("9"),
-            )
-            assert (
-                c.post(
-                    reverse("offer-respond", args=[offer.pk]),
-                    {"action": "accept"},
-                    format="json",
-                ).status_code
-                == 200
-            )
-            resp = c.patch(
-                reverse("lot-status", args=[lot.pk]),
-                {"status": "exported"},
-                format="json",
-            )
-        assert resp.status_code == HTTPStatus.OK, resp.data
-        lot.refresh_from_db()
-        assert lot.status == "exported"
-        assert lot.compliance_score() == 7
+            resp = c.patch(reverse("lot-status", args=[lot.pk]), {"status": "exported"}, format="json")
+        assert resp.status_code == HTTPStatus.BAD_REQUEST
+        assert "EUDR due-diligence evidence" in resp.data["failed_gates"]
+        # The full export path with supply plots is covered in traceability/tests.py.
 
     def test_compliance_check_returns_report(self):
         exp = make_user("exporter")

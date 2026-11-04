@@ -39,6 +39,12 @@ from bunna_bridge.lots.models import Offer
 from bunna_bridge.lots.models import SampleRequest
 from bunna_bridge.lots.models import WashingStation
 from bunna_bridge.roasting.models import RoastBatch
+from bunna_bridge.traceability.models import DdsReference
+from bunna_bridge.traceability.models import LotSource
+from bunna_bridge.traceability.models import Plot
+from bunna_bridge.traceability.models import Producer
+from bunna_bridge.traceability.models import ProducerConsent
+from bunna_bridge.traceability.models import RiskSignOff
 from bunna_bridge.roasting.models import RoastBatchLot
 from bunna_bridge.roasting.models import RoastEquipment
 from bunna_bridge.users.models import Certification
@@ -114,8 +120,12 @@ class Command(BaseCommand):
         SampleRequest.objects.filter(buyer__in=users).delete()
         CuppingScore.objects.filter(lot__in=lots).delete()
         ComplianceEvent.objects.filter(lot__in=lots).delete()
+        DdsReference.objects.filter(lot__in=lots).delete()
+        LotSource.objects.filter(lot__in=lots).delete()
         Offer.objects.filter(lot__in=lots).delete()
         lots.delete()
+        Plot.objects.filter(producer__owner__in=users).delete()
+        Producer.objects.filter(owner__in=users).delete()
         Notification.objects.filter(recipient__in=users).delete()
         DeforestationZone.objects.filter(source=DEMO_ZONE_SOURCE).delete()
         FloorPrice.objects.filter(source__startswith="Demo").delete()
@@ -141,6 +151,49 @@ class Command(BaseCommand):
         lot.eudr_dds_generated_at = timezone.now()
         lot.save(actor=actor)
 
+    def _trace(self, lot, owner, plots, consent=True):
+        """Register producers + plots and link them to the lot as supply sources.
+
+        `plots`: list of (name, ref, kebele, geometry, declared_ha, kg)."""
+        for name, ref, kebele, geom, declared, kg in plots:
+            producer = Producer.objects.filter(owner=owner, external_ref=ref).first() or Producer.objects.create(
+                owner=owner, external_ref=ref, name=name, kebele=kebele, region=lot.get_region_display(),
+                cooperative=lot.washing_station, created_by=owner,
+            )
+            if consent and not producer.current_consent("eudr_sharing"):
+                ProducerConsent.objects.create(producer=producer, purpose="eudr_sharing", method="witnessed",
+                                               captured_by=owner)
+            is_polygon = isinstance(geom, Polygon)
+            plot = Plot.objects.create(
+                producer=producer, name=f"{name.split()[0]}'s plot", boundary=geom if is_polygon else None,
+                location=None if is_polygon else geom, declared_area_ha=Decimal(declared), land_tenure="owned",
+                created_by=owner,
+            )
+            LotSource.objects.create(lot=lot, plot=plot, quantity_kg=Decimal(kg),
+                                     delivery_reference=f"WS-{ref}", created_by=owner)
+        lot.refresh_from_db()
+        return lot
+
+    def _sign_and_package(self, lot, owner, package=True):
+        from bunna_bridge.traceability import due_diligence as dd
+        from bunna_bridge.traceability.package import build_package
+
+        dd.sync_risks(lot)
+        for risk in lot.risks.filter(status="open").exclude(severity="high").exclude(code="country_standard_risk"):
+            risk.status = "accepted"
+            risk.justification = "Reviewed by the export manager: supplier records on file at the washing station."
+            risk.save()
+        RiskSignOff.objects.create(
+            lot=lot, signed_by=owner, register_fingerprint=dd.register_fingerprint(lot),
+            conclusion="Risk of non-compliance is negligible: every plot is mapped, clear of post-2020 "
+                       "forest loss and covered by producer consent.",
+        )
+        if package:
+            build_package(lot, owner)
+        lot.save(actor=owner)
+        lot.refresh_from_db()
+        return lot
+
     def _cup(self, lot, grader, base, confirm=True, notes=""):
         b = Decimal(str(base))
         score = CuppingScore.objects.create(
@@ -165,6 +218,8 @@ class Command(BaseCommand):
                    bio="Demo exporter account.")
         self._user("buyer", "buyer", "Sarah", "Lindqvist", company_name="Nordic Green Imports AB (demo)",
                    country="Sweden")
+        self._user("importer", "importer", "Jonas", "Weber", company_name="Hamburg Green Coffee GmbH (demo)",
+                   country="Germany")
         self._user("roaster", "roaster", "Yonas", "Tesfaye", company_name="Addis Micro Roastery (demo)",
                    roastery_type="micro", roastery_monthly_capacity_kg=400)
         self._user("farmer", "farmer", "Abebe", "Worku", farm_name="Kochere Ridge Farm (demo)",
@@ -212,6 +267,10 @@ class Command(BaseCommand):
 
         buyer = self._user("buyer", "buyer", "Sarah", "Lindqvist", company_name="Nordic Green Imports AB",
                            country="Sweden")
+        importer = self._user("importer", "importer", "Jonas", "Weber", company_name="Hamburg Green Coffee GmbH",
+                              country="Germany",
+                              bio="EU operator: imports Ethiopian green coffee and files the EUDR due diligence "
+                                  "statement in the EU Information System.")
         roaster = self._user("roaster", "roaster", "Yonas", "Tesfaye", company_name="Addis Micro Roastery",
                              roastery_type="micro", roastery_monthly_capacity_kg=400,
                              roastery_roast_styles="light, medium", roastery_preferred_origins="Yirgacheffe, Guji",
@@ -277,6 +336,18 @@ class Command(BaseCommand):
             docs=all_docs, photos=["origin-yirgacheffe.webp", "cupping-detail.webp", "cta-band.webp"],
         )
         self._cup(kochere, grader, "8.00", notes="Jasmine, bergamot, lemon zest, peach")
+        # Kochere blends six smallholders delivering cherry to the station.
+        kochere.channel = "vertical"
+        kochere.save(actor=exporter)
+        self._trace(kochere, exporter, [
+            ("Abebe Worku", "KOC-001", "Kochere", farmers["farmer"].boundary, "3.20", "900"),
+            ("Mulu Gebre", "KOC-002", "Kochere", Point(38.2231, 6.3312, srid=4326), "1.10", "420"),
+            ("Tesfaye Alemu", "KOC-003", "Kochere", Point(38.2205, 6.3378, srid=4326), "0.90", "380"),
+            ("Hirut Desta", "KOC-004", "Kochere", Point(38.2289, 6.3294, srid=4326), "1.60", "560"),
+            ("Bekele Shiferaw", "KOC-005", "Banko Gotiti", Point(38.2102, 6.3420, srid=4326), "2.30", "510"),
+            ("Etenesh Dukale", "KOC-006", "Banko Gotiti", Point(38.2153, 6.3466, srid=4326), "1.20", "430"),
+        ])
+        self._sign_and_package(kochere, exporter)
         self._generate_dds(kochere, exporter)
 
         hambela = lot(
@@ -291,6 +362,15 @@ class Command(BaseCommand):
         )
         self._cup(hambela, grader, "7.75", notes="Blueberry, cacao, red wine")
         self._cup(hambela, grader, "7.75", confirm=False, notes="Second cupping — awaiting confirmation")
+        # Hambela: plots mapped, but one producer has not yet given data-sharing consent.
+        hambela.channel = "vertical"
+        hambela.save(actor=exporter)
+        self._trace(hambela, exporter, [
+            ("Almaz Tadesse", "HAM-001", "Hambela Wamena", farmers["farmer2"].boundary, "2.40", "1100"),
+        ])
+        self._trace(hambela, exporter, [
+            ("Gemechu Dida", "HAM-002", "Hambela Wamena", Point(38.6304, 5.8311, srid=4326), "1.40", "700"),
+        ], consent=False)
 
         bensa = lot(
             exporter, lot_id="SDM-2026-0213", name="Bensa Honey G2", status="listed", farmer=farmers["farmer3"],
@@ -301,6 +381,13 @@ class Command(BaseCommand):
             phyto_cert_expiry=today + timedelta(days=60), docs=all_docs, photos=["origin-sidama.webp"],
         )
         self._cup(bensa, grader, "7.50", notes="Apricot, honey, black tea")
+        # Bensa: union lot, mapped and consented — risk assessment not signed yet.
+        bensa.channel = "union"
+        bensa.save(actor=exporter)
+        self._trace(bensa, exporter, [
+            ("Kebede Mamo", "BEN-001", "Bensa", farmers["farmer3"].boundary, "1.80", "1300"),
+            ("Aster Hailu", "BEN-002", "Bensa", Point(38.4622, 6.8811, srid=4326), "1.50", "1100"),
+        ])
         self._generate_dds(bensa, exporter)
 
         harrar = lot(
@@ -311,6 +398,13 @@ class Command(BaseCommand):
             phyto_cert_expiry=today + timedelta(days=45), docs=all_docs, photos=["origin-harrar.webp"],
         )
         self._cup(harrar, grader, "7.75", notes="Blueberry, cardamom, dark chocolate")
+        # Harrar: a single estate, fully through due diligence.
+        harrar.channel = "direct"
+        harrar.save(actor=exporter)
+        self._trace(harrar, exporter, [
+            ("Gara Muleta Estate", "HAR-001", "Gara Muleta", square(41.87, 9.28), "48.0", "1200"),
+        ])
+        self._sign_and_package(harrar, exporter)
         self._generate_dds(harrar, exporter)
 
         lot(
@@ -351,9 +445,14 @@ class Command(BaseCommand):
                                            price_per_kg_usd=Decimal("5.70"))
         _accept(bensa_offer, bensa_offer.quantity_kg, bensa_offer.price_per_kg_usd)
 
-        harrar_offer = Offer.objects.create(lot=harrar, buyer=roaster, quantity_kg=Decimal("300"),
-                                            price_per_kg_usd=Decimal("7.20"))
-        _accept(harrar_offer, harrar_offer.quantity_kg, harrar_offer.price_per_kg_usd)
+        # Harrar was bought by an EU importer, who filed the DDS with the evidence package.
+        import_offer = Offer.objects.create(lot=harrar, buyer=importer, quantity_kg=Decimal("600"),
+                                            price_per_kg_usd=Decimal("7.30"), delivery_window="Jan 2027")
+        _accept(import_offer, import_offer.quantity_kg, import_offer.price_per_kg_usd)
+        DdsReference.objects.create(
+            lot=harrar, offer=import_offer, reference_number="26DEHH4Q7N2Z81", verification_number="KX7PQ2LM",
+            submitted_on=today - timedelta(days=3), package=harrar.evidence_packages.first(), recorded_by=importer,
+        )
         harrar.refresh_from_db()
         assert harrar.export_ready, "Harrar demo lot should pass all 7 gates"
         harrar.status = "exported"

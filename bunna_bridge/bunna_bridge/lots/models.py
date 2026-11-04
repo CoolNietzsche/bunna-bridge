@@ -55,7 +55,7 @@ GATE_FIELDS = (
 GATE_LABELS = {
     "gps_verified":        "GPS geolocation",
     "deforestation_free":  "Deforestation-free (post-2020)",
-    "eudr_dds_ready":      "EUDR Due Diligence Statement",
+    "eudr_dds_ready":      "EUDR due-diligence evidence",
     "phyto_cert_uploaded": "Phytosanitary certificate",
     "ecta_license_active": "ECTA export license",
     "nbe_fx_declared":     "NBE FX declaration",
@@ -222,6 +222,23 @@ class CoffeeLot(models.Model):
     is_rainforest_alliance = models.BooleanField(default=False)
     tasting_notes        = models.TextField(blank=True, default="")
     farm_story           = models.TextField(blank=True, default="")
+
+    # ── Supply chain (EUDR traceability, roadmap E-3) ───────────────────────
+    CHANNEL_CHOICES = [
+        ("direct", "Direct from own farm / estate"),
+        ("vertical", "Vertically integrated (own washing station, registered suppliers)"),
+        ("union", "Cooperative union"),
+        ("ecx", "Bought through ECX"),
+        ("unknown", "Not stated"),
+    ]
+    channel = models.CharField(
+        max_length=10, choices=CHANNEL_CHOICES, default="unknown",
+        help_text="How the coffee reached the exporter. ECX lots lose farm-level traceability.",
+    )
+    archived_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Archived lots are hidden but kept for the 5-year EUDR record-keeping period.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

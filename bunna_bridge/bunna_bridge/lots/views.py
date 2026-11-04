@@ -30,6 +30,8 @@ def is_admin(user):
 def visible_lots(user, base=None):
     """The lots `user` may read. Single source of truth for lot scoping."""
     qs = base if base is not None else CoffeeLot.objects.all()
+    # Archived lots are kept for EUDR record-keeping but hidden from browsing.
+    qs = qs.filter(archived_at__isnull=True)
     if not user or not user.is_authenticated:
         return qs.filter(status__in=MARKETPLACE_STATUSES)
     if is_admin(user):
@@ -158,6 +160,26 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(actor=self.request.user)
 
+    def perform_destroy(self, instance):
+        """
+        Lots with traceability, offers or compliance records are archived,
+        not deleted: EUDR requires records to be kept for 5 years. A bare
+        draft with no history can still be deleted.
+        """
+        from django.utils import timezone
+        has_history = (
+            instance.status != "draft"
+            or instance.offers.exists()
+            or instance.sources.exists()
+            or instance.evidence_packages.exists()
+            or instance.dds_references.exists()
+        )
+        if has_history:
+            instance.archived_at = timezone.now()
+            instance.save(update_fields=["archived_at"], actor=self.request.user)
+        else:
+            instance.delete()
+
     @action(detail=True, methods=["get"], url_path="compliance-events")
     def compliance_events(self, request, pk=None):
         from .models import ComplianceEvent
@@ -174,6 +196,10 @@ class CoffeeLotViewSet(viewsets.ModelViewSet):
         from .eudr_spatial import run_deforestation_check_for_lot
         lot = self.get_object()
         was_free = lot.deforestation_free
+        from bunna_bridge.traceability.geo import run_plot_checks
+        for source in lot.sources.select_related("plot"):
+            run_plot_checks(source.plot)
+            source.plot.save()
         # Re-derive every gate (expiries, license, floor price) and re-run the satellite check.
         defor_result = run_deforestation_check_for_lot(lot, actor=request.user)
         lot.save(actor=request.user)
@@ -384,7 +410,7 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
             return SampleRequest.objects.filter(
                 Q(buyer=user) | Q(lot__exporter=user)
             ).select_related("lot","buyer")
-        if role == "buyer":
+        if role in ("buyer", "importer"):
             return SampleRequest.objects.filter(buyer=user).select_related("lot","buyer")
         if role == "exporter":
             return SampleRequest.objects.filter(
@@ -393,7 +419,7 @@ class SampleRequestViewSet(viewsets.ModelViewSet):
         return SampleRequest.objects.none()
 
     def perform_create(self, serializer):
-        if getattr(self.request.user, "role", None) not in ("buyer", "roaster"):
+        if getattr(self.request.user, "role", None) not in ("buyer", "importer", "roaster"):
             from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("Only buyer and roaster accounts can request samples.")
         serializer.save(buyer=self.request.user)

@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "date_joined", "is_verified", "farm_id", "role", "ecta_license_verified_at"]
 
 
-SELF_SERVICE_ROLES = ["exporter", "buyer", "farmer", "roaster"]
+SELF_SERVICE_ROLES = ["exporter", "buyer", "importer", "farmer", "roaster"]
 
 
 class RegisterSerializer(serializers.ModelSerializer):

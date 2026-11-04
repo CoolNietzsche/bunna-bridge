@@ -112,7 +112,8 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "ecex_permit_file", "ecex_permit_number", "ecex_permit_expiry",
             "nbe_fx_declaration_file",
             "customs_declaration_file", "customs_declaration_id",
-            "eudr_dds_reference",
+            # supply chain
+            "channel", "archived_at",
         ]
         # Every gate is derived in CoffeeLot.save() (lots/compliance.py), so
         # none are writable. `status` only changes through the status endpoint
@@ -120,7 +121,7 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
         # Certification badges are derived from Certification records.
         read_only_fields = [
             *GATE_FIELDS, "status", "farm_photos",
-            "is_organic", "is_fair_trade", "is_rainforest_alliance",
+            "is_organic", "is_fair_trade", "is_rainforest_alliance", "archived_at",
         ]
         extra_kwargs = {
             "phyto_cert_file":          {"write_only": True},
@@ -131,7 +132,6 @@ class CoffeeLotListSerializer(serializers.ModelSerializer):
             "ecex_permit_number":       {"write_only": True},
             "ecex_permit_expiry":       {"write_only": True},
             "customs_declaration_id":   {"write_only": True},
-            "eudr_dds_reference":       {"write_only": True},
         }
 
     readiness_percent = serializers.SerializerMethodField()
@@ -233,6 +233,7 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
     sample_requests_count = serializers.SerializerMethodField()
     offers_count         = serializers.SerializerMethodField()
     certifications        = serializers.SerializerMethodField()
+    due_diligence         = serializers.SerializerMethodField()
 
     class Meta:
         model     = CoffeeLot
@@ -266,6 +267,11 @@ class CoffeeLotDetailSerializer(GeoFeatureModelSerializer):
     def get_gate_report(self, obj):
         from .compliance import gate_report
         return gate_report(obj)
+
+    def get_due_diligence(self, obj):
+        # Counts and dates only — no producer names or plot locations.
+        from bunna_bridge.traceability.due_diligence import due_diligence_summary
+        return due_diligence_summary(obj)
 
     def get_readiness_percent(self, obj):
         return round(100 * obj.compliance_score() / len(GATE_FIELDS))
@@ -319,10 +325,12 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
     boundary_geojson      = serializers.SerializerMethodField()
     farm_location_geojson = serializers.SerializerMethodField()
     certifications         = serializers.SerializerMethodField()
+    trust_profile          = serializers.SerializerMethodField()
 
     class Meta:
         model  = CoffeeLot
         fields = [
+            "trust_profile",
             "id", "lot_id", "name",
             "region", "washing_station", "altitude_m",
             "processing", "grade", "varietal", "harvest_date",
@@ -351,6 +359,27 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
 
     def get_boundary_geojson(self, obj):
         return json.loads(obj.boundary.geojson) if obj.boundary else None
+
+    def get_trust_profile(self, obj):
+        """Public, personal-data-free proof points (roadmap E-13)."""
+        from bunna_bridge.traceability.due_diligence import due_diligence_summary
+
+        dd = due_diligence_summary(obj)
+        exporter = obj.exporter
+        return {
+            "exporter_licence_verified": bool(exporter.ecta_license_verified_at),
+            "supply_channel": obj.get_channel_display(),
+            "producers": dd["producers"],
+            "plots_mapped": dd["plots"],
+            "plots_with_polygon": dd["polygons"],
+            "plots_deforestation_clear": dd["plots_clear"],
+            "traced_kg": dd["traced_kg"],
+            "risk_assessment_signed_at": dd["signed_off_at"],
+            "evidence_package_at": dd["package_generated_at"],
+            "dds_filed_by_importer": dd["dds_recorded"],
+            "deforestation_free": obj.deforestation_free,
+            "geolocated": obj.gps_verified,
+        }
 
     def get_farm_location_geojson(self, obj):
         return json.loads(obj.farm_location.geojson) if obj.farm_location else None
@@ -432,7 +461,7 @@ class OfferSerializer(serializers.ModelSerializer):
         attrs = super().validate(attrs)
         user = self.context["request"].user
         lot = attrs.get("lot")
-        if getattr(user, "role", None) not in ("buyer", "roaster"):
+        if getattr(user, "role", None) not in ("buyer", "importer", "roaster"):
             raise serializers.ValidationError("Only buyer and roaster accounts can make offers.")
         if lot is None:
             raise serializers.ValidationError({"lot": "This field is required."})

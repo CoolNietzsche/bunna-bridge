@@ -578,7 +578,7 @@ class TestGpsVerifiedAutoDerivation:
 
 
 class TestEudrDdsReadyAutoSet:
-    def test_generating_a_real_dds_sets_eudr_dds_ready(self, tmp_path):
+    def test_dds_summary_is_stored_but_does_not_pass_the_gate(self, tmp_path):
         point = Point(38.2, 6.15, srid=4326)
         exporter = _make_user("exporter")
         # No zone data is loaded in tests, so the satellite check can't run;
@@ -594,7 +594,8 @@ class TestEudrDdsReadyAutoSet:
         assert resp.status_code == HTTPStatus.OK
         assert resp["Content-Type"] == "application/pdf"
         lot.refresh_from_db()
-        assert lot.eudr_dds_ready is True
+        # Gate needs supply plots + signed risk register + evidence package.
+        assert lot.eudr_dds_ready is False
         assert lot.eudr_dds_file
         assert lot.eudr_dds_generated_at is not None
 

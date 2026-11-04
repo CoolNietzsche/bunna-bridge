@@ -72,7 +72,7 @@ class OfferListCreateView(generics.ListCreateAPIView):
             return Offer.objects.filter(
                 Q(buyer=user) | Q(lot__exporter=user)
             ).select_related("lot", "buyer")
-        if role == "buyer":
+        if role in ("buyer", "importer"):
             return Offer.objects.filter(buyer=user).select_related("lot", "buyer")
         if role == "admin" or user.is_staff:
             return Offer.objects.select_related("lot", "buyer")

@@ -15,11 +15,17 @@ def _region_code(text):
     return (letters[:3] or "GEN").ljust(3, "X")
 
 
+# Roles that buy green coffee on the marketplace. Importers are buyers who
+# also place the coffee on the EU market and file the EUDR DDS.
+BUYER_ROLES = ("buyer", "importer")
+
+
 class User(AbstractUser):
     class Role(models.TextChoices):
         ADMIN    = "admin",    "Admin"
         EXPORTER = "exporter", "Exporter"
         BUYER    = "buyer",    "Buyer"
+        IMPORTER = "importer", "EU importer"
         FARMER   = "farmer",   "Farmer"
         QGRADER  = "qgrader",  "Q-Grader"
         ROASTER  = "roaster",  "Roaster"
@@ -135,6 +141,10 @@ class User(AbstractUser):
     @property
     def is_buyer(self):
         return self.role == self.Role.BUYER
+
+    @property
+    def is_importer(self):
+        return self.role == self.Role.IMPORTER
 
     @property
     def is_farmer(self):

@@ -101,36 +101,35 @@ def floor_price_status(lot):
 
 def apply_gates(lot, previous=None):
     """Recompute every gate on `lot` in place. `previous` is the DB copy (or None for new lots)."""
+    from bunna_bridge.traceability import due_diligence as dd
+
     from .eudr_spatial import deforestation_result_for_lot
 
     today = _today()
+    has_sources = previous is not None and dd.lot_has_sources(lot)
 
-    # Gate: GPS geolocation present.
-    lot.gps_verified = bool(lot.boundary or lot.farm_location)
-
-    # Gate: deforestation-free. Re-run the satellite check whenever geometry changes.
-    geometry_changed = previous is None or not (
-        _same_geometry(previous.boundary, lot.boundary)
-        and _same_geometry(previous.farm_location, lot.farm_location)
-    )
-    if not lot.gps_verified:
-        lot.deforestation_free = False
-    elif geometry_changed:
-        result = deforestation_result_for_lot(lot)
-        if result["deforestation_free"] is not None:
-            lot.deforestation_free = result["deforestation_free"]
-        elif previous is not None:
+    if has_sources:
+        # Multi-plot lot: location and deforestation must hold for EVERY plot.
+        lot.gps_verified, lot.deforestation_free = dd.source_gate_values(dd.lot_sources(lot))
+    else:
+        # Legacy single-geometry lot (no registered supply plots yet).
+        lot.gps_verified = bool(lot.boundary or lot.farm_location)
+        geometry_changed = previous is None or not (
+            _same_geometry(previous.boundary, lot.boundary)
+            and _same_geometry(previous.farm_location, lot.farm_location)
+        )
+        if not lot.gps_verified:
             lot.deforestation_free = False
-
-    # A DDS attests to specific geometry; if that geometry changed, the DDS is stale.
-    if previous is not None and geometry_changed and lot.eudr_dds_file:
-        lot.eudr_dds_file = None
-        lot.eudr_dds_generated_at = None
-
-    # Gate: DDS — a stored DDS for a lot that is located and deforestation-free.
-    lot.eudr_dds_ready = (
-        bool(lot.eudr_dds_file) and lot.gps_verified and lot.deforestation_free
-    )
+        elif geometry_changed:
+            result = deforestation_result_for_lot(lot)
+            if result["deforestation_free"] is not None:
+                lot.deforestation_free = result["deforestation_free"]
+            elif previous is not None:
+                lot.deforestation_free = False
+        # The summary PDF describes specific geometry; drop it if that changed.
+        if previous is not None and geometry_changed and lot.eudr_dds_file:
+            lot.eudr_dds_file = None
+            lot.eudr_dds_generated_at = None
 
     # Gate: phytosanitary certificate present and not expired.
     lot.phyto_cert_uploaded = bool(lot.phyto_cert_file) and not (
@@ -146,6 +145,13 @@ def apply_gates(lot, previous=None):
 
     # Gate: price at or above the configured floor.
     lot.cta_floor_met = floor_price_status(lot)[0]
+
+    # Gate: EUDR due-diligence evidence — current evidence package, signed-off
+    # risk assessment, no open high risk, every plot located and clear.
+    # The risk register needs the lot row to exist, so new lots start at False.
+    if previous is not None:
+        dd.sync_risks(lot)
+    lot.eudr_dds_ready = has_sources and dd.dds_gate(lot, lot.gps_verified, lot.deforestation_free)
     return lot
 
 
@@ -165,64 +171,13 @@ def gate_report(lot):
             },
         )
 
-    if lot.boundary:
-        add("gps_verified", True, "Farm boundary polygon captured.")
-    elif lot.farm_location:
-        add(
-            "gps_verified",
-            True,
-            "GPS point captured. Plots over 4 ha need a full polygon under EUDR.",
-        )
-    else:
-        add(
-            "gps_verified",
-            False,
-            "No farm location yet.",
-            "Draw the farm boundary or inherit it from the farmer.",
-        )
+    from bunna_bridge.traceability import due_diligence as dd
 
-    if not lot.gps_verified:
-        add(
-            "deforestation_free",
-            False,
-            "Needs a farm location before the satellite check can run.",
-            "Add a farm location.",
-        )
-    elif lot.deforestation_free:
-        add(
-            "deforestation_free",
-            True,
-            "No forest loss after 31 Dec 2020 detected inside the plot (Hansen GFC).",
-        )
+    sources = dd.lot_sources(lot) if lot.pk else []
+    if sources:
+        _report_source_gates(add, lot, sources)
     else:
-        add(
-            "deforestation_free",
-            False,
-            "The plot overlaps forest loss detected after 31 Dec 2020, or the check could not complete.",
-            "Re-run the compliance check; if the overlap is real this lot cannot enter the EU.",
-        )
-
-    if lot.eudr_dds_ready:
-        when = (
-            f" on {timezone.localtime(lot.eudr_dds_generated_at):%d %b %Y}"
-            if lot.eudr_dds_generated_at
-            else ""
-        )
-        add("eudr_dds_ready", True, f"Due Diligence Statement stored{when}.")
-    elif not (lot.gps_verified and lot.deforestation_free):
-        add(
-            "eudr_dds_ready",
-            False,
-            "The DDS can only be generated once location and deforestation gates pass.",
-            "Fix the two gates above first.",
-        )
-    else:
-        add(
-            "eudr_dds_ready",
-            False,
-            "No Due Diligence Statement generated yet.",
-            "Generate the EUDR DDS.",
-        )
+        _report_legacy_gates(add, lot)
 
     if lot.phyto_cert_uploaded:
         until = (
@@ -267,6 +222,96 @@ def gate_report(lot):
     order = {g: i for i, g in enumerate(GATE_FIELDS)}
     report.sort(key=lambda r: order[r["gate"]])
     return report
+
+
+def _report_legacy_gates(add, lot):
+    if lot.boundary:
+        add("gps_verified", True, "Farm boundary polygon captured.")
+    elif lot.farm_location:
+        add(
+            "gps_verified",
+            True,
+            "GPS point captured. Plots over 4 ha need a full polygon under EUDR.",
+        )
+    else:
+        add(
+            "gps_verified",
+            False,
+            "No farm location yet.",
+            "Draw the farm boundary or inherit it from the farmer.",
+        )
+
+    if not lot.gps_verified:
+        add(
+            "deforestation_free",
+            False,
+            "Needs a farm location before the satellite check can run.",
+            "Add a farm location.",
+        )
+    elif lot.deforestation_free:
+        add(
+            "deforestation_free",
+            True,
+            "No forest loss after 31 Dec 2020 detected inside the plot (Hansen GFC).",
+        )
+    else:
+        add(
+            "deforestation_free",
+            False,
+            "The plot overlaps forest loss detected after 31 Dec 2020, or the check could not complete.",
+            "Re-run the compliance check; if the overlap is real this lot cannot enter the EU.",
+        )
+
+    add(
+        "eudr_dds_ready",
+        False,
+        "This lot has no registered supply plots, so the importer's evidence package cannot be built.",
+        "Add supply sources (or convert the lot's farm location into a registered plot).",
+    )
+
+
+def _report_source_gates(add, lot, sources):
+    from bunna_bridge.traceability import due_diligence as dd
+    from bunna_bridge.traceability.geo import plot_geolocation_problem
+
+    n = len(sources)
+    bad_geo = [s.plot for s in sources if plot_geolocation_problem(s.plot)]
+    if not bad_geo:
+        polygons = sum(1 for s in sources if s.plot.boundary is not None)
+        add("gps_verified", True, f"All {n} plot(s) located ({polygons} polygon, {n - polygons} point).")
+    else:
+        add(
+            "gps_verified", False,
+            f"{len(bad_geo)} of {n} plot(s) lack valid geolocation: {plot_geolocation_problem(bad_geo[0])}",
+            "Open Supply sources and capture the missing points or polygons.",
+        )
+
+    not_clear = [s.plot for s in sources if s.plot.deforestation_status != "clear"]
+    if not lot.gps_verified:
+        add("deforestation_free", False, "Every plot needs a location before the check can pass.",
+            "Fix plot geolocation first.")
+    elif not not_clear:
+        add("deforestation_free", True,
+            f"All {n} plot(s) clear of forest loss after 31 Dec 2020 (Hansen GFC).")
+    else:
+        overlap = sum(1 for p in not_clear if p.deforestation_status == "overlap")
+        add(
+            "deforestation_free", False,
+            f"{overlap} plot(s) overlap post-2020 forest loss; {len(not_clear) - overlap} not yet checked.",
+            "See the risk register: verify on the ground or remove the plot from the lot.",
+        )
+
+    if lot.eudr_dds_ready:
+        package = dd.current_package(lot, sources)
+        add("eudr_dds_ready", True,
+            f"Evidence package for the EU importer generated on {timezone.localtime(package.generated_at):%d %b %Y}.")
+    else:
+        blockers = dd.package_blockers(lot)
+        if blockers:
+            add("eudr_dds_ready", False, blockers[0], "Open Due diligence on this lot.")
+        else:
+            add("eudr_dds_ready", False, "Risk assessment signed off — evidence package not generated yet.",
+                "Generate the evidence package for your importer.")
 
 
 def readiness_percent(lot):

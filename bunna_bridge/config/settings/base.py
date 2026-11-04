@@ -95,6 +95,7 @@ LOCAL_APPS = [
      # Bunna Bridge apps
     "bunna_bridge.lots",
     "bunna_bridge.roasting",
+    "bunna_bridge.traceability",
 
     # Your stuff: custom apps go here
 ]
