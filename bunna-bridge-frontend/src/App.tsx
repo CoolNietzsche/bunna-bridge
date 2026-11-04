@@ -29,6 +29,9 @@ const Contracts = lazy(() => import("./pages/Contracts"));
 const ContractDetail = lazy(() => import("./pages/ContractDetail"));
 const Messages = lazy(() => import("./pages/Messages"));
 const FloorPrices = lazy(() => import("./pages/FloorPrices"));
+const LotCupping = lazy(() => import("./pages/LotCupping"));
+const CuppingSessions = lazy(() => import("./pages/CuppingSessions"));
+const CuppingSessionDetail = lazy(() => import("./pages/CuppingSessionDetail"));
 const RoastEquipmentPage = lazy(() => import("./pages/RoastEquipment"));
 const RoastBatches = lazy(() => import("./pages/RoastBatches"));
 const LotPipeline = lazy(() => import("./pages/LotPipeline"));
@@ -81,7 +84,10 @@ export default function App() {
             <Route path="/lots/new"    element={<ProtectedRoute><CreateLot /></ProtectedRoute>} />
             <Route path="/lots/:id"    element={<ProtectedRoute><LotDetail /></ProtectedRoute>} />
             <Route path="/lots"        element={<ProtectedRoute><Lots /></ProtectedRoute>} />
-            <Route path="/lots/:id/cup"    element={<ProtectedRoute><CuppingForm /></ProtectedRoute>} />
+            <Route path="/lots/:id/cup"    element={<ProtectedRoute><LotCupping /></ProtectedRoute>} />
+            <Route path="/lots/:id/cup/classic" element={<ProtectedRoute><CuppingForm /></ProtectedRoute>} />
+            <Route path="/cupping-sessions" element={<ProtectedRoute><CuppingSessions /></ProtectedRoute>} />
+            <Route path="/cupping-sessions/:id" element={<ProtectedRoute><CuppingSessionDetail /></ProtectedRoute>} />
             <Route path="/map"            element={<ProtectedRoute><FarmerLotsMap /></ProtectedRoute>} />
             <Route path="/lots/:id/edit"  element={<ProtectedRoute><EditLot /></ProtectedRoute>} />
             <Route path="/pipeline"      element={<ProtectedRoute><LotPipeline /></ProtectedRoute>} />

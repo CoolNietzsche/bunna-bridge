@@ -415,6 +415,65 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Loading is blocked until the buyer approves the pre-shipment sample', blocked > 0 && !ships2.body[0].events.some(e => e.kind === 'loaded'));
   await page.context().close();
 
+  // 20. Phase 4 — Q-grader cups a lot with CVA and confirms the score
+  const qT = await token('qgrader@demo.beersheba.et');
+  const hamLot = await lotId(qT, 'GUJ-2026-0311');
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'qgrader@demo.beersheba.et');
+  await page.goto(`${BASE}/lots/${hamLot}/cup`);
+  await page.waitForTimeout(1000);
+  for (const attr of ['Fragrance', 'Aroma', 'Flavor', 'Acidity', 'Sweetness', 'Overall']) {
+    await page.getByRole('radiogroup', { name: `${attr} liking` }).getByRole('radio', { name: '7' }).click();
+  }
+  await page.getByLabel('Tasting notes').fill('blueberry, cacao');
+  await page.getByRole('button', { name: /Submit assessment/ }).click();
+  await page.waitForTimeout(800);
+  check('CVA score saved and shown', (await page.locator('text=/Saved — 88\\.19 points/').count()) > 0);
+  await page.getByRole('button', { name: /Confirm and publish score/ }).click();
+  await page.waitForURL(/\/lots\/[0-9a-f-]+$/, { timeout: 8000 });
+  const hamCva = await api(qT, `/api/v1/quality/lots/${hamLot}/cva/`);
+  check('Confirmed CVA becomes the lot score', hamCva.body.latest?.method === 'CVA' && hamCva.body.latest?.score === 88.19, JSON.stringify(hamCva.body.latest));
+
+  // 21. Blind session: the Q-grader scores both coded cups; the organiser reveals
+  const sessions = await api(qT, '/api/v1/quality/sessions/');
+  const openS = sessions.body.find(x => x.status === 'open');
+  await page.goto(`${BASE}/cupping-sessions/${openS.id}`);
+  await page.waitForTimeout(1000);
+  const blindName = await page.locator('text=/HAR-2025-0098/').count();
+  check('Blind session hides lot names from the grader', blindName === 0);
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole('radiogroup', { name: 'Flavor liking' }).getByRole('radio', { name: String(7 - i) }).click();
+    await page.getByRole('button', { name: /Save score/ }).click();
+    await page.waitForTimeout(900);
+  }
+  await page.context().close();
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await loginUI(page, 'exporter@demo.beersheba.et');
+  await page.goto(`${BASE}/cupping-sessions/${openS.id}`);
+  await page.waitForTimeout(1000);
+  await page.getByRole('button', { name: /Close scoring/ }).click();
+  await page.waitForTimeout(800);
+  await page.getByRole('button', { name: /Reveal results/ }).click();
+  await page.waitForTimeout(1000);
+  const sess = await api(expT, `/api/v1/quality/sessions/${openS.id}/`);
+  check('Organiser reveals results with panel means', sess.body.status === 'revealed' && sess.body.results.samples.every(x => x.n === 1));
+
+  // 22. Physical analysis recorded in the UI gets an SCA green grade
+  const benLot = await lotId(expT, 'SDM-2026-0213');
+  await page.goto(`${BASE}/lots/${benLot}`);
+  await page.waitForTimeout(1200);
+  await page.getByRole('button', { name: /Record analysis/ }).click();
+  await page.getByLabel('Moisture %').fill('10.9');
+  await page.getByLabel('Water activity').fill('0.55');
+  await page.getByLabel(/^Full black/).fill('1');
+  await page.getByRole('button', { name: /Save analysis/ }).click();
+  await page.waitForTimeout(1000);
+  const phys = await api(expT, `/api/v1/quality/lots/${benLot}/physical/`);
+  check('Lab analysis graded (a primary defect rules out Specialty)', phys.body[0]?.sca_green_grade === 'Premium', phys.body[0]?.sca_green_grade);
+  await page.context().close();
+
   console.log(results.join('\n'));
   console.log(errs.length ? 'PAGE ERRORS: ' + JSON.stringify(errs) : 'no page errors');
   await browser.close();

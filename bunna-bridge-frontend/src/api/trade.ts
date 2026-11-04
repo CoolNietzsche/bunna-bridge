@@ -8,6 +8,8 @@ export interface ContractRow {
   lot: string;
   lot_code: string;
   lot_name: string;
+  seller: number;
+  buyer: number;
   seller_name: string;
   buyer_name: string;
   quantity_kg: string;

@@ -3,6 +3,8 @@ import { useParams, useNavigate, useLocation, useSearchParams } from "react-rout
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getLot, createOffer, downloadSpecSheet, apiErrorText } from "../api/lots";
 import DueDiligencePanel from "../components/trace/DueDiligencePanel";
+import PhysicalCard from "../components/quality/PhysicalCard";
+import ReliabilityCard from "../components/quality/ReliabilityCard";
 import { startConversation } from "../api/trade";
 import type { DueDiligenceSummary } from "../api/traceability";
 import { createSampleRequest } from "../api/samples";
@@ -337,6 +339,8 @@ export default function MarketplaceLotDetail() {
           </section>
 
           {lot.due_diligence?.has_sources && <TraceabilitySummary dd={lot.due_diligence} />}
+          {isAuthenticated && <PhysicalCard lotId={lot.id} canRecord={false} />}
+          {isAuthenticated && lot.exporter && <ReliabilityCard exporterId={lot.exporter} name={lot.exporter_company || undefined} />}
         </div>
 
         {/* Right — action panel */}

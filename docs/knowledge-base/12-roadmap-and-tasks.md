@@ -106,6 +106,8 @@ The aggregation backbone and the importer evidence package. This is the product-
 
 ## Phase 4 — Quality data (Feb–Apr 2027)
 
+> **Status 2026-11-04: built early, before deployment.** Q-1 to Q-4 are done (backend, UI and tests). Before relying on the results commercially, check the CVA formula and the SCA green-grading tables against the current official SCA documents. Details are in [/DONE.md](../../DONE.md).
+
 | ID | Task | Size | Notes |
 |---|---|---|---|
 | Q-1 | **CVA cupping mode** (descriptive + affective; 100-point conversion shown) alongside the legacy 2004 form | L | Q-graders moved to CVA in 2025 |

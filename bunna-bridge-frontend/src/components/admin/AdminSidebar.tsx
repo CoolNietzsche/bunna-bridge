@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Package, GitBranch, Inbox, FlaskConical,
   ShoppingBag, TrendingUp, Heart, Sprout, Map as MapIcon, Settings,
-  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2, FileSignature, MessageSquare, Landmark, Container } from "lucide-react";
+  ChevronLeft, ChevronRight, X, Coffee, Award, Droplets, Flame, Wrench, BadgeCheck, Users, Scale, Truck, Smartphone, Building2, FileSignature, MessageSquare, Landmark, Container, CupSoda } from "lucide-react";
 import type { ReactNode } from "react";
 import { AT } from "../../styles/adminTokens";
 import BrandMark from "../site/BrandMark";
@@ -40,6 +40,7 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "Offers", path: "/offers", icon: <Inbox size={s} />, cap: "manage_offers" },
       { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
       { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
+      { label: "Cupping Sessions", path: "/cupping-sessions", icon: <CupSoda size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
       { label: "Certifications", path: "/certifications", icon: <Award size={s} /> },
     ],
@@ -48,6 +49,7 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
       { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
+      { label: "Cupping Sessions", path: "/cupping-sessions", icon: <CupSoda size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
@@ -63,6 +65,7 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "Offers Received", path: "/offers", icon: <Inbox size={s} /> },
       { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
       { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
+      { label: "Cupping Sessions", path: "/cupping-sessions", icon: <CupSoda size={s} /> },
       { label: "Marketplace", path: "/marketplace", icon: <ShoppingBag size={s} /> },
       { label: "My Offers", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
@@ -74,6 +77,7 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "My Offers & DDS", path: "/buyer/offers", icon: <TrendingUp size={s} /> },
       { label: "Contracts", path: "/contracts", icon: <FileSignature size={s} /> },
       { label: "Messages", path: "/messages", icon: <MessageSquare size={s} /> },
+      { label: "Cupping Sessions", path: "/cupping-sessions", icon: <CupSoda size={s} /> },
       { label: "Watchlist", path: "/buyer/watchlist", icon: <Heart size={s} /> },
       { label: "Samples", path: "/samples", icon: <FlaskConical size={s} /> },
     ],
@@ -91,7 +95,10 @@ function groupsFor(role: string | undefined, caps: string[] | null): NavGroup[] 
       { label: "My Farm", path: "/farm", icon: <Sprout size={s} /> },
       { label: "Lot Map", path: "/map", icon: <MapIcon size={s} /> },
     ],
-    qgrader: [{ label: "Lots to Cup", path: "/lots", icon: <Package size={s} /> }],
+    qgrader: [
+      { label: "Lots to Cup", path: "/lots", icon: <Package size={s} /> },
+      { label: "Cupping Sessions", path: "/cupping-sessions", icon: <CupSoda size={s} /> },
+    ],
   };
   const allowed = (item: NavItem) => !item.cap || caps === null || caps.includes(item.cap);
   const account: NavItem[] = [{ label: "Settings", path: "/settings", icon: <Settings size={s} /> }];

@@ -9,6 +9,8 @@ import SamplesClaims from "../components/trade/SamplesClaims";
 import ShipmentPanel from "../components/trade/ShipmentPanel";
 import PaymentsPanel from "../components/trade/PaymentsPanel";
 import ContractMessages from "../components/trade/ContractMessages";
+import ComparisonCard from "../components/quality/ComparisonCard";
+import ReliabilityCard from "../components/quality/ReliabilityCard";
 import {
   STATUS_TONE, cancelContract, downloadContractPdf, getContract, registerContract, sendContract, signContract,
   updateContract, usd,
@@ -48,10 +50,12 @@ export default function ContractDetail() {
           <TermsCard c={c} />
           {c.status !== "cancelled" && <ShipmentPanel contract={c} />}
           {c.status !== "cancelled" && c.status !== "draft" && <SamplesClaims contract={c} />}
+          {(c.status === "shipped" || c.status === "completed") && c.my_party !== "forwarder" && <ComparisonCard contractId={c.id} />}
         </div>
         <div style={{ display: "grid", gap: 20 }}>
           {c.status !== "cancelled" && <SignAndRegister c={c} />}
           {c.money && <PaymentsPanel contract={c} />}
+          {c.my_party === "buyer" && c.seller && <ReliabilityCard exporterId={c.seller} name={c.seller_name} />}
           {(c.my_party === "seller" || c.my_party === "buyer") && <ContractMessages contract={c} />}
         </div>
       </div>

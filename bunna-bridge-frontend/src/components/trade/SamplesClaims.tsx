@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, FlaskConical, Plus, X } from "lucide-react";
 import { ErrorNote, Field, Muted, Pill } from "../trace/ui";
+import PhysicalCard from "../quality/PhysicalCard";
 import { formatDate, grid } from "../trace/styles";
 import { decideSample, getClaims, getSamples, raiseClaim, respondClaim, sendSample, usd } from "../../api/trade";
 import type { Contract } from "../../api/trade";
@@ -20,6 +21,7 @@ export default function SamplesClaims({ contract: c }: { contract: Contract }) {
   const [error, setError] = useState("");
   const [newSample, setNewSample] = useState<{ kind: string; courier: string; tracking_number: string; sent_on: string } | null>(null);
   const [decide, setDecide] = useState<{ id: number; cup_score: string; moisture_pct: string; notes: string } | null>(null);
+  const [labFor, setLabFor] = useState<number | null>(null);
   const [claim, setClaim] = useState<{ reason: string; description: string; amount_usd: string; file: File | null } | null>(null);
   const seller = c.my_party === "seller" || c.my_party === "admin";
   const buyer = c.my_party === "buyer" || c.my_party === "admin";
@@ -70,6 +72,15 @@ export default function SamplesClaims({ contract: c }: { contract: Contract }) {
             </span>
           </div>
           {s.buyer_notes && <Muted style={{ marginTop: 4 }}>{s.buyer_notes}</Muted>}
+          {(seller || buyer) && labFor !== s.id && (
+            <button style={{ ...AC.btnSm, marginTop: 6 }} onClick={() => setLabFor(s.id)}>Add lab analysis</button>
+          )}
+          {labFor === s.id && (
+            <div style={{ marginTop: 8 }}>
+              <PhysicalCard lotId={c.lot} canRecord contractSampleId={s.id} title={`Lab analysis — ${s.kind_label}`} />
+              <button style={{ ...AC.btnSm, marginTop: 6 }} onClick={() => setLabFor(null)}>Close</button>
+            </div>
+          )}
           {decide?.id === s.id && (
             <div style={{ marginTop: 8 }}>
               <div style={grid(130)}>

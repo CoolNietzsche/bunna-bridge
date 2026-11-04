@@ -40,6 +40,11 @@ from bunna_bridge.lots.models import SampleRequest
 from bunna_bridge.lots.models import WashingStation
 from bunna_bridge.roasting.models import RoastBatch
 from bunna_bridge.messaging.models import SmsMessage
+from bunna_bridge.quality.models import CuppingSession
+from bunna_bridge.quality.models import CvaAssessment
+from bunna_bridge.quality.models import PhysicalAnalysis
+from bunna_bridge.quality.models import SessionGrader
+from bunna_bridge.quality.models import SessionSample
 from bunna_bridge.orgs.models import ComplianceDocument
 from bunna_bridge.orgs.models import Invitation
 from bunna_bridge.orgs.models import Membership
@@ -136,6 +141,10 @@ class Command(BaseCommand):
         ComplianceEvent.objects.filter(lot__in=lots).delete()
         DdsReference.objects.filter(lot__in=lots).delete()
         Conversation.objects.filter(lot__in=lots).delete()
+        CuppingSession.objects.filter(owner__in=users).delete()
+        CvaAssessment.objects.filter(lot__in=lots).delete()
+        CvaAssessment.objects.filter(grader__in=users).delete()
+        PhysicalAnalysis.objects.filter(lot__in=lots).delete()
         for contract in Contract.objects.filter(lot__in=lots):
             contract.payments.all().delete()
             for shipment in contract.shipments.all():
@@ -360,6 +369,59 @@ class Command(BaseCommand):
             Message.objects.create(conversation=conv, sender=sender, body=body)
         conv.last_message_at = timezone.now()
         conv.save()
+
+    def _phase4(self, exporter, grader, kochere, hambela, bensa, harrar, today):
+        """Lab analysis, a confirmed CVA, a revealed calibration session and an open one."""
+        from bunna_bridge.quality.services import apply_to_lot
+
+        PhysicalAnalysis.objects.create(
+            lot=kochere, analysed_by=exporter, analysed_on=today - timedelta(days=9), lab="Highland Exports QC lab",
+            moisture_pct=Decimal("10.6"), water_activity=Decimal("0.54"), density_g_l=Decimal("742"),
+            screens={"20": 6, "19": 22, "18": 38, "17": 21, "16": 10, "15": 3},
+            defects={"partial_black": 2, "broken": 7, "immature": 4, "slight_insect": 6}, ecta_grade="G1",
+            ecta_certificate="ECTA-LQ-26-08812", odour="Clean", color="Bluish green",
+        )
+        PhysicalAnalysis.objects.create(
+            lot=harrar, analysed_by=exporter, analysed_on=today - timedelta(days=21), lab="Highland Exports QC lab",
+            moisture_pct=Decimal("11.4"), water_activity=Decimal("0.61"), density_g_l=Decimal("705"),
+            screens={"20": 4, "19": 15, "18": 34, "17": 27, "16": 15, "15": 5},
+            defects={"full_sour": 1, "broken": 12, "shell": 6, "immature": 5}, ecta_grade="G1",
+        )
+        cva = CvaAssessment.objects.create(
+            grader=grader, lot=kochere, assessed_on=today - timedelta(days=7), status="confirmed",
+            fragrance=7, aroma=7, flavor=7, aftertaste=6, acidity=7, sweetness=6, mouthfeel=6, overall=7,
+            intensities={"acidity": 10, "sweetness": 9, "mouthfeel": 7}, flavor_categories=["floral", "citrus", "berry"],
+            main_acid="citric", mouthfeel_type="silky", descriptors="jasmine, bergamot, peach, black tea",
+        )
+        apply_to_lot(kochere, cva.score, grader.get_full_name(), cva.assessed_on, cva.descriptors, actor=grader)
+
+        panel = [grader] + [
+            self._user(f"qgrader{n}", "qgrader", first, last, company_name="Licensed Q Arabica Grader")
+            for n, (first, last) in [(2, ("Mekdes", "Assefa")), (3, ("Lars", "Holm"))]
+        ]
+        revealed = CuppingSession.objects.create(owner=exporter, name="Harvest calibration — Gedeo & Guji",
+                                                 held_on=today - timedelta(days=5), location="Highland QC lab, Addis",
+                                                 blind=True, status="revealed")
+        cups = [(kochere, None), (hambela, None), (bensa, None), (None, "Guji Uraga offer sample")]
+        base = [[7, 7, 6, 6], [7, 7, 6, 6], [6, 7, 6, 5]]  # grader × cup baseline liking
+        for g in panel:
+            SessionGrader.objects.create(session=revealed, user=g)
+        for j, (lot, label) in enumerate(cups, start=1):
+            ss = SessionSample.objects.create(session=revealed, code=str(300 + j * 47), position=j, lot=lot,
+                                              label=label or "")
+            for i, g in enumerate(panel):
+                lvl = base[i][j - 1]
+                CvaAssessment.objects.create(
+                    grader=g, lot=lot, session_sample=ss, assessed_on=revealed.held_on, status="submitted",
+                    fragrance=lvl, aroma=lvl, flavor=lvl, aftertaste=max(lvl - 1, 1), acidity=lvl, sweetness=lvl,
+                    mouthfeel=max(lvl - 1, 1), overall=lvl,
+                    descriptors=["jasmine, lemon", "blueberry, cacao", "apricot, honey", "strawberry, winey"][j - 1],
+                )
+        open_session = CuppingSession.objects.create(owner=exporter, name="Pre-shipment check — Harrar & Kochere",
+                                                     held_on=today, location="Highland QC lab, Addis", blind=True)
+        SessionGrader.objects.create(session=open_session, user=grader)
+        for j, lot in enumerate([harrar, kochere], start=1):
+            SessionSample.objects.create(session=open_session, code=str(510 + j * 33), position=j, lot=lot)
 
     def _cup(self, lot, grader, base, confirm=True, notes=""):
         b = Decimal(str(base))
@@ -649,4 +711,5 @@ class Command(BaseCommand):
                                   roast_level="medium")
         self._phase2(exporter, farmers, kochere, today)
         self._phase3(exporter, buyer, harrar, bensa, kochere, today)
+        self._phase4(exporter, grader, kochere, hambela, bensa, harrar, today)
         del roaster_lot, admin

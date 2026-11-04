@@ -438,3 +438,82 @@ docker compose -f docker-compose.local.yml run --rm django pytest
 - Import the real ECTA minimum-price tables (Minimum Prices page, or CSV).
 - Email delivery for notifications and messages (roadmap 1.11).
 - Electronic signatures are simple click-to-sign records with a terms fingerprint. If a buyer or bank needs a qualified e-signature (for example eIDAS in the EU), that requires an integration partner.
+
+---
+
+## 2026-11-04 — Phase 4: quality data
+
+Built before deployment, as requested. Backend tests: **219 pass** (11 of them new). End-to-end browser test: **51 of 51 checks pass, no page errors** (5 of them new).
+
+New Django app: `bunna_bridge/quality/`. New screens: **Cup this lot (CVA)**, **Cupping sessions**, and **Session detail**. New cards on the lot, marketplace, contract and exporter pages.
+
+### Q-1 CVA cupping — done
+- **Cup this lot** (`/lots/<id>/cup`) now uses the SCA **Coffee Value Assessment** (2024):
+  - **Liking:** each of 8 attributes (fragrance, aroma, flavour, aftertaste, acidity, sweetness, mouthfeel, overall) is rated 1–9.
+  - **Description:** intensity 0–15 per attribute, up to 5 flavour categories, main acid, mouthfeel and tasting notes.
+  - Non-uniform and defective cups are counted.
+  - The **100-point score updates live** as you rate: 0.65625 × sum of the 8 ratings + 52.75 − 2 per non-uniform cup − 4 per defective cup. All 9s give 100; all 7s give 89.5.
+- The **2004 form still works** at `/lots/<id>/cup/classic`.
+- **Who can do what:**
+  - a licensed Q-grader can confirm a CVA, which locks it and makes it the score buyers see;
+  - the exporter's own lab team can record CVAs as internal records, which do not change the public score.
+- The lot score shown everywhere is now the **newest confirmed score** from any of: the 2004 form, a CVA, or a published panel score. The method used is shown with it.
+
+### Q-2 Physical (green) analysis — done
+- A **Green analysis** card on the lot page records:
+  - moisture, water activity, free-settled density;
+  - screen-size distribution (20 down to below 14), shown as a bar;
+  - defect counts per SCA defect type in a 350 g sample, and quakers;
+  - odour, colour, the ECTA grade and ECTA certificate number.
+- **Calculated automatically:**
+  - full-defect equivalents (primary and secondary), using SCA conversion ratios;
+  - the **SCA green grade**: Specialty (no primary defects and up to 5 full defects), Premium (up to 8), Exchange (up to 23), or Below standard.
+- **Warnings:** moisture outside 10–12%, water activity above 0.70, low density, and screen percentages that don't add up to 100%.
+- Buyers who can see a lot also see its latest analysis.
+
+### Q-3 Cupping sessions — done
+- **Cupping sessions** (`/cupping-sessions`). Exporters, roasters, Q-graders, buyers, importers and cooperatives can organise them.
+- The organiser:
+  - adds lots or other samples, and each cup gets a **random 3-digit code**;
+  - invites graders by email;
+  - closes scoring, then **reveals** the results.
+- **Graders in a blind session see only codes** until the reveal. Each grader fills a CVA per cup, can update it while the session is open, and moves to the next unscored cup automatically.
+- **Results for each cup:**
+  - panel mean, spread (standard deviation, minimum and maximum) and number of graders;
+  - attribute averages and the combined tasting notes.
+- **Grader calibration:**
+  - each grader's **bias** (how far above or below the panel they score on average) and average deviation;
+  - a grader is marked Calibrated (bias within ±1.5 and deviation of 2 points or less) or Review.
+- **Use as lot score:** the organiser can publish a panel mean (2 or more graders) to their own lot. It shows as "Panel of N".
+
+### Q-4 Pre-shipment vs arrival, and exporter track record — done
+- On a contract, both buyer and exporter can add a **lab analysis** to any sample (pre-shipment or arrival).
+- A **Pre-shipment vs arrival** card on shipped contracts compares, for each sample:
+  - cup score, moisture, water activity, density, screen 18+ share and full defects.
+  - Large changes are flagged: cup score down more than 2 points, moisture changed more than 1 point, density down more than 30 g/L, screen 18+ down more than 10 points, or full defects changed by more than 3.
+- An **exporter track record** card appears on the exporter's storefront, on marketplace lots and on the buyer's contract view:
+  - contracts and shipments;
+  - share shipped on time (vessel departed by the end of the shipment period);
+  - claims and claim rate;
+  - share of pre-shipment samples approved first time;
+  - average cup-score change from pre-shipment sample to arrival.
+- This record is the basis for the exporter reliability score in Phase 5 (M-6).
+
+### Demo data (password `Beersheba-Demo-2026`)
+- New Q-graders: `qgrader2@demo.beersheba.et` and `qgrader3@demo.beersheba.et`.
+- **Kochere:**
+  - lab analysis: moisture 10.6%, water activity 0.54, density 742 g/L, Specialty grade, ECTA G1;
+  - a confirmed CVA by Tigist Bekele, 87.5 points.
+- **"Harvest calibration — Gedeo & Guji":** revealed. 4 blind cups, 3 graders; one grader scores higher than the panel and one lower.
+- **"Pre-shipment check — Harrar & Kochere":** open. Log in as `qgrader@demo.beersheba.et` to score the two coded cups, then as the exporter to reveal.
+
+### To verify before relying on it commercially
+- The CVA formula and the SCA defect conversion and grading tables were written from the SCA standards as I know them. Check them against the current official SCA documents (the CVA protocol and the green-coffee grading handbook). The constants are all in `bunna_bridge/quality/scoring.py`.
+- The ECTA grade is entered as ECTA's liquoring centre issues it. The platform does not calculate ECTA grades, because ECTA's point tables were not available to check.
+
+### To run on the VPS when deploying (Docker only)
+```bash
+cd bunna_bridge
+docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+docker compose -f docker-compose.local.yml run --rm django pytest
+```
