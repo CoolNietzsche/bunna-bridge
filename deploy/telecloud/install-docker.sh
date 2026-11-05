@@ -24,13 +24,19 @@ say "Refreshing the package list (does not upgrade anything)"
 apt-get update -q
 
 say "What apt would install (dry run)"
-apt-get install -s --no-upgrade docker.io docker-compose-v2 docker-buildx | grep -E '^(Inst|Conf)' | grep '^Inst' | sed 's/^/   /' || true
-if apt-get install -s --no-upgrade docker.io docker-compose-v2 docker-buildx | grep '^Inst' | grep -q '\['; then
+PKGS=(docker.io docker-compose-v2 docker-buildx)
+# --no-install-recommends: only Docker and what it strictly needs (no ubuntu-fan, dnsmasq-base, ...).
+APT_OPTS=(--no-upgrade --no-install-recommends)
+apt-get install -s "${APT_OPTS[@]}" "${PKGS[@]}" | grep '^Inst' | sed 's/^/   /' || true
+# A NEW package looks like:   Inst name (version ...)
+# An UPGRADE looks like:      Inst name [installed-version] (new-version ...)
+if apt-get install -s "${APT_OPTS[@]}" "${PKGS[@]}" | grep -qE '^Inst [^ ]+ \['; then
   die "apt wants to UPGRADE an existing package (shown in [brackets] above). Not installing."
 fi
 
 say "Installing Docker"
-DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-upgrade docker.io docker-compose-v2 docker-buildx
+ok "only new packages; nothing already installed is upgraded"
+DEBIAN_FRONTEND=noninteractive apt-get install -y -q "${APT_OPTS[@]}" "${PKGS[@]}"
 systemctl enable --now docker
 
 say "Check"
