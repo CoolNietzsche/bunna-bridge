@@ -607,3 +607,26 @@ docker compose -f docker-compose.local.yml run --rm django pytest
 docker compose -f docker-compose.local.yml restart celerybeat celeryworker
 ```
 The restart picks up the new task that closes auctions every 2 minutes.
+
+## 2026-11-05 — Deployment kit for the new Telecloud VPS
+
+The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so Beersheba is packaged to stay out of its way. Guide and scripts: `deploy/telecloud/README.md`.
+
+- **Production image fixed.** It was missing the map libraries (GDAL, GEOS, PROJ) the app needs, so it could not start. The old VPS worked around this by running the development image.
+- **New `bunna_bridge/docker-compose.server.yml`:**
+  - code built into the image; Gunicorn with 2 workers, a Celery worker and a scheduler, PostGIS and Redis;
+  - each container has a memory cap; about 550 MB in use in total;
+  - one port, on `127.0.0.1` only; no Traefik and no Flower.
+- **Scripts.** Each prints a report to paste back:
+  - `check.sh` looks at the server and changes nothing;
+  - `install-docker.sh` uses Ubuntu packages and stops if anything installed would be upgraded;
+  - `setup.sh` creates the secrets on the server, never printed;
+  - `frontend.sh` builds the website in a container capped at 1.2 GB;
+  - `nginx.sh` adds Beersheba's own nginx file and certificate. It reloads nginx only after a passing config test, and rolls back if the test fails;
+  - `backup.sh` backs up nightly, keeping 14 days; `update.sh` deploys new code; `status.sh` is a health check.
+- **Uploaded files.** Only lot photos and certificates are publicly served. Export documents, consent forms, plot photos, contracts and evidence packages return 404 and are only served through logged-in views. The old server used a block-list instead.
+- **Rehearsed here** on a fresh clone with Docker and nginx 1.24 (the server's version):
+  - setup, website build, backup with a full restore test, and update;
+  - all routes; HTTP→HTTPS redirect; admin; private files blocked;
+  - a browser test of login, marketplace, Select, EU stock, Learn and contracts: no errors, and all lot photos loaded.
+- **Not yet done:** running it on the server itself. That needs the domain and DNS record, and is done step by step with the founder.

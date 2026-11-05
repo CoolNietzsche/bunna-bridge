@@ -20,6 +20,8 @@ docker compose -f docker-compose.local.yml build django   # rebuild after adding
 docker compose -f docker-compose.local.yml run --rm django pytest
 ```
 
+On the new Telecloud server (Nov 2026) the stack is `docker-compose.server.yml` instead of `docker-compose.local.yml`, run with `sudo` from `/opt/beersheba/app/bunna_bridge`; deploy steps and scripts are in `deploy/telecloud/README.md`. That server also runs a live call centre: never touch `/var/www/mereq_*`, PM2, the other nginx sites or the certbot renewal job, and only reload nginx after `nginx -t` passes.
+
 A `justfile` wraps the same compose file (`just manage <args>`, `just up`, `just build`, `just logs`). Either form is fine as long as it goes through Docker.
 
 Other backend gotchas:

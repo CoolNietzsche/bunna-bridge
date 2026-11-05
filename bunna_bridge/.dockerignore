@@ -12,3 +12,9 @@ venv
 .envs/
 .venv/
 **/__pycache__/
+
+# Server deployment: never bake uploads, secrets or build output into the image
+bunna_bridge/media/
+media/
+staticfiles/
+.env

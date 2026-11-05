@@ -1,0 +1,89 @@
+# Beersheba on a shared server (Ethio Telecom Telecloud VPS, Nov 2026).
+#
+# The server already runs other sites behind its own nginx on ports 80/443,
+# so this stack:
+#   - publishes ONE port, and only on the server's loopback (127.0.0.1:8100);
+#     the host nginx proxies the Beersheba domain to it. Nothing here is
+#     reachable from the internet directly.
+#   - brings no Traefik, no nginx and no Flower.
+#   - caps each container's memory so it can't starve the other sites.
+#   - bakes the code into the image (no bind mount), so host files can't
+#     break the containers.
+#
+# Usage (from this folder):
+#   docker compose -f docker-compose.server.yml up -d --build
+#   docker compose -f docker-compose.server.yml run --rm django python manage.py <command>
+
+name: beersheba
+
+volumes:
+  postgres_data: {}
+  postgres_backups: {}
+  redis_data: {}
+
+x-django: &django
+  build:
+    context: .
+    dockerfile: ./compose/production/django/Dockerfile
+  image: beersheba_django
+  restart: unless-stopped
+  depends_on:
+    - postgres
+    - redis
+  env_file:
+    - ./.envs/.server/.django
+    - ./.envs/.server/.postgres
+  volumes:
+    # Uploaded files live on the host so the host nginx can serve lot photos.
+    - ${BEERSHEBA_MEDIA_DIR:-./bunna_bridge/media}:/app/bunna_bridge/media
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  django:
+    <<: *django
+    command: /start
+    ports:
+      - "127.0.0.1:${BEERSHEBA_PORT:-8100}:5000"
+    environment:
+      GUNICORN_CMD_ARGS: "--workers 2 --timeout 60 --max-requests 1000 --max-requests-jitter 100 --forwarded-allow-ips=* --no-control-socket"
+    mem_limit: 700m
+
+  celeryworker:
+    <<: *django
+    command: celery -A config.celery_app worker -l INFO --concurrency 1
+    mem_limit: 400m
+
+  celerybeat:
+    <<: *django
+    command: /start-celerybeat
+    mem_limit: 250m
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/server/postgres/Dockerfile
+    image: beersheba_postgres
+    restart: unless-stopped
+    env_file:
+      - ./.envs/.server/.postgres
+    command: postgres -c shared_buffers=128MB -c effective_cache_size=384MB -c max_connections=40
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+    mem_limit: 600m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  redis:
+    image: docker.io/redis:7.2
+    restart: unless-stopped
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru --save 300 10
+    volumes:
+      - redis_data:/data
+    mem_limit: 100m
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }

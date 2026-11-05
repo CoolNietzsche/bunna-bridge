@@ -47,6 +47,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   gettext \
   # entrypoint
   wait-for-it \
+  # GeoDjango runtime libraries (GDAL, GEOS, PROJ)
+  libgdal32 \
+  libgeos-c1v5 \
+  libproj25 \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
