@@ -630,3 +630,10 @@ The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so B
   - all routes; HTTP→HTTPS redirect; admin; private files blocked;
   - a browser test of login, marketplace, Select, EU stock, Learn and contracts: no errors, and all lot photos loaded.
 - **Not yet done:** running it on the server itself. That needs the domain and DNS record, and is done step by step with the founder.
+
+### Test mode on port 8090 (added 2026-11-05)
+- There is no domain yet, so `setup.sh 196.189.51.169` sets Beersheba up for plain HTTP, and `nginx.sh` serves it at `http://196.189.51.169:8090`. Ports 80/443 are not touched. Inbound TCP 8090 must be allowed in the Telecloud security group.
+- Running `setup.sh` again with the domain switches to HTTPS and keeps all settings and data.
+- Over HTTP, GPS capture, the field app's offline mode and admin login stay off until HTTPS is set up. The Team page's "Copy link" button now shows the link instead of failing.
+- Any failing command now stops the scripts with a clear STOP message.
+- Rehearsed here: setup, website build, nginx 1.24 on 8090, all routes, private files blocked, and a browser test of login and the main pages.

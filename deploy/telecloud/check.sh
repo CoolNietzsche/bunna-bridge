@@ -3,6 +3,7 @@
 #   sudo bash /opt/beersheba/app/deploy/telecloud/check.sh [your-domain]
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
+trap - ERR   # read-only report: keep going past checks that "fail"
 DOMAIN=${1:-}
 PORT=8100
 

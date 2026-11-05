@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# Step 5 — put Beersheba online at https://DOMAIN.
+# Step 5 — put Beersheba online.
 #   sudo bash /opt/beersheba/app/deploy/telecloud/nginx.sh
+#
+# Test mode (setup.sh was given the server's IP): serves the site over plain
+# HTTP on its own port, http://<IP>:8090/ — no certificate, and ports 80/443
+# are not touched. Open TCP 8090 in the Telecloud security group to reach it.
+# Later, run setup.sh with the domain and then this script again: the same
+# file switches to HTTPS on 443 and port 8090 is no longer used.
 #
 # Adds ONE new nginx file (/etc/nginx/sites-available/beersheba) and one
 # certificate for DOMAIN. Existing sites and the 03:15 renewal job are not
@@ -11,11 +17,18 @@ set -euo pipefail
 need_root
 load_conf
 SERVER_IP=196.189.51.169
+SCHEME=https; is_ip "$DOMAIN" && SCHEME=http
 TEMPLATE="$(dirname "$0")/nginx-beersheba.conf"
 
-render() {  # $1 = full | http
+render() {  # $1 = full | http | iptest
   sed -e "s|__DOMAIN__|$DOMAIN|g" -e "s|__PORT__|$PORT|g" -e "s|__MEDIA__|$MEDIA|g" "$TEMPLATE" > "$SITE.tmp"
   [ "$1" = http ] && sed -i '/#HTTPS-START/,/#HTTPS-END/d' "$SITE.tmp"
+  if [ "$1" = iptest ]; then  # the full site on its own test port, without certificate or HSTS
+    awk '/^server \{/ && !seen {skip=1; seen=1} /^#HTTPS-START/ {skip=0} !skip' "$SITE.tmp" > "$SITE.tmp2"
+    sed -e "s/listen 443 ssl;/listen $WEBPORT;/" -e "s/listen \[::\]:443 ssl;/listen [::]:$WEBPORT;/" \
+        -e '/ssl_certificate/d' -e '/Strict-Transport-Security/d' "$SITE.tmp2" > "$SITE.tmp"
+    rm -f "$SITE.tmp2"
+  fi
   grep -rqs '\[::\]:' /etc/nginx/sites-enabled/ || sed -i '/\[::\]/d' "$SITE.tmp"   # match the server's IPv6 use
   mv "$SITE.tmp" "$SITE"
 }
@@ -32,19 +45,49 @@ safe_reload() {  # test first; on failure put back the previous file and do NOT 
 say "Pre-checks"
 nginx -t 2>/dev/null || die "The existing nginx config already fails its own test. Not touching nginx."
 ok "existing nginx config is valid"
-ip=$(getent ahostsv4 "$DOMAIN" | awk 'NR==1{print $1}' || true)
-[ "$ip" = "$SERVER_IP" ] || die "$DOMAIN points to '${ip:-nothing}', not $SERVER_IP. Fix the DNS A record first."
-ok "$DOMAIN points at this server"
+if is_ip "$DOMAIN"; then
+  [ "$DOMAIN" = "$SERVER_IP" ] || die "Test mode needs this server's public IP ($SERVER_IP), not $DOMAIN."
+  ok "test mode: plain HTTP on http://$DOMAIN:$WEBPORT/"
+  if ss -ltnH | awk '{print $4}' | grep -qE "[:.]$WEBPORT\$" && ! grep -qs "listen $WEBPORT;" "$SITE"; then
+    die "Port $WEBPORT is already used by another program."
+  fi
+  ok "port $WEBPORT is free (or already Beersheba's)"
+else
+  ip=$(getent ahostsv4 "$DOMAIN" | awk 'NR==1{print $1}' || true)
+  [ "$ip" = "$SERVER_IP" ] || die "$DOMAIN points to '${ip:-nothing}', not $SERVER_IP. Fix the DNS A record first."
+  ok "$DOMAIN points at this server"
+fi
 for f in /etc/nginx/sites-enabled/*; do
   [ "$(readlink -f "$f")" = "$SITE" ] && continue
   grep -qsw "server_name.*$DOMAIN" "$f" && die "$DOMAIN is already used in $f."
 done
 ok "no other site uses $DOMAIN"
 [ -f "$WEB/index.html" ] || die "Website not built yet. Run frontend.sh first."
-curl -fs -o /dev/null -H "Host: $DOMAIN" -H 'X-Forwarded-Proto: https' "http://127.0.0.1:$PORT/api/v1/market/articles/" || die "Backend not answering on 127.0.0.1:$PORT. Run setup.sh first."
+curl -fs -o /dev/null -H "Host: $DOMAIN" -H "X-Forwarded-Proto: $SCHEME" "http://127.0.0.1:$PORT/api/v1/market/articles/" || die "Backend not answering on 127.0.0.1:$PORT. Run setup.sh first."
 ok "backend is answering"
 install -d -m 755 "$ACME"
 [ -f "$SITE" ] && cp -a "$SITE" "$SITE.prev" || true
+
+if is_ip "$DOMAIN"; then
+  say "Test site over plain HTTP"
+  render iptest
+  ln -sf "$SITE" "$SITE_LINK"
+  safe_reload
+  rm -f "$SITE.prev"
+  say "Checks"
+  sleep 2
+  for path in / /learn /api/v1/market/articles/; do
+    printf '   %-40s %s\n' "http://$DOMAIN:$WEBPORT$path" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -H "Host: $DOMAIN:$WEBPORT" "http://127.0.0.1:$WEBPORT$path" || true)"
+  done
+  printf '   %-40s %s (should be 404)\n' "private document path" "$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN:$WEBPORT" "http://127.0.0.1:$WEBPORT/media/lots/phyto/x.pdf" || true)"
+  echo "   other sites on this server (should be unchanged):"
+  for s in /etc/nginx/sites-enabled/*; do
+    n=$(grep -m1 -ow 'server_name[^;]*' "$s" | awk '{print $2}' || true)
+    [ -n "$n" ] && [ "$n" != "_" ] && [ "$n" != "$DOMAIN" ] && printf '   %-40s %s\n' "https://$n/" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$n:443:127.0.0.1" "https://$n/" || true)"
+  done
+  say "Done. Open TCP $WEBPORT in the Telecloud security group, then http://$DOMAIN:$WEBPORT/ in a browser. Paste everything above back to Claude."
+  exit 0
+fi
 
 if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
   say "1/2 Temporary HTTP-only site, so the certificate can be issued"
@@ -82,6 +125,6 @@ certbot renew --dry-run --cert-name "$DOMAIN" 2>&1 | grep -iE 'success|fail' | h
 echo "   other sites on this server (should be unchanged):"
 for s in /etc/nginx/sites-enabled/*; do
   n=$(grep -m1 -ow 'server_name[^;]*' "$s" | awk '{print $2}' || true)
-  [ -n "$n" ] && [ "$n" != "_" ] && printf '   %-28s %s\n' "https://$n/" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$n/" || true)"
+  [ -n "$n" ] && [ "$n" != "_" ] && printf '   %-28s %s\n' "https://$n/" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$n:443:127.0.0.1" "https://$n/" || true)"
 done
 say "Done. Paste everything above back to Claude."

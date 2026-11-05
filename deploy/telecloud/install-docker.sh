@@ -24,7 +24,7 @@ say "Refreshing the package list (does not upgrade anything)"
 apt-get update -q
 
 say "What apt would install (dry run)"
-apt-get install -s --no-upgrade docker.io docker-compose-v2 docker-buildx | grep -E '^(Inst|Conf)' | grep '^Inst' | sed 's/^/   /'
+apt-get install -s --no-upgrade docker.io docker-compose-v2 docker-buildx | grep -E '^(Inst|Conf)' | grep '^Inst' | sed 's/^/   /' || true
 if apt-get install -s --no-upgrade docker.io docker-compose-v2 docker-buildx | grep '^Inst' | grep -q '\['; then
   die "apt wants to UPGRADE an existing package (shown in [brackets] above). Not installing."
 fi
@@ -35,8 +35,8 @@ systemctl enable --now docker
 
 say "Check"
 docker --version; docker compose version; docker buildx version
-systemctl is-active docker
-systemctl is-active nginx | sed 's/^/nginx: /'
+systemctl is-active docker || true
+systemctl is-active nginx | sed 's/^/nginx: /' || true
 say "Memory after"
 mem_report
 say "Done. Paste everything above back to Claude."

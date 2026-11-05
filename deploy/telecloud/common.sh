@@ -18,6 +18,9 @@ ok()   { printf '   OK  %s\n' "$*"; }
 warn() { printf '   !!  %s\n' "$*"; }
 die()  { printf '\n   STOP: %s\n   Nothing else was changed. Paste this output back.\n' "$*"; exit 1; }
 
+# Any failing command stops the script with a clear message instead of silently.
+trap 'die "The command on line $LINENO of $(basename "$0") failed (see the lines just above)."' ERR
+
 need_root() { [ "$(id -u)" -eq 0 ] || die "Run this with sudo: sudo bash $0 $*"; }
 
 load_conf() {
@@ -33,3 +36,6 @@ mem_available_mb() { awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo; }
 # The uid the app runs as inside the container (owns uploaded files).
 container_uid() { "${COMPOSE[@]}" run --rm --no-deps -T --entrypoint id django -u 2>/dev/null | tail -1 | tr -dc '0-9'; }
 container_gid() { "${COMPOSE[@]}" run --rm --no-deps -T --entrypoint id django -g 2>/dev/null | tail -1 | tr -dc '0-9'; }
+
+# Test mode: Beersheba is set up on the server's IP address over plain HTTP until a domain exists.
+is_ip() { [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; }

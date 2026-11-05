@@ -21,7 +21,31 @@ through this server.
 
 No security-group change is needed: Beersheba uses the existing ports 80 and 443.
 
-## Before you start
+## Test mode first (no domain yet): http://196.189.51.169:8090
+
+Until the domain exists, Beersheba can run over plain HTTP on its own port, 8090. Ports 80 and
+443 are not touched. Give `setup.sh` the server's IP instead of a domain:
+
+```bash
+sudo bash /opt/beersheba/app/deploy/telecloud/install-docker.sh
+sudo bash /opt/beersheba/app/deploy/telecloud/setup.sh 196.189.51.169
+sudo bash /opt/beersheba/app/deploy/telecloud/frontend.sh
+sudo bash /opt/beersheba/app/deploy/telecloud/nginx.sh
+```
+
+Then, in the Telecloud console, allow **inbound TCP 8090** in the server's security group and
+open `http://196.189.51.169:8090/`.
+
+Test mode limits, because the connection is not encrypted:
+- use test passwords only;
+- GPS capture of farm boundaries and the field app's offline mode need HTTPS, so they wait for the domain;
+- Django admin login needs HTTPS too.
+
+To switch to the domain later, set the DNS record (below), then run
+`setup.sh YOUR-DOMAIN` and `nginx.sh` again. Settings and data are kept, the site moves to HTTPS,
+and port 8090 is no longer used, so you can close it in the security group.
+
+## Before you start (domain)
 
 1. Choose the domain (for example `beersheba.example.com`).
 2. At your DNS provider, add an **A record** for it pointing to `196.189.51.169`.

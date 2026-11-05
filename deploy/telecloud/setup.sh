@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Step 3 — first-time setup of the Beersheba backend (Docker only).
 #   sudo bash /opt/beersheba/app/deploy/telecloud/setup.sh your-domain
+#   sudo bash /opt/beersheba/app/deploy/telecloud/setup.sh 196.189.51.169   # test mode: http://IP:8090
+#
+# Run it again with the real domain later: the address settings are updated,
+# the secrets are kept, and the containers restart with the new address.
 #
 # Creates secret settings ON THE SERVER (they are never printed), builds the
 # images, creates the database and starts the containers. The web port is
@@ -11,6 +15,8 @@ need_root "$@"
 DOMAIN=${1:-}
 [ -n "$DOMAIN" ] || die "Give the domain, e.g.: sudo bash $0 beersheba.example.com"
 PORT=8100
+SCHEME=https; SSL_REDIRECT=True; WEBPORT=443; ORIGIN="https://$DOMAIN"
+if is_ip "$DOMAIN"; then SCHEME=http; SSL_REDIRECT=False; WEBPORT=${2:-8090}; ORIGIN="http://$DOMAIN:$WEBPORT"; fi
 BRANCH=$(git -C "$APP" rev-parse --abbrev-ref HEAD)
 
 say "Memory before"
@@ -24,7 +30,7 @@ fi
 say "Folders"
 install -d -m 755 "$ROOT" "$MEDIA" "$BACKUPS"
 install -d -m 700 "$BACKEND/.envs/.server"
-printf 'DOMAIN=%s\nPORT=%s\nBRANCH=%s\n' "$DOMAIN" "$PORT" "$BRANCH" > "$CONF"
+printf 'DOMAIN=%s\nPORT=%s\nWEBPORT=%s\nBRANCH=%s\n' "$DOMAIN" "$PORT" "$WEBPORT" "$BRANCH" > "$CONF"
 printf 'BEERSHEBA_MEDIA_DIR=%s\nBEERSHEBA_PORT=%s\n' "$MEDIA" "$PORT" > "$BACKEND/.env"
 ok "$ROOT (app, media, backups)"
 
@@ -57,7 +63,16 @@ DJANGO_DEFAULT_FROM_EMAIL=Beersheba <noreply@$DOMAIN>
 EOF
   ok "created app settings"
 else ok "kept existing app settings"; fi
+set_key() {  # replace KEY=... in the settings file, or add it
+  if grep -q "^$1=" "$DJ"; then sed -i "s|^$1=.*|$1=$2|" "$DJ"; else echo "$1=$2" >> "$DJ"; fi
+}
+set_key DJANGO_ALLOWED_HOSTS "$DOMAIN"
+set_key CORS_ALLOWED_ORIGINS "$ORIGIN"
+set_key DJANGO_SECURE_SSL_REDIRECT "$SSL_REDIRECT"
+set_key DJANGO_DEFAULT_FROM_EMAIL "Beersheba <noreply@$DOMAIN>"
 chmod 600 "$DJ" "$PG"
+ok "address: $ORIGIN"
+is_ip "$DOMAIN" && warn "test mode: plain HTTP, so use test passwords only until HTTPS is set up"
 
 say "Building images (10-20 minutes the first time)"
 cd "$BACKEND"
@@ -76,11 +91,11 @@ say "Starting Beersheba"
 "${COMPOSE[@]}" up -d
 sleep 12
 "${COMPOSE[@]}" ps --format 'table {{.Service}}\t{{.Status}}\t{{.Ports}}'
-code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" -H 'X-Forwarded-Proto: https' "http://127.0.0.1:$PORT/api/v1/market/articles/" || true)
+code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $DOMAIN" -H "X-Forwarded-Proto: $SCHEME" "http://127.0.0.1:$PORT/api/v1/market/articles/" || true)
 [ "$code" = "200" ] && ok "API answers on 127.0.0.1:$PORT" || warn "API answered $code (expected 200) — paste the output back"
 docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}'
 
 say "Memory after"
 mem_report
-systemctl is-active nginx | sed 's/^/nginx: /'
+systemctl is-active nginx | sed 's/^/nginx: /' || true
 say "Done. Paste everything above back to Claude."

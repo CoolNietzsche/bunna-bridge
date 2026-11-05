@@ -3,6 +3,7 @@
 #   sudo bash /opt/beersheba/app/deploy/telecloud/status.sh
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
+trap - ERR   # read-only report: keep going past checks that "fail"
 need_root
 load_conf
 
@@ -16,7 +17,9 @@ df -h / | tail -1
 du -sh "$MEDIA" "$BACKUPS" 2>/dev/null
 say "Website"
 for path in / /api/v1/market/articles/; do
-  printf '   %-40s %s\n' "https://$DOMAIN$path" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "https://$DOMAIN$path")"
+  if is_ip "$DOMAIN"; then url="http://127.0.0.1:${WEBPORT:-8090}$path"; hdr="Host: $DOMAIN:${WEBPORT:-8090}"
+  else url="https://$DOMAIN$path"; hdr="X-Beersheba: status"; fi
+  printf '   %-40s %s\n' "$path" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -H "$hdr" "$url")"
 done
 say "Latest backup"
 ls -1t "$BACKUPS" 2>/dev/null | head -2 | sed 's/^/   /'

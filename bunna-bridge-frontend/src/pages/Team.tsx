@@ -113,7 +113,7 @@ function TeamCard() {
                     <Mail size={12} style={{ verticalAlign: "-2px" }} /> {i.email} · {i.role_label} · until {formatDate(i.expires_at)}
                   </span>
                   <span style={{ display: "flex", gap: "6px" }}>
-                    <button style={AC.btnSm} onClick={async () => { await navigator.clipboard.writeText(link(i.token)); setCopied(i.token); setTimeout(() => setCopied(null), 2000); }}>
+                    <button style={AC.btnSm} onClick={async () => { if (!navigator.clipboard) { window.prompt("Copy this invitation link", link(i.token)); return; } await navigator.clipboard.writeText(link(i.token)); setCopied(i.token); setTimeout(() => setCopied(null), 2000); }}>
                       {copied === i.token ? <Check size={12} /> : <Copy size={12} />} {copied === i.token ? "Copied" : "Copy link"}
                     </button>
                     <button style={AC.btnSm} aria-label="Revoke invitation" onClick={async () => { await revokeInvitation(i.id); refresh(); }}><X size={12} /></button>
