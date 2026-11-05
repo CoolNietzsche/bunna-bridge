@@ -111,7 +111,7 @@ else
 fi
 
 say "2/2 Full HTTPS site"
-cp -a "$SITE" "$SITE.prev"
+[ -f "$SITE" ] && cp -a "$SITE" "$SITE.prev" || true
 render full
 ln -sf "$SITE" "$SITE_LINK"
 safe_reload
