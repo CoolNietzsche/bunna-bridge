@@ -1,4 +1,4 @@
-# Shared settings for the Beersheba deploy scripts on the Telecloud VPS.
+# Shared settings for the Beersheba deploy scripts (any Ubuntu server with nginx in front).
 # Sourced by the other scripts; not run on its own.
 
 ROOT=/opt/beersheba                 # everything Beersheba owns on this server
@@ -39,3 +39,11 @@ container_gid() { "${COMPOSE[@]}" run --rm --no-deps -T --entrypoint id django -
 
 # Test mode: Beersheba is set up on the server's IP address over plain HTTP until a domain exists.
 is_ip() { [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; }
+
+# This server's addresses: the ones on its network cards plus the public one seen from outside
+# (they differ behind cloud NAT). Used to check that the domain or IP really is this server.
+server_ips() {
+  { hostname -I 2>/dev/null; curl -s --max-time 5 https://api.ipify.org 2>/dev/null; } \
+    | tr ' ' '\n' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | sort -u || true
+}
+is_this_server() { server_ips | grep -qx "$1"; }

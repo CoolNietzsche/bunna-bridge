@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Step 1 — READ-ONLY look at the server. Changes nothing, prints no secrets.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/check.sh [your-domain]
+#   sudo bash /opt/beersheba/app/deploy/server/check.sh [your-domain]
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
 trap - ERR   # read-only report: keep going past checks that "fail"
@@ -41,7 +41,8 @@ if [ -n "$DOMAIN" ]; then
   say "DNS for $DOMAIN"
   ip=$(getent ahostsv4 "$DOMAIN" | awk 'NR==1{print $1}' || true)
   echo "   $DOMAIN -> ${ip:-no address}"
-  [ "$ip" = "196.189.51.169" ] && ok "points at this server" || warn "does not point at 196.189.51.169 yet"
+  echo "   this server: $(server_ips | tr '\n' ' ')"
+  { [ -n "$ip" ] && is_this_server "$ip"; } && ok "points at this server" || warn "does not point at this server yet"
   grep -rlw "server_name.*$DOMAIN" /etc/nginx/sites-enabled/ 2>/dev/null | sed 's/^/   !! already used by nginx file: /'
 fi
 say "Done. Nothing was changed. Paste everything above back to Claude."

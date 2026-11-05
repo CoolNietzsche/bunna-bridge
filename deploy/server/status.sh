@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Read-only health check of Beersheba. Changes nothing.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/status.sh
+#   sudo bash /opt/beersheba/app/deploy/server/status.sh
 set -uo pipefail
 . "$(dirname "$0")/common.sh"
 trap - ERR   # read-only report: keep going past checks that "fail"

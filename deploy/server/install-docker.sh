@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Step 2 — install Docker from Ubuntu's own packages, only if it is missing.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/install-docker.sh
+#   sudo bash /opt/beersheba/app/deploy/server/install-docker.sh
 #
-# Safe for the call centre:
+# Safe for the other sites on this server:
 #   - `--no-upgrade`: apt installs only new packages and refuses to upgrade any
 #     package that is already installed (nginx, openssl, node ... stay as they are).
 #     If Docker would need an upgrade of something existing, apt stops instead.

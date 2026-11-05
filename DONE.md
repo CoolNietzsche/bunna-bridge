@@ -610,7 +610,7 @@ The restart picks up the new task that closes auctions every 2 minutes.
 
 ## 2026-11-05 — Deployment kit for the new Telecloud VPS
 
-The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so Beersheba is packaged to stay out of its way. Guide and scripts: `deploy/telecloud/README.md`.
+The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so Beersheba is packaged to stay out of its way. Guide and scripts: `deploy/server/README.md`.
 
 - **Production image fixed.** It was missing the map libraries (GDAL, GEOS, PROJ) the app needs, so it could not start. The old VPS worked around this by running the development image.
 - **New `bunna_bridge/docker-compose.server.yml`:**
@@ -637,3 +637,10 @@ The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so B
 - Over HTTP, GPS capture, the field app's offline mode and admin login stay off until HTTPS is set up. The Team page's "Copy link" button now shows the link instead of failing.
 - Any failing command now stops the scripts with a clear STOP message.
 - Rehearsed here: setup, website build, nginx 1.24 on 8090, all routes, private files blocked, and a browser test of login and the main pages.
+
+### Fresh deployment on the old VPS instead (2026-11-05)
+- The Telecloud server could not reach `ghcr.io`, where the image's build tools come from. The founder chose a fresh deployment from the latest code on the old VPS (`91.107.204.59`) instead.
+- Scripts moved to `deploy/server/` and made server-independent: they detect the server's own IP addresses rather than having Telecloud's written in.
+- If the old Beersheba nginx file still serves the domain, `nginx.sh` stops and prints the exact command to switch it off.
+- The old `/root/bunna-bridge` deployment is not used. Its systemd unit should be disabled once the new site works.
+- Handoff for the session on the VPS: `docs/development/session-logs/2026-11-05-deployment-handoff.md`.

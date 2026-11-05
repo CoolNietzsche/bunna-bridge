@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Deploy the latest code: backup, pull, rebuild, migrate, restart, rebuild the website.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/update.sh
-# Only Beersheba containers restart. nginx and the call centre are not touched.
+#   sudo bash /opt/beersheba/app/deploy/server/update.sh
+# Only Beersheba containers restart. nginx and the other sites on this server are not touched.
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 need_root
@@ -12,7 +12,7 @@ mem_report
 [ "$(mem_available_mb)" -ge 1200 ] || die "Less than 1.2 GB memory available — try again later."
 
 say "Backup first"
-bash "$APP/deploy/telecloud/backup.sh"
+bash "$APP/deploy/server/backup.sh"
 
 say "Pulling $BRANCH"
 before=$(git -C "$APP" rev-parse --short HEAD)
@@ -28,7 +28,7 @@ chown -R "$(container_uid):$(container_gid)" "$MEDIA"
 docker image prune -f >/dev/null
 
 say "Rebuilding the website"
-bash "$APP/deploy/telecloud/frontend.sh" | grep -E 'OK|STOP|!!' || true
+bash "$APP/deploy/server/frontend.sh" | grep -E 'OK|STOP|!!' || true
 
 say "Status"
-bash "$APP/deploy/telecloud/status.sh"
+bash "$APP/deploy/server/status.sh"

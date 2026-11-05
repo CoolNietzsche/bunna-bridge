@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Step 3 — first-time setup of the Beersheba backend (Docker only).
-#   sudo bash /opt/beersheba/app/deploy/telecloud/setup.sh your-domain
-#   sudo bash /opt/beersheba/app/deploy/telecloud/setup.sh 196.189.51.169   # test mode: http://IP:8090
+#   sudo bash /opt/beersheba/app/deploy/server/setup.sh your-domain
+#   sudo bash /opt/beersheba/app/deploy/server/setup.sh <server-ip>      # test mode: http://IP:8090
 #
 # Run it again with the real domain later: the address settings are updated,
 # the secrets are kept, and the containers restart with the new address.
@@ -21,7 +21,7 @@ BRANCH=$(git -C "$APP" rev-parse --abbrev-ref HEAD)
 
 say "Memory before"
 mem_report
-[ "$(mem_available_mb)" -ge 1200 ] || die "Less than 1.2 GB memory available — building now could slow the call centre."
+[ "$(mem_available_mb)" -ge 1200 ] || die "Less than 1.2 GB memory available — building now could slow the other sites on this server."
 command -v docker >/dev/null || die "Docker is not installed. Run install-docker.sh first."
 if ss -ltnH | awk '{print $4}' | grep -qE "[:.]$PORT\$" && ! docker ps --format '{{.Names}}' | grep -q '^beersheba-django'; then
   die "Port $PORT is already used by another program."

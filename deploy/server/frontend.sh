@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Step 4 — build the website inside a throw-away Node container and publish it
 # to /var/www/beersheba. Does not use or change the server's own Node or PM2.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/frontend.sh
+#   sudo bash /opt/beersheba/app/deploy/server/frontend.sh
 set -euo pipefail
 . "$(dirname "$0")/common.sh"
 need_root
 
 say "Memory before"
 mem_report
-[ "$(mem_available_mb)" -ge 1400 ] || die "Less than 1.4 GB memory available — the build could slow the call centre."
+[ "$(mem_available_mb)" -ge 1400 ] || die "Less than 1.4 GB memory available — the build could slow the other sites on this server."
 
 say "Building the website (capped at 1.2 GB memory, about 2 minutes)"
 docker run --rm -m 1200m --memory-swap 1200m -e NODE_OPTIONS=--max-old-space-size=900 -e npm_config_update_notifier=false \

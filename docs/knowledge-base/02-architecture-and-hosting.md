@@ -40,7 +40,7 @@ bunna-bridge/
 ## New server: Ethio Telecom Telecloud VPS (from 2026-11-05)
 
 Beersheba is moving to `ecs-28b1` (196.189.51.169), which also hosts a live call centre.
-Everything is in `deploy/telecloud/` (step-by-step `README.md` + scripts) and
+Everything is in `deploy/server/` (step-by-step `README.md` + scripts) and
 `bunna_bridge/docker-compose.server.yml`:
 - Code baked into the production image (now with GDAL/GEOS/PROJ); no bind mount, no Traefik, no Flower.
 - One port, `127.0.0.1:8100`; the host nginx file `/etc/nginx/sites-available/beersheba` serves the SPA

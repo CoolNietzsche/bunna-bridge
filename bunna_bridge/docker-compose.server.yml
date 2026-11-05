@@ -1,4 +1,4 @@
-# Beersheba on a shared server (Ethio Telecom Telecloud VPS, Nov 2026).
+# Beersheba on a shared server (Nov 2026).
 #
 # The server already runs other sites behind its own nginx on ports 80/443,
 # so this stack:

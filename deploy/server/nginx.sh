@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Step 5 — put Beersheba online.
-#   sudo bash /opt/beersheba/app/deploy/telecloud/nginx.sh
+#   sudo bash /opt/beersheba/app/deploy/server/nginx.sh
 #
 # Test mode (setup.sh was given the server's IP): serves the site over plain
 # HTTP on its own port, http://<IP>:8090/ — no certificate, and ports 80/443
-# are not touched. Open TCP 8090 in the Telecloud security group to reach it.
+# are not touched. Port 8090 must be open in any cloud firewall in front of the server.
 # Later, run setup.sh with the domain and then this script again: the same
 # file switches to HTTPS on 443 and port 8090 is no longer used.
 #
@@ -16,7 +16,6 @@ set -euo pipefail
 . "$(dirname "$0")/common.sh"
 need_root
 load_conf
-SERVER_IP=196.189.51.169
 SCHEME=https; is_ip "$DOMAIN" && SCHEME=http
 TEMPLATE="$(dirname "$0")/nginx-beersheba.conf"
 
@@ -46,7 +45,7 @@ say "Pre-checks"
 nginx -t 2>/dev/null || die "The existing nginx config already fails its own test. Not touching nginx."
 ok "existing nginx config is valid"
 if is_ip "$DOMAIN"; then
-  [ "$DOMAIN" = "$SERVER_IP" ] || die "Test mode needs this server's public IP ($SERVER_IP), not $DOMAIN."
+  is_this_server "$DOMAIN" || die "Test mode needs this server's own IP; $DOMAIN is not one of: $(server_ips | tr '\n' ' ')"
   ok "test mode: plain HTTP on http://$DOMAIN:$WEBPORT/"
   if ss -ltnH | awk '{print $4}' | grep -qE "[:.]$WEBPORT\$" && ! grep -qs "listen $WEBPORT;" "$SITE"; then
     die "Port $WEBPORT is already used by another program."
@@ -54,12 +53,15 @@ if is_ip "$DOMAIN"; then
   ok "port $WEBPORT is free (or already Beersheba's)"
 else
   ip=$(getent ahostsv4 "$DOMAIN" | awk 'NR==1{print $1}' || true)
-  [ "$ip" = "$SERVER_IP" ] || die "$DOMAIN points to '${ip:-nothing}', not $SERVER_IP. Fix the DNS A record first."
+  { [ -n "$ip" ] && is_this_server "$ip"; } || die "$DOMAIN points to '${ip:-nothing}', not this server ($(server_ips | tr '\n' ' ')). Fix the DNS A record first, or wait for it to update."
   ok "$DOMAIN points at this server"
 fi
 for f in /etc/nginx/sites-enabled/*; do
   [ "$(readlink -f "$f")" = "$SITE" ] && continue
-  grep -qsw "server_name.*$DOMAIN" "$f" && die "$DOMAIN is already used in $f."
+  grep -qsw "server_name.*$DOMAIN" "$f" && die "$DOMAIN is already used in $f.
+   If that is an OLD Beersheba site you no longer need, switch it off (the file is kept in
+   sites-available, nginx is not reloaded yet) and run this script again:
+       sudo rm $f"
 done
 ok "no other site uses $DOMAIN"
 [ -f "$WEB/index.html" ] || die "Website not built yet. Run frontend.sh first."
@@ -85,7 +87,7 @@ if is_ip "$DOMAIN"; then
     n=$(grep -m1 -ow 'server_name[^;]*' "$s" | awk '{print $2}' || true)
     [ -n "$n" ] && [ "$n" != "_" ] && [ "$n" != "$DOMAIN" ] && printf '   %-40s %s\n' "https://$n/" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 --resolve "$n:443:127.0.0.1" "https://$n/" || true)"
   done
-  say "Done. Open TCP $WEBPORT in the Telecloud security group, then http://$DOMAIN:$WEBPORT/ in a browser. Paste everything above back to Claude."
+  say "Done. Make sure port $WEBPORT is open in any cloud firewall, then open http://$DOMAIN:$WEBPORT/ in a browser. Paste everything above back to Claude."
   exit 0
 fi
 
@@ -97,7 +99,7 @@ if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
   echo ok > "$ACME/beersheba-check"
   mkdir -p "$ACME/.well-known/acme-challenge" && mv "$ACME/beersheba-check" "$ACME/.well-known/acme-challenge/"
   curl -fs "http://$DOMAIN/.well-known/acme-challenge/beersheba-check" >/dev/null \
-    || die "http://$DOMAIN is not reachable from the server itself. Check port 80 in the Telecloud security group."
+    || die "http://$DOMAIN is not reachable from the server itself. Check that port 80 is open in any cloud firewall."
   rm -f "$ACME/.well-known/acme-challenge/beersheba-check"
   say "Requesting the certificate for $DOMAIN only"
   certbot certonly --webroot -w "$ACME" -d "$DOMAIN" --non-interactive --agree-tos \
