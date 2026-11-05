@@ -19,7 +19,7 @@ nginx is only ever **reloaded**, never restarted, and only after `nginx -t` pass
 open connections finish, so agents' pages keep working. Calls go browser → PBX and do not pass
 through this server.
 
-No security-group change is needed: Beersheba uses the existing ports 80 and 443.
+With the domain, no security-group change is needed (Beersheba uses the existing ports 80 and 443). Test mode needs inbound TCP 8090 opened (see below).
 
 ## Test mode first (no domain yet): http://196.189.51.169:8090
 
