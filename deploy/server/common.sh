@@ -21,6 +21,16 @@ die()  { printf '\n   STOP: %s\n   Nothing else was changed. Paste this output b
 # Any failing command stops the script with a clear message instead of silently.
 trap 'die "The command on line $LINENO of $(basename "$0") failed (see the lines just above)."' ERR
 
+# Some servers have two certbots (Ubuntu package and snap) and one of them can be broken
+# (e.g. the apt one crashing on a newer pyOpenSSL). Use the first one that actually runs.
+certbot() {
+  local c
+  for c in /snap/bin/certbot /usr/bin/certbot; do
+    if [ -x "$c" ] && "$c" --version >/dev/null 2>&1; then "$c" "$@"; return; fi
+  done
+  command certbot "$@"
+}
+
 need_root() { [ "$(id -u)" -eq 0 ] || die "Run this with sudo: sudo bash $0 $*"; }
 
 load_conf() {
