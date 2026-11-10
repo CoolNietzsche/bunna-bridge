@@ -69,7 +69,7 @@ set_key() {  # replace KEY=... in the settings file, or add it
 set_key DJANGO_ALLOWED_HOSTS "$DOMAIN"
 set_key CORS_ALLOWED_ORIGINS "$ORIGIN"
 set_key DJANGO_SECURE_SSL_REDIRECT "$SSL_REDIRECT"
-set_key DJANGO_DEFAULT_FROM_EMAIL "Beersheba <noreply@$DOMAIN>"
+grep -q "^DJANGO_DEFAULT_FROM_EMAIL=" "$DJ" || set_key DJANGO_DEFAULT_FROM_EMAIL "Beersheba <noreply@$DOMAIN>"  # keep one set by email.sh
 chmod 600 "$DJ" "$PG"
 ok "address: $ORIGIN"
 is_ip "$DOMAIN" && warn "test mode: plain HTTP, so use test passwords only until HTTPS is set up"

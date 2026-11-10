@@ -122,6 +122,17 @@ if MAILGUN_API_KEY and MAILGUN_DOMAIN:
             default="https://api.mailgun.net/v3",
         ),
     }
+elif env("EMAIL_HOST", default=""):
+    # Plain SMTP, e.g. a cPanel mailbox (mail.paperless.et, SSL on port 465).
+    # Values live in .envs/.server/.django, written by deploy/server/email.sh.
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env.int("EMAIL_PORT", default=465)
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+    EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=EMAIL_PORT == 465)  # noqa: PLR2004
+    EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=EMAIL_PORT == 587)  # noqa: PLR2004
+    EMAIL_TIMEOUT = 15
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
