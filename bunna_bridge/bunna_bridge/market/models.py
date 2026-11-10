@@ -212,3 +212,44 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Lead(models.Model):
+    """An enquiry from the public website (landing page, /exporters, /buyers, /pricing, /contact).
+
+    Saved first, then emailed to settings.LEADS_NOTIFY_EMAIL by tasks.notify_new_lead,
+    so nothing is lost if the mail server is down. Worked in the Django admin.
+    """
+
+    class Role(models.TextChoices):
+        EXPORTER = "exporter", "Exporter"
+        COOPERATIVE = "cooperative", "Cooperative / union"
+        IMPORTER = "importer", "Importer"
+        ROASTER = "roaster", "Roaster"
+        OTHER = "other", "Other"
+
+    class Status(models.TextChoices):
+        NEW = "new", "New"
+        CONTACTED = "contacted", "Contacted"
+        QUALIFIED = "qualified", "Qualified"
+        CLOSED = "closed", "Closed"
+
+    role = models.CharField(max_length=12, choices=Role.choices)
+    name = models.CharField(max_length=120)
+    email = models.EmailField()
+    company = models.CharField(max_length=160)
+    country = models.CharField(max_length=80)
+    phone = models.CharField(max_length=40, blank=True)
+    volume = models.CharField(max_length=60, blank=True, help_text="Yearly volume, as the visitor chose it.")
+    message = models.TextField(blank=True, max_length=4000)
+    source = models.CharField(max_length=60, blank=True, help_text="Page the form was sent from.")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.NEW)
+    notes = models.TextField(blank=True, help_text="Internal notes; never shown to the visitor.")
+    notified_at = models.DateTimeField(null=True, blank=True, help_text="When the alert email was sent.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.company}) - {self.get_role_display()}"

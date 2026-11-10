@@ -23,6 +23,7 @@ from bunna_bridge.trade.models import Contract
 from bunna_bridge.users.models import User
 
 from . import services as svc
+from .models import Lead
 from .models import SelectEntry
 from .models import SelectProgramme
 from .models import WarehouseStock
@@ -289,3 +290,67 @@ class TestArticles:
         assert client_for(make_user("exporter")).post(reverse("article-list"), {"slug": "x"}, format="json").status_code == 403
 
 
+
+
+# ── Website enquiries (public lead form) ─────────────────────────────────────
+
+LEAD = {
+    "role": "exporter",
+    "name": "Abebe Kebede",
+    "email": "abebe@example.com",
+    "company": "Highland Exports PLC",
+    "country": "Ethiopia",
+    "volume": "5-20 containers",
+    "message": "We need EUDR packages for the coming harvest.",
+    "source": "/exporters",
+}
+
+
+def test_lead_is_saved_and_emailed(settings, mailoutbox, django_capture_on_commit_callbacks):
+    settings.CELERY_TASK_ALWAYS_EAGER = True
+    settings.LEADS_NOTIFY_EMAIL = "team@example.com"
+    with django_capture_on_commit_callbacks(execute=True):
+        r = APIClient().post(reverse("lead-create"), LEAD, format="json")
+    assert r.status_code == 201
+    lead = Lead.objects.get()
+    assert lead.company == "Highland Exports PLC"
+    assert lead.status == Lead.Status.NEW
+    assert lead.notified_at is not None
+    assert len(mailoutbox) == 1
+    mail = mailoutbox[0]
+    assert mail.to == ["team@example.com"]
+    assert mail.reply_to == ["abebe@example.com"]
+    assert "Highland Exports PLC" in mail.subject
+    assert "EUDR packages" in mail.body
+
+
+def test_lead_works_with_a_stale_token():
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Bearer not-a-real-token")
+    r = client.post(reverse("lead-create"), LEAD, format="json")
+    assert r.status_code == 201
+
+
+def test_lead_honeypot_saves_nothing(mailoutbox):
+    r = APIClient().post(reverse("lead-create"), {**LEAD, "website": "http://spam.example"}, format="json")
+    assert r.status_code == 201
+    assert not Lead.objects.exists()
+    assert mailoutbox == []
+
+
+def test_lead_validation():
+    r = APIClient().post(reverse("lead-create"), {**LEAD, "email": "nope", "role": "pirate"}, format="json")
+    assert r.status_code == 400
+    assert set(r.data) == {"email", "role"}
+    r = APIClient().post(reverse("lead-create"), {"role": "roaster"}, format="json")
+    assert r.status_code == 400
+    assert {"name", "email", "company", "country"} <= set(r.data)
+
+
+def test_lead_single_line_fields_are_flattened():
+    APIClient().post(reverse("lead-create"), {**LEAD, "company": "Evil\r\nBcc: x@y.z"}, format="json")
+    assert Lead.objects.get().company == "Evil Bcc: x@y.z"
+
+
+def test_leads_are_not_listable():
+    assert APIClient().get(reverse("lead-create")).status_code == 405

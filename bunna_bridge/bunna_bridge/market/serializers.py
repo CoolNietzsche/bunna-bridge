@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import Article
+from .models import Lead
 from .models import SavedSearch
 from .models import SelectEntry
 from .models import SelectProgramme
@@ -192,3 +193,23 @@ class ArticleSerializer(serializers.ModelSerializer):
         if v and not v.startswith("https://"):
             raise serializers.ValidationError("Use an https:// link.")
         return v
+
+
+class LeadSerializer(serializers.ModelSerializer):
+    # Honeypot: a field real visitors never see. Bots that fill it are dropped quietly.
+    website = serializers.CharField(required=False, allow_blank=True, write_only=True, max_length=200)
+
+    class Meta:
+        model = Lead
+        fields = ["role", "name", "email", "company", "country", "phone", "volume", "message", "source", "website"]
+        extra_kwargs = {"message": {"max_length": 4000}}
+
+    def validate(self, attrs):
+        for key in ("name", "company", "country", "phone", "volume", "source"):
+            if key in attrs:
+                attrs[key] = " ".join(attrs[key].split())  # no line breaks in one-line fields
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop("website", None)
+        return super().create(validated_data)

@@ -24,10 +24,12 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
     title: "Platform",
     links: [
-      { label: "How it works", to: "/#how" },
-      { label: "Traceability", to: "/#values" },
+      { label: "For exporters", to: "/exporters" },
+      { label: "For importers and roasters", to: "/buyers" },
+      { label: "EUDR guide", to: "/eudr" },
+      { label: "Pricing", to: "/pricing" },
+      { label: "Contact", to: "/contact" },
       { label: "Sign in", to: "/login" },
-      { label: "Create account", to: "/register" },
     ],
   },
 ];

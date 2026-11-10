@@ -1,9 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   ArrowUpRight, ChevronRight, MapPin, Leaf, FileCheck2, ScanLine,
-  ShieldCheck, Landmark, BadgeCheck, CheckCircle2,
+  ShieldCheck, Landmark, BadgeCheck, CheckCircle2, Building2, Coffee, Check, Minus,
 } from "lucide-react";
+import LeadForm from "../components/site/LeadForm";
+import PassportPreview from "../components/site/PassportPreview";
+import EudrDeadline from "../components/site/EudrDeadline";
+import { CheckList, Faq, SectionHead as MkSectionHead } from "../components/site/marketing";
 import AppShell from "../components/AppShell";
+import { usePageMeta } from "../hooks/usePageMeta";
 import OriginCard from "../components/market/OriginCard";
 import Reveal from "../components/Reveal";
 import { SELECTIONS, STATIC_ORIGINS } from "../lib/catalog";
@@ -33,6 +38,10 @@ const ORIGIN_IMAGES: Record<string, string> = {
 // pipeline (see CLAUDE.md), not live metrics.
 export default function Landing() {
   const navigate = useNavigate();
+  usePageMeta(
+    "Beersheba · Traceable Ethiopian specialty coffee, EUDR-ready",
+    "Ethiopian specialty coffee traceable to the plot, with EUDR evidence for EU importers. Exporters map, trace and sell; buyers source with confidence.",
+  );
 
   return (
     <AppShell footer>
@@ -54,12 +63,12 @@ export default function Landing() {
           </Reveal>
           <Reveal delay={240}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: "22px", marginTop: "32px" }}>
-              <button className="bb-cta" onClick={() => navigate("/marketplace")} style={primaryBtn}>
-                Explore the coffees
-              </button>
-              <a href="#pipeline" className="bb-text-link" style={textLink}>
-                How it works <ChevronRight size={18} className="bb-cta-icon" />
+              <a className="bb-cta" href="#contact" style={{ ...primaryBtn, textDecoration: "none" }}>
+                Talk to us
               </a>
+              <Link to="/marketplace" className="bb-text-link" style={textLink}>
+                Explore the coffees <ChevronRight size={18} className="bb-cta-icon" />
+              </Link>
             </div>
           </Reveal>
 
@@ -94,8 +103,37 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Two audiences, two doors ──────────────────────────── */}
+      <section className="container-editorial mk-section" style={{ paddingTop: "clamp(72px, 9vw, 112px)" }}>
+        <div className="mk-split">
+          <Reveal>
+            <Link to="/exporters" className="mk-card mk-door">
+              <span className="mk-icon mk-icon-solid" aria-hidden><Building2 size={20} /></span>
+              <span className="mk-kicker" style={{ fontSize: "0.92rem" }}>I export coffee</span>
+              <h2 className="mk-door-title">Get every lot EUDR-ready and sell it to Europe.</h2>
+              <span className="mk-body">Map farms offline, trace cherry into lots, pass seven compliance gates and hand importers the evidence they need.</span>
+              <span className="mk-door-go">For exporters <ChevronRight size={18} aria-hidden /></span>
+            </Link>
+          </Reveal>
+          <Reveal delay={90}>
+            <Link to="/buyers" className="mk-card mk-door">
+              <span className="mk-icon" aria-hidden><Coffee size={20} /></span>
+              <span className="mk-kicker" style={{ fontSize: "0.92rem" }}>I buy coffee</span>
+              <h2 className="mk-door-title">Source Ethiopian coffee you can file with confidence.</h2>
+              <span className="mk-body">Plot-level geolocation, quality data and an EUDR evidence package with every lot, direct from verified exporters.</span>
+              <span className="mk-door-go">For importers and roasters <ChevronRight size={18} aria-hidden /></span>
+            </Link>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── EUDR deadline ─────────────────────────────────────── */}
+      <section className="container-editorial" style={{ paddingTop: "clamp(40px, 5vw, 64px)" }}>
+        <Reveal><EudrDeadline /></Reveal>
+      </section>
+
       {/* ── The pipeline ─────────────────────────────────────── */}
-      <section id="pipeline" className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)", scrollMarginTop: "90px" }}>
+      <section id="how" className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)", scrollMarginTop: "90px" }}>
         <div className="bb-pipeline-head" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "32px" }}>
           <Reveal style={{ flex: 1 }}>
             <SectionHead kicker="The pipeline" title="Seven gates to a Green Passport" sub="Every lot is scored against seven independent compliance checks before it can list. Pass all seven, and it earns a verifiable Green Passport." />
@@ -140,6 +178,14 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── Green Passport example ─────────────────────────────── */}
+      <section className="container-editorial mk-section" id="passport">
+        <Reveal>
+          <MkSectionHead kicker="See the evidence" title="Look inside a Green Passport." sub="This is what an EU buyer sees for every export-ready lot: the gates it passed, the plots behind it and the proof for each. Click a gate." />
+        </Reveal>
+        <Reveal delay={100}><div style={{ marginTop: 36 }}><PassportPreview /></div></Reveal>
+      </section>
+
       {/* ── Browse by origin (asymmetric bento) ──────────────── */}
       <section className="container-editorial" style={{ paddingTop: "clamp(96px, 12vw, 152px)" }}>
         <Reveal>
@@ -171,6 +217,40 @@ export default function Landing() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ── Compared with the usual way ───────────────────────── */}
+      <section className="container-editorial mk-section">
+        <Reveal>
+          <MkSectionHead kicker="Why software" title="Compared with the usual way." sub="Most exporters meet EUDR with consultants and spreadsheets. That works for a lot or two, not for a whole harvest." />
+        </Reveal>
+        <Reveal delay={80}>
+          <div className="mk-compare-wrap">
+            <table className="mk-compare">
+              <thead>
+                <tr><th scope="col"><span className="sr-only">Feature</span></th><th scope="col">Spreadsheets</th><th scope="col">Consultants</th><th scope="col" className="mk-us">Beersheba</th></tr>
+              </thead>
+              <tbody>
+                {COMPARE.map(([label, sheet, consult, us]) => (
+                  <tr key={label as string}>
+                    <th scope="row">{label}</th>
+                    <td>{sheet}</td>
+                    <td>{consult}</td>
+                    <td className="mk-us">{us}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── FAQ ───────────────────────────────────────────────── */}
+      <section className="container-editorial mk-section">
+        <Reveal>
+          <MkSectionHead kicker="Questions" title="Good questions, straight answers." />
+          <Faq items={FAQ} />
+        </Reveal>
       </section>
 
       {/* ── Values + CTA ─────────────────────────────────────── */}
@@ -207,11 +287,11 @@ export default function Landing() {
               </div>
 
               <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "28px" }}>
-                <button className="bb-cta" onClick={() => navigate("/marketplace")} style={{ ...primaryBtn, background: "#FFFFFF", color: "#1D1D1F" }}>
+                <a className="bb-cta" href="#contact" style={{ ...primaryBtn, background: "#FFFFFF", color: "#1D1D1F", textDecoration: "none" }}>
+                  Talk to us
+                </a>
+                <button onClick={() => navigate("/marketplace")} style={ghostOnDarkBtn}>
                   Browse the marketplace
-                </button>
-                <button onClick={() => navigate("/register")} style={ghostOnDarkBtn}>
-                  Create an account
                 </button>
               </div>
             </div>
@@ -219,7 +299,24 @@ export default function Landing() {
         </Reveal>
       </section>
 
+      {/* ── Lead form ─────────────────────────────────────────── */}
+      <section className="container-editorial mk-section" id="contact">
+        <div className="mk-card bb-contact-card" style={{ padding: "clamp(28px, 5vw, 56px)", display: "grid", gap: "clamp(28px, 4vw, 56px)", gridTemplateColumns: "minmax(0, 0.8fr) minmax(0, 1.2fr)" }}>
+          <div>
+            <MkSectionHead kicker="Talk to us" title="Get ready before your buyers ask." />
+            <CheckList items={[
+              "Exporters: a walkthrough with your own lots and a plan to map your supply",
+              "Importers and roasters: lots matched to what you buy, and samples",
+              "Everyone: straight answers about EUDR",
+            ]} />
+          </div>
+          <LeadForm cta="Talk to us" />
+        </div>
+      </section>
+
       <style>{`
+        @media (max-width: 880px){ .bb-contact-card { grid-template-columns: 1fr !important; } }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
         .bb-gradient-text {
           background: linear-gradient(100deg, #1B7A4E 0%, #2E9A66 45%, #8FBF4A 100%);
           -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -304,12 +401,33 @@ function TopographicMark({ style, strokeA, strokeB }: { style?: React.CSSPropert
 const GATES = [
   { label: "GPS boundary", sub: "Farm plotted and verified against forest baselines.", icon: <MapPin size={19} /> },
   { label: "Deforestation-free", sub: "Clear of forest loss since December 2020.", icon: <Leaf size={19} /> },
-  { label: "EUDR due diligence", sub: "Statement generated and lodged for EU customs.", icon: <FileCheck2 size={19} /> },
+  { label: "EUDR evidence", sub: "Plot GeoJSON and risk register, ready for the importer's statement.", icon: <FileCheck2 size={19} /> },
   { label: "Phytosanitary cert", sub: "Export health certificate on file.", icon: <ScanLine size={19} /> },
   { label: "ECTA license", sub: "Active, licensed exporter of record.", icon: <ShieldCheck size={19} /> },
   { label: "NBE FX declaration", sub: "50/50 forex retention filed with the bank.", icon: <Landmark size={19} /> },
-  { label: "CTA floor price", sub: "Meets the government coffee floor price.", icon: <BadgeCheck size={19} /> },
+  { label: "ECTA floor price", sub: "Meets the minimum export price for its grade.", icon: <BadgeCheck size={19} /> },
   { label: "Green Passport", sub: "All seven gates passed — export ready.", icon: <CheckCircle2 size={20} />, final: true },
+];
+
+const yes = <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Check size={16} style={{ color: "var(--color-forest)" }} aria-hidden /></span>;
+const no = <Minus size={16} style={{ color: "var(--color-text-ghost)" }} aria-label="No" />;
+
+const COMPARE: [string, React.ReactNode, React.ReactNode, React.ReactNode][] = [
+  ["Plot mapping in the field", <>Separate GPS apps, copied by hand</>, <>Survey teams, per project</>, <>{yes} Field app, works offline</>],
+  ["Plots linked to each lot", no, <>Per audit</>, <>{yes} Every delivery, every lot</>],
+  ["Deforestation check", no, <>Report per project</>, <>{yes} Automatic, on every plot</>],
+  ["Evidence for the importer", <>Files emailed around</>, <>PDF report</>, <>{yes} Package with GeoJSON and risk register</>],
+  ["Tamper-evident audit trail", no, no, <>{yes} Hash-chained log</>],
+  ["Ready for next season", <>Start again</>, <>New contract</>, <>{yes} Builds on last year's data</>],
+  ["Finding EU buyers", no, no, <>{yes} Built-in marketplace</>],
+];
+
+const FAQ = [
+  { q: "What is Beersheba?", a: "An export platform for Ethiopian specialty coffee. Exporters use it to trace their coffee to the plot and prove EUDR compliance; EU importers and roasters use it to find and buy those lots with the evidence attached." },
+  { q: "Who has to comply with EUDR?", a: <>The operator who first places the coffee on the EU market — usually the importer — files the due diligence statement from 30 December 2026. They can't do it without plot data from origin, so exporters need it too. The <Link to="/eudr" style={{ color: "var(--color-forest)" }}>EUDR guide</Link> explains it in plain words.</> },
+  { q: "What happens if a lot fails a gate?", a: "It can't list as export-ready. The platform shows exactly which gate failed and what's needed to fix it — a missing plot boundary, an expired certificate, a price below the floor." },
+  { q: "Is our data safe?", a: "Your day-to-day data is private to your team; only the lots you list are public. Producers' personal data is only shared where EUDR requires it and consent is recorded. Every compliance change is written to a tamper-evident log." },
+  { q: "What does it cost?", a: <>Exporters pay a subscription sized to their volume; browsing the marketplace is free. <Link to="/pricing" style={{ color: "var(--color-forest)" }}>See pricing</Link>.</> },
 ];
 
 function SectionHead({ kicker: k, title, sub }: { kicker: string; title: string; sub?: string }) {

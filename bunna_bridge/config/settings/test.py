@@ -42,5 +42,7 @@ MEDIA_URL = "http://media.testserver/"
 # where a test overrides it on purpose.
 REST_FRAMEWORK = {  # noqa: F405
     **REST_FRAMEWORK,  # noqa: F405
-    "DEFAULT_THROTTLE_RATES": {"anon": "100000/hour", "user": "100000/hour", "auth": "100000/hour"},
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "100000/hour", "user": "100000/hour", "auth": "100000/hour", "leads": "100000/hour",
+    },
 }

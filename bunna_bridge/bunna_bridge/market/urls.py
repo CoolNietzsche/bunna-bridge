@@ -22,6 +22,7 @@ urlpatterns = [
     path("market/lots/<uuid:lot_pk>/impact/", v.ImpactView.as_view(), name="lot-impact"),
     path("market/exporters/<int:user_id>/reliability-score/", v.ReliabilityScoreView.as_view(),
          name="reliability-score"),
+    path("market/leads/", v.LeadCreateView.as_view(), name="lead-create"),
     path("market/articles/", v.ArticleListView.as_view(), name="article-list"),
     path("market/articles/<slug:slug>/", v.ArticleDetailView.as_view(), name="article-detail"),
 ]

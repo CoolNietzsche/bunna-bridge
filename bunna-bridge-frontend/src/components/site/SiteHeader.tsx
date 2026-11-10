@@ -14,10 +14,12 @@ interface NavLink { label: string; path: string; }
 function navLinksFor(role: string | undefined, authed: boolean): NavLink[] {
   if (!authed) {
     return [
+      { label: "For exporters", path: "/exporters" },
+      { label: "For buyers", path: "/buyers" },
       { label: "Marketplace", path: "/marketplace" },
-      { label: "Origins", path: "/marketplace?tab=origins" },
+      { label: "EUDR", path: "/eudr" },
       { label: "Learn", path: "/learn" },
-      { label: "How it works", path: "/#how" },
+      { label: "Pricing", path: "/pricing" },
     ];
   }
   switch (role) {
@@ -149,7 +151,7 @@ export default function SiteHeader() {
             {!isAuthenticated ? (
               <div className="desktop-only" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <button onClick={() => go("/login")} style={ghostBtn}>Sign in</button>
-                <button onClick={() => go("/marketplace")} style={primaryBtn}>Browse coffees</button>
+                <button onClick={() => go("/contact")} style={primaryBtn}>Talk to us</button>
               </div>
             ) : (
               <div className="desktop-only" style={{ position: "relative" }}>
@@ -196,7 +198,7 @@ export default function SiteHeader() {
             {!isAuthenticated ? (
               <>
                 <button onClick={() => go("/login")} style={mobileItem}>Sign in</button>
-                <button onClick={() => go("/marketplace")} style={{ ...mobileItem, color: T.color.forest, fontWeight: 600 }}>Browse coffees</button>
+                <button onClick={() => go("/contact")} style={{ ...mobileItem, color: T.color.forest, fontWeight: 600 }}>Talk to us</button>
               </>
             ) : (
               <>

@@ -250,6 +250,8 @@ ADMIN_URL = "admin/"
 ADMINS = ['"Bunna Bridge Team" <hello@bunnabridge.com>']
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
+# Website enquiries (market.Lead) are emailed here. Empty = save only, no email.
+LEADS_NOTIFY_EMAIL = env("LEADS_NOTIFY_EMAIL", default="beersheba@paperless.et")
 # https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings
 # Force the `admin` sign in process to go through the `django-allauth` workflow
 DJANGO_ADMIN_FORCE_ALLAUTH = env.bool("DJANGO_ADMIN_FORCE_ALLAUTH", default=False)
@@ -396,6 +398,8 @@ REST_FRAMEWORK = {
         "user": env("DRF_THROTTLE_USER", default="5000/hour"),
         # login + registration: brute-force protection
         "auth": env("DRF_THROTTLE_AUTH", default="10/minute"),
+        # public website enquiry form: spam protection
+        "leads": env("DRF_THROTTLE_LEADS", default="10/hour"),
     },
 }
 

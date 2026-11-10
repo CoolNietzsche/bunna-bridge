@@ -15,11 +15,13 @@ saved-searches/ · saved-searches/<id>/
 lots/<lot>/impact/                   impact and transparency score
 exporters/<user>/reliability-score/  reliability score
 articles/ · articles/<slug>/         education hub (admins publish)
+leads/                               public website enquiry form (anyone; throttled)
 """
 
 from decimal import Decimal
 from decimal import InvalidOperation
 
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -45,6 +47,7 @@ from .models import StockOrder
 from .models import WarehouseStock
 from .models import WatchItem
 from .serializers import ArticleSerializer
+from .serializers import LeadSerializer
 from .serializers import EntrySerializer
 from .serializers import OrderSerializer
 from .serializers import ProgrammeSerializer
@@ -358,3 +361,23 @@ class ArticleDetailView(APIView):
         self._get(request, slug).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+class LeadCreateView(APIView):
+    """Public enquiry form. No login; no auth header needed (a stale token must not block it)."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    throttle_scope = "leads"
+
+    def post(self, request):
+        s = LeadSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        if s.validated_data.get("website"):
+            # Honeypot filled in: answer like a success so the bot learns nothing, save nothing.
+            return Response({"ok": True}, status=status.HTTP_201_CREATED)
+        lead = s.save()
+        from .tasks import notify_new_lead
+
+        transaction.on_commit(lambda: notify_new_lead.delay(lead.pk))
+        return Response({"ok": True}, status=status.HTTP_201_CREATED)

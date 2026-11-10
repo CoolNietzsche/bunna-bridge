@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useBoundarySync } from './hooks/useBoundarySync';
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -51,6 +51,11 @@ const SelectProgramme = lazy(() => import("./pages/SelectProgramme"));
 const EuStock = lazy(() => import("./pages/EuStock"));
 const Learn = lazy(() => import("./pages/Learn"));
 const LearnArticle = lazy(() => import("./pages/LearnArticle"));
+const Exporters = lazy(() => import("./pages/Exporters"));
+const Buyers = lazy(() => import("./pages/Buyers"));
+const Eudr = lazy(() => import("./pages/Eudr"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 // Pages are code-split per route; the landing page stays in the main bundle
 // so first paint for visitors doesn't wait on a second request.
@@ -63,6 +68,19 @@ function PageFallback() {
       <span style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Loading…</span>
     </div>
   );
+}
+
+/** New page starts at the top; links with a #hash scroll to that section instead. */
+function ScrollToTop() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const t = window.setTimeout(() => document.getElementById(hash.slice(1))?.scrollIntoView(), 80);
+      return () => window.clearTimeout(t);
+    }
+    window.scrollTo(0, 0);
+  }, [pathname, hash]);
+  return null;
 }
 
 /** Public marketing landing at "/"; authenticated users go to their dashboard. */
@@ -79,6 +97,7 @@ export default function App() {
       <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/"            element={<RootRoute />} />
@@ -124,6 +143,11 @@ export default function App() {
             <Route path="/select/:id"   element={<ProtectedRoute><SelectProgramme /></ProtectedRoute>} />
             <Route path="/eu-stock"     element={<ProtectedRoute><EuStock /></ProtectedRoute>} />
             <Route path="/learn"        element={<Learn />} />
+            <Route path="/exporters"    element={<Exporters />} />
+            <Route path="/buyers"       element={<Buyers />} />
+            <Route path="/eudr"         element={<Eudr />} />
+            <Route path="/pricing"      element={<Pricing />} />
+            <Route path="/contact"      element={<Contact />} />
             <Route path="/learn/:slug"  element={<LearnArticle />} />
             <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/admin/licenses" element={<ProtectedRoute><LicenseReviews /></ProtectedRoute>} />

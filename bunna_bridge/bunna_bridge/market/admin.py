@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import Article
 from .models import Bid
+from .models import Lead
 from .models import SavedSearch
 from .models import SelectEntry
 from .models import SelectProgramme
@@ -45,3 +46,15 @@ class SavedSearchAdmin(admin.ModelAdmin):
 class ArticleAdmin(admin.ModelAdmin):
     list_display = ["title", "kind", "region", "published_at"]
     prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(Lead)
+class LeadAdmin(admin.ModelAdmin):
+    list_display = ["created_at", "name", "company", "role", "country", "volume", "status", "notified_at"]
+    list_filter = ["status", "role", "country"]
+    list_editable = ["status"]
+    search_fields = ["name", "company", "email", "message"]
+    readonly_fields = ["role", "name", "email", "company", "country", "phone", "volume", "message", "source",
+                       "notified_at", "created_at"]
+    fields = ["status", "notes", *readonly_fields]
+    date_hierarchy = "created_at"
