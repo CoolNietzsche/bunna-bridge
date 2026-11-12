@@ -524,3 +524,41 @@ class Offer(models.Model):
 
     def __str__(self):
         return f"Offer by {self.buyer} on {self.lot.lot_id} [{self.status}]"
+
+
+class LotStory(models.Model):
+    """
+    How a lot's public story page (/story/<id>) is presented: a partner header,
+    a place line, the partner's own lot reference, a hero picture, an order
+    button and statements made by a partner (shown as theirs, never as
+    verified by Beersheba). The verified checklist is always computed from the
+    lot's data (lots/story.py), never typed in.
+    """
+
+    MAX_STATEMENTS = 6
+
+    lot = models.OneToOneField("CoffeeLot", on_delete=models.CASCADE, related_name="story")
+    partner_line = models.CharField(
+        max_length=120, blank=True, help_text="Shown above the lot name, e.g. a hotel and roastery pairing.",
+    )
+    place_label = models.CharField(max_length=120, blank=True, help_text="Place line, e.g. a kebele and region.")
+    reference = models.CharField(max_length=40, blank=True, help_text="A partner's own lot reference.")
+    hero_image = models.ImageField(
+        upload_to="lots/photos/story/", null=True, blank=True,
+        help_text="Top picture. Without one, the page shows the farm on a satellite map.",
+    )
+    order_label = models.CharField(max_length=60, blank=True)
+    order_detail = models.CharField(max_length=80, blank=True)
+    order_price = models.CharField(max_length=20, blank=True)
+    order_url = models.URLField(
+        blank=True, help_text="Shop or WhatsApp link. Without one, the button opens an order request form.",
+    )
+    statements_by = models.CharField(max_length=120, blank=True, help_text="Who makes the partner statements.")
+    statements = models.JSONField(default=list, blank=True)
+    show_grower_names = models.BooleanField(
+        default=False, help_text="Name the growers who consented to appearing on public lot pages.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Story settings for {self.lot.lot_id}"

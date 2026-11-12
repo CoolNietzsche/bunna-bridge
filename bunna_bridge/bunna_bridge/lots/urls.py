@@ -8,7 +8,7 @@ from .views import (
     LotBoundaryView, LotBoundaryInheritView,
     NotificationListView, notification_unread_count,
     notification_mark_read, notification_mark_all_read,
-    LotStoryPublicView, LotPhotosView,
+    LotStoryPublicView, LotStorySettingsView, LotPhotosView,
     LotDocumentDownloadView,
     WashingStationListCreateView, WashingStationDetailView,
 )
@@ -65,6 +65,8 @@ urlpatterns = router.urls + [
     path("lots/<uuid:lot_pk>/spec-sheet/",
          LotSpecSheetView.as_view(),                            name="lot-spec-sheet"),
     # ── Public Lot Story ───────────────────────────────────────────────────
+    path("lots/<uuid:lot_pk>/story-settings/",
+         LotStorySettingsView.as_view(),              name="lot-story-settings"),
     path("lots/<uuid:pk>/story/",
          LotStoryPublicView.as_view(),                name="lot-story-public"),
     # ── Washing Stations ───────────────────────────────────────────────────

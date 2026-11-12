@@ -27,6 +27,7 @@ from . import due_diligence as dd
 from .geo import geodesic_area_ha
 from .geo import traces_feature
 from .geo import validate_plot_geometry
+from .models import CherryDelivery
 from .models import DdsReference
 from .models import ForestBaseline2020
 from .models import LotRisk
@@ -753,3 +754,83 @@ class TestBaselineAndTrust:
         )
         assert r.status_code == 400
         assert LotRisk.objects.get(pk=risk.pk).status == "open"
+
+
+# ── Public story page: verified checklist, partner settings, consent ─────────
+
+
+class TestStoryPage:
+    def story(self, lot):
+        return APIClient().get(reverse("lot-story-public", args=[lot.pk])).data["story"]
+
+    def test_checklist_is_computed_from_records(self, loss_data):
+        lot = build_traced_lot(verified_exporter())
+        items = {i["key"]: i for i in self.story(lot)["covenant"]}
+        assert items["forest"]["met"] is True
+        assert items["traced"]["met"] is True
+        assert items["licence"]["met"] is True
+        assert items["baseline"]["met"] is False  # no EU 2020 forest map loaded in this test
+        assert items["paid"]["met"] is False  # no deliveries recorded
+
+    def test_unverified_exporter_and_untraced_lot_are_not_ticked(self):
+        lot = make_lot(make_user("exporter"))
+        items = {i["key"]: i for i in self.story(lot)["covenant"]}
+        assert not any(i["met"] for i in items.values())
+
+    def test_payments_on_record(self, loss_data):
+        exp = verified_exporter()
+        lot = build_traced_lot(exp, plots=1)
+        plot = lot.sources.first().plot
+        CherryDelivery.objects.create(owner=exp, producer=plot.producer, plot=plot, lot=lot, receipt_number="R1",
+                                      delivered_on=date(2026, 1, 5), weight_kg=Decimal("500"),
+                                      price_per_kg_etb=Decimal("120"), amount_paid_etb=Decimal("60000"))
+        items = {i["key"]: i for i in self.story(lot)["covenant"]}
+        assert items["paid"]["met"] is True
+        assert "1 of 1" in items["paid"]["detail"]
+
+    def test_grower_names_and_plots_only_with_story_consent(self, loss_data):
+        exp = verified_exporter()
+        lot = build_traced_lot(exp, plots=2)
+        r = client_for(exp).patch(reverse("lot-story-settings", args=[lot.pk]), {"show_grower_names": True},
+                                  format="json")
+        assert r.status_code == 200
+        story = self.story(lot)
+        assert story["growers"] == ""
+        assert [f for f in story["map"]["features"] if f["properties"]["kind"] == "plot"] == []
+        producer = Producer.objects.get(owner=exp, name="Producer 1")
+        ProducerConsent.objects.create(producer=producer, purpose="story", method="witnessed")
+        story = self.story(lot)
+        assert story["growers"] == "Producer 1"
+        assert "Producer 0" not in json.dumps(story)
+        assert len([f for f in story["map"]["features"] if f["properties"]["kind"] == "plot"]) == 1
+
+    def test_team_edits_settings_others_cannot(self, loss_data):
+        exp = verified_exporter()
+        lot = build_traced_lot(exp, plots=1)
+        url = reverse("lot-story-settings", args=[lot.pk])
+        assert client_for(make_user("buyer")).patch(url, {"partner_line": "X"}, format="json").status_code == 403
+        body = {"partner_line": "Hotel × Roastery", "reference": "SKY-SID-001", "order_label": "Take Ethiopia home",
+                "order_price": "$20", "statements_by": "A Roastery",
+                "statements": ["Grown under native forest canopy", "  ", "Roasted with clean energy"]}
+        r = client_for(exp).patch(url, body, format="json")
+        assert r.status_code == 200, r.data
+        assert r.data["statements"] == ["Grown under native forest canopy", "Roasted with clean energy"]
+        assert client_for(exp).patch(url, {"order_url": "http://shop.example"}, format="json").status_code == 400
+        story = self.story(lot)
+        assert story["reference"] == "SKY-SID-001"
+        assert story["order"] == {"label": "Take Ethiopia home", "detail": "", "price": "$20", "url": None}
+        assert story["statements"]["by"] == "A Roastery"
+        # Partner statements never become checklist items.
+        assert all("canopy" not in i["text"] for i in story["covenant"])
+
+    def test_hero_image_upload_and_removal(self, loss_data, tmp_path, settings):
+        settings.MEDIA_ROOT = tmp_path
+        exp = verified_exporter()
+        lot = build_traced_lot(exp, plots=1)
+        url = reverse("lot-story-settings", args=[lot.pk])
+        png = SimpleUploadedFile("hero.png", b"\x89PNG\r\n\x1a\n" + b"0" * 64, content_type="image/png")
+        r = client_for(exp).patch(url, {"hero_image": png}, format="multipart")
+        assert r.status_code == 200, r.data
+        assert "lots/photos/story/" in r.data["hero_image"]
+        r = client_for(exp).patch(url, {"remove_hero": "true"}, format="multipart")
+        assert r.data["hero_image"] is None

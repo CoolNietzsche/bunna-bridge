@@ -41,6 +41,21 @@ def _scale(value, low, high, maximum):
 GREEN_YIELD = {"cherry": Decimal("0.20"), "dry_cherry": Decimal("0.50"), "parchment": Decimal("0.80")}
 
 
+def farm_price_share(lot, deliveries=None):
+    """Farmers' share of the FOB price in %, from recorded cherry prices; None without the data."""
+    from bunna_bridge.traceability.models import CherryDelivery
+
+    if deliveries is None:
+        deliveries = list(CherryDelivery.objects.filter(lot=lot))
+    rate = Decimal(str(getattr(settings, "NBE_DEFAULT_FX_RATE", "0") or "0"))
+    priced = [d for d in deliveries if d.price_per_kg_etb]
+    if not (priced and lot.fob_price_usd and rate > 0):
+        return None
+    weight = sum(d.weight_kg for d in priced)
+    green_cost = sum(d.weight_kg * d.price_per_kg_etb / GREEN_YIELD.get(d.form, Decimal("0.20")) for d in priced) / weight
+    return float(green_cost / (lot.fob_price_usd * rate) * 100)
+
+
 def impact(lot):
     from bunna_bridge.traceability.due_diligence import lot_sources
     from bunna_bridge.traceability.models import CherryDelivery
@@ -50,12 +65,8 @@ def impact(lot):
     rate = Decimal(str(getattr(settings, "NBE_DEFAULT_FX_RATE", "0") or "0"))
 
     # 1. Share of the FOB price paid to farmers (from recorded cherry prices).
-    priced = [d for d in deliveries if d.price_per_kg_etb]
-    if priced and lot.fob_price_usd and rate > 0:
-        weight = sum(d.weight_kg for d in priced)
-        green_cost = sum(d.weight_kg * d.price_per_kg_etb / GREEN_YIELD.get(d.form, Decimal("0.20")) for d in priced) / weight
-        fob_etb = lot.fob_price_usd * rate
-        share = float(green_cost / fob_etb * 100)
+    share = farm_price_share(lot, deliveries)
+    if share is not None:
         criteria.append(_criterion(
             "farm_price_share", "Farmers' share of the export price", _scale(share, 40, 70, 30), 30,
             f"Farmers received about {share:.0f}% of the FOB price (green-coffee equivalent of recorded cherry prices, "

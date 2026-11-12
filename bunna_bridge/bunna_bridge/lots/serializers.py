@@ -6,6 +6,7 @@ from bunna_bridge.orgs.access import same_team
 
 from .models import CoffeeLot, CuppingScore, SampleRequest, Offer, WashingStation, ComplianceEvent
 from .models import GATE_FIELDS
+from .models import LotStory
 
 # Commercial terms hidden from anonymous marketplace visitors — same set the
 # public Lot Story page has always excluded, now applied consistently to the
@@ -330,11 +331,12 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
     farm_location_geojson = serializers.SerializerMethodField()
     certifications         = serializers.SerializerMethodField()
     trust_profile          = serializers.SerializerMethodField()
+    story                  = serializers.SerializerMethodField()
 
     class Meta:
         model  = CoffeeLot
         fields = [
-            "trust_profile",
+            "trust_profile", "story",
             "id", "lot_id", "name",
             "region", "washing_station", "altitude_m",
             "processing", "grade", "varietal", "harvest_date",
@@ -392,6 +394,42 @@ class PublicLotStorySerializer(serializers.ModelSerializer):
 
     def get_certifications(self, obj):
         return lot_certifications(obj)
+
+    def get_story(self, obj):
+        from .story import public_story
+        return public_story(obj)
+
+
+class LotStorySettingsSerializer(serializers.ModelSerializer):
+    """What the lot's team edits about its public story page."""
+
+    hero_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LotStory
+        fields = ["partner_line", "place_label", "reference", "hero_image", "order_label", "order_detail",
+                  "order_price", "order_url", "statements_by", "statements", "show_grower_names", "updated_at"]
+        read_only_fields = ["hero_image", "updated_at"]
+
+    def get_hero_image(self, obj):
+        return obj.hero_image.url if obj.hero_image else None
+
+    def validate_order_url(self, value):
+        if value and not value.startswith("https://"):
+            raise serializers.ValidationError("Use an https:// link.")
+        return value
+
+    def validate_statements(self, value):
+        if isinstance(value, str):
+            value = [line for line in value.splitlines()]
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Statements must be a list of lines.")
+        lines = [" ".join(str(v).split()) for v in value if str(v).strip()]
+        if len(lines) > LotStory.MAX_STATEMENTS:
+            raise serializers.ValidationError(f"At most {LotStory.MAX_STATEMENTS} statements.")
+        if any(len(line) > 140 for line in lines):  # noqa: PLR2004
+            raise serializers.ValidationError("Keep each statement to 140 characters.")
+        return lines
 
 
 class SampleRequestSerializer(serializers.ModelSerializer):

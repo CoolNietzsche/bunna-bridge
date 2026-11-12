@@ -644,3 +644,42 @@ The new server (`ecs-28b1`, 196.189.51.169) also runs the live call centre, so B
 - If the old Beersheba nginx file still serves the domain, `nginx.sh` stops and prints the exact command to switch it off.
 - The old `/root/bunna-bridge` deployment is not used. Its systemd unit should be disabled once the new site works.
 - Handoff for the session on the VPS: `docs/development/session-logs/2026-11-05-deployment-handoff.md`.
+
+## 2026-11-12 — Public lot story page: premium redesign (from Abeni's notes)
+
+The page behind a lot's QR code (`/story/<id>`) is redesigned for guests and coffee drinkers: dark, with gold and white accents.
+- Backend tests: 240 pass (8 new).
+- End-to-end browser test: 66 of 66 checks pass (5 new).
+
+### What the page shows
+- **Partner header** above the lot name, e.g. "Skylight Hotel × Eset Coffee Roastery", and the line **"Verified by Beersheba"**.
+- **Top picture:** an uploaded forest or farm photo. Without one, the page shows the farm itself on a satellite map, with the boundary drawn in gold.
+- **Place line and elevation**, e.g. "Bensa, Sidama Highlands", "Elevation 2,180 MASL".
+- **Coffee specs card:**
+  - lot reference (a partner's own, e.g. SKY-SID-001, or the Beersheba lot ID);
+  - variety, process, grade, elevation, harvest, cup score;
+  - the growers' names (only with consent, below) and the exporter;
+  - the tasting notes.
+- **Beersheba Climate Covenant:** a checklist worked out from the lot's own records, never typed in:
+  - zero deforestation since 31 December 2020;
+  - checked against the EU 2020 satellite forest map;
+  - traced to mapped farm plots;
+  - payments to the growers on record;
+  - exported under a verified ECTA licence.
+
+  Anything not yet shown by the records is marked "Not yet", rather than ticked.
+- **Partner statements:** claims Beersheba cannot check, such as forest canopy or roasting technology. They appear under the partner's name, with the note "Beersheba has not verified them", never with a tick.
+- **Two buttons:**
+  - **Order** (e.g. "Take Ethiopia home · 250 g souvenir box · $20"). It opens the partner's shop or WhatsApp link if one is set. Otherwise a short order request goes to the Beersheba enquiry inbox and is emailed to the team.
+  - **Explore the GPS farm boundary map:** a full-screen satellite or street map.
+- **Grower privacy:** names and plot shapes appear only for growers who have given the "story" consent (show farm story on public lot pages).
+
+### Where it is edited
+A new **Public story page** card on the lot page, for the lot's team. It sets the partner header, place line, reference, top picture, order button, partner statements and whether to name the growers.
+
+### Demo data
+Bensa Honey G2 (Sidama) is set up as the example: Skylight Hotel × Eset Coffee Roastery, SKY-SID-001, variety 74112, 2,180 m. Its growers are Tadesse Wolde and Aster Hailu, both with story consent and paid deliveries.
+
+### To check
+- **Exchange rate:** `NBE_DEFAULT_FX_RATE` still defaults to 59.85 birr per dollar, the rate before the birr was floated in 2024. That makes the farmers' share of the export price come out too high. The story page hides the figure when it is over 100%, but the server should set the current rate.
+- **Satellite imagery:** it comes from Esri's World Imagery service, credited on the page. Check Esri's terms for commercial use, or switch to a licensed provider.

@@ -34,6 +34,7 @@ from bunna_bridge.lots.models import CoffeeLot
 from bunna_bridge.lots.models import ComplianceEvent
 from bunna_bridge.lots.models import CuppingScore
 from bunna_bridge.lots.models import FloorPrice
+from bunna_bridge.lots.models import LotStory
 from bunna_bridge.lots.models import Notification
 from bunna_bridge.lots.models import Offer
 from bunna_bridge.lots.models import SampleRequest
@@ -524,6 +525,25 @@ class Command(BaseCommand):
         SavedSearch.objects.create(user=importer, name="EUDR-ready naturals", alert=False,
                                    filters={"process": "natural", "compliance": "eudr"})
 
+        # Public story page for the Bensa lot: a hotel and roastery partnership (story polish, Nov 2026).
+        CoffeeLot.objects.filter(pk=bensa.pk).update(altitude_m=2180, varietal="74112, Indigenous Landrace")
+        for i, src in enumerate(bensa.sources.select_related("plot__producer"), start=1):
+            grower = src.plot.producer
+            ProducerConsent.objects.create(producer=grower, purpose="story", method="witnessed", captured_by=exporter)
+            CherryDelivery.objects.create(
+                owner=exporter, producer=grower, plot=src.plot, lot=bensa, form="cherry", receipt_number=f"BEN-26-{i:04d}",
+                delivered_on=today - timedelta(days=40 + i), weight_kg=Decimal("2600"), price_per_kg_etb=Decimal("125.00"),
+                amount_paid_etb=Decimal("325000.00"), paid_on=today - timedelta(days=38 + i),
+                payment_reference=f"TB{7720 + i}", recorded_by=exporter,
+            )
+        LotStory.objects.create(
+            lot=bensa, partner_line="Skylight Hotel × Eset Coffee Roastery", place_label="Bensa, Sidama Highlands",
+            reference="SKY-SID-001", order_label="Take Ethiopia home", order_detail="250 g souvenir box",
+            order_price="$20", statements_by="Eset Coffee Roastery", show_grower_names=True,
+            statements=["Grown under native Afromontane forest canopy",
+                        "Roasted with clean-energy IMF recirculation technology"],
+        )
+
         # Education hub (M-7).
         for i, (slug, title, kind, region, summary, body) in enumerate(ARTICLES):
             Article.objects.create(slug=slug, title=title, kind=kind, region=region, summary=summary, body=body,
@@ -722,7 +742,7 @@ class Command(BaseCommand):
         bensa.channel = "union"
         bensa.save(actor=exporter)
         self._trace(bensa, exporter, [
-            ("Kebede Mamo", "BEN-001", "Bensa", farmers["farmer3"].boundary, "1.80", "1300"),
+            ("Tadesse Wolde", "BEN-001", "Bensa", farmers["farmer3"].boundary, "1.80", "1300"),
             ("Aster Hailu", "BEN-002", "Bensa", Point(38.4622, 6.8811, srid=4326), "1.50", "1100"),
         ])
         self._generate_dds(bensa, exporter)

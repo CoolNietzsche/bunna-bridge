@@ -240,7 +240,7 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   check('Buyer without an accepted offer cannot see the evidence', notImp.status === 404);
   await page.goto(`${BASE}/story/${har}`);
   await page.waitForTimeout(1200);
-  check('Public story shows the traceability profile', (await page.locator('text=/Traceable to the farm/').count()) > 0);
+  check('Public story shows the verified checklist', (await page.locator('text=/Beersheba Climate Covenant/').count()) > 0);
   check('Public story hides producer names', (await page.locator('text=/Gara Muleta Estate/').count()) === 0);
   await page.context().close();
 
@@ -545,6 +545,26 @@ process.on('uncaughtException', (e) => { console.log(results.join('\n')); consol
   await page.getByRole('link', { name: /Buying Ethiopian coffee under the EUDR/ }).click();
   await page.waitForTimeout(1000);
   check('Learn hub is public and renders article headings', await page.getByRole('heading', { name: 'What Beersheba provides' }).count() === 1);
+  await page.context().close();
+
+  // 26. Public story page: partner branding, consented grower names, honest checklist, order request
+  const storyT = await token('exporter@demo.beersheba.et');
+  const benStory = await lotId(storyT, 'SDM-2026-0213');
+  page = await newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await page.goto(`${BASE}/story/${benStory}`);
+  await page.waitForTimeout(2500);
+  check('Story page shows the partner header and reference', (await page.locator('text=/Skylight Hotel/').count()) > 0 && (await page.locator('text=SKY-SID-001').count()) > 0);
+  check('Story page names only consenting growers', (await page.locator('text=/Tadesse Wolde/').count()) > 0);
+  check('Unchecked items are shown as not yet confirmed', (await page.locator('text=/Not yet/').count()) > 0);
+  check('Partner statements are marked as not verified', (await page.locator('text=/Beersheba has not verified them/').count()) > 0);
+  await page.getByRole('button', { name: /Take Ethiopia home/ }).click();
+  await page.getByLabel('Your name').fill('E2E Guest');
+  await page.getByLabel('Email').fill('guest@example.com');
+  await page.getByLabel('Country').fill('Germany');
+  await page.getByRole('button', { name: 'Send order request' }).click();
+  await page.waitForTimeout(1200);
+  check('Souvenir order request is sent', (await page.locator('text=Request sent').count()) > 0);
   await page.context().close();
 
   console.log(results.join('\n'));

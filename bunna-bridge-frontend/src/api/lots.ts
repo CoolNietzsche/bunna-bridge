@@ -121,8 +121,29 @@ export interface TrustProfile {
   geolocated: boolean;
 }
 
+export interface StoryCovenantItem { key: string; text: string; met: boolean; detail: string }
+export interface StoryFeature { type: "Feature"; properties: { kind: "farm" | "plot" }; geometry: GeoJSON.Geometry }
+export interface PublicStory {
+  partner_line: string;
+  place_label: string;
+  reference: string;
+  hero_image: string | null;
+  growers: string;
+  covenant: StoryCovenantItem[];
+  statements: { by: string; items: string[] } | null;
+  order: { label: string; detail: string; price: string; url: string | null } | null;
+  map: { type: "FeatureCollection"; features: StoryFeature[] };
+  traced_kg: string;
+}
+export interface StorySettings {
+  partner_line: string; place_label: string; reference: string; hero_image: string | null;
+  order_label: string; order_detail: string; order_price: string; order_url: string;
+  statements_by: string; statements: string[]; show_grower_names: boolean; updated_at?: string;
+}
+
 export interface PublicLotStory {
   trust_profile?: TrustProfile;
+  story: PublicStory;
   id: string;
   lot_id: string;
   name: string;
@@ -238,6 +259,12 @@ export const getLot = async (id: string): Promise<CoffeeLot> => {
   }
   return data as CoffeeLot;
 };
+
+export const getStorySettings = async (lotId: string): Promise<StorySettings> =>
+  (await api.get<StorySettings>(`/v1/lots/${lotId}/story-settings/`)).data;
+export const saveStorySettings = async (lotId: string, input: Partial<StorySettings> | FormData): Promise<StorySettings> =>
+  (await api.patch<StorySettings>(`/v1/lots/${lotId}/story-settings/`, input,
+    input instanceof FormData ? { headers: { "Content-Type": "multipart/form-data" } } : undefined)).data;
 
 export const getLotStory = async (id: string): Promise<PublicLotStory> => {
   const { data } = await api.get<PublicLotStory>(`/v1/lots/${id}/story/`);

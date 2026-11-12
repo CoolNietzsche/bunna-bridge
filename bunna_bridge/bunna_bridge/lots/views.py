@@ -836,6 +836,65 @@ def notification_mark_all_read(request):
 
 
 # ── Public Lot Story ─────────────────────────────────────────────────────────
+class LotStorySettingsView(APIView):
+    """
+    GET/PATCH /api/v1/lots/<lot_pk>/story-settings/ — the lot team edits how its
+    public story page looks. PATCH takes JSON, or multipart with `hero_image`;
+    `remove_hero=true` clears the picture.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def _lot(self, request, lot_pk):
+        lot = get_object_or_404(CoffeeLot, pk=lot_pk)
+        if not (is_admin(request.user) or same_team(request.user, lot.exporter_id)):
+            return None, Response({"detail": "Only the lot's team can edit its story page."}, status=403)
+        return lot, None
+
+    def get(self, request, lot_pk):
+        from .models import LotStory
+        from .serializers import LotStorySettingsSerializer
+
+        lot, denied = self._lot(request, lot_pk)
+        if denied:
+            return denied
+        story = LotStory.objects.filter(lot=lot).first() or LotStory(lot=lot)
+        return Response(LotStorySettingsSerializer(story).data)
+
+    def patch(self, request, lot_pk):
+        import json as _json
+
+        from .models import LotStory
+        from .serializers import LotStorySettingsSerializer
+
+        lot, denied = self._lot(request, lot_pk)
+        if denied:
+            return denied
+        story, _ = LotStory.objects.get_or_create(lot=lot)
+        data = {k: v for k, v in request.data.items() if k not in ("hero_image", "remove_hero")}
+        if isinstance(data.get("statements"), str) and data["statements"].lstrip().startswith("["):
+            try:
+                data["statements"] = _json.loads(data["statements"])
+            except ValueError:
+                return Response({"detail": "Statements must be a list of lines."}, status=400)
+        if "show_grower_names" in data and isinstance(data["show_grower_names"], str):
+            data["show_grower_names"] = data["show_grower_names"].lower() in ("1", "true", "yes", "on")
+        s = LotStorySettingsSerializer(story, data=data, partial=True)
+        s.is_valid(raise_exception=True)
+        s.save()
+        photo = request.FILES.get("hero_image")
+        if photo is not None:
+            if photo.content_type not in ALLOWED_PHOTO_TYPES:
+                return Response({"detail": "Only JPEG, PNG, or WEBP images are allowed."}, status=400)
+            if photo.size > MAX_PHOTO_BYTES:
+                return Response({"detail": "Photo must be under 5MB."}, status=400)
+            if story.hero_image:
+                story.hero_image.delete(save=False)
+            story.hero_image.save(f"{lot.lot_id}-{photo.name}", photo, save=True)
+        elif str(request.data.get("remove_hero", "")).lower() in ("1", "true", "yes") and story.hero_image:
+            story.hero_image.delete(save=True)
+        return Response(LotStorySettingsSerializer(story).data)
+
+
 class LotStoryPublicView(APIView):
     """
     GET /api/v1/lots/<pk>/story/
