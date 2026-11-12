@@ -16,7 +16,7 @@ ESCROW_MILESTONES = [
 def calculate_settlement(
     volume_kg: Decimal,
     price_per_kg: Decimal,
-    nbe_rate: Decimal,          # ETB per 1 USD — e.g. 59.85
+    nbe_rate: Decimal,          # ETB per 1 USD — e.g. 160.92
     platform_fee_pct: Decimal = PLATFORM_FEE_PCT,
     nbe_split: Decimal = NBE_SPLIT_RATIO,
 ) -> dict:

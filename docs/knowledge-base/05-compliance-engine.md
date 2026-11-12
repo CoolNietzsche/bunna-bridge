@@ -44,7 +44,7 @@ etb_portion = net × 50 %   → etb_amount = etb_portion × nbe_rate
 usd_retained = net − etb_portion
 milestones  = 20 % / 30 % / 50 % of gross
 ```
-Rate: request `nbe_rate` → else `settings.NBE_DEFAULT_FX_RATE` (env, default 59.85).
+Rate: request `nbe_rate` → else `settings.NBE_DEFAULT_FX_RATE` (env, default 160.92, updated 2026-11-12).
 The widget sends the typed rate (blank = server default). The 50/50 rule and rate still need re-validating against current NBE directives.
 
 ## Cupping (quality ledger)

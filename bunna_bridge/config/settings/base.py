@@ -285,7 +285,7 @@ REDIS_URL = env("REDIS_URL", default="redis://redis:6379/0")
 # Used as the fallback when a settlement request doesn't specify a rate.
 # Update via NBE_DEFAULT_FX_RATE env var when the official rate changes —
 # do not hardcode this value in views/serializers.
-NBE_DEFAULT_FX_RATE = env("NBE_DEFAULT_FX_RATE", default="59.85")
+NBE_DEFAULT_FX_RATE = env("NBE_DEFAULT_FX_RATE", default="160.92")  # ETB per USD, set 2026-11-12
 REDIS_SSL = REDIS_URL.startswith("rediss://")
 
 # Celery

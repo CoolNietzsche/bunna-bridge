@@ -681,5 +681,5 @@ A new **Public story page** card on the lot page, for the lot's team. It sets th
 Bensa Honey G2 (Sidama) is set up as the example: Skylight Hotel × Eset Coffee Roastery, SKY-SID-001, variety 74112, 2,180 m. Its growers are Tadesse Wolde and Aster Hailu, both with story consent and paid deliveries.
 
 ### To check
-- **Exchange rate:** `NBE_DEFAULT_FX_RATE` still defaults to 59.85 birr per dollar, the rate before the birr was floated in 2024. That makes the farmers' share of the export price come out too high. The story page hides the figure when it is over 100%, but the server should set the current rate.
+- **Exchange rate:** updated on 2026-11-12 to **160.92 birr per dollar**, both as the code default and on the server (`NBE_DEFAULT_FX_RATE`). Update it on the server whenever the NBE rate moves.
 - **Satellite imagery:** it comes from Esri's World Imagery service, credited on the page. Check Esri's terms for commercial use, or switch to a licensed provider.

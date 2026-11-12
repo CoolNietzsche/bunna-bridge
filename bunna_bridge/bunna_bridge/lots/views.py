@@ -321,7 +321,7 @@ class SettlementView(viewsets.ViewSet):
     """
     Calculate settlement breakdown for a lot contract.
     POST /api/v1/lots/{id}/settlement/
-    Body: { "nbe_rate": 59.85 }   (optional — defaults to settings.NBE_DEFAULT_FX_RATE)
+    Body: { "nbe_rate": 160.92 }   (optional — defaults to settings.NBE_DEFAULT_FX_RATE)
           { "total_usd": 12000 }  (optional — overrides lot.volume_kg * lot.price_per_kg)
     Delegates all math to lots.settlement.calculate_settlement() — single source of truth,
     shared with any other caller of that function.

@@ -39,7 +39,7 @@ Beersheba bundles: a lot registry with GPS boundaries → a satellite deforestat
 
 - **2.5 % platform fee** on gross contract value (`lots/settlement.py: PLATFORM_FEE_PCT`).
 - **Escrow milestones** modelled but not implemented as money movement: 20 % sample approved / 30 % export docs cleared / 50 % delivery confirmed.
-- **NBE 50/50 rule**: 50 % of net USD proceeds converted to ETB at the NBE rate (`NBE_DEFAULT_FX_RATE` env, default `59.85`). Note: Ethiopia's FX regime changed in 2024; confirm the current retention rule and rate with an Ethiopian trade advisor before relying on this math.
+- **NBE 50/50 rule**: 50 % of net USD proceeds converted to ETB at the NBE rate (`NBE_DEFAULT_FX_RATE` env, default `160.92`, updated 2026-11-12). Note: Ethiopia's FX regime changed in 2024; confirm the current retention rule and rate with an Ethiopian trade advisor before relying on this math.
 - No payments, invoicing, or escrow integration exists yet.
 
 ## Competitive picture (from `mds/agriveri-analysis.md`)
