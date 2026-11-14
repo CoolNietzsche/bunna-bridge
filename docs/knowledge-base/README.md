@@ -20,6 +20,7 @@ This folder is the **single starting point** for anyone (human or AI) picking up
 | 12 | [12-roadmap-and-tasks.md](12-roadmap-and-tasks.md) | **Current plan**: founder decisions, phased roadmap to the 30 Dec 2026 EUDR date and beyond, task list, KPIs |
 | 13 | [13-farmer-registration-readiness.md](13-farmer-registration-readiness.md) | Plan: what is left before registering real farmers (blockers, gaps, pilot) |
 | 14 | [14-workspaces-and-subscriptions.md](14-workspaces-and-subscriptions.md) | Plan: a workspace per client (shared database, workspace-owned records) and subscription plans |
+| 15 | [15-pilot-guji-hambela.md](15-pilot-guji-hambela.md) | Pilot plan: registering farmers in Hambela (Guji): location, people, equipment, system preparation, daily operations |
 
 ## Source-of-truth order
 
