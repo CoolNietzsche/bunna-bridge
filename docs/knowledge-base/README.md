@@ -18,6 +18,8 @@ This folder is the **single starting point** for anyone (human or AI) picking up
 | 10 | [10-release-2026-10-31.md](10-release-2026-10-31.md) | **Latest release**: what changed and the exact deploy commands |
 | 11 | [11-market-research-and-gap-analysis.md](11-market-research-and-gap-analysis.md) | Industry research (Belco, Algrano, importers, EUDR tech, ECTMS), regulations, every user type's workflow vs. what we cover |
 | 12 | [12-roadmap-and-tasks.md](12-roadmap-and-tasks.md) | **Current plan**: founder decisions, phased roadmap to the 30 Dec 2026 EUDR date and beyond, task list, KPIs |
+| 13 | [13-farmer-registration-readiness.md](13-farmer-registration-readiness.md) | Plan: what is left before registering real farmers (blockers, gaps, pilot) |
+| 14 | [14-workspaces-and-subscriptions.md](14-workspaces-and-subscriptions.md) | Plan: a workspace per client (shared database, workspace-owned records) and subscription plans |
 
 ## Source-of-truth order
 
