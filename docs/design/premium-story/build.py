@@ -9,7 +9,9 @@ ASSETS = HERE.parents[2] / "bunna_bridge/bunna_bridge/lots/management/commands/d
 
 
 def data_uri(match):
-    raw = (ASSETS / f"{match.group(1)}.webp").read_bytes()
+    name = f"{match.group(1)}.webp"
+    own = HERE / "assets" / name  # photos supplied for this design
+    raw = (own if own.exists() else ASSETS / name).read_bytes()
     return "data:image/webp;base64," + base64.b64encode(raw).decode()
 
 
