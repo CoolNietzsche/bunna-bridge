@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium Story Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Design prototype for a partner-branded premium story page.
+   Not wired to the app: it shows the proposed layout, using the Bensa demo lot. */
+:root {
+  --bg: #0C0B09; --raised: #15130F; --raised2: #1D1A15; --line: rgba(244,239,228,.10);
+  --text: #F4EFE4; --muted: #ADA493; --faint: #8F8776;
+  --gold: #D4B26A; --gold-soft: #E6C987; --leaf: #82CFA0;
+  --partner: #D4B26A;            /* the partner's accent colour, set per story page */
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --w: 1080px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 20px; }
+.eyebrow { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin: 0 0 14px; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spacing: -.01em; }
+h2 { font-size: clamp(34px, 6vw, 52px); line-height: 1.04; }
+.lede { color: var(--muted); font-size: 17px; max-width: 34em; }
+section { padding: 88px 0; border-top: 1px solid var(--line); position: relative; }
+
+/* 1. Co-brand bar */
+.cobrand { position: sticky; top: 0; z-index: 20; background: rgba(12,11,9,.82); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.cobrand .wrap { display: flex; align-items: center; gap: 14px; height: 64px; }
+.logo-slot { height: 34px; min-width: 112px; padding: 0 12px; border: 1px dashed rgba(244,239,228,.28); border-radius: 8px;
+  display: grid; place-items: center; font-size: 11px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+.cobrand .x { font-family: var(--serif); font-size: 22px; color: var(--faint); }
+.cobrand .pill { margin-left: auto; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--partner);
+  border: 1px solid color-mix(in srgb, var(--partner) 45%, transparent); padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+
+/* 2. Hero */
+.hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; overflow: hidden; }
+.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.04); }
+.hero::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(12,11,9,.15) 0%, rgba(12,11,9,.25) 40%, rgba(12,11,9,.92) 82%, var(--bg) 100%); }
+.hero .wrap { position: relative; z-index: 1; padding-bottom: 56px; width: 100%; }
+.hero h1 { font-size: clamp(54px, 11vw, 108px); line-height: .92; }
+.hero h1 em { color: var(--gold-soft); font-style: italic; }
+.hero .sub { margin: 18px 0 0; font-size: 18px; color: rgba(244,239,228,.86); max-width: 30em; }
+.hero .welcome { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--gold-soft); margin: 0 0 12px; }
+
+/* Origin pass: the boarding-pass motif */
+.pass { margin-top: 36px; display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px;
+  background: rgba(21,19,15,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; max-width: 640px; position: relative; }
+.pass .stop small { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.pass .stop b { display: block; font-family: var(--serif); font-weight: 600; font-size: 26px; line-height: 1.1; color: var(--text); }
+.pass .stop span { font-size: 12px; color: var(--muted); }
+.pass .arrow { color: var(--gold); opacity: .8; }
+.pass .stop:last-child { text-align: right; }
+.pass::before, .pass::after { content: ""; position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg); transform: translateY(-50%); border: 1px solid var(--line); }
+.pass::before { left: -10px; } .pass::after { right: -10px; }
+
+/* 3. In your cup (product) */
+.product { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.stage { position: relative; aspect-ratio: 4/5; border-radius: 22px; overflow: hidden;
+  background: radial-gradient(ellipse 70% 55% at 50% 42%, #3a2c1c 0%, #1a140e 55%, #0f0c09 100%); border: 1px solid var(--line); }
+.stage svg { position: absolute; inset: 8% 12% 6%; width: 76%; height: 86%; }
+.stage .slot-note { position: absolute; left: 16px; bottom: 14px; font-size: 11px; color: var(--faint); letter-spacing: .06em; }
+.notes { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 28px; }
+.notes span { font-family: var(--serif); font-style: italic; font-size: 20px; padding: 6px 16px; border-radius: 999px;
+  border: 1px solid rgba(212,178,106,.35); color: var(--gold-soft); }
+.specs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+.specs div { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.specs div:nth-child(odd) { padding-right: 16px; }
+.specs small { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+.specs b { font-weight: 500; font-size: 15px; }
+.serve { margin-top: 22px; padding: 16px 18px; border-radius: 14px; background: var(--raised); border: 1px solid var(--line);
+  font-size: 14px; color: var(--muted); }
+.serve b { color: var(--text); font-weight: 500; }
+
+/* 4. Farmer story */
+.farmer { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: start; }
+.portrait { position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 3/4; border: 1px solid var(--line); }
+.portrait img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.9) contrast(1.05); }
+.portrait::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(12,11,9,.85)); }
+.portrait figcaption { position: absolute; z-index: 1; left: 20px; right: 20px; bottom: 18px; }
+.portrait figcaption b { font-family: var(--serif); font-size: 30px; font-weight: 500; display: block; line-height: 1.1; }
+.portrait figcaption span { font-size: 13px; color: var(--muted); }
+.portrait .slot-tag { position: absolute; z-index: 1; top: 14px; left: 14px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  background: rgba(12,11,9,.7); color: var(--muted); padding: 6px 10px; border-radius: 999px; border: 1px dashed rgba(244,239,228,.3); }
+blockquote { margin: 0 0 28px; font-family: var(--serif); font-size: clamp(28px, 4.4vw, 40px); line-height: 1.15; font-style: italic; color: var(--text); }
+blockquote::before { content: "“"; display: block; font-size: 80px; line-height: .6; color: var(--gold); font-style: normal; margin-bottom: 8px; }
+.story p:not(.eyebrow):not(.consent) { color: rgba(244,239,228,.82); margin: 0 0 16px; font-size: 17px; }
+.farm-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: 14px; overflow: hidden; margin: 28px 0; }
+.farm-facts div { background: var(--raised); padding: 16px; }
+.farm-facts b { display: block; font-family: var(--serif); font-size: 28px; font-weight: 500; color: var(--gold-soft); line-height: 1.1; }
+.farm-facts small { display: block; line-height: 1.35; margin-top: 4px; font-size: 11px; color: var(--faint); letter-spacing: .06em; }
+.others { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); }
+.others .av { width: 42px; height: 42px; border-radius: 50%; background: var(--raised2); display: grid; place-items: center;
+  font-family: var(--serif); font-size: 18px; color: var(--gold-soft); border: 1px solid var(--line); flex: none; }
+.others p { margin: 0; font-size: 14px; color: var(--muted); }
+.others p b { color: var(--text); font-weight: 500; }
+.consent { margin-top: 14px; font-size: 12px; color: var(--faint); display: flex; gap: 8px; align-items: center; }
+
+/* 5. Journey */
+.journey { position: relative; margin-top: 44px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+.journey::before { content: ""; position: absolute; top: 23px; left: 10%; right: 10%; height: 1px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 6px, transparent 6px 12px); opacity: .55; }
+.leg { text-align: center; padding: 0 8px; position: relative; }
+.leg .dot { width: 46px; height: 46px; margin: 0 auto 16px; border-radius: 50%; background: var(--raised); border: 1px solid rgba(212,178,106,.45);
+  display: grid; place-items: center; color: var(--gold); position: relative; z-index: 1; }
+.leg:last-child .dot { background: var(--partner); color: var(--bg); border-color: var(--partner); }
+.leg b { display: block; font-family: var(--serif); font-size: 21px; font-weight: 500; line-height: 1.15; }
+.leg span { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+.leg small { display: block; font-size: 11px; color: var(--faint); margin-top: 6px; letter-spacing: .06em; }
+
+/* 6. Place (photo band) */
+.place { padding: 0; border-top: 0; }
+.place .band { position: relative; height: 70vh; min-height: 420px; overflow: hidden; }
+.place .band img { width: 100%; height: 100%; object-fit: cover; }
+.place .band::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--bg) 0%, transparent 22%, transparent 60%, var(--bg) 100%); }
+.place .cap { position: absolute; z-index: 1; left: 0; right: 0; bottom: 40px; }
+.place .cap p { font-family: var(--serif); font-size: clamp(26px, 4vw, 38px); font-style: italic; max-width: 20em; margin: 0; line-height: 1.2; }
+.place .cap small { display: block; margin-top: 10px; font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+
+/* 7. Verified */
+.verified { display: grid; grid-template-columns: 1fr 1.2fr; gap: 56px; align-items: start; }
+.checks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.checks li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.checks svg { color: var(--leaf); margin-top: 3px; }
+.checks b { display: block; font-weight: 500; }
+.checks span { font-size: 14px; color: var(--muted); }
+.mapcard { margin-top: 22px; border-radius: 16px; border: 1px solid var(--line); background: var(--raised); padding: 18px; display: flex; gap: 14px; align-items: center; }
+.mapcard .thumb { width: 64px; height: 64px; border-radius: 12px; overflow: hidden; flex: none; }
+.mapcard .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.mapcard p { margin: 0; font-size: 14px; color: var(--muted); }
+.mapcard p b { color: var(--text); font-weight: 500; }
+
+/* 8. Closing */
+.closing { text-align: center; padding: 110px 0 120px; }
+.closing h2 { max-width: 13em; margin: 0 auto 18px; }
+.closing .lede { margin: 0 auto 34px; }
+.btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { font: 600 15px var(--sans); padding: 15px 24px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--text);
+  cursor: pointer; text-decoration: none; display: inline-flex; gap: 10px; align-items: center; }
+.btn.primary { background: var(--gold); color: #17130c; border-color: var(--gold); }
+.btn:focus-visible { outline: 2px solid var(--gold-soft); outline-offset: 3px; }
+footer { border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 12px; color: var(--faint); }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer b { color: var(--muted); font-weight: 500; }
+
+/* Design notes (prototype only) */
+.note { display: none; position: absolute; top: 18px; right: 20px; z-index: 5; max-width: 300px; background: #FFF6DE; color: #3a2d12;
+  font: 500 12.5px/1.45 var(--sans); padding: 10px 12px 10px 38px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.note i { position: absolute; left: 10px; top: 9px; width: 20px; height: 20px; border-radius: 50%; background: #3a2d12; color: #FFF6DE;
+  font-style: normal; font-size: 11px; display: grid; place-items: center; }
+body.notes-on .note { display: block; }
+.hero .note, .place .note { top: 84px; }
+.toggle { position: fixed; z-index: 30; right: 16px; bottom: 16px; font: 600 13px var(--sans); background: #FFF6DE; color: #3a2d12;
+  border: 0; border-radius: 999px; padding: 11px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.45); cursor: pointer; }
+
+@media (max-width: 820px) {
+  section { padding: 64px 0; }
+  .product, .farmer, .verified { grid-template-columns: 1fr; gap: 32px; }
+  .journey { grid-template-columns: 1fr; gap: 0; margin-top: 32px; }
+  .journey::before { top: 10px; bottom: 60px; left: 23px; right: auto; width: 1px; height: auto;
+    background: repeating-linear-gradient(180deg, var(--gold) 0 6px, transparent 6px 12px); }
+  .leg { display: grid; grid-template-columns: 46px 1fr; column-gap: 16px; text-align: left; padding: 0 0 26px; }
+  .leg .dot { margin: 0; grid-row: span 3; }
+  .pass { grid-template-columns: 1fr auto 1fr; row-gap: 14px; }
+  .pass .stop b { font-size: 21px; }
+  .pass .hide-sm { display: none; }
+  .logo-slot { min-width: 84px; font-size: 10px; padding: 0 8px; }
+  .cobrand .pill { display: none; }
+  .note { position: relative; top: auto !important; right: auto; margin: 0 20px 18px; max-width: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero img { animation: drift 24s ease-out both; }
+  @keyframes drift { from { transform: scale(1.12); } to { transform: scale(1.02); } }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s ease, transform .9s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="cobrand">
+  <div class="wrap">
+    <div class="logo-slot" title="Ethiopian Airlines logo goes here">Airline logo</div>
+    <span class="x">×</span>
+    <div class="logo-slot" title="Eset Coffee logo goes here">Roaster logo</div>
+    <span class="pill">Served on your flight</span>
+  </div>
+</header>
+
+<section class="hero" style="border-top:0;padding:0">
+  <div class="note"><i>1</i>Co-brand bar: the airline's and the roaster's logos side by side, staying at the top while the guest scrolls. Their accent colour tints the pill and the last journey stop.</div>
+  <img src="{{IMG:origin-yirgacheffe}}" alt="Ripe red coffee cherries on the branch in the Sidama highlands">
+  <div class="wrap">
+    <p class="welcome">Welcome on board. This is the coffee in your cup.</p>
+    <h1>Bensa,<br><em>Sidama</em></h1>
+    <p class="sub">A honey-processed coffee grown at 2,180 metres by two families in southern Ethiopia, roasted in Addis Ababa and served to you above the clouds.</p>
+    <div class="pass" aria-label="The journey of this coffee">
+      <div class="stop"><small>Origin</small><b>BEN</b><span>Bensa · 2,180 m</span></div>
+      <svg class="arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <div class="stop"><small>Roasted</small><b>ADD</b><span>Addis Ababa</span></div>
+      <svg class="arrow hide-sm" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      <div class="stop hide-sm"><small>Served</small><b>FL 350</b><span>Your seat</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="cup">
+  <div class="note"><i>2</i>New: the product. A studio photo of the roaster's bag or the cup as served on board (the illustration is a stand-in). Tasting notes come from the lot's cupping record.</div>
+  <div class="wrap product">
+    <div class="stage reveal">
+      <svg viewBox="0 0 300 380" aria-label="Coffee bag (stand-in for the product photo)">
+        <defs>
+          <linearGradient id="bag" x1="0" x2="1"><stop offset="0" stop-color="#1b1712"/><stop offset=".45" stop-color="#2c251c"/><stop offset="1" stop-color="#14110d"/></linearGradient>
+          <linearGradient id="foil" x1="0" x2="1"><stop offset="0" stop-color="#8d7440"/><stop offset=".5" stop-color="#e6c987"/><stop offset="1" stop-color="#8d7440"/></linearGradient>
+          <radialGradient id="shadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+        </defs>
+        <ellipse cx="150" cy="360" rx="120" ry="14" fill="url(#shadow)"/>
+        <path d="M58 52 L242 52 L254 350 Q150 362 46 350 Z" fill="url(#bag)" stroke="rgba(244,239,228,.08)"/>
+        <rect x="56" y="34" width="188" height="22" rx="3" fill="url(#foil)"/>
+        <path d="M60 40h180M60 46h180M60 52h180" stroke="rgba(0,0,0,.25)" stroke-width=".8"/>
+        <rect x="88" y="118" width="124" height="168" rx="4" fill="#F4EFE4"/>
+        <rect x="96" y="126" width="108" height="152" rx="2" fill="none" stroke="#B8975A" stroke-width=".8"/>
+        <circle cx="150" cy="160" r="17" fill="none" stroke="#B8975A" stroke-width=".8" stroke-dasharray="2 2"/>
+        <text x="150" y="163" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" letter-spacing="1" fill="#8F8776">LOGO</text>
+        <text x="150" y="205" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="25" fill="#1D1A15">Bensa</text>
+        <text x="150" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" letter-spacing="2.4" fill="#6E6E73">SIDAMA · ETHIOPIA</text>
+        <line x1="122" y1="236" x2="178" y2="236" stroke="#B8975A" stroke-width=".8"/>
+        <text x="150" y="252" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-style="italic" font-size="11" fill="#5b4a2a">apricot · honey · black tea</text>
+        <text x="150" y="268" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" letter-spacing="1.6" fill="#8F8776">HONEY PROCESS · 250 G</text>
+        <path d="M70 70 Q80 200 66 340" stroke="rgba(244,239,228,.05)" stroke-width="10" fill="none"/>
+      </svg>
+      <span class="slot-note">Product photo slot (bag, cup or on-board serving)</span>
+    </div>
+    <div class="reveal">
+      <p class="eyebrow">In your cup</p>
+      <h2>Soft apricot, wild honey, a black-tea finish</h2>
+      <div class="notes"><span>Apricot</span><span>Honey</span><span>Black tea</span></div>
+      <div class="specs">
+        <div><small>Process</small><b>Honey</b></div>
+        <div><small>Altitude</small><b>2,180 m</b></div>
+        <div><small>Variety</small><b>74112, Indigenous Landrace</b></div>
+        <div><small>Grade</small><b>G2</b></div>
+        <div><small>Roast</small><b>Light-medium, by Eset</b></div>
+        <div><small>Harvest</small><b>2025/26</b></div>
+      </div>
+      <p class="serve"><b>How it is served on board:</b> freshly brewed, black. Let it cool for a minute: the fruit opens up as it does.</p>
+    </div>
+  </div>
+</section>
+
+<section id="farmer">
+  <div class="note"><i>3</i>New: the farmer's story. A portrait, a quote in their own words and three numbers about the farm. Shown only when the farmer gave consent for the story page. The words here are sample text: the real ones come from a short interview.</div>
+  <div class="wrap farmer">
+    <figure class="portrait reveal" style="margin:0">
+      <img src="{{IMG:origin-sidama}}" alt="Raised drying beds of red coffee cherries in the Sidama hills">
+      <span class="slot-tag">Farmer portrait slot</span>
+      <figcaption><b>Tadesse Wolde</b><span>Grower, Bensa · coffee in the family for three generations</span></figcaption>
+    </figure>
+    <div class="story reveal">
+      <p class="eyebrow">The people behind it</p>
+      <blockquote>We pick only the red cherries. My father said a coffee tree remembers how you treat it.</blockquote>
+      <p>Tadesse farms 1.8 hectares on the slopes above Bensa, under the shade of the old forest trees that keep the soil cool and the cherries ripening slowly. At harvest the family picks by hand, a few rounds over each tree, and carries the cherries to the washing station before evening.</p>
+      <p>This coffee was traced from his plot and his neighbour's to the bag in your cup, and both families were paid for every delivery.</p>
+      <div class="farm-facts">
+        <div><b>1.8 ha</b><small>Family farm</small></div>
+        <div><b>2,180 m</b><small>Above sea level</small></div>
+        <div><b>Shade</b><small>Under forest canopy</small></div>
+      </div>
+      <div class="others">
+        <div class="av">A</div>
+        <p><b>Aster Hailu</b> also grew this lot, on her 1.5 ha plot further down the same hillside.</p>
+      </div>
+      <p class="consent">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Shared with the growers' consent, recorded on Beersheba.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="journey">
+  <div class="note"><i>4</i>New: the journey, from tree to seat. Each stop is filled from records already in the system (deliveries, grading, contract); the last stop carries the partner's colour.</div>
+  <div class="wrap">
+    <p class="eyebrow">From tree to seat</p>
+    <h2>Five stops, every one on record</h2>
+    <div class="journey reveal">
+      <div class="leg"><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><b>Picked</b><span>Two family farms, Bensa</span><small>Harvest 2025/26</small></div>
+      <div class="leg"><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div><b>Processed</b><span>Honey method, dried on raised beds</span><small>Bensa washing station</small></div>
+      <div class="leg"><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><b>Graded</b><span>Cupped and graded G2</span><small>ECTA, Addis Ababa</small></div>
+      <div class="leg"><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><b>Roasted</b><span>Small batches by Eset</span><small>Addis Ababa</small></div>
+      <div class="leg"><div class="dot"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div><b>Served</b><span>In your cup, on board</span><small>Flight partner</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="place">
+  <div class="note"><i>5</i>A full-width photo of the place, as a pause between chapters. On the real page this sits next to the satellite map that already exists.</div>
+  <div class="band">
+    <img src="{{IMG:origin-guji}}" alt="Mist over forested coffee hills in southern Ethiopia" loading="lazy">
+    <div class="cap"><div class="wrap">
+      <p>Coffee was born in these forests. It still grows best in their shade.</p>
+      <small>Southern Ethiopian highlands</small>
+    </div></div>
+  </div>
+</section>
+
+<section id="verified">
+  <div class="note"><i>6</i>The proof, kept from today's page: the Climate Covenant checks and the satellite map. Compact here, so the story leads and the evidence backs it.</div>
+  <div class="wrap verified">
+    <div class="reveal">
+      <p class="eyebrow">Verified origin</p>
+      <h2>Beautiful, and on the record</h2>
+      <p class="lede" style="margin-top:16px">Every claim on this page is checked against the farm records and satellite data held by Beersheba.</p>
+      <div class="mapcard">
+        <div class="thumb"><img src="{{IMG:origin-guji}}" alt="" loading="lazy"></div>
+        <p><b>See the farms from above</b><br>Satellite map of both plots, Bensa</p>
+      </div>
+    </div>
+    <ul class="checks reveal">
+      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><b>No forest cleared since 2020</b><span>Plots checked against satellite forest-loss data</span></div></li>
+      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><b>Traced to two family plots</b><span>Mapped by GPS, linked to this lot</span></div></li>
+      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><b>Farmers paid for every delivery</b><span>Payments recorded at the washing station</span></div></li>
+      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><div><b>Licensed export</b><span>Exporter registered with ECTA</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="note"><i>7</i>Closing: take the coffee home. The order request that exists today, plus a share button, tuned for travellers (pick up on arrival, or delivered).</div>
+  <div class="wrap">
+    <p class="eyebrow">Take Ethiopia home</p>
+    <h2>Enjoyed it? The same coffee, for your kitchen</h2>
+    <p class="lede">A 250 g box of this lot, roasted by Eset. Collect it on arrival in Addis Ababa or have it delivered.</p>
+    <div class="btns">
+      <a class="btn primary" href="#">Request a box · $20</a>
+      <a class="btn" href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Share this story</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Story verified by <b>Beersheba</b> · bunnabridge.pro.et</span>
+    <span>Reference EAL-SID-001 · design prototype</span>
+  </div>
+</footer>
+
+<button class="toggle" type="button" aria-pressed="false">Show design notes</button>
+
+<script>
+  const t = document.querySelector('.toggle');
+  t.addEventListener('click', () => {
+    const on = document.body.classList.toggle('notes-on');
+    t.textContent = on ? 'Hide design notes' : 'Show design notes';
+    t.setAttribute('aria-pressed', on);
+  });
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.15 }) : null;
+  document.querySelectorAll('.reveal').forEach((el) => io ? io.observe(el) : el.classList.add('in'));
+</script>
+</body>
+</html>
