@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bensa Coffee Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Partner story page (Ethiopian Airlines x Eset Coffee): product landing layout, luxury finish. */
+:root {
+  --ivory: #F8F3EA; --ivory-2: #F0E7D7; --paper: #FFFDF9;
+  --espresso: #15100B; --espresso-2: #1E1711; --espresso-3: #2A2119;
+  --ink: #17110C; --muted: #6E6255; --muted-dark: #A99B89;
+  --gold: #A9843F; --gold-light: #D8BA7B; --hair: rgba(23,17,12,.12); --hair-dark: rgba(248,243,234,.12);
+  --ea-green: #5E934A; --ea-yellow: #FDC52E; --ea-red: #C8202F;
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --w: 1200px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--ivory); color: var(--ink); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 28px; }
+.eyebrow { font: 500 11px var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold); margin: 0 0 18px; }
+.dark .eyebrow { color: var(--gold-light); }
+.center { text-align: center; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 500; margin: 0; letter-spacing: -.01em; }
+h2 { font-size: clamp(40px, 5.4vw, 64px); line-height: 1.02; }
+h2 em, h1 em { font-style: italic; color: var(--gold); }
+.dark h2 em { color: var(--gold-light); }
+.tricolour { display: flex; gap: 6px; justify-content: center; margin: 22px 0 0; }
+.tricolour i { width: 26px; height: 2px; border-radius: 2px; }
+.tricolour i:nth-child(1) { background: var(--ea-green); } .tricolour i:nth-child(2) { background: var(--ea-yellow); } .tricolour i:nth-child(3) { background: var(--ea-red); }
+.btn { display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 30px; border-radius: 999px; font: 500 14px var(--sans);
+  letter-spacing: .06em; border: 1px solid transparent; cursor: pointer; transition: background .3s, color .3s, transform .3s, border-color .3s; white-space: nowrap; }
+.btn:hover { transform: translateY(-2px); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.btn-dark { background: var(--espresso); color: var(--ivory); }
+.btn-dark:hover { background: var(--gold); color: var(--espresso); }
+.btn-line { border-color: var(--ink); color: var(--ink); }
+.btn-line:hover { background: var(--ink); color: var(--ivory); }
+.btn-gold { background: var(--gold-light); color: var(--espresso); }
+.btn-gold:hover { background: var(--ivory); }
+.btn-gold-line { border-color: rgba(216,186,123,.6); color: var(--gold-light); }
+.btn-gold-line:hover { background: var(--gold-light); color: var(--espresso); }
+
+/* Nav */
+.nav { position: fixed; inset: 0 0 auto; z-index: 50; background: rgba(248,243,234,.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent; transition: border-color .3s, background .3s; }
+.nav.scrolled { border-color: var(--hair); background: rgba(248,243,234,.94); }
+.nav .wrap { height: 92px; display: flex; align-items: center; gap: 28px; }
+.lockup { display: flex; align-items: center; gap: 18px; }
+.lockup .ea { height: 42px; width: auto; }
+.lockup .eset { height: 54px; width: auto; }
+.lockup .div { width: 1px; height: 38px; background: var(--hair); }
+.links { display: flex; gap: 34px; margin: 0 auto; }
+.links a { font: 500 11.5px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); transition: color .2s; }
+.links a:hover { color: var(--ink); }
+.nav .btn { height: 42px; padding: 0 22px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+.burger { display: none; margin-left: auto; background: none; border: 0; padding: 8px; color: var(--ink); cursor: pointer; }
+
+/* Hero */
+.hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden;
+  background: radial-gradient(55% 65% at 74% 50%, #F3E3C3 0%, rgba(248,243,234,0) 70%), var(--ivory); }
+.hero .wrap { display: grid; grid-template-columns: 1.08fr .92fr; gap: 40px; align-items: center; padding-top: 110px; padding-bottom: 70px; width: 100%; }
+.pill { display: inline-flex; align-items: center; gap: 12px; padding: 9px 18px; border: 1px solid var(--hair); border-radius: 999px; background: rgba(255,253,249,.6);
+  font: 500 11px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(169,132,63,.18); }
+.hero h1 { font-size: clamp(54px, 6.8vw, 100px); line-height: .9; letter-spacing: -.02em; margin: 30px 0 28px; }
+.hero h1 em { display: block; }
+.hero .sub { font: 300 clamp(17px, 1.5vw, 19px)/1.7 var(--sans); color: var(--muted); max-width: 31em; margin: 0 0 38px; }
+.ctas { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.facts { display: flex; flex-wrap: wrap; gap: 0; margin-top: 46px; padding-top: 26px; border-top: 1px solid var(--hair); max-width: 560px; }
+.facts span { font: 500 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); padding: 0 18px; border-left: 1px solid var(--hair); }
+.facts span:first-child { padding-left: 0; border-left: 0; }
+.stage { position: relative; display: grid; place-items: center; height: min(78vh, 680px); }
+.stage::before { content: ""; position: absolute; width: min(500px, 88%); aspect-ratio: 1; border-radius: 50%;
+  border: 1px solid rgba(169,132,63,.35); box-shadow: inset 0 0 0 18px rgba(255,253,249,.35); }
+.stage::after { content: ""; position: absolute; width: min(620px, 108%); aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(169,132,63,.14); }
+.stage img { position: relative; z-index: 1; height: 92%; width: auto; filter: drop-shadow(0 46px 40px rgba(70,45,15,.32)); animation: float 8s ease-in-out infinite; }
+.stage .shadow { position: absolute; bottom: 2%; width: 46%; height: 26px; border-radius: 50%; background: radial-gradient(rgba(60,40,15,.35), transparent 70%); filter: blur(6px); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+/* The coffee */
+.coffee { padding: 120px 0 110px; background: linear-gradient(180deg, var(--ivory-2), var(--ivory)); }
+.product-card { margin-top: 60px; background: var(--paper); border: 1px solid var(--hair); border-radius: 28px; display: grid; grid-template-columns: .9fr 1.1fr;
+  overflow: hidden; box-shadow: 0 40px 80px -50px rgba(60,40,15,.35); }
+.product-card .art { position: relative; display: grid; place-items: center; padding: 50px 30px; background: radial-gradient(60% 60% at 50% 50%, #F4E6CB, var(--paper) 75%); }
+.product-card .art img { height: 430px; width: auto; filter: drop-shadow(0 30px 28px rgba(70,45,15,.28)); }
+.product-card .info { padding: 56px 56px 50px; border-left: 1px solid var(--hair); }
+.product-card h3 { font-size: clamp(40px, 4.4vw, 54px); line-height: 1; }
+.product-card .origin { font: 500 11px var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--muted); margin: 12px 0 26px; }
+.notes { font: italic 400 clamp(24px, 2.4vw, 30px)/1.3 var(--serif); color: var(--gold); margin: 0 0 28px; }
+.specs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hair); margin-bottom: 34px; }
+.specs div { padding: 15px 0; border-bottom: 1px solid var(--hair); }
+.specs div:nth-child(odd) { padding-right: 18px; }
+.specs small { display: block; font: 500 10px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.specs b { font-weight: 500; font-size: 15px; }
+
+/* Dark sections */
+.dark { background: var(--espresso); color: var(--ivory); }
+.proof { padding: 120px 0; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 64px; }
+.stat { background: var(--espresso-2); border: 1px solid var(--hair-dark); border-radius: 22px; padding: 32px 28px 28px; transition: transform .35s, border-color .35s; }
+.stat:hover { transform: translateY(-4px); border-color: rgba(216,186,123,.35); }
+.stat b { display: block; font: 500 54px/1 var(--serif); color: var(--gold-light); letter-spacing: -.01em; }
+.stat h4 { margin: 16px 0 8px; font: 500 12px var(--sans); letter-spacing: .2em; text-transform: uppercase; }
+.stat p { margin: 0 0 26px; font: 300 14px/1.6 var(--sans); color: var(--muted-dark); }
+.stat .bar { height: 2px; width: 46px; border-radius: 2px; }
+
+/* Farmers */
+.farmers { padding: 120px 0; }
+.farmers .intro { font: 300 17px/1.7 var(--sans); color: var(--muted); max-width: 36em; margin: 22px auto 0; }
+.feature { margin-top: 60px; display: grid; grid-template-columns: 1fr 1fr; background: var(--espresso); color: var(--ivory); border-radius: 28px; overflow: hidden; }
+.feature .photo { position: relative; min-height: 520px; }
+.feature .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 24% 40%; }
+.feature .text { padding: 64px 60px; display: flex; flex-direction: column; justify-content: center; }
+.feature blockquote { margin: 0 0 26px; font: italic 400 clamp(30px, 3vw, 40px)/1.18 var(--serif); }
+.feature blockquote::before { content: "“"; display: block; font: 400 90px/.5 var(--serif); color: var(--gold-light); margin-bottom: 18px; font-style: normal; }
+.feature .text p { font: 300 15.5px/1.75 var(--sans); color: var(--muted-dark); margin: 0 0 30px; }
+.feature .name { display: flex; align-items: center; gap: 14px; padding-top: 24px; border-top: 1px solid var(--hair-dark); }
+.feature .name b { display: block; font: 500 24px var(--serif); }
+.feature .name span { font: 500 11px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted-dark); }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; }
+.card { background: var(--paper); border: 1px solid var(--hair); border-radius: 22px; padding: 30px 26px 26px; display: flex; flex-direction: column; transition: transform .35s, box-shadow .35s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 30px 50px -36px rgba(60,40,15,.45); }
+.card .ic { width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(169,132,63,.45); color: var(--gold); display: grid; place-items: center; margin-bottom: 22px; }
+.card h4 { margin: 0 0 10px; font: 500 24px/1.1 var(--serif); }
+.card p { margin: 0 0 22px; font: 300 14px/1.65 var(--sans); color: var(--muted); flex: 1; }
+.card a { font: 500 11px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+
+/* Journey */
+.journey { padding: 120px 0 110px; }
+.photos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 60px; }
+.photos figure { margin: 0; }
+.photos .ph { aspect-ratio: 3/4; border-radius: 16px; overflow: hidden; }
+.photos img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05) brightness(.92); transition: filter .7s, transform .9s; }
+.photos figure:hover img { filter: none; transform: scale(1.05); }
+.photos figcaption { margin-top: 14px; display: flex; gap: 10px; align-items: baseline; }
+.photos figcaption i { font: italic 400 22px var(--serif); color: var(--gold-light); }
+.photos figcaption span { font: 500 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted-dark); }
+.journey .center-row { display: flex; justify-content: center; margin-top: 56px; }
+
+/* CTA + footer */
+.cta { position: relative; overflow: hidden; padding: 130px 0 0; border-top: 1px solid var(--hair-dark); }
+.cta .ghost { position: absolute; left: 50%; top: 40px; transform: translateX(-50%); font: italic 400 clamp(180px, 30vw, 440px)/1 var(--serif);
+  color: rgba(248,243,234,.035); pointer-events: none; white-space: nowrap; }
+.cta h2 { position: relative; font-size: clamp(52px, 7.6vw, 104px); line-height: .95; }
+.cta h2 em { display: block; }
+.cta .lead { position: relative; font: 300 17px/1.7 var(--sans); color: var(--muted-dark); max-width: 34em; margin: 26px auto 0; }
+.form { position: relative; display: flex; gap: 10px; max-width: 540px; margin: 42px auto 12px; }
+.form input { flex: 1; height: 54px; border-radius: 999px; border: 1px solid var(--hair-dark); background: var(--espresso-2); color: var(--ivory); padding: 0 24px; font: 300 15px var(--sans); }
+.form input::placeholder { color: var(--muted-dark); }
+.form input:focus { outline: 1px solid var(--gold-light); }
+.small { position: relative; font: 300 13px var(--sans); color: var(--muted-dark); margin: 0; }
+.partners { position: relative; display: flex; align-items: center; justify-content: center; gap: 34px; flex-wrap: wrap; margin-top: 80px; padding: 40px 0; border-top: 1px solid var(--hair-dark); }
+.partners small { font: 500 10.5px var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--muted-dark); width: 100%; text-align: center; }
+.partners .plate { background: var(--ivory); border-radius: 14px; padding: 12px 18px; }
+.partners .plate img { height: 34px; width: auto; }
+.partners .eset { height: 58px; width: auto; }
+.partners .bs { font: 500 26px var(--serif); color: var(--ivory); }
+.partners .bs span { display: block; font: 500 9.5px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted-dark); margin-top: 2px; }
+.foot { position: relative; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 26px 0 36px; border-top: 1px solid var(--hair-dark);
+  font: 400 12px var(--sans); color: var(--muted-dark); letter-spacing: .04em; }
+.foot nav { display: flex; gap: 22px; }
+.foot a:hover { color: var(--gold-light); }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 1s ease, transform 1s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; } .reveal { opacity: 1; transform: none; } }
+
+@media (max-width: 1040px) {
+  .links { gap: 22px; }
+  .stat-grid, .cards { grid-template-columns: repeat(2, 1fr); }
+  .photos { grid-template-columns: repeat(3, 1fr); }
+  .photos figure:nth-child(n+4) { display: none; }
+}
+@media (max-width: 860px) {
+  .links, .nav .btn { display: none; }
+  .burger { display: block; }
+  .nav.open .links { display: flex; flex-direction: column; position: absolute; top: 92px; left: 0; right: 0; background: var(--ivory); padding: 10px 28px 28px; gap: 20px; border-bottom: 1px solid var(--hair); }
+  .lockup .ea { height: 32px; } .lockup .eset { height: 44px; }
+  .hero .wrap { grid-template-columns: 1fr; padding-top: 120px; gap: 10px; }
+  .stage { height: 520px; }
+  .product-card, .feature { grid-template-columns: 1fr; }
+  .product-card .info { border-left: 0; border-top: 1px solid var(--hair); padding: 36px 28px; }
+  .product-card .art img { height: 340px; }
+  .feature .photo { min-height: 380px; }
+  .feature .text { padding: 40px 28px; }
+  .form { flex-direction: column; }
+  .coffee, .proof, .farmers, .journey { padding: 88px 0; }
+}
+@media (max-width: 520px) {
+  .stat-grid, .cards { grid-template-columns: 1fr; }
+  .photos { grid-template-columns: repeat(2, 1fr); }
+  .photos figure:nth-child(n+3) { display: none; }
+  .stage { height: 440px; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 0; }
+  .facts span { padding: 0 0 0 12px; font-size: 10.5px; letter-spacing: .16em; }
+  .facts span:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .wrap { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a class="lockup" href="#top" aria-label="Ethiopian Airlines and Eset Coffee">
+      <img class="ea" src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines">
+      <span class="div" aria-hidden="true"></span>
+      <img class="eset" src="{{IMG:logo-eset-ink}}" alt="Eset Coffee">
+    </a>
+    <div class="links" id="links">
+      <a href="#coffee">The coffee</a>
+      <a href="#proof">Origin</a>
+      <a href="#farmers">Farmers</a>
+      <a href="#journey">Journey</a>
+    </div>
+    <a class="btn btn-line" href="#home">Take it home</a>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="pill"><i></i>Served on board · Single origin</span>
+      <h1>From the forest <em>to your seat.</em></h1>
+      <p class="sub">A rare honey-processed coffee from two family farms in Bensa, Sidama. Grown at 2,180 metres, roasted in Addis Ababa by Eset, and poured for you above the clouds.</p>
+      <div class="ctas">
+        <a class="btn btn-dark" href="#home">Take a jar home
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-line" href="#farmers">Meet the farmers</a>
+      </div>
+      <div class="facts"><span>Single origin</span><span>Honey process</span><span>2,180 m</span><span>Forest-safe</span></div>
+    </div>
+    <div class="stage">
+      <img src="{{IMG:product-jar}}" alt="A glass jar of Bensa roasted coffee beans with a gold lid">
+      <span class="shadow" aria-hidden="true"></span>
+    </div>
+  </div>
+</header>
+
+<section class="coffee" id="coffee">
+  <div class="wrap">
+    <p class="eyebrow center">The coffee in your cup</p>
+    <h2 class="center">Bensa, <em>Sidama</em></h2>
+    <div class="product-card reveal">
+      <div class="art"><img src="{{IMG:product-jar}}" alt="" loading="lazy"></div>
+      <div class="info">
+        <h3>Bensa</h3>
+        <p class="origin">Sidama · Ethiopia · Harvest 2025/26</p>
+        <p class="notes">Soft apricot, wild honey and a long black-tea finish.</p>
+        <div class="specs">
+          <div><small>Process</small><b>Honey</b></div>
+          <div><small>Altitude</small><b>2,180 m</b></div>
+          <div><small>Variety</small><b>74112, Indigenous Landrace</b></div>
+          <div><small>Grade</small><b>G2</b></div>
+          <div><small>Roasted by</small><b>Eset Coffee, Addis Ababa</b></div>
+          <div><small>Served</small><b>On board, freshly brewed</b></div>
+        </div>
+        <a class="btn btn-dark" href="#home">Request a jar · $20</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark proof" id="proof">
+  <div class="wrap">
+    <p class="eyebrow center">Origin &amp; proof</p>
+    <h2 class="center">Beautiful, and <em>on the record</em></h2>
+    <div class="tricolour" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="stat-grid">
+      <div class="stat reveal"><b>2,180 m</b><h4>Grown high</h4><p>Cherries ripen slowly at altitude, for a sweeter, brighter cup.</p><div class="bar" style="background:var(--ea-green)"></div></div>
+      <div class="stat reveal"><b>Zero</b><h4>Forest cleared</h4><p>No forest lost on these farms since 2020, checked by satellite.</p><div class="bar" style="background:var(--ea-yellow)"></div></div>
+      <div class="stat reveal"><b>100%</b><h4>Traced</h4><p>Every bean linked to two mapped family plots in Bensa.</p><div class="bar" style="background:var(--ea-red)"></div></div>
+      <div class="stat reveal"><b>2</b><h4>Families paid</h4><p>Each delivery weighed, paid and recorded at the washing station.</p><div class="bar" style="background:var(--gold-light)"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="farmers" id="farmers">
+  <div class="wrap">
+    <p class="eyebrow center">The people behind it</p>
+    <h2 class="center">Meet the <em>farmers</em></h2>
+    <p class="intro center">Two families grew this coffee on the hills above Bensa. Their story is shared with their consent.</p>
+    <div class="feature reveal">
+      <div class="photo"><img src="{{IMG:farmer-portrait}}" alt="Tadesse Wolde in the morning mist, a tall shade tree behind him" loading="lazy"></div>
+      <div class="text">
+        <blockquote>We pick only the red cherries. A coffee tree remembers how you treat it.</blockquote>
+        <p>Tadesse farms 1.8 hectares under old forest shade trees. The family picks by hand, several rounds per tree, and carries the cherries to the washing station before evening.</p>
+        <div class="name"><div><b>Tadesse Wolde</b><span>Grower · Bensa, Sidama</span></div></div>
+      </div>
+    </div>
+    <div class="cards">
+      <div class="card reveal"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+        <h4>Aster Hailu</h4><p>Grows on 1.5 hectares further down the same hillside. Her cherries make up part of this lot.</p><a href="#farmers">Her story</a></div>
+      <div class="card reveal"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></span>
+        <h4>Washing station</h4><p>Honey processed and dried on raised beds in Bensa, where every delivery is weighed and paid.</p><a href="#journey">The station</a></div>
+      <div class="card reveal"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
+        <h4>The roaster</h4><p>Roasted in small batches in Addis Ababa by Eset Coffee, for the cabin and for your kitchen.</p><a href="#coffee">The roast</a></div>
+      <div class="card reveal"><span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 6l7-3 8 3 7-3v15l-7 3-8-3-7 3z"/><path d="M8 3v15M16 6v15"/></svg></span>
+        <h4>The farms</h4><p>Both plots seen from above, checked against forest maps from 2020 to today.</p><a href="#journey">Open the map</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark journey" id="journey">
+  <div class="wrap">
+    <p class="eyebrow center">Follow the journey</p>
+    <h2 class="center">From tree <em>to seat</em></h2>
+    <div class="tricolour" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="photos">
+      <figure class="reveal"><div class="ph"><img src="{{IMG:forest-walk}}" alt="Two farmers walking through coffee growing under forest trees" loading="lazy"></div><figcaption><i>i.</i><span>Forest</span></figcaption></figure>
+      <figure class="reveal"><div class="ph"><img src="{{IMG:cherries}}" alt="Freshly picked red coffee cherries" loading="lazy"></div><figcaption><i>ii.</i><span>Picked</span></figcaption></figure>
+      <figure class="reveal"><div class="ph"><img src="{{IMG:drying-beds}}" alt="A worker sorting coffee on raised drying beds" loading="lazy" style="object-position: 40% 50%"></div><figcaption><i>iii.</i><span>Dried</span></figcaption></figure>
+      <figure class="reveal"><div class="ph"><img src="{{IMG:cupping-detail}}" alt="Coffee being cupped for grading" loading="lazy"></div><figcaption><i>iv.</i><span>Graded</span></figcaption></figure>
+      <figure class="reveal"><div class="ph"><img src="{{IMG:cta-band}}" alt="Sacks of coffee ready to leave the warehouse" loading="lazy"></div><figcaption><i>v.</i><span>Packed</span></figcaption></figure>
+    </div>
+    <div class="center-row"><a class="btn btn-gold-line" href="#farmers">See the farms from above</a></div>
+  </div>
+</section>
+
+<section class="dark cta" id="home">
+  <div class="ghost" aria-hidden="true">Bensa</div>
+  <div class="wrap center">
+    <p class="eyebrow" style="position:relative">Take Ethiopia home</p>
+    <h2>The same coffee, <em>for your kitchen.</em></h2>
+    <p class="lead">A 250 g jar of this lot, roasted by Eset. Collect it on arrival in Addis Ababa, or have it delivered.</p>
+    <form class="form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Request received';">
+      <input type="text" placeholder="Your phone or email" aria-label="Phone or email">
+      <button class="btn btn-gold" type="submit">Request a jar · $20</button>
+    </form>
+    <p class="small">We will contact you to confirm collection or delivery.</p>
+    <div class="partners">
+      <small>In partnership</small>
+      <span class="plate"><img src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines"></span>
+      <img class="eset" src="{{IMG:logo-eset-white}}" alt="Eset Coffee">
+      <span class="bs">Beersheba<span>Origin verified</span></span>
+    </div>
+    <div class="foot">
+      <span>Reference EAL-SID-001 · bunnabridge.pro.et</span>
+      <nav><a href="#top">Privacy</a><a href="#farmers">Farmer consent</a><a href="#top">Terms</a></nav>
+    </div>
+  </div>
+</section>
+
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 30);
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  const burger = document.getElementById('burger');
+  burger.onclick = () => { const o = nav.classList.toggle('open'); burger.setAttribute('aria-expanded', o); };
+  document.querySelectorAll('#links a').forEach((a) => (a.onclick = () => nav.classList.remove('open')));
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.12 }) : null;
+  document.querySelectorAll('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
+</script>
+</body>
+</html>
