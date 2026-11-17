@@ -1,4 +1,4 @@
-"""Inlines the demo photos into template.html, producing one self-contained prototype file."""
+"""Inlines the demo photos into each template, producing self-contained prototype files."""
 
 import base64
 import re
@@ -13,7 +13,12 @@ def data_uri(match):
     return "data:image/webp;base64," + base64.b64encode(raw).decode()
 
 
-html = re.sub(r"\{\{IMG:([a-z-]+)\}\}", data_uri, (HERE / "template.html").read_text())
-out = HERE / "premium-story-ethiopian-airlines-eset.html"
-out.write_text(html)
-print("wrote", out, f"{len(html) // 1024} KB")
+PAGES = {
+    "template.html": "premium-story-ethiopian-airlines-eset.html",
+    "landing-template.html": "landing-ethiopian-airlines-eset.html",
+}
+for src, dst in PAGES.items():
+    html = re.sub(r"\{\{IMG:([a-z-]+)\}\}", data_uri, (HERE / src).read_text())
+    out = HERE / dst
+    out.write_text(html)
+    print("wrote", out, f"{len(html) // 1024} KB")
