@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bensa · Ethiopian Airlines × Eset Coffee</title>
+<meta name="description" content="Bensa, Sidama. Grown by two families, roasted by Eset Coffee, served on board Ethiopian Airlines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Product showcase for the Bensa jar (Ethiopian Airlines x Eset Coffee).
+   Principles: one product, lit like a photograph; few, large elements; full-bleed imagery;
+   type does the work; proof is quiet but specific; one clear action, always in reach. */
+:root {
+  --night: #0D0A07; --night-2: #15100B; --night-3: #1F1811;
+  --ivory: #F6F0E5; --ivory-2: #EDE3D1; --paper: #FBF8F2;
+  --ink: #17110C; --muted: #6F6356; --muted-d: #A3957F;
+  --gold: #A6813D; --gold-l: #D9BC7F; --gold-xl: #EBD5A4;
+  --hair: rgba(23,17,12,.12); --hair-d: rgba(246,240,229,.12);
+  --ea-green: #5E934A; --ea-yellow: #FDC52E; --ea-red: #C8202F;
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --w: 1240px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--night); color: var(--ivory); font: 300 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 32px; }
+.label { font: 400 11px var(--sans); letter-spacing: .34em; text-transform: uppercase; }
+.serif { font-family: var(--serif); }
+em { font-style: italic; }
+.light { background: var(--ivory); color: var(--ink); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 14px; height: 56px; padding: 0 32px; border-radius: 999px; font: 400 13px var(--sans);
+  letter-spacing: .16em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: all .35s ease; white-space: nowrap; }
+.btn:focus-visible { outline: 1px solid var(--gold-l); outline-offset: 4px; }
+.btn-gold { background: var(--gold-l); color: var(--night); }
+.btn-gold:hover { background: var(--gold-xl); }
+.btn-ghost { border-color: rgba(246,240,229,.35); color: var(--ivory); }
+.btn-ghost:hover { border-color: var(--ivory); }
+.btn-ink { background: var(--ink); color: var(--ivory); }
+.btn-ink:hover { background: var(--gold); }
+.link { font: 400 12px var(--sans); letter-spacing: .22em; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 4px; }
+
+/* Co-brand bar */
+.top { position: fixed; inset: 0 0 auto; z-index: 60; background: rgba(246,240,229,.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--hair); color: var(--ink); }
+.top .wrap { height: 76px; display: flex; align-items: center; justify-content: space-between; }
+.lockup { display: flex; align-items: center; gap: 20px; }
+.lockup .ea { height: 40px; width: auto; }
+.lockup .eset { height: 50px; width: auto; }
+.lockup .x { font: 300 22px var(--serif); color: var(--muted); }
+.top nav { display: flex; gap: 34px; }
+.top nav a { font: 400 11px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); transition: color .2s; }
+.top nav a:hover { color: var(--ink); }
+
+/* Sticky purchase bar */
+.buybar { position: fixed; left: 0; right: 0; top: 76px; z-index: 55; background: rgba(13,10,7,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--hair-d); transform: translateY(-110%); transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.buybar.show { transform: none; }
+.buybar .wrap { height: 60px; display: flex; align-items: center; gap: 22px; }
+.buybar .name { font: 400 22px var(--serif); }
+.buybar .meta { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted-d); }
+.buybar .price { margin-left: auto; font: 400 20px var(--serif); color: var(--gold-l); }
+.buybar .btn { height: 40px; padding: 0 22px; font-size: 11px; }
+
+/* Hero */
+.hero { position: relative; min-height: 100vh; padding-top: 76px; display: grid; align-items: center; overflow: hidden;
+  background: radial-gradient(42% 58% at var(--mx, 70%) var(--my, 46%), rgba(217,188,127,.20), transparent 70%),
+              radial-gradient(70% 90% at 70% 100%, #2A1E12 0%, transparent 60%), var(--night); }
+.hero .grain { position: absolute; inset: 0; opacity: .08; pointer-events: none; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.hero .wrap { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; width: 100%; }
+.hero .kicker { color: var(--gold-l); margin: 0 0 30px; display: flex; align-items: center; gap: 14px; }
+.hero .kicker::before { content: ""; width: 34px; height: 1px; background: var(--gold-l); }
+.hero h1 { font: 300 clamp(56px, 6.4vw, 94px)/.95 var(--serif); letter-spacing: -.015em; margin: 0; }
+.hero h1 em { display: block; color: var(--gold-l); font-weight: 300; }
+.hero .sub { font: 300 18px/1.7 var(--sans); color: var(--muted-d); margin: 30px 0 42px; }
+.hero .ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+.plinth { position: relative; height: calc(100vh - 110px); max-height: 780px; min-height: 520px; display: grid; place-items: end center; }
+.plinth .beam { position: absolute; top: -12%; left: 50%; width: 70%; height: 100%; transform: translateX(-50%);
+  background: conic-gradient(from 180deg at 50% 0%, transparent 160deg, rgba(235,213,164,.10) 172deg, rgba(235,213,164,.16) 180deg, rgba(235,213,164,.10) 188deg, transparent 200deg); filter: blur(8px); }
+.plinth .floor { position: absolute; bottom: 7%; width: 86%; height: 90px; border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(217,188,127,.20), transparent 70%); }
+.jar { position: relative; height: min(calc((100vh - 110px) * .74), 580px); display: flex; flex-direction: column; align-items: center; margin-bottom: 12%; }
+.jar img { height: 100%; width: auto; filter: drop-shadow(0 40px 50px rgba(0,0,0,.6)); }
+.jar .reflect { position: absolute; top: 100%; height: 100%; transform: scaleY(-1); opacity: .16;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 70%, #000 100%); mask-image: linear-gradient(to bottom, transparent 70%, #000 100%); filter: blur(1px); }
+.hero .scroll { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); color: var(--muted-d); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.hero .scroll i { width: 1px; height: 46px; background: linear-gradient(var(--gold-l), transparent); animation: drip 2.4s ease-in-out infinite; }
+@keyframes drip { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+.intro-up { opacity: 0; transform: translateY(30px); animation: up 1.4s cubic-bezier(.2,.7,.2,1) forwards; }
+.d1 { animation-delay: .15s; } .d2 { animation-delay: .35s; } .d3 { animation-delay: .55s; } .d4 { animation-delay: .75s; }
+.jar.intro-up { animation-duration: 1.8s; animation-delay: .2s; }
+@keyframes up { to { opacity: 1; transform: none; } }
+
+/* Statement (word-by-word reveal) */
+.statement { padding: 170px 0 120px; }
+.statement p { font: 300 clamp(34px, 4.6vw, 64px)/1.18 var(--serif); margin: 0 auto; max-width: 17em; text-align: center; }
+.statement .w { color: rgba(23,17,12,.14); transition: color .4s ease; }
+.statement .w.on { color: var(--ink); }
+.statement .w.gold.on { color: var(--gold); font-style: italic; }
+.statement .label { display: block; text-align: center; color: var(--gold); margin-bottom: 40px; }
+
+/* Full-bleed origin */
+.origin { position: relative; height: 112vh; overflow: hidden; }
+.origin img { position: absolute; left: 0; top: -10%; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.origin::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ivory) 0%, rgba(13,10,7,0) 16%, rgba(13,10,7,.05) 55%, rgba(13,10,7,.85) 100%); }
+.origin .cap { position: absolute; z-index: 1; left: 0; right: 0; bottom: 70px; }
+.origin .cap .wrap { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; flex-wrap: wrap; }
+.origin h2 { font: 300 clamp(48px, 6.4vw, 96px)/.95 var(--serif); margin: 0; }
+.origin h2 em { color: var(--gold-l); }
+.origin .coords { text-align: right; color: var(--muted-d); }
+.origin .coords b { display: block; font: 300 30px var(--serif); color: var(--ivory); letter-spacing: .02em; }
+
+/* Closer look */
+.closer { padding: 150px 0 140px; background: radial-gradient(50% 60% at 50% 45%, #FFFDF8, var(--ivory) 70%); }
+.closer .head { text-align: center; margin-bottom: 70px; }
+.closer h2, .cup h2, .proof h2, .partners h2, .journey h2 { font: 300 clamp(44px, 5.4vw, 76px)/1 var(--serif); margin: 18px 0 0; }
+.closer h2 em, .cup h2 em, .proof h2 em, .partners h2 em { color: var(--gold); }
+.closer .label, .cup .label, .proof .label, .partners .label { color: var(--gold); }
+.look { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 40px; }
+.look .shot { position: relative; height: 640px; }
+.look .shot img { height: 100%; width: auto; filter: drop-shadow(0 40px 40px rgba(70,45,15,.25)); }
+.dot { position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--paper); border: 1px solid var(--gold); transform: translate(-50%, -50%); }
+.dot::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 1px solid rgba(166,129,61,.5); animation: ping 2.6s ease-out infinite; }
+@keyframes ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+.notes-col { display: flex; flex-direction: column; gap: 90px; }
+.notes-col.left { text-align: right; }
+.note b { display: block; font: 400 28px/1.1 var(--serif); margin: 10px 0 8px; }
+.note p { margin: 0; font: 300 15px/1.7 var(--sans); color: var(--muted); max-width: 22em; }
+.notes-col.left .note p { margin-left: auto; }
+.note .label { font-size: 10px; }
+
+/* In the cup */
+.cup { padding: 150px 0; }
+.cup .grid { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 80px; border-top: 1px solid var(--hair-d); }
+.cup .flav { padding: 46px 34px 10px; border-left: 1px solid var(--hair-d); }
+.cup .flav:first-child { border-left: 0; padding-left: 0; }
+.cup .flav i { font: italic 300 16px var(--serif); color: var(--gold-l); }
+.cup .flav h3 { font: 300 clamp(40px, 4.4vw, 60px)/1 var(--serif); margin: 14px 0 18px; }
+.cup .flav p { margin: 0; color: var(--muted-d); max-width: 20em; }
+.cup .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; flex-wrap: wrap; }
+.cup .head > div:first-child .label { color: var(--gold-l); }
+.cup h2 em { color: var(--gold-l); }
+.recipe { display: flex; gap: 40px; }
+.recipe div { text-align: left; }
+.recipe b { display: block; font: 300 40px/1 var(--serif); color: var(--ivory); }
+.recipe span { font: 400 10px var(--sans); letter-spacing: .26em; text-transform: uppercase; color: var(--muted-d); }
+
+/* Farmer, full-bleed */
+.farmer { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; background: #DCD8D2; color: var(--ink); }
+.farmer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 20% 50%; }
+.farmer::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(220,216,210,0) 35%, rgba(232,229,224,.55) 60%, rgba(236,233,228,.75) 100%); }
+.farmer .wrap { position: relative; z-index: 1; width: 100%; display: flex; justify-content: flex-end; }
+.farmer .text { max-width: 500px; }
+.farmer .label { color: #6E5530; }
+.farmer blockquote { margin: 26px 0 30px; font: italic 300 clamp(34px, 3.6vw, 52px)/1.12 var(--serif); }
+.farmer p { margin: 0 0 34px; color: #4E463D; font-size: 16px; }
+.farmer .sig { display: flex; gap: 18px; align-items: baseline; padding-top: 22px; border-top: 1px solid rgba(23,17,12,.2); }
+.farmer .sig b { font: 400 30px var(--serif); }
+.farmer .sig span { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: #6E5F4E; }
+.also { margin-top: 26px; font-size: 15px; color: #4E463D; }
+.also b { font-weight: 500; color: var(--ink); }
+
+/* Journey: horizontal gallery */
+.journey { padding: 150px 0 120px; }
+.journey .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; flex-wrap: wrap; }
+.journey .label { color: var(--gold-l); }
+.journey h2 em { color: var(--gold-l); }
+.arrows { display: flex; gap: 10px; }
+.arrows button { width: 54px; height: 54px; border-radius: 50%; border: 1px solid rgba(246,240,229,.3); background: transparent; color: var(--ivory); cursor: pointer; transition: all .3s; }
+.arrows button:hover { background: var(--ivory); color: var(--night); }
+.rail { display: flex; gap: 22px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 60px max(32px, calc((100vw - var(--w)) / 2 + 32px)) 10px; scrollbar-width: none; scroll-padding-inline: max(32px, calc((100vw - var(--w)) / 2 + 32px)); }
+.rail::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 min(560px, 78vw); scroll-snap-align: start; }
+.slide .ph { aspect-ratio: 4/5; border-radius: 6px; overflow: hidden; }
+.slide img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s ease; }
+.slide:hover img { transform: scale(1.04); }
+.slide .t { display: flex; gap: 18px; margin-top: 22px; align-items: baseline; }
+.slide .t i { font: italic 300 30px var(--serif); color: var(--gold-l); min-width: 40px; }
+.slide .t b { display: block; font: 400 26px var(--serif); margin-bottom: 4px; }
+.slide .t p { margin: 0; color: var(--muted-d); font-size: 15px; }
+.slide.final .ph { display: grid; place-items: center; background: radial-gradient(60% 60% at 50% 50%, #2A2016, var(--night-2)); border: 1px solid var(--hair-d); }
+.slide.final .ph div { text-align: center; padding: 30px; }
+.slide.final .ph .plate { display: inline-block; background: var(--ivory); border-radius: 12px; padding: 14px 20px; margin-bottom: 26px; }
+.slide.final .ph .plate img { height: 46px; width: auto; }
+.slide.final .ph p { font: italic 300 32px/1.2 var(--serif); margin: 0; }
+
+/* Proof ledger */
+.proof { padding: 150px 0; }
+.proof .cols { display: grid; grid-template-columns: .8fr 1.2fr; gap: 90px; align-items: start; }
+.seal { margin-top: 50px; width: 190px; height: 190px; color: var(--gold); }
+.seal text { font: 500 10.5px var(--sans); letter-spacing: 3.2px; fill: currentColor; text-transform: uppercase; }
+.ledger { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
+.ledger li { display: grid; grid-template-columns: 170px 1fr auto; gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--hair); align-items: baseline; }
+.ledger .k { font: 400 11px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.ledger .v { font: 400 25px/1.25 var(--serif); }
+.ledger .v small { display: block; font: 300 14px/1.6 var(--sans); color: var(--muted); margin-top: 6px; }
+.ledger .ok { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(94,147,74,.6); display: grid; place-items: center; color: var(--ea-green); }
+
+/* Partners */
+.partners { padding: 130px 0 140px; background: var(--paper); color: var(--ink); text-align: center; border-top: 1px solid var(--hair); }
+.pair { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 60px; align-items: center; max-width: 860px; margin: 70px auto 0; }
+.pair .rule { height: 100%; background: var(--hair); }
+.pair img { margin: 0 auto 24px; }
+.pair .ea { height: 64px; width: auto; }
+.pair .eset { height: 92px; width: auto; }
+.pair p { margin: 0 auto; max-width: 20em; color: var(--muted); }
+.tri { display: inline-flex; gap: 6px; margin-top: 22px; }
+.tri i { width: 22px; height: 2px; } .tri i:nth-child(1) { background: var(--ea-green); } .tri i:nth-child(2) { background: var(--ea-yellow); } .tri i:nth-child(3) { background: var(--ea-red); }
+
+/* Final CTA */
+.final-cta { position: relative; overflow: hidden; padding: 150px 0 0; text-align: center; }
+.final-cta .ghost { position: absolute; left: 50%; top: 30px; transform: translateX(-50%); font: italic 300 clamp(200px, 32vw, 480px)/1 var(--serif); color: rgba(246,240,229,.03); white-space: nowrap; pointer-events: none; }
+.final-cta .mini { position: relative; height: 300px; width: auto; margin: 0 auto 40px; filter: drop-shadow(0 30px 40px rgba(0,0,0,.6)); }
+.final-cta h2 { position: relative; font: 300 clamp(48px, 6.6vw, 96px)/.98 var(--serif); margin: 0; }
+.final-cta h2 em { display: block; color: var(--gold-l); }
+.final-cta .lead { position: relative; color: var(--muted-d); max-width: 32em; margin: 26px auto 0; font-size: 17px; }
+.form { position: relative; display: flex; gap: 10px; max-width: 560px; margin: 44px auto 14px; }
+.form input { flex: 1; height: 56px; border-radius: 999px; border: 1px solid var(--hair-d); background: var(--night-2); color: var(--ivory); padding: 0 26px; font: 300 15px var(--sans); }
+.form input::placeholder { color: var(--muted-d); }
+.form input:focus { outline: 1px solid var(--gold-l); }
+.final-cta .small { position: relative; font-size: 13px; color: var(--muted-d); margin: 0; }
+footer { position: relative; margin-top: 110px; border-top: 1px solid var(--hair-d); }
+footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding-top: 28px; padding-bottom: 38px; font-size: 12px; color: var(--muted-d); letter-spacing: .04em; }
+footer nav { display: flex; gap: 24px; }
+footer .bs { font: 400 20px var(--serif); color: var(--ivory); }
+
+.reveal { opacity: 0; transform: translateY(34px); transition: opacity 1.2s cubic-bezier(.2,.7,.2,1), transform 1.2s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::after { animation: none !important; transition: none !important; } .reveal, .intro-up { opacity: 1; transform: none; } .statement .w { color: var(--ink); } }
+
+@media (max-width: 980px) {
+  .top nav { display: none; }
+  .hero .wrap { grid-template-columns: 1fr; padding-top: 50px; }
+  .plinth { height: 560px; min-height: 0; }
+  .jar { height: 420px; }
+  .look { grid-template-columns: 1fr; }
+  .look .shot { height: 480px; margin: 0 auto; order: -1; }
+  .notes-col, .notes-col.left { text-align: left; gap: 34px; }
+  .notes-col.left .note p { margin-left: 0; }
+  .cup .grid { grid-template-columns: 1fr; }
+  .cup .flav, .cup .flav:first-child { border-left: 0; border-bottom: 1px solid var(--hair-d); padding: 34px 0; }
+  .proof .cols { grid-template-columns: 1fr; gap: 30px; }
+  .ledger li { grid-template-columns: 1fr auto; }
+  .ledger .k { grid-column: 1 / -1; }
+  .farmer { min-height: auto; display: block; background: #E5E2DD; }
+  .farmer img { position: relative; height: 62vh; object-position: 22% 50%; }
+  .farmer::after { display: none; }
+  .farmer .wrap { padding-top: 46px; padding-bottom: 70px; }
+  .pair { grid-template-columns: 1fr; gap: 50px; }
+  .pair .rule { height: 1px; width: 80px; margin: 0 auto; }
+  .buybar .meta { display: none; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 0 22px; }
+  .top .wrap { height: 64px; }
+  .lockup { gap: 12px; } .lockup .ea { height: 30px; } .lockup .eset { height: 40px; }
+  .buybar { top: 64px; }
+  .hero { padding-top: 64px; }
+  .hero .ctas .btn { width: 100%; justify-content: center; }
+  .plinth { height: 480px; }
+  .jar { height: 360px; }
+  .statement { padding: 120px 0; }
+  .origin { height: 80vh; }
+  .origin .coords { text-align: left; }
+  .look .shot { height: 400px; }
+  .recipe { gap: 26px; }
+  .recipe b { font-size: 32px; }
+  .form { flex-direction: column; }
+  .form input { flex: none; width: 100%; }
+  .form .btn { justify-content: center; }
+  .final-cta .mini { height: 230px; }
+  .buybar .name { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="lockup" href="#top" aria-label="Ethiopian Airlines and Eset Coffee">
+      <img class="ea" src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines">
+      <span class="x" aria-hidden="true">×</span>
+      <img class="eset" src="{{IMG:logo-eset-ink}}" alt="Eset Coffee">
+    </a>
+    <nav><a href="#closer">The jar</a><a href="#cup">The cup</a><a href="#farmer">The farmer</a><a href="#proof">Proof</a></nav>
+  </div>
+</header>
+
+<div class="buybar" id="buybar" aria-hidden="true">
+  <div class="wrap">
+    <span class="name">Bensa</span>
+    <span class="meta">Sidama · Honey process · 250 g jar</span>
+    <span class="price">$20</span>
+    <a class="btn btn-gold" href="#order" tabindex="-1">Request a jar</a>
+  </div>
+</div>
+
+<section class="hero" id="top">
+  <div class="grain" aria-hidden="true"></div>
+  <div class="wrap">
+    <div>
+      <p class="label kicker intro-up d1">Served on board</p>
+      <h1 class="intro-up d2">From the forest <em>to your seat.</em></h1>
+      <p class="sub intro-up d3">Grown by two families in Bensa, Sidama.<br>Roasted by Eset. Poured above the clouds.</p>
+      <div class="ctas intro-up d4">
+        <a class="btn btn-gold" href="#order">Request a jar · $20</a>
+        <a class="btn btn-ghost" href="#closer">Discover Bensa</a>
+      </div>
+    </div>
+    <div class="plinth" aria-hidden="false">
+      <div class="beam" aria-hidden="true"></div>
+      <div class="floor" aria-hidden="true"></div>
+      <div class="jar intro-up" id="heroJar">
+        <img src="{{IMG:product-jar}}" alt="The Bensa jar: whole roasted beans in clear glass under a gold lid">
+        <img class="reflect" src="{{IMG:product-jar}}" alt="" aria-hidden="true">
+      </div>
+    </div>
+  </div>
+  <div class="scroll label" aria-hidden="true"><i></i></div>
+</section>
+
+<section class="light statement">
+  <div class="wrap">
+    <span class="label">Bensa, Sidama · Harvest 2025/26</span>
+    <p id="statement">Every bean in this jar can be traced to two family farms on one hillside in Sidama, where the forest is still standing.</p>
+  </div>
+</section>
+
+<section class="origin" id="origin">
+  <img data-speed=".18" src="{{IMG:forest-walk}}" alt="Two farmers walking through coffee growing beneath tall forest trees in Bensa">
+  <div class="cap"><div class="wrap">
+    <h2 class="reveal">Grown in the shade<br>of <em>the forest.</em></h2>
+    <div class="coords reveal"><b>2,180 m</b><span class="label">Bensa · Sidama · Ethiopia</span></div>
+  </div></div>
+</section>
+
+<section class="light closer" id="closer">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="label">Take a closer look</span>
+      <h2>The Bensa <em>jar</em></h2>
+    </div>
+    <div class="look">
+      <div class="notes-col left">
+        <div class="note reveal"><span class="label">01 · Sealed in Addis Ababa</span><b>Roasted in small batches</b><p>Eset roasts in Addis Ababa and seals each jar under a gold lid.</p></div>
+        <div class="note reveal"><span class="label">02 · One origin</span><b>One hillside, one harvest</b><p>No blending. Every bean comes from two mapped family plots in Bensa.</p></div>
+      </div>
+      <div class="shot reveal">
+        <img src="{{IMG:product-jar}}" alt="The Bensa jar">
+        <span class="dot" style="left:50%;top:7%"></span>
+        <span class="dot" style="left:50%;top:48%"></span>
+        <span class="dot" style="left:30%;top:78%"></span>
+      </div>
+      <div class="notes-col">
+        <div class="note reveal"><span class="label">03 · The beans</span><b>Honey processed</b><p>Dried with some of the fruit still on the bean, for natural sweetness and a silky body.</p></div>
+        <div class="note reveal"><span class="label">04 · Whole bean</span><b>250 g, ground at home</b><p>Whole beans keep their aroma. Grind just before brewing for the cup you had on board.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cup" id="cup">
+  <div class="wrap">
+    <div class="head reveal">
+      <div><span class="label">In the cup</span><h2>Bright, sweet, <em>long.</em></h2></div>
+      <div class="recipe" aria-label="Suggested pour-over recipe">
+        <div><b>15 g</b><span>Coffee</span></div>
+        <div><b>250 ml</b><span>Water</span></div>
+        <div><b>93°</b><span>Celsius</span></div>
+        <div><b>3:00</b><span>Minutes</span></div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="flav reveal"><i>First sip</i><h3>Apricot</h3><p>Soft stone fruit, bright but gentle, as the cup is still hot.</p></div>
+      <div class="flav reveal"><i>As it cools</i><h3>Wild honey</h3><p>Sweetness from the honey process, round and floral.</p></div>
+      <div class="flav reveal"><i>The finish</i><h3>Black tea</h3><p>A clean, long, slightly tannic finish that stays with you.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="farmer" id="farmer">
+  <img src="{{IMG:farmer-portrait}}" alt="Tadesse Wolde in the morning mist, a tall shade tree behind him">
+  <div class="wrap">
+    <div class="text reveal">
+      <span class="label">The grower</span>
+      <blockquote>“We pick only the red cherries. A coffee tree remembers how you treat it.”</blockquote>
+      <p>Tadesse farms 1.8 hectares beneath old forest shade trees. The family picks by hand, several rounds per tree, and carries the cherries to the washing station before evening.</p>
+      <div class="sig"><b>Tadesse Wolde</b><span>Bensa, Sidama</span></div>
+      <p class="also">This lot is shared with <b>Aster Hailu</b>, who farms 1.5 hectares further down the same hillside.</p>
+    </div>
+  </div>
+</section>
+
+<section class="journey" id="journey">
+  <div class="wrap head">
+    <div><span class="label">The journey</span><h2>From tree <em>to seat</em></h2></div>
+    <div class="arrows"><button type="button" data-dir="-1" aria-label="Previous">&#8592;</button><button type="button" data-dir="1" aria-label="Next">&#8594;</button></div>
+  </div>
+  <div class="rail" id="rail">
+    <article class="slide"><div class="ph"><img src="{{IMG:cherries}}" alt="Ripe red coffee cherries" loading="lazy"></div><div class="t"><i>i.</i><div><b>Picked by hand</b><p>Only ripe red cherries, several passes per tree.</p></div></div></article>
+    <article class="slide"><div class="ph"><img src="{{IMG:drying-beds}}" alt="A worker turning coffee on raised drying beds" loading="lazy" style="object-position:42% 50%"></div><div class="t"><i>ii.</i><div><b>Dried in the sun</b><p>Turned by hand on raised beds at the washing station.</p></div></div></article>
+    <article class="slide"><div class="ph"><img src="{{IMG:cupping-detail}}" alt="Coffee being cupped" loading="lazy"></div><div class="t"><i>iii.</i><div><b>Cupped and graded</b><p>Tasted and graded in Addis Ababa before it is chosen.</p></div></div></article>
+    <article class="slide"><div class="ph"><img src="{{IMG:cta-band}}" alt="Sacks of coffee in a warehouse" loading="lazy"></div><div class="t"><i>iv.</i><div><b>Roasted by Eset</b><p>Small batches in Addis Ababa, sealed in glass.</p></div></div></article>
+    <article class="slide final"><div class="ph"><div><span class="plate"><img src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines"></span><p>Poured for you,<br>above the clouds.</p></div></div><div class="t"><i>v.</i><div><b>On board</b><p>Served freshly brewed on Ethiopian Airlines.</p></div></div></article>
+  </div>
+</section>
+
+<section class="light proof" id="proof">
+  <div class="wrap cols">
+    <div class="reveal">
+      <span class="label">The proof</span>
+      <h2>Beautiful, and <em>on the record.</em></h2>
+      <svg class="seal" viewBox="0 0 200 200" aria-label="Origin verified by Beersheba">
+        <defs><path id="ring" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs>
+        <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <text><textPath href="#ring" startOffset="0">Origin verified · Beersheba · Traced to the tree ·</textPath></text>
+        <path d="M84 101l11 11 22-24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <ul class="ledger reveal">
+      <li><span class="k">Forest</span><span class="v">No forest cleared since 2020<small>Both plots checked against satellite forest-loss data.</small></span><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Origin</span><span class="v">Traced to two family plots<small>Mapped by GPS in Bensa and linked to this lot.</small></span><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Farmers</span><span class="v">Paid for every delivery<small>Weighed, paid and recorded at the washing station.</small></span><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Export</span><span class="v">Licensed and graded<small>Registered with the Ethiopian Coffee and Tea Authority.</small></span><span class="ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="partners">
+  <div class="wrap">
+    <span class="label reveal">A partnership</span>
+    <h2 class="reveal">Two Ethiopian names, <em>one cup.</em></h2>
+    <div class="pair">
+      <div class="reveal"><img class="ea" src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines"><p>Ethiopia's flag carrier, pouring Ethiopian coffee on board.</p></div>
+      <span class="rule" aria-hidden="true"></span>
+      <div class="reveal"><img class="eset" src="{{IMG:logo-eset-ink}}" alt="Eset Coffee"><p>Roasting single-origin Ethiopian coffee in Addis Ababa.</p></div>
+    </div>
+    <div class="tri" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>
+</section>
+
+<section class="final-cta" id="order">
+  <div class="ghost" aria-hidden="true">Bensa</div>
+  <div class="wrap">
+    <img class="mini reveal" src="{{IMG:product-jar}}" alt="" aria-hidden="true">
+    <h2 class="reveal">Take the flight <em>home with you.</em></h2>
+    <p class="lead reveal">The same coffee, in a 250 g jar. Collect it on arrival in Addis Ababa, or have it delivered.</p>
+    <form class="form reveal" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Request received';">
+      <input type="text" placeholder="Your phone or email" aria-label="Phone or email" required>
+      <button class="btn btn-gold" type="submit">Request a jar · $20</button>
+    </form>
+    <p class="small">We will contact you to confirm collection or delivery.</p>
+  </div>
+  <footer>
+    <div class="wrap">
+      <span class="bs">Beersheba</span>
+      <span>Origin verified · Reference EAL-SID-001</span>
+      <nav><a href="#top">Privacy</a><a href="#farmer">Farmer consent</a><a href="#top">Terms</a></nav>
+    </div>
+  </footer>
+</section>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Statement: split into words, light them up as the paragraph scrolls through the viewport.
+  const st = document.getElementById('statement');
+  const gold = new Set(['traced', 'forest', 'standing.']);
+  st.innerHTML = st.textContent.split(' ').map((w) => `<span class="w${gold.has(w) ? ' gold' : ''}">${w}</span>`).join(' ');
+  const words = [...st.querySelectorAll('.w')];
+
+  const hero = document.querySelector('.hero');
+  const buybar = document.getElementById('buybar');
+  const par = [...document.querySelectorAll('[data-speed]')];
+  function onScroll() {
+    const vh = window.innerHeight;
+    buybar.classList.toggle('show', window.scrollY > hero.offsetHeight * .8);
+    const r = st.getBoundingClientRect();
+    const p = reduce ? 1 : Math.min(1, Math.max(0, (vh * .85 - r.top) / (r.height + vh * .35)));
+    const n = Math.round(p * words.length);
+    words.forEach((w, i) => w.classList.toggle('on', i < n));
+    if (!reduce) par.forEach((el) => {
+      const b = el.parentElement.getBoundingClientRect();
+      el.style.transform = `translate3d(0, ${(b.top * -parseFloat(el.dataset.speed)).toFixed(1)}px, 0)`;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // Hero light follows the pointer, gently.
+  if (!reduce) hero.addEventListener('pointermove', (e) => {
+    const b = hero.getBoundingClientRect();
+    hero.style.setProperty('--mx', `${(((e.clientX - b.left) / b.width) * 100).toFixed(1)}%`);
+    hero.style.setProperty('--my', `${(((e.clientY - b.top) / b.height) * 100).toFixed(1)}%`);
+  });
+
+  // Journey rail arrows.
+  const rail = document.getElementById('rail');
+  document.querySelectorAll('.arrows button').forEach((b) => b.addEventListener('click', () => {
+    const step = rail.querySelector('.slide').getBoundingClientRect().width + 22;
+    rail.scrollBy({ left: step * Number(b.dataset.dir), behavior: 'smooth' });
+  }));
+
+  // Reveal on scroll.
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.15 }) : null;
+  document.querySelectorAll('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
+})();
+</script>
+</body>
+</html>

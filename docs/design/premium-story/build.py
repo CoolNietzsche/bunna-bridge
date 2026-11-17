@@ -17,7 +17,7 @@ def data_uri(match):
 
 PAGES = {
     "template.html": "premium-story-ethiopian-airlines-eset.html",
-    "luxe-template.html": "landing-ethiopian-airlines-eset.html",
+    "showcase-template.html": "landing-ethiopian-airlines-eset.html",
 }
 for src, dst in PAGES.items():
     html = re.sub(r"\{\{IMG:([a-z-]+)\}\}", data_uri, (HERE / src).read_text())
