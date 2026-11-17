@@ -25,6 +25,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/") || url.pathname.startsWith("/admin")) return;
+  if (url.pathname.startsWith("/demo/")) return; // standalone partner demo pages: never cached as the app shell
 
   if (req.mode === "navigate") {
     event.respondWith(
