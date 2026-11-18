@@ -37,7 +37,7 @@ button { font: inherit; }
 em { font-style: italic; }
 .light { background: var(--ivory); color: var(--ink); }
 :focus-visible { outline: 1px solid var(--gold-l); outline-offset: 4px; }
-.light :focus-visible, .bar :focus-visible { outline-color: var(--gold); }
+.light :focus-visible { outline-color: var(--gold); }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 54px; padding: 0 30px; border-radius: 999px; font: 400 13px var(--sans);
   letter-spacing: .16em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: background .3s, border-color .3s, color .3s; white-space: nowrap; }
@@ -49,20 +49,21 @@ em { font-style: italic; }
 .btn-ink:hover { background: var(--gold); }
 
 /* One slim bar: partners, product, action */
-.bar { position: fixed; inset: 0 0 auto; z-index: 60; height: var(--bar); background: rgba(246,240,229,.94); color: var(--ink);
-  backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px); border-bottom: 1px solid var(--hair); }
+.bar { position: fixed; inset: 0 0 auto; z-index: 60; height: var(--bar); background: rgba(13,10,7,.9); color: var(--ivory);
+  backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px); border-bottom: 1px solid rgba(217,188,127,.18); }
 .bar .wrap { height: 100%; display: flex; align-items: center; gap: 28px; }
 .lockup { display: flex; align-items: center; gap: 14px; flex: none; }
-.lockup .ea { height: 32px; width: auto; }
-.lockup .eset { height: 42px; width: auto; }
-.lockup .x { font: 300 20px var(--serif); color: var(--muted); }
+.lockup .plate { display: grid; place-items: center; height: 38px; padding: 0 10px; border-radius: 8px; background: var(--ivory); }
+.lockup .ea { height: 28px; width: auto; }
+.lockup .eset { height: 46px; width: auto; filter: drop-shadow(0 0 14px rgba(217,188,127,.18)); }
+.lockup .x { font: 300 20px var(--serif); color: var(--muted-d); }
 .bar nav { display: flex; gap: 28px; margin-left: 20px; }
-.bar nav a { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
-.bar nav a:hover { color: var(--ink); }
+.bar nav a { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted-d); transition: color .2s; }
+.bar nav a:hover { color: var(--gold-l); }
 .bar .prod { margin-left: auto; display: flex; align-items: baseline; gap: 12px; opacity: 0; transform: translateY(6px); transition: opacity .4s, transform .4s; }
 .bar.past .prod { opacity: 1; transform: none; }
 .bar .prod b { font: 400 21px var(--serif); }
-.bar .prod span { font: 400 16px var(--serif); color: var(--gold); }
+.bar .prod span { font: 400 16px var(--serif); color: var(--gold-l); }
 .bar .btn { height: 38px; padding: 0 20px; font-size: 11px; gap: 0; }
 
 /* Hero */
@@ -305,7 +306,7 @@ dialog::backdrop { background: rgba(8,6,4,.62); backdrop-filter: blur(6px); -web
 @media (max-width: 600px) {
   :root { --bar: 58px; }
   .wrap { padding: 0 22px; }
-  .lockup { gap: 10px; } .lockup .ea { height: 26px; } .lockup .eset { height: 36px; }
+  .lockup { gap: 10px; } .lockup .plate { height: 32px; padding: 0 8px; } .lockup .ea { height: 23px; } .lockup .eset { height: 38px; }
   .bar .prod { display: none; }
   .bar .btn { margin-left: auto; padding: 0 16px; }
   .bar .btn .long { display: none; }
@@ -326,13 +327,13 @@ dialog::backdrop { background: rgba(8,6,4,.62); backdrop-filter: blur(6px); -web
 <header class="bar" id="bar">
   <div class="wrap">
     <a class="lockup" href="#top" aria-label="Ethiopian Airlines and Eset Coffee, back to top">
-      <img class="ea" src="img/logo-ethiopian-360.webp" alt="Ethiopian Airlines" width="956" height="400">
+      <span class="plate"><img class="ea" src="img/logo-ethiopian-360.webp" alt="Ethiopian Airlines" width="956" height="400"></span>
       <span class="x" aria-hidden="true">×</span>
       <img class="eset" src="img/logo-eset-gold-320.webp" alt="Eset Coffee" width="1600" height="1224">
     </a>
     <nav aria-label="Sections"><a href="#closer">The jar</a><a href="#cup">The cup</a><a href="#farmer">The farmer</a><a href="#proof">Proof</a></nav>
     <div class="prod" aria-hidden="true"><b>Bensa</b><span>$20</span></div>
-    <button class="btn btn-ink" type="button" data-order>Request<span class="long">&nbsp;a jar</span></button>
+    <button class="btn btn-gold" type="button" data-order>Request<span class="long">&nbsp;a jar</span></button>
   </div>
 </header>
 
