@@ -54,6 +54,10 @@ services:
     <<: *django
     command: celery -A config.celery_app worker -l INFO --concurrency 1
     mem_limit: 400m
+    # Celery's pool needs a little scratch space at start-up. Keeping /tmp in memory means a
+    # full server disk can no longer stop the worker (and with it, lead alerts and SMS).
+    tmpfs:
+      - /tmp:size=64m
 
   celerybeat:
     <<: *django
