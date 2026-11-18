@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D0A07">
+<title>Bensa · Ethiopian Airlines × Eset Coffee</title>
+<meta name="description" content="Bensa, Sidama. Grown by two families, roasted by Eset Coffee, served on board Ethiopian Airlines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Bensa jar showcase, version 2 (Ethiopian Airlines x Eset Coffee): no on-board welcome in the hero,
+   split farmer portrait, and a journey that slides sideways as you scroll down.
+   Mobile first: most visitors scan a QR code on board, on slow Wi-Fi.
+   One product lit like a photograph; one slim bar with the action always in reach;
+   the jar holds still while its details are shown; proof is quiet and specific. */
+:root {
+  --night: #0D0A07; --night-2: #15100B; --night-3: #1F1811;
+  --ivory: #F6F0E5; --ivory-2: #EDE3D1; --paper: #FBF8F2;
+  --ink: #17110C; --muted: #6F6356; --muted-d: #A3957F;
+  --gold: #A6813D; --gold-l: #D9BC7F; --gold-xl: #EBD5A4;
+  --hair: rgba(23,17,12,.12); --hair-d: rgba(246,240,229,.12);
+  --ea-green: #5E934A; --ea-yellow: #FDC52E; --ea-red: #C8202F;
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, serif;
+  --sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --w: 1240px; --bar: 64px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: var(--bar); }
+body { margin: 0; background: var(--night); color: var(--ivory); font: 300 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+.wrap { max-width: var(--w); margin: 0 auto; padding: 0 32px; }
+.label { font: 400 11px var(--sans); letter-spacing: .32em; text-transform: uppercase; }
+em { font-style: italic; }
+.light { background: var(--ivory); color: var(--ink); }
+:focus-visible { outline: 1px solid var(--gold-l); outline-offset: 4px; }
+.light :focus-visible, .bar :focus-visible { outline-color: var(--gold); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; height: 54px; padding: 0 30px; border-radius: 999px; font: 400 13px var(--sans);
+  letter-spacing: .16em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; transition: background .3s, border-color .3s, color .3s; white-space: nowrap; }
+.btn-gold { background: var(--gold-l); color: var(--night); }
+.btn-gold:hover { background: var(--gold-xl); }
+.btn-ghost { background: transparent; border-color: rgba(246,240,229,.35); color: var(--ivory); }
+.btn-ghost:hover { border-color: var(--ivory); }
+.btn-ink { background: var(--ink); color: var(--ivory); }
+.btn-ink:hover { background: var(--gold); }
+
+/* One slim bar: partners, product, action */
+.bar { position: fixed; inset: 0 0 auto; z-index: 60; height: var(--bar); background: rgba(246,240,229,.94); color: var(--ink);
+  backdrop-filter: saturate(1.4) blur(16px); -webkit-backdrop-filter: saturate(1.4) blur(16px); border-bottom: 1px solid var(--hair); }
+.bar .wrap { height: 100%; display: flex; align-items: center; gap: 28px; }
+.lockup { display: flex; align-items: center; gap: 14px; flex: none; }
+.lockup .ea { height: 32px; width: auto; }
+.lockup .eset { height: 42px; width: auto; }
+.lockup .x { font: 300 20px var(--serif); color: var(--muted); }
+.bar nav { display: flex; gap: 28px; margin-left: 20px; }
+.bar nav a { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.bar nav a:hover { color: var(--ink); }
+.bar .prod { margin-left: auto; display: flex; align-items: baseline; gap: 12px; opacity: 0; transform: translateY(6px); transition: opacity .4s, transform .4s; }
+.bar.past .prod { opacity: 1; transform: none; }
+.bar .prod b { font: 400 21px var(--serif); }
+.bar .prod span { font: 400 16px var(--serif); color: var(--gold); }
+.bar .btn { height: 38px; padding: 0 20px; font-size: 11px; gap: 0; }
+
+/* Hero */
+.hero { position: relative; min-height: 100svh; padding-top: var(--bar); overflow: hidden;
+  background: radial-gradient(42% 58% at var(--mx, 72%) var(--my, 48%), rgba(217,188,127,.20), transparent 70%),
+              radial-gradient(70% 90% at 70% 100%, #2A1E12 0%, transparent 60%), var(--night); }
+.hero .wrap { position: relative; min-height: calc(100svh - var(--bar)); display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "head jar" "body jar";
+  align-content: center; column-gap: 40px; }
+.hero .head { grid-area: head; align-self: end; }
+.hero .body { grid-area: body; align-self: start; }
+.kicker { color: var(--gold-l); margin: 0 0 26px; display: flex; align-items: center; gap: 14px; }
+.kicker::before { content: ""; width: 34px; height: 1px; background: var(--gold-l); }
+.hero h1 { font: 300 clamp(44px, 6.2vw, 92px)/.96 var(--serif); letter-spacing: -.015em; margin: 0; }
+.hero h1 em { display: block; color: var(--gold-l); }
+.hero .sub { font: 300 18px/1.7 var(--sans); color: var(--muted-d); margin: 28px 0 38px; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.plinth { grid-area: jar; position: relative; height: calc(100svh - var(--bar) - 40px); max-height: 760px; display: grid; place-items: center; }
+.plinth .beam { position: absolute; top: -10%; left: 50%; width: 70%; height: 100%; transform: translateX(-50%); pointer-events: none;
+  background: conic-gradient(from 180deg at 50% 0%, transparent 160deg, rgba(235,213,164,.10) 172deg, rgba(235,213,164,.16) 180deg, rgba(235,213,164,.10) 188deg, transparent 200deg); filter: blur(8px); }
+.plinth .floor { position: absolute; bottom: 8%; width: 80%; height: 80px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(217,188,127,.18), transparent 70%); }
+.hero-jar { position: relative; height: min(calc((100svh - var(--bar)) * .72), 580px); aspect-ratio: 800 / 1210; }
+.hero-jar img { width: 100%; height: 100%; filter: drop-shadow(0 40px 46px rgba(0,0,0,.6)); }
+.hero-jar .reflect { position: absolute; top: 100%; left: 0; transform: scaleY(-1); opacity: .14; filter: blur(1px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 72%, #000 100%); mask-image: linear-gradient(to bottom, transparent 72%, #000 100%); }
+.in-up { opacity: 0; transform: translateY(26px); animation: up 1.3s cubic-bezier(.2,.7,.2,1) forwards; }
+.d1 { animation-delay: .1s; } .d2 { animation-delay: .25s; } .d3 { animation-delay: .45s; } .d4 { animation-delay: .6s; }
+@keyframes up { to { opacity: 1; transform: none; } }
+
+/* Statement */
+.statement { padding: 160px 0 130px; }
+.statement .label { display: block; text-align: center; color: var(--gold); margin-bottom: 36px; }
+.statement p { font: 300 clamp(30px, 4.4vw, 62px)/1.18 var(--serif); margin: 0 auto; max-width: 17em; text-align: center; }
+.statement .w { color: rgba(23,17,12,.14); transition: color .4s ease; }
+.statement .w.on { color: var(--ink); }
+.statement .w.gold.on { color: var(--gold); font-style: italic; }
+
+/* Forest */
+.origin { position: relative; height: 100vh; min-height: 560px; overflow: hidden; }
+.origin img { position: absolute; left: 0; top: -10%; width: 100%; height: 120%; object-fit: cover; will-change: transform; }
+.origin::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ivory) 0%, rgba(13,10,7,0) 14%, rgba(13,10,7,.12) 40%, rgba(13,10,7,.62) 68%, rgba(13,10,7,.92) 100%); }
+.origin .cap { position: absolute; z-index: 1; left: 0; right: 0; bottom: 64px; }
+.origin .cap .wrap { display: flex; justify-content: space-between; align-items: flex-end; gap: 26px; flex-wrap: wrap; }
+.origin h2 { font: 300 clamp(44px, 6.2vw, 92px)/.96 var(--serif); margin: 0; }
+.origin h2 em { color: var(--gold-l); }
+.origin .alt b { display: block; font: 300 30px var(--serif); }
+.origin .alt span { color: var(--muted-d); }
+
+/* Closer look: the jar holds still while its details change */
+.closer { background: radial-gradient(50% 60% at 40% 50%, #FFFDF8, var(--ivory) 70%); color: var(--ink); }
+.closer .track { height: 520vh; position: relative; }
+.closer .stick { position: sticky; top: var(--bar); height: calc(100svh - var(--bar)); overflow: hidden; }
+.closer .stick .wrap { height: 100%; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: 30px; }
+.zoombox { position: relative; height: 100%; display: grid; place-items: center; }
+.zoom { position: relative; height: min(66%, 560px); aspect-ratio: 800 / 1210; transition: transform 1.1s cubic-bezier(.2,.7,.2,1); transform-origin: 50% 50%; }
+.zoom img { width: 100%; height: 100%; filter: drop-shadow(0 34px 34px rgba(70,45,15,.25)); }
+.hot { position: absolute; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--gold); background: rgba(251,248,242,.92); transform: translate(-50%, -50%) scale(.75);
+  cursor: pointer; padding: 0; transition: transform .5s, background .5s, opacity .5s; opacity: .6; }
+.hot::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--gold); transform: scale(0); transition: transform .5s; }
+.hot.on { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+.hot.on::after { transform: scale(1); }
+.hot.on::before { content: ""; position: absolute; inset: -10px; border-radius: 50%; border: 1px solid rgba(166,129,61,.5); animation: ping 2.4s ease-out infinite; }
+@keyframes ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.7); opacity: 0; } }
+.leader { position: absolute; height: 1px; background: linear-gradient(90deg, var(--gold), rgba(166,129,61,.15)); transform-origin: left center; pointer-events: none; transition: opacity .4s; }
+.steps { position: relative; height: 360px; }
+.step { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; opacity: 0; transform: translateY(18px); transition: opacity .6s, transform .6s; pointer-events: none; }
+.step.on { opacity: 1; transform: none; pointer-events: auto; }
+.step .label { color: var(--gold); }
+.step h3 { font: 300 clamp(36px, 4.2vw, 60px)/1.02 var(--serif); margin: 16px 0 18px; }
+.step h3 em { color: var(--gold); }
+.step p { margin: 0; color: var(--muted); font-size: 17px; max-width: 26em; }
+.progress { display: flex; align-items: center; gap: 16px; margin-top: 30px; font: 400 12px var(--sans); letter-spacing: .2em; color: var(--muted); }
+.progress .rail { width: 140px; height: 1px; background: var(--hair); position: relative; }
+.progress .rail i { position: absolute; left: 0; top: 0; height: 1px; background: var(--gold); width: 0; transition: width .5s; }
+.closer.static .track { height: auto; }
+.closer.static .stick { position: static; height: auto; padding: 100px 0; }
+.closer.static .steps { height: auto; display: grid; gap: 36px; }
+.closer.static .step { position: static; opacity: 1; transform: none; }
+
+/* In the cup */
+.cup { padding: 140px 0; }
+.cup .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 36px; flex-wrap: wrap; }
+.cup .label { color: var(--gold-l); }
+.cup h2 { font: 300 clamp(42px, 5.2vw, 74px)/1 var(--serif); margin: 16px 0 0; }
+.cup h2 em { color: var(--gold-l); }
+.recipe { display: flex; gap: 36px; }
+.recipe b { display: block; font: 300 38px/1 var(--serif); }
+.recipe span { font: 400 10px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted-d); }
+.flavs { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 70px; border-top: 1px solid var(--hair-d); }
+.flav { padding: 42px 30px 6px; border-left: 1px solid var(--hair-d); }
+.flav:first-child { border-left: 0; padding-left: 0; }
+.flav i { font: italic 300 16px var(--serif); color: var(--gold-l); }
+.flav h3 { font: 300 clamp(38px, 4.2vw, 58px)/1 var(--serif); margin: 12px 0 16px; }
+.flav p { margin: 0; color: var(--muted-d); max-width: 20em; }
+
+/* Farmer */
+.farmer { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; background: var(--ivory); color: var(--ink); }
+.farmer .text-col { display: flex; align-items: center; justify-content: flex-end; padding: 110px 70px 110px max(32px, calc((100vw - var(--w)) / 2 + 32px)); }
+.farmer .text { max-width: 500px; }
+.farmer .photo { position: relative; overflow: hidden; min-height: 560px; }
+.farmer .photo img { position: absolute; inset: -6% 0; width: 100%; height: 112%; object-fit: cover; object-position: 62% 30%; will-change: transform; }
+.farmer .label { color: var(--gold); }
+.farmer blockquote { margin: 24px 0 28px; font: italic 300 clamp(32px, 3.4vw, 50px)/1.12 var(--serif); }
+.farmer p { margin: 0 0 30px; color: var(--muted); }
+.farmer .sig { display: flex; gap: 16px; align-items: baseline; padding-top: 20px; border-top: 1px solid var(--hair); flex-wrap: wrap; }
+.farmer .sig b { font: 400 30px var(--serif); }
+.farmer .sig span { font: 400 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+.farmer .also { margin: 22px 0 0; font-size: 15px; }
+.farmer .also b { font-weight: 500; color: var(--ink); }
+
+/* Journey */
+.journey { position: relative; }
+.hs { position: relative; }
+.hs-stick { position: sticky; top: var(--bar); height: calc(100svh - var(--bar)); overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 5vh; }
+.journey .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 28px; flex-wrap: wrap; }
+.journey .label { color: var(--gold-l); }
+.journey h2 { font: 300 clamp(42px, 5.2vw, 74px)/1 var(--serif); margin: 16px 0 0; }
+.journey h2 em { color: var(--gold-l); }
+.hs-progress { display: flex; align-items: center; gap: 16px; font: 400 12px var(--sans); letter-spacing: .2em; color: var(--muted-d); }
+.hs-progress .rail { width: 160px; height: 1px; background: var(--hair-d); position: relative; }
+.hs-progress .rail i { position: absolute; left: 0; top: 0; height: 1px; width: 0; background: var(--gold-l); }
+.hs-track { display: flex; gap: 32px; padding: 0 max(32px, calc((100vw - var(--w)) / 2 + 32px)); width: max-content; will-change: transform; }
+.slide { flex: 0 0 auto; width: min(440px, 72vw, calc((100svh - var(--bar) - 300px) * .8)); transform-origin: 50% 60%; will-change: transform, opacity; }
+.slide .ph { aspect-ratio: 4/5; border-radius: 6px; overflow: hidden; background: var(--night-3); }
+.slide .ph img { width: 118%; max-width: none; height: 100%; object-fit: cover; margin-left: -9%; will-change: transform; }
+.hs.static .hs-stick { position: static; height: auto; padding: 120px 0 100px; }
+.hs.static .hs-track { width: auto; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.hs.static .slide { scroll-snap-align: start; }
+.slide .t { display: flex; gap: 16px; margin-top: 20px; align-items: baseline; }
+.slide .t i { font: italic 300 28px var(--serif); color: var(--gold-l); min-width: 36px; }
+.slide .t b { display: block; font: 400 25px var(--serif); margin-bottom: 4px; }
+.slide .t p { margin: 0; color: var(--muted-d); font-size: 15px; }
+.slide.final .ph { display: grid; place-items: center; background: radial-gradient(60% 60% at 50% 50%, #2A2016, var(--night-2)); border: 1px solid var(--hair-d); }
+.slide.final .ph > div { text-align: center; padding: 28px; }
+.slide.final .plate { display: inline-block; background: var(--ivory); border-radius: 12px; padding: 14px 20px; margin-bottom: 24px; }
+.slide.final .plate img { height: 44px; width: auto; }
+.slide.final .ph p { font: italic 300 32px/1.2 var(--serif); margin: 0; }
+
+/* Proof */
+.proof { padding: 140px 0; }
+.proof .cols { display: grid; grid-template-columns: .8fr 1.2fr; gap: 80px; align-items: start; }
+.proof .label { color: var(--gold); }
+.proof h2 { font: 300 clamp(42px, 5.2vw, 74px)/1 var(--serif); margin: 16px 0 0; }
+.proof h2 em { color: var(--gold); }
+.seal { margin-top: 46px; width: 180px; height: 180px; color: var(--gold); }
+.seal text { font: 500 10.5px var(--sans); letter-spacing: 3.2px; fill: currentColor; text-transform: uppercase; }
+.ledger { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
+.ledger li { display: grid; grid-template-columns: 150px 1fr auto; gap: 22px; padding: 26px 0; border-bottom: 1px solid var(--hair); align-items: baseline; }
+.ledger .k { font: 400 11px var(--sans); letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.ledger .v { font: 400 24px/1.25 var(--serif); }
+.ledger .v small { display: block; font: 300 14px/1.6 var(--sans); color: var(--muted); margin-top: 6px; }
+.ledger .ok { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(94,147,74,.6); display: grid; place-items: center; color: var(--ea-green); }
+
+/* Partners */
+.partners { padding: 120px 0 130px; background: var(--paper); color: var(--ink); text-align: center; border-top: 1px solid var(--hair); }
+.partners .label { color: var(--gold); }
+.partners h2 { font: 300 clamp(40px, 5vw, 70px)/1.02 var(--serif); margin: 16px 0 0; }
+.partners h2 em { color: var(--gold); }
+.pair { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 56px; align-items: center; max-width: 840px; margin: 64px auto 0; }
+.pair .rule { height: 100%; background: var(--hair); }
+.pair img { margin: 0 auto 22px; width: auto; }
+.pair .ea { height: 62px; } .pair .eset { height: 90px; }
+.pair p { margin: 0 auto; max-width: 20em; color: var(--muted); }
+.tri { display: inline-flex; gap: 6px; margin-top: 20px; }
+.tri i { width: 22px; height: 2px; } .tri i:nth-child(1) { background: var(--ea-green); } .tri i:nth-child(2) { background: var(--ea-yellow); } .tri i:nth-child(3) { background: var(--ea-red); }
+
+/* Close */
+.close { position: relative; overflow: hidden; padding: 140px 0 0; text-align: center; }
+.close .ghost { position: absolute; left: 50%; top: 20px; transform: translateX(-50%); font: italic 300 clamp(200px, 32vw, 480px)/1 var(--serif); color: rgba(246,240,229,.03); white-space: nowrap; pointer-events: none; }
+.close .mini { position: relative; height: 280px; width: auto; margin: 0 auto 36px; filter: drop-shadow(0 30px 40px rgba(0,0,0,.6)); }
+.close h2 { position: relative; font: 300 clamp(46px, 6.4vw, 94px)/.98 var(--serif); margin: 0; }
+.close h2 em { display: block; color: var(--gold-l); }
+.close .lead { position: relative; color: var(--muted-d); max-width: 32em; margin: 24px auto 36px; font-size: 17px; }
+footer { position: relative; margin-top: 110px; border-top: 1px solid var(--hair-d); }
+footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; padding-top: 26px; padding-bottom: 36px; font-size: 12px; color: var(--muted-d); }
+footer .bs { font: 400 20px var(--serif); color: var(--ivory); }
+
+/* Request sheet */
+dialog { border: 0; padding: 0; background: transparent; color: var(--ink); max-width: none; max-height: none; width: 100%; height: 100%; }
+dialog::backdrop { background: rgba(8,6,4,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.sheet { position: absolute; right: 0; top: 0; bottom: 0; width: min(480px, 100%); background: var(--paper); overflow-y: auto; padding: 34px 34px 40px; box-shadow: -30px 0 80px rgba(0,0,0,.35);
+  animation: slide .45s cubic-bezier(.2,.7,.2,1); }
+@keyframes slide { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet .top { display: flex; justify-content: space-between; align-items: center; }
+.sheet .x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--hair); background: transparent; cursor: pointer; color: var(--ink); }
+.sheet .item { display: flex; gap: 18px; align-items: center; margin: 26px 0 24px; padding: 16px; border: 1px solid var(--hair); border-radius: 16px; background: #fff; }
+.sheet .item img { height: 92px; width: auto; }
+.sheet .item b { display: block; font: 400 26px/1.1 var(--serif); }
+.sheet .item span { font-size: 14px; color: var(--muted); }
+.sheet h3 { font: 300 34px/1.1 var(--serif); margin: 0; }
+.field { display: block; margin-bottom: 16px; }
+.field > span { display: block; font: 400 11px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.field input, .field select { width: 100%; height: 50px; border-radius: 12px; border: 1px solid rgba(23,17,12,.2); background: #fff; padding: 0 16px; font: 400 16px var(--sans); color: var(--ink); }
+.field input:focus, .field select:focus { outline: 2px solid var(--gold-l); outline-offset: 0; border-color: var(--gold); }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.choice label { position: relative; border: 1px solid rgba(23,17,12,.2); border-radius: 12px; padding: 14px; cursor: pointer; background: #fff; font-size: 14px; line-height: 1.4; }
+.choice label b { display: block; font-weight: 500; margin-bottom: 2px; }
+.choice input { position: absolute; opacity: 0; }
+.choice label:has(input:checked) { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); background: #FFFBF2; }
+.choice label:has(input:focus-visible) { outline: 2px solid var(--gold-l); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.sheet .total { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 0; margin: 6px 0 18px; border-top: 1px solid var(--hair); }
+.sheet .total b { font: 400 30px var(--serif); }
+.sheet .btn { width: 100%; }
+.sheet .err { color: #9B2C1F; font-size: 14px; margin: 12px 0 0; min-height: 1em; }
+.sheet .fine { font-size: 13px; color: var(--muted); margin: 14px 0 0; }
+.done { text-align: center; padding: 40px 0; }
+.done .tick { width: 74px; height: 74px; border-radius: 50%; border: 1px solid var(--gold); display: grid; place-items: center; margin: 0 auto 24px; color: var(--gold); }
+.done h3 { margin-bottom: 14px; }
+.done p { color: var(--muted); margin: 0 auto 28px; max-width: 22em; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 1.1s cubic-bezier(.2,.7,.2,1), transform 1.1s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .reveal, .in-up { opacity: 1; transform: none; } .statement .w { color: var(--ink); } }
+
+@media (max-width: 980px) {
+  .bar nav { display: none; }
+  .hero .wrap { grid-template-columns: 1fr; grid-template-areas: "head" "jar" "body"; align-content: start; padding-top: 34px; }
+  .plinth { height: auto; max-height: none; padding: 18px 0 30px; }
+  .hero-jar { height: min(42svh, 380px); }
+  .plinth .floor { bottom: 14px; }
+  .hero .sub { margin-top: 0; }
+  .closer .stick .wrap { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; gap: 0; }
+  .zoom { height: min(78%, 330px); }
+  .steps { height: 190px; }
+  .step h3 { margin: 10px 0 10px; }
+  .step p { font-size: 15px; }
+  .progress { margin: 14px 0 22px; }
+  .leader { display: none; }
+  .flavs { grid-template-columns: 1fr; }
+  .flav, .flav:first-child { border-left: 0; border-bottom: 1px solid var(--hair-d); padding: 30px 0; }
+  .proof .cols { grid-template-columns: 1fr; gap: 26px; }
+  .ledger li { grid-template-columns: 1fr auto; }
+  .ledger .k { grid-column: 1 / -1; }
+  .farmer { grid-template-columns: 1fr; min-height: auto; }
+  .farmer .photo { order: -1; min-height: 0; height: 72vh; }
+  .farmer .text-col { justify-content: flex-start; padding: 46px 32px 70px; }
+  .pair { grid-template-columns: 1fr; gap: 46px; }
+  .pair .rule { height: 1px; width: 80px; margin: 0 auto; }
+}
+@media (max-width: 600px) {
+  :root { --bar: 58px; }
+  .wrap { padding: 0 22px; }
+  .lockup { gap: 10px; } .lockup .ea { height: 26px; } .lockup .eset { height: 36px; }
+  .bar .prod { display: none; }
+  .bar .btn { margin-left: auto; padding: 0 16px; }
+  .bar .btn .long { display: none; }
+  .hero h1 { font-size: 44px; }
+  .kicker { margin-bottom: 18px; }
+  .ctas .btn { flex: 1 1 100%; }
+  .statement { padding: 110px 0 90px; }
+  .origin { height: 78vh; }
+  .recipe { gap: 22px; } .recipe b { font-size: 30px; }
+  .close .mini { height: 220px; }
+  .row2, .choice { grid-template-columns: 1fr; }
+  .sheet { padding: 24px 22px 34px; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar" id="bar">
+  <div class="wrap">
+    <a class="lockup" href="#top" aria-label="Ethiopian Airlines and Eset Coffee, back to top">
+      <img class="ea" src="{{IMG:logo-ethiopian}}" alt="Ethiopian Airlines" width="956" height="400">
+      <span class="x" aria-hidden="true">×</span>
+      <img class="eset" src="{{IMG:logo-eset-ink}}" alt="Eset Coffee" width="672" height="515">
+    </a>
+    <nav aria-label="Sections"><a href="#closer">The jar</a><a href="#cup">The cup</a><a href="#farmer">The farmer</a><a href="#proof">Proof</a></nav>
+    <div class="prod" aria-hidden="true"><b>Bensa</b><span>$20</span></div>
+    <button class="btn btn-ink" type="button" data-order>Request<span class="long">&nbsp;a jar</span></button>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="head">
+      <h1 class="in-up d2">From the forest <em>to your seat.</em></h1>
+    </div>
+    <div class="plinth">
+      <div class="beam" aria-hidden="true"></div>
+      <div class="floor" aria-hidden="true"></div>
+      <div class="hero-jar in-up d1">
+        <img src="{{IMG:product-jar}}" sizes="(max-width: 980px) 185px, 400px" width="800" height="1210" fetchpriority="high" alt="The Bensa jar: whole roasted beans in clear glass under a gold lid">
+        <img class="reflect" src="{{IMG:product-jar}}" sizes="(max-width: 980px) 185px, 400px" width="800" height="1210" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="body">
+      <p class="sub in-up d3">Grown by two families in Bensa, Sidama.<br>Roasted in Addis Ababa by Eset.</p>
+      <div class="ctas in-up d4">
+        <button class="btn btn-gold" type="button" data-order>Request a jar · $20</button>
+        <a class="btn btn-ghost" href="#closer">Take a closer look</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="light statement">
+  <div class="wrap">
+    <span class="label">Bensa, Sidama · Harvest 2025/26</span>
+    <p id="statement">Every bean in this jar can be traced to two family farms on one hillside in Sidama, where the forest is still standing.</p>
+  </div>
+</section>
+
+<section class="origin">
+  <img data-speed=".16" src="{{IMG:green-cherries}}" sizes="(max-width: 600px) 80vw, 100vw" loading="lazy" decoding="async" alt="Coffee cherries ripening on the branch in the Bensa highlands">
+  <div class="cap"><div class="wrap">
+    <h2 class="reveal">Grown in the shade<br>of <em>the forest.</em></h2>
+    <div class="alt reveal"><b>2,180 m</b><span class="label">Bensa · Sidama · Ethiopia</span></div>
+  </div></div>
+</section>
+
+<section class="closer" id="closer" aria-label="The Bensa jar, in detail">
+  <div class="track" id="track">
+    <div class="stick">
+      <div class="wrap">
+        <div class="zoombox" id="zoombox">
+          <div class="zoom" id="zoom">
+            <img src="{{IMG:product-jar}}" sizes="(max-width: 980px) 185px, 400px" width="800" height="1210" loading="lazy" decoding="async" alt="The Bensa jar">
+            <button class="hot" type="button" data-step="1" style="left:50%;top:6%" aria-label="The lid"></button>
+            <button class="hot" type="button" data-step="2" style="left:50%;top:47%" aria-label="The label"></button>
+            <button class="hot" type="button" data-step="3" style="left:31%;top:77%" aria-label="The beans"></button>
+            <button class="hot" type="button" data-step="4" style="left:68%;top:24%" aria-label="Whole bean"></button>
+          </div>
+        </div>
+        <div>
+          <div class="steps" id="steps" aria-live="polite">
+            <div class="step on"><span class="label">Take a closer look</span><h3>The Bensa <em>jar</em></h3><p>Two hundred and fifty grams of one hillside, one harvest, in clear glass.</p></div>
+            <div class="step"><span class="label">01 · The lid</span><h3>Sealed in <em>Addis Ababa</em></h3><p>Roasted by Eset and sealed under a gold lid.</p></div>
+            <div class="step"><span class="label">02 · The label</span><h3>One <em>origin</em></h3><p>No blending. Every bean comes from two mapped family plots in Bensa, Sidama.</p></div>
+            <div class="step"><span class="label">03 · The beans</span><h3>Honey <em>processed</em></h3><p>Dried with some of the fruit still on the bean, for natural sweetness and a silky body.</p></div>
+            <div class="step"><span class="label">04 · Whole bean</span><h3>Ground <em>at home</em></h3><p>Whole beans keep their aroma. Grind just before brewing for the cup you had on board.</p></div>
+          </div>
+          <div class="progress" aria-hidden="true"><span id="stepNo">00</span><span class="rail"><i id="stepBar"></i></span><span>04</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cup" id="cup">
+  <div class="wrap">
+    <div class="head reveal">
+      <div><span class="label">In the cup</span><h2>Bright, sweet, <em>long.</em></h2></div>
+      <div class="recipe" aria-label="Suggested pour-over recipe: 15 grams of coffee, 250 millilitres of water at 93 degrees, 3 minutes">
+        <div><b>15 g</b><span>Coffee</span></div><div><b>250 ml</b><span>Water</span></div><div><b>93°</b><span>Celsius</span></div><div><b>3:00</b><span>Minutes</span></div>
+      </div>
+    </div>
+    <div class="flavs">
+      <div class="flav reveal"><i>First sip</i><h3>Apricot</h3><p>Soft stone fruit, bright but gentle, while the cup is still hot.</p></div>
+      <div class="flav reveal"><i>As it cools</i><h3>Wild honey</h3><p>Sweetness from the honey process, round and floral.</p></div>
+      <div class="flav reveal"><i>The finish</i><h3>Black tea</h3><p>A clean, long, slightly tannic finish that stays with you.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="farmer" id="farmer">
+  <div class="text-col">
+    <div class="text reveal">
+      <span class="label">The grower</span>
+      <blockquote>“We pick only the red cherries. A coffee tree remembers how you treat it.”</blockquote>
+      <p>Tadesse farms 1.8 hectares beneath old forest shade trees. The family picks by hand, several rounds per tree, and carries the cherries to the washing station before evening.</p>
+      <div class="sig"><b>Tadesse Wolde</b><span>Bensa, Sidama</span></div>
+      <p class="also">This lot is shared with <b>Aster Hailu</b>, who farms 1.5 hectares further down the same hillside.</p>
+    </div>
+  </div>
+  <div class="photo"><img data-speed=".08" src="{{IMG:farmer-harvest}}" sizes="(max-width: 980px) 100vw, 50vw" loading="lazy" decoding="async" alt="Tadesse Wolde smiling beside his coffee trees, holding a basket of ripe red cherries"></div>
+</section>
+
+<section class="journey" id="journey">
+  <div class="hs" id="hs">
+    <div class="hs-stick">
+      <div class="wrap head">
+        <div><span class="label">The journey</span><h2>From tree <em>to seat</em></h2></div>
+        <div class="hs-progress" aria-hidden="true"><span id="hsNo">01</span><span class="rail"><i id="hsBar"></i></span><span>05</span></div>
+      </div>
+      <div class="hs-track" id="hsTrack">
+        <article class="slide"><div class="ph"><img src="{{IMG:cherries}}" sizes="(max-width: 600px) 72vw, 440px" loading="lazy" decoding="async" alt="Ripe red coffee cherries"></div><div class="t"><i>i.</i><div><b>Picked by hand</b><p>Only ripe red cherries, several passes per tree.</p></div></div></article>
+        <article class="slide"><div class="ph"><img src="{{IMG:drying-beds}}" sizes="(max-width: 600px) 72vw, 440px" loading="lazy" decoding="async" alt="A worker turning coffee on raised drying beds" style="object-position:42% 50%"></div><div class="t"><i>ii.</i><div><b>Dried in the sun</b><p>Turned by hand on raised beds at the washing station.</p></div></div></article>
+        <article class="slide"><div class="ph"><img src="{{IMG:cupping-detail}}" loading="lazy" decoding="async" alt="Coffee being cupped"></div><div class="t"><i>iii.</i><div><b>Cupped and graded</b><p>Tasted and graded in Addis Ababa before it is chosen.</p></div></div></article>
+        <article class="slide"><div class="ph"><img src="{{IMG:cta-band}}" sizes="(max-width: 600px) 72vw, 440px" loading="lazy" decoding="async" alt="Sacks of coffee in a warehouse"></div><div class="t"><i>iv.</i><div><b>Roasted by Eset</b><p>Small batches in Addis Ababa, sealed in glass.</p></div></div></article>
+        <article class="slide final"><div class="ph"><div><span class="plate"><img src="{{IMG:logo-ethiopian}}" loading="lazy" alt="Ethiopian Airlines" width="956" height="400"></span><p>Poured for you,<br>above the clouds.</p></div></div><div class="t"><i>v.</i><div><b>On board</b><p id="servedOn">Served freshly brewed on Ethiopian Airlines.</p></div></div></article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="light proof" id="proof">
+  <div class="wrap cols">
+    <div class="reveal">
+      <span class="label">The proof</span>
+      <h2>Beautiful, and <em>on the record.</em></h2>
+      <svg class="seal" viewBox="0 0 200 200" role="img" aria-label="Origin verified by Beersheba">
+        <defs><path id="ring" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0"/></defs>
+        <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width=".8"/>
+        <text><textPath href="#ring">Origin verified · Beersheba · Traced to the tree ·</textPath></text>
+        <path d="M84 101l11 11 22-24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <ul class="ledger reveal">
+      <li><span class="k">Forest</span><span class="v">No forest cleared since 2020<small>Both plots checked against satellite forest-loss data.</small></span><span class="ok" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Origin</span><span class="v">Traced to two family plots<small>Mapped by GPS in Bensa and linked to this lot.</small></span><span class="ok" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Farmers</span><span class="v">Paid for every delivery<small>Weighed, paid and recorded at the washing station.</small></span><span class="ok" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+      <li><span class="k">Export</span><span class="v">Licensed and graded<small>Registered with the Ethiopian Coffee and Tea Authority.</small></span><span class="ok" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="partners">
+  <div class="wrap">
+    <span class="label reveal">A partnership</span>
+    <h2 class="reveal">Two Ethiopian names, <em>one cup.</em></h2>
+    <div class="pair">
+      <div class="reveal"><img class="ea" src="{{IMG:logo-ethiopian}}" loading="lazy" alt="Ethiopian Airlines" width="956" height="400"><p>Ethiopia's flag carrier, pouring Ethiopian coffee on board.</p></div>
+      <span class="rule" aria-hidden="true"></span>
+      <div class="reveal"><img class="eset" src="{{IMG:logo-eset-ink}}" loading="lazy" alt="Eset Coffee" width="672" height="515"><p>Roasting single-origin Ethiopian coffee in Addis Ababa.</p></div>
+    </div>
+    <div class="tri" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>
+</section>
+
+<section class="close" id="order">
+  <div class="ghost" aria-hidden="true">Bensa</div>
+  <div class="wrap">
+    <img class="mini reveal" src="{{IMG:product-jar}}" sizes="190px" width="800" height="1210" loading="lazy" decoding="async" alt="" aria-hidden="true">
+    <h2 class="reveal">Take the flight <em>home with you.</em></h2>
+    <p class="lead reveal">The same coffee, in a 250 g jar. Collect it at Addis Ababa Bole Airport, or have it delivered.</p>
+    <button class="btn btn-gold reveal" type="button" data-order>Request a jar · $20</button>
+  </div>
+  <footer>
+    <div class="wrap">
+      <span class="bs">Beersheba</span>
+      <span>Origin verified · Reference EAL-SID-001</span>
+      <span>bunnabridge.pro.et</span>
+    </div>
+  </footer>
+</section>
+</main>
+
+<dialog id="sheet" aria-labelledby="sheetTitle">
+  <div class="sheet">
+    <div class="top"><span class="label" style="color:var(--gold)">Request a jar</span><button class="x" type="button" data-close aria-label="Close">&#10005;</button></div>
+    <div id="formView">
+      <div class="item"><img src="{{IMG:product-jar}}" sizes="70px" width="800" height="1210" loading="lazy" alt=""><div><b id="sheetTitle">Bensa</b><span>Sidama, Ethiopia · 250 g whole bean · $20</span></div></div>
+      <form id="orderForm" novalidate>
+        <div class="row2">
+          <label class="field"><span>Your name</span><input name="name" autocomplete="name" required maxlength="120"></label>
+          <label class="field"><span>Jars</span><select name="qty"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+        </div>
+        <label class="field"><span>Email</span><input name="email" type="email" autocomplete="email" required maxlength="254"></label>
+        <label class="field"><span>Phone (optional)</span><input name="phone" type="tel" autocomplete="tel" maxlength="40"></label>
+        <div class="field" role="radiogroup" aria-label="How would you like it?"><span>How would you like it?</span>
+          <div class="choice">
+            <label><input type="radio" name="method" value="collect" checked><b>Collect</b>At Addis Ababa Bole Airport</label>
+            <label><input type="radio" name="method" value="deliver"><b>Deliver</b>To my address</label>
+          </div>
+        </div>
+        <label class="field"><span>Country</span><input name="country" autocomplete="country-name" required maxlength="80" value="Ethiopia"></label>
+        <label class="hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+        <div class="total"><span class="label">Total</span><b id="total">$20</b></div>
+        <button class="btn btn-ink" type="submit" id="send">Send request</button>
+        <p class="err" id="err" role="alert"></p>
+        <p class="fine">No payment now. We will contact you to confirm and arrange payment.</p>
+      </form>
+    </div>
+    <div class="done" id="doneView" hidden>
+      <div class="tick"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <h3>Thank you<span id="doneName"></span>.</h3>
+      <p id="doneText">Your request is in. We will contact you to confirm.</p>
+      <button class="btn btn-ink" type="button" data-close>Back to the story</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  const flight = '';
+
+  // Statement: words light up as the paragraph scrolls through.
+  const st = $('#statement');
+  const gold = new Set(['traced', 'forest', 'standing.']);
+  st.innerHTML = st.textContent.split(' ').map((w) => `<span class="w${gold.has(w) ? ' gold' : ''}">${w}</span>`).join(' ');
+  const words = $$('.w', st);
+
+  // Closer look: the jar holds still; scrolling moves through five steps.
+  const closer = $('#closer'), track = $('#track'), zoom = $('#zoom'), zoombox = $('#zoombox');
+  const steps = $$('.step'), hots = $$('.hot');
+  const focus = [null, [50, 6], [50, 47], [31, 77], [68, 24]];
+  let cur = -1;
+  if (reduce) { closer.classList.add('static'); steps.forEach((s) => s.classList.add('on')); hots.forEach((h) => h.classList.add('on')); }
+  function setStep(n) {
+    if (n === cur) return;
+    cur = n;
+    steps.forEach((s, i) => s.classList.toggle('on', i === n));
+    hots.forEach((h, i) => h.classList.toggle('on', i + 1 === n));
+    $('#stepNo').textContent = String(n).padStart(2, '0');
+    $('#stepBar').style.width = `${(n / 4) * 100}%`;
+    const f = focus[n];
+    zoom.style.transformOrigin = f ? `${f[0]}% ${f[1]}%` : '50% 50%';
+    zoom.style.transform = f ? `scale(${window.innerWidth <= 980 ? 1.18 : 1.22})` : 'none';
+  }
+  hots.forEach((h) => h.addEventListener('click', () => {
+    const n = Number(h.dataset.step), r = track.getBoundingClientRect();
+    const span = track.offsetHeight - window.innerHeight;
+    window.scrollTo({ top: window.scrollY + r.top + span * ((n + .5) / 5), behavior: reduce ? 'auto' : 'smooth' });
+  }));
+
+  const bar = $('#bar'), hero = $('.hero'), par = $$('[data-speed]');
+  function onScroll() {
+    const vh = window.innerHeight;
+    bar.classList.toggle('past', window.scrollY > hero.offsetHeight * .7);
+    const r = st.getBoundingClientRect();
+    const p = reduce ? 1 : Math.min(1, Math.max(0, (vh * .85 - r.top) / (r.height + vh * .35)));
+    const n = Math.round(p * words.length);
+    words.forEach((w, i) => w.classList.toggle('on', i < n));
+    if (!reduce) {
+      const t = track.getBoundingClientRect(), span = track.offsetHeight - vh;
+      const q = Math.min(.999, Math.max(0, -t.top / span));
+      setStep(Math.floor(q * 5));
+      par.forEach((el) => {
+        const b = el.parentElement.getBoundingClientRect();
+        if (b.bottom > 0 && b.top < vh) el.style.transform = `translate3d(0, ${(b.top * -parseFloat(el.dataset.speed)).toFixed(1)}px, 0)`;
+      });
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  if (!reduce && window.matchMedia('(pointer: fine)').matches) hero.addEventListener('pointermove', (e) => {
+    const b = hero.getBoundingClientRect();
+    hero.style.setProperty('--mx', `${(((e.clientX - b.left) / b.width) * 100).toFixed(1)}%`);
+    hero.style.setProperty('--my', `${(((e.clientY - b.top) / b.height) * 100).toFixed(1)}%`);
+  });
+
+  // Journey: the section pins and its cards glide sideways as you scroll down, with a soft spring.
+  const hs = $('#hs'), hsTrack = $('#hsTrack'), cards = $$('.slide', hsTrack), hsBar = $('#hsBar'), hsNo = $('#hsNo');
+  let hsDist = 0, hsTarget = 0, hsX = 0, hsRun = false;
+  function hsSize() {
+    if (reduce) { hs.classList.add('static'); return; }
+    hsDist = Math.max(0, hsTrack.scrollWidth - window.innerWidth);
+    hs.style.height = `${hsDist + window.innerHeight}px`;
+  }
+  function hsFrame() {
+    hsX += (hsTarget - hsX) * .12;
+    if (Math.abs(hsTarget - hsX) < .3) hsX = hsTarget;
+    hsTrack.style.transform = `translate3d(${(-hsX).toFixed(1)}px, 0, 0)`;
+    const vw = window.innerWidth;
+    cards.forEach((c) => {
+      const r = c.getBoundingClientRect();
+      const d = (r.left + r.width / 2 - vw / 2) / vw;
+      const a = Math.min(1, Math.abs(d));
+      c.style.transform = `scale(${(1 - a * .08).toFixed(3)})`;
+      c.style.opacity = (1 - a * .45).toFixed(3);
+      const im = c.querySelector('.ph img');
+      if (im) im.style.transform = `translate3d(${(d * -36).toFixed(1)}px, 0, 0)`;
+    });
+    const p = hsDist ? hsX / hsDist : 0;
+    hsBar.style.width = `${(p * 100).toFixed(1)}%`;
+    hsNo.textContent = String(Math.min(cards.length, 1 + Math.round(p * (cards.length - 1)))).padStart(2, '0');
+    if (hsX !== hsTarget) requestAnimationFrame(hsFrame); else hsRun = false;
+  }
+  function hsScroll() {
+    if (reduce) return;
+    const top = -hs.getBoundingClientRect().top;
+    hsTarget = Math.min(hsDist, Math.max(0, top));
+    if (!hsRun) { hsRun = true; requestAnimationFrame(hsFrame); }
+  }
+  hsSize();
+  window.addEventListener('resize', () => { hsSize(); hsScroll(); });
+  window.addEventListener('load', () => { hsSize(); hsScroll(); });
+  window.addEventListener('scroll', hsScroll, { passive: true });
+  hsScroll();
+
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.15 }) : null;
+  $$('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
+
+  // Request sheet: sends to the platform's enquiry inbox (POST /api/v1/market/leads/).
+  const sheet = $('#sheet'), form = $('#orderForm'), err = $('#err'), send = $('#send');
+  let opener = null;
+  $$('[data-order]').forEach((b) => b.addEventListener('click', () => {
+    opener = b; $('#formView').hidden = false; $('#doneView').hidden = true; err.textContent = '';
+    sheet.showModal(); setTimeout(() => form.name.focus(), 50);
+  }));
+  $$('[data-close]').forEach((b) => b.addEventListener('click', () => sheet.close()));
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+  sheet.addEventListener('close', () => opener && opener.focus());
+  form.qty.addEventListener('change', () => { $('#total').textContent = `$${20 * Number(form.qty.value)}`; });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    err.textContent = '';
+    const name = form.name.value.trim(), email = form.email.value.trim(), country = form.country.value.trim();
+    if (!name) { err.textContent = 'Please add your name.'; form.name.focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Please check your email address.'; form.email.focus(); return; }
+    if (!country) { err.textContent = 'Please add your country.'; form.country.focus(); return; }
+    const qty = Number(form.qty.value);
+    const how = form.method.value === 'deliver' ? 'Deliver to the customer\'s address' : 'Collect at Addis Ababa Bole Airport';
+    const payload = {
+      role: 'other', name, email, country, phone: form.phone.value.trim(),
+      company: 'Ethiopian Airlines × Eset Coffee',
+      volume: `${qty} × 250 g jar`,
+      source: `demo:ethiopian-airlines:v2`,
+      message: `Bensa jar request: ${qty} × 250 g jar at $20 each ($${20 * qty}).\n${how}.\nFlight: ${flight || 'not given'}.\nLot reference EAL-SID-001.`,
+      website: form.website.value,
+    };
+    send.disabled = true; send.textContent = 'Sending…';
+    try {
+      const res = await fetch('/api/v1/market/leads/', { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) });
+      if (res.status === 429) throw new Error('Too many requests from this connection. Please try again in a little while.');
+      if (!res.ok) {
+        let msg = 'The request could not be sent. Please check the details and try again.';
+        try { const data = await res.json(); const first = Object.values(data)[0]; if (Array.isArray(first) && first[0]) msg = String(first[0]); } catch (_) { /* keep default */ }
+        throw new Error(msg);
+      }
+      $('#doneName').textContent = `, ${name.split(' ')[0]}`;
+      $('#doneText').textContent = form.method.value === 'deliver'
+        ? `Your request for ${qty} jar${qty > 1 ? 's' : ''} is in. We will contact you at ${email} to arrange delivery and payment.`
+        : `Your request for ${qty} jar${qty > 1 ? 's' : ''} is in. We will contact you at ${email} to arrange collection at Bole Airport.`;
+      $('#formView').hidden = true; $('#doneView').hidden = false;
+      form.reset(); $('#total').textContent = '$20';
+    } catch (ex) {
+      err.textContent = ex instanceof TypeError ? 'No connection right now. Please try again when you are back online.' : ex.message;
+    } finally {
+      send.disabled = false; send.textContent = 'Send request';
+    }
+  });
+})();
+</script>
+</body>
+</html>

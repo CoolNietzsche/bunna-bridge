@@ -32,6 +32,8 @@ WIDTHS = {
     "logo-ethiopian": [360],
     "logo-eset-ink": [280],
     "logo-eset-white": [280],
+    "farmer-harvest": [640, 960, 1244],
+    "green-cherries": [720, 1200, 1672],
 }
 
 
@@ -56,19 +58,20 @@ def inline(match):
     return 'src="data:image/webp;base64,' + base64.b64encode(raw).decode() + '"'
 
 
-def published(match):
+def published(match, prefix="img/"):
     name = match.group(1)
     widths = WIDTHS[name]
     default = widths[len(widths) // 2]
-    attrs = f'src="img/{name}-{default}.webp"'
+    attrs = f'src="{prefix}{name}-{default}.webp"'
     if len(widths) > 1:
-        attrs += ' srcset="' + ", ".join(f"img/{name}-{w}.webp {w}w" for w in widths) + '"'
+        attrs += ' srcset="' + ", ".join(f"{prefix}{name}-{w}.webp {w}w" for w in widths) + '"'
     return attrs
 
 
 PAGES = {
     "template.html": "premium-story-ethiopian-airlines-eset.html",
     "experience-template.html": "landing-ethiopian-airlines-eset.html",
+    "experience-v2-template.html": "landing-v2-ethiopian-airlines-eset.html",
 }
 IMG = re.compile(r'src="\{\{IMG:([a-z-]+)\}\}"')
 
@@ -90,3 +93,9 @@ for name, widths in WIDTHS.items():
 live = IMG.sub(published, (HERE / "experience-template.html").read_text())
 (LIVE_DIR / "index.html").write_text(live)
 print("live", LIVE_DIR, f"page {len(live) // 1024} KB, images {total // 1024} KB in total")
+
+# Version 2 lives at /demo/ethiopian-airlines/v2/ and shares the same images.
+(LIVE_DIR / "v2").mkdir()
+live2 = IMG.sub(lambda m: published(m, "../img/"), (HERE / "experience-v2-template.html").read_text())
+(LIVE_DIR / "v2" / "index.html").write_text(live2)
+print("live", LIVE_DIR / "v2", f"page {len(live2) // 1024} KB")
