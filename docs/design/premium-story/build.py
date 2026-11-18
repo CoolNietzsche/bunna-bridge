@@ -32,6 +32,7 @@ WIDTHS = {
     "logo-ethiopian": [360],
     "logo-eset-ink": [280],
     "logo-eset-white": [280],
+    "logo-eset-gold": [320],
     "farmer-harvest": [640, 960, 1244],
     "green-cherries": [720, 1200, 1672],
 }
