@@ -1,32 +1,92 @@
-"""Inlines the demo photos into each template, producing self-contained prototype files."""
+"""Builds the partner story pages.
+
+- Preview copies in this folder have every photo inlined, so a single file opens anywhere.
+- The live copy (bunna-bridge-frontend/public/demo/ethiopian-airlines/) references separate,
+  resized images with srcset, so phones on slow in-flight Wi-Fi download only what they show.
+
+Templates mark images as src="{{IMG:name}}". Run: python3 docs/design/premium-story/build.py
+"""
 
 import base64
+import io
 import re
+import shutil
 from pathlib import Path
 
+from PIL import Image
+
 HERE = Path(__file__).parent
-ASSETS = HERE.parents[2] / "bunna_bridge/bunna_bridge/lots/management/commands/demo_assets"
+ROOT = HERE.parents[2]
+DEMO_ASSETS = ROOT / "bunna_bridge/bunna_bridge/lots/management/commands/demo_assets"
+LIVE_DIR = ROOT / "bunna-bridge-frontend/public/demo/ethiopian-airlines"
+
+# Widths to publish for each image; the middle one is the default src. Logos get one 2x size.
+WIDTHS = {
+    "product-jar": [360, 560, 800],
+    "farmer-portrait": [720, 1100, 1500],
+    "forest-walk": [720, 1200],
+    "cherries": [640, 1000, 1400],
+    "drying-beds": [640, 1000, 1400],
+    "cta-band": [640, 1000, 1500],
+    "cupping-detail": [380],
+    "logo-ethiopian": [360],
+    "logo-eset-ink": [280],
+    "logo-eset-white": [280],
+}
 
 
-def data_uri(match):
-    name = f"{match.group(1)}.webp"
-    own = HERE / "assets" / name  # photos supplied for this design
-    raw = (own if own.exists() else ASSETS / name).read_bytes()
-    return "data:image/webp;base64," + base64.b64encode(raw).decode()
+def source(name):
+    own = HERE / "assets" / f"{name}.webp"  # photos supplied for this design
+    return own if own.exists() else DEMO_ASSETS / f"{name}.webp"
+
+
+def resized(name, width):
+    im = Image.open(source(name))
+    if im.width > width:
+        im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+    buf = io.BytesIO()
+    lossless = name.startswith("logo-")
+    im.save(buf, "WEBP", quality=74, method=6, lossless=lossless)
+    return buf.getvalue()
+
+
+def inline(match):
+    name = match.group(1)
+    raw = source(name).read_bytes() if name not in WIDTHS else resized(name, WIDTHS[name][-1])
+    return 'src="data:image/webp;base64,' + base64.b64encode(raw).decode() + '"'
+
+
+def published(match):
+    name = match.group(1)
+    widths = WIDTHS[name]
+    default = widths[len(widths) // 2]
+    attrs = f'src="img/{name}-{default}.webp"'
+    if len(widths) > 1:
+        attrs += ' srcset="' + ", ".join(f"img/{name}-{w}.webp {w}w" for w in widths) + '"'
+    return attrs
 
 
 PAGES = {
     "template.html": "premium-story-ethiopian-airlines-eset.html",
-    "showcase-template.html": "landing-ethiopian-airlines-eset.html",
+    "experience-template.html": "landing-ethiopian-airlines-eset.html",
 }
-for src, dst in PAGES.items():
-    html = re.sub(r"\{\{IMG:([a-z-]+)\}\}", data_uri, (HERE / src).read_text())
-    out = HERE / dst
-    out.write_text(html)
-    print("wrote", out, f"{len(html) // 1024} KB")
+IMG = re.compile(r'src="\{\{IMG:([a-z-]+)\}\}"')
 
-# The live copy: served by the website at /demo/ethiopian-airlines/ (not linked or indexed).
-PUBLISH = HERE.parents[2] / "bunna-bridge-frontend/public/demo/ethiopian-airlines/index.html"
-PUBLISH.parent.mkdir(parents=True, exist_ok=True)
-PUBLISH.write_text((HERE / "landing-ethiopian-airlines-eset.html").read_text())
-print("wrote", PUBLISH)
+for src, dst in PAGES.items():
+    html = IMG.sub(inline, (HERE / src).read_text())
+    (HERE / dst).write_text(html)
+    print("preview", dst, f"{len(html) // 1024} KB")
+
+# Live copy with separate images.
+if LIVE_DIR.exists():
+    shutil.rmtree(LIVE_DIR)
+(LIVE_DIR / "img").mkdir(parents=True)
+total = 0
+for name, widths in WIDTHS.items():
+    for w in widths:
+        data = resized(name, w)
+        (LIVE_DIR / "img" / f"{name}-{w}.webp").write_bytes(data)
+        total += len(data)
+live = IMG.sub(published, (HERE / "experience-template.html").read_text())
+(LIVE_DIR / "index.html").write_text(live)
+print("live", LIVE_DIR, f"page {len(live) // 1024} KB, images {total // 1024} KB in total")
